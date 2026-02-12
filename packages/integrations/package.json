@@ -1,0 +1,44 @@
+{
+  "name": "@las/integrations",
+  "version": "0.0.1",
+  "description": "Third-party integrations for Legend-App State utilities",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "keywords": [
+    "legendapp",
+    "state",
+    "integrations",
+    "react-query",
+    "zustand"
+  ],
+  "peerDependencies": {
+    "@legendapp/state": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@legendapp/state": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsup": "^8.0.1",
+    "@legendapp/state": "^2.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}
