@@ -1,3 +1,4 @@
+"use client"
 import { useObservable, useObserve } from '@legendapp/state/react'
 import { batch } from '@legendapp/state'
 import { MutationKey, MutationObserver } from '@tanstack/react-query'
@@ -145,22 +146,22 @@ export function useMutation<TData = unknown, TVariables = void, TContext = unkno
     if (!observer) return
 
     const unsubscribe = observer.subscribe((result) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const s = state$ as any
       batch(() => {
-        state$.assign({
-          data: result.data,
-          error: result.error,
-          status: result.status,
-          isIdle: result.isIdle,
-          isPending: result.isPending,
-          isPaused: result.isPaused,
-          isSuccess: result.isSuccess,
-          isError: result.isError,
-          failureCount: result.failureCount,
-          failureReason: result.failureReason,
-          submittedAt: result.submittedAt,
-          variables: result.variables,
-          context: result.context,
-        })
+        s.data.set(result.data)
+        s.error.set(result.error)
+        s.status.set(result.status)
+        s.isIdle.set(result.isIdle)
+        s.isPending.set(result.isPending)
+        s.isPaused.set(result.isPaused)
+        s.isSuccess.set(result.isSuccess)
+        s.isError.set(result.isError)
+        s.failureCount.set(result.failureCount)
+        s.failureReason.set(result.failureReason)
+        s.submittedAt.set(result.submittedAt)
+        s.variables.set(result.variables)
+        s.context.set(result.context)
       })
     })
 

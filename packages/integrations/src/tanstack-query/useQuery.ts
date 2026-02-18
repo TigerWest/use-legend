@@ -1,9 +1,11 @@
-import { useObservable, useObserve } from '@legendapp/state/react'
-import { batch, isObservable } from '@legendapp/state'
-import { QueryKey, QueryObserver } from '@tanstack/react-query'
-import { useEffect, useRef } from 'react'
-import type { Observable } from '@legendapp/state'
-import { useQueryClient } from './useQueryClient'
+"use client";
+import { useMount, useObservable, useObserve } from "@legendapp/state/react";
+import { isObservable } from "@legendapp/state";
+// import { QueryKey, QueryObserver } from "@tanstack/react-query";
+import { QueryKey, QueryObserver } from "@tanstack/query-core";
+import { useRef } from "react";
+import type { Observable } from "@legendapp/state";
+import { useQueryClient } from "./useQueryClient";
 
 /**
  * QueryKey를 직렬화하면서 Observable 값을 추출합니다.
@@ -14,52 +16,62 @@ function serializeQueryKey(queryKey: QueryKey): string {
   return JSON.stringify(queryKey, (_key, value) => {
     // isObservable을 사용하여 안전하게 Observable을 감지하고 값을 추출
     if (isObservable(value)) {
-      return value.get()
+      return value.get();
     }
-    return value
-  })
+    return value;
+  });
 }
 
 export interface UseQueryOptions<TData = unknown> {
-  queryKey: QueryKey
-  queryFn: () => Promise<TData>
-  enabled?: boolean
-  staleTime?: number
-  gcTime?: number
-  retry?: number | boolean
-  refetchOnWindowFocus?: boolean
-  refetchOnMount?: boolean
-  refetchOnReconnect?: boolean
+  queryKey: QueryKey;
+  queryFn: () => Promise<TData>;
+  enabled?: boolean;
+  staleTime?: number;
+  gcTime?: number;
+  retry?: number | boolean;
+  refetchOnWindowFocus?: boolean;
+  refetchOnMount?: boolean;
+  refetchOnReconnect?: boolean;
+  /**
+   * Set this to `true` to throw errors to the nearest error boundary.
+   * Set to a function to control which errors should be thrown.
+   */
+  throwOnError?: boolean | ((error: Error) => boolean);
+  /**
+   * Set this to `true` to enable React Suspense mode.
+   * The hook will throw a promise while fetching, suspending the component.
+   */
+  suspense?: boolean;
 }
 
 export interface QueryState<TData = unknown> {
-  data: TData | undefined
-  error: Error | null
-  status: 'pending' | 'error' | 'success'
-  fetchStatus: 'fetching' | 'paused' | 'idle'
-  isPending: boolean
-  isSuccess: boolean
-  isError: boolean
-  isLoadingError: boolean
-  isRefetchError: boolean
-  isFetching: boolean
-  isPaused: boolean
-  isRefetching: boolean
-  isLoading: boolean
+  data: TData | undefined;
+  error: Error | null;
+  status: "pending" | "error" | "success";
+  fetchStatus: "fetching" | "paused" | "idle";
+  isPending: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  isLoadingError: boolean;
+  isRefetchError: boolean;
+  isFetching: boolean;
+  isPaused: boolean;
+  isRefetching: boolean;
+  isLoading: boolean;
   /**
    * @deprecated Use `isLoading` instead. Will be removed in TanStack Query v6.
    */
-  isInitialLoading: boolean
-  isStale: boolean
-  isPlaceholderData: boolean
-  isFetched: boolean
-  isFetchedAfterMount: boolean
-  isEnabled: boolean
-  dataUpdatedAt: number
-  errorUpdatedAt: number
-  failureCount: number
-  failureReason: Error | null
-  errorUpdateCount: number
+  isInitialLoading: boolean;
+  isStale: boolean;
+  isPlaceholderData: boolean;
+  isFetched: boolean;
+  isFetchedAfterMount: boolean;
+  isEnabled: boolean;
+  dataUpdatedAt: number;
+  errorUpdatedAt: number;
+  failureCount: number;
+  failureReason: Error | null;
+  errorUpdateCount: number;
 }
 
 /**
@@ -114,16 +126,20 @@ export interface QueryState<TData = unknown> {
  * ```
  */
 export function useQuery<TData = unknown>(
-  options: UseQueryOptions<TData>
-): Observable<QueryState<TData>> & { refetch: () => void } {
-  const queryClient = useQueryClient()
+  options: UseQueryOptions<TData>,
+): Observable<QueryState<TData>> & {
+  state$: Observable<QueryState<TData>>;
+  refetch: () => void;
+} {
+  const queryClient = useQueryClient();
+  // const isServer = typeof window === "undefined";
 
   // Observable 상태 초기화
   const state$ = useObservable({
     data: undefined as TData | undefined,
     error: null as Error | null,
-    status: 'pending' as 'pending' | 'error' | 'success',
-    fetchStatus: 'idle' as 'fetching' | 'paused' | 'idle',
+    status: "pending" as "pending" | "error" | "success",
+    fetchStatus: "idle" as "fetching" | "paused" | "idle",
     isPending: true,
     isSuccess: false,
     isError: false,
@@ -144,15 +160,15 @@ export function useQuery<TData = unknown>(
     failureCount: 0,
     failureReason: null as Error | null,
     errorUpdateCount: 0,
-  })
+  });
 
   // Observer는 한 번만 생성
-  const observerRef = useRef<QueryObserver<TData, Error> | null>(null)
-  const previousQueryKeyRef = useRef<string | null>(null)
+  const observerRef = useRef<QueryObserver<TData, Error> | null>(null);
+  const previousQueryKeyRef = useRef<string | null>(null);
 
   if (!observerRef.current) {
-    const initialQueryKeyString = serializeQueryKey(options.queryKey)
-    previousQueryKeyRef.current = initialQueryKeyString
+    const initialQueryKeyString = serializeQueryKey(options.queryKey);
+    previousQueryKeyRef.current = initialQueryKeyString;
     observerRef.current = new QueryObserver<TData, Error>(queryClient, {
       queryKey: [initialQueryKeyString],
       queryFn: options.queryFn,
@@ -163,7 +179,7 @@ export function useQuery<TData = unknown>(
       refetchOnWindowFocus: options.refetchOnWindowFocus,
       refetchOnMount: options.refetchOnMount,
       refetchOnReconnect: options.refetchOnReconnect,
-    })
+    });
   }
 
   // useObserve로 options 변화 추적 (렌더링 중 동기 실행)
@@ -171,10 +187,10 @@ export function useQuery<TData = unknown>(
   useObserve(() => {
     // options 객체를 직렬화하면서 Observable 값을 추출
     // serializeQueryKey의 replacer에서 .get()을 호출하므로 useObserve가 추적
-    const queryKeyString = serializeQueryKey(options.queryKey)
+    const queryKeyString = serializeQueryKey(options.queryKey);
 
     // queryKey가 변경되었는지 확인
-    const hasQueryKeyChanged = previousQueryKeyRef.current !== queryKeyString
+    const hasQueryKeyChanged = previousQueryKeyRef.current !== queryKeyString;
 
     observerRef.current?.setOptions({
       queryKey: [queryKeyString] as QueryKey,
@@ -186,67 +202,85 @@ export function useQuery<TData = unknown>(
       refetchOnWindowFocus: options.refetchOnWindowFocus,
       refetchOnMount: options.refetchOnMount,
       refetchOnReconnect: options.refetchOnReconnect,
-    })
+    });
 
     // queryKey가 변경되면 refetch 트리거
     if (hasQueryKeyChanged && previousQueryKeyRef.current !== null) {
-      observerRef.current?.refetch()
+      observerRef.current?.refetch();
     }
 
-    previousQueryKeyRef.current = queryKeyString
-  })
+    previousQueryKeyRef.current = queryKeyString;
+  });
 
   // 구독은 한 번만 설정 (React lifecycle)
-  useEffect(() => {
-    const observer = observerRef.current
-    if (!observer) return
+  useMount(() => {
+    const observer = observerRef.current;
+    if (!observer) return;
 
     const unsubscribe = observer.subscribe((result) => {
-      batch(() => {
-        state$.assign({
-          data: result.data,
-          error: result.error,
-          status: result.status,
-          fetchStatus: result.fetchStatus,
-          isPending: result.isPending,
-          isSuccess: result.isSuccess,
-          isError: result.isError,
-          isLoadingError: result.isLoadingError,
-          isRefetchError: result.isRefetchError,
-          isFetching: result.isFetching,
-          isPaused: result.isPaused,
-          isRefetching: result.isRefetching,
-          isLoading: result.isLoading,
-          isInitialLoading: result.isLoading,
-          isStale: result.isStale,
-          isPlaceholderData: result.isPlaceholderData,
-          isFetched: result.isFetched,
-          isFetchedAfterMount: result.isFetchedAfterMount,
-          isEnabled: result.isEnabled ?? true,
-          dataUpdatedAt: result.dataUpdatedAt,
-          errorUpdatedAt: result.errorUpdatedAt,
-          failureCount: result.failureCount,
-          failureReason: result.failureReason,
-          errorUpdateCount: result.errorUpdateCount,
-        })
-      })
-    })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      state$.set({
+        data: result.data,
+        error: result.error ?? null,
+        status: result.status,
+        fetchStatus: result.fetchStatus as "fetching" | "paused" | "idle",
+        isPending: result.isPending,
+        isSuccess: result.isSuccess,
+        isError: result.isError,
+        isLoadingError: result.isLoadingError,
+        isRefetchError: result.isRefetchError,
+        isFetching: result.isFetching,
+        isPaused: result.isPaused,
+        isRefetching: result.isRefetching,
+        isLoading: result.isLoading,
+        isInitialLoading: result.isLoading,
+        isStale: result.isStale,
+        isPlaceholderData: result.isPlaceholderData,
+        isFetched: result.isFetched,
+        isFetchedAfterMount: result.isFetchedAfterMount,
+        isEnabled: result.isEnabled ?? true,
+        dataUpdatedAt: result.dataUpdatedAt,
+        errorUpdatedAt: result.errorUpdatedAt,
+        failureCount: result.failureCount,
+        failureReason: result.failureReason ?? null,
+        errorUpdateCount: result.errorUpdateCount,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    });
 
     return () => {
-      unsubscribe()
-    }
+      unsubscribe();
+    };
     // state$는 stable하므로 의존성에 불필요
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  });
 
-  // refetch 함수를 별도로 반환
   const refetch = () => {
-    observerRef.current?.refetch()
-  }
+    observerRef.current?.refetch();
+  };
 
-  // Observable과 함수를 별도로 반환 (Object.assign 사용하지 않음)
+  // // Return a Proxy that:
+  // // 1. Delegates field accesses to state$ (so result.isPending.get() works for tests)
+  // // 2. Exposes state$ directly (so result.state$ works for page usage)
+  // // 3. Exposes refetch directly
+  // const proxyResult = new Proxy(
+  //   { state$, refetch } as {
+  //     state$: Observable<QueryState<TData>>;
+  //     refetch: () => void;
+  //   },
+  //   {
+  //     get(target, prop: string | symbol) {
+  //       if (prop === "state$") return target.state$;
+  //       if (prop === "refetch") return target.refetch;
+  //       // Delegate all observable property accesses to state$
+  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //       return (target.state$ as any)[prop];
+  //     },
+  //   },
+  // );
+
   return {
-    ...state$,
+    state$,
     refetch,
-  } as Observable<QueryState<TData>> & { refetch: () => void }
+  } as any;
 }

@@ -1,14 +1,17 @@
-import { createContext, ReactNode } from 'react'
-import { QueryClient } from '@tanstack/react-query'
+"use client";
+import { createContext, ReactNode } from "react";
+import { QueryClient } from "@tanstack/query-core";
 
 /**
  * React Context for QueryClient
  */
-export const QueryClientContext = createContext<QueryClient | undefined>(undefined)
+export const QueryClientContext = createContext<QueryClient | undefined>(
+  undefined,
+);
 
 export interface QueryClientProviderProps {
-  client: QueryClient
-  children: ReactNode
+  client: QueryClient;
+  children: ReactNode;
 }
 
 /**
@@ -30,10 +33,15 @@ export interface QueryClientProviderProps {
  * }
  * ```
  */
-export function QueryClientProvider({ client, children }: QueryClientProviderProps) {
+export function QueryClientProvider({
+  client,
+  children,
+}: QueryClientProviderProps) {
   return (
     <QueryClientContext.Provider value={client}>
       {children}
     </QueryClientContext.Provider>
-  )
+  );
 }
+
+export { QueryClient };

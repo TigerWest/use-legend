@@ -1,3 +1,4 @@
+"use client"
 import { useContext } from 'react'
 import { QueryClient } from '@tanstack/react-query'
 import { QueryClientContext } from './QueryClientProvider'
