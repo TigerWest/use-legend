@@ -29,5 +29,10 @@
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.15.4"
+  "packageManager": "pnpm@8.15.4",
+  "pnpm": {
+    "overrides": {
+      "@legendapp/state": "3.0.0-beta.44"
+    }
+  }
 }
