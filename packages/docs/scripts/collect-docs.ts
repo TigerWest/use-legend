@@ -217,13 +217,22 @@ async function scanSourceFiles(): Promise<DocFile[]> {
     const parts = relativeToPackages.split(path.sep)
     const packageName = parts[1] as 'utils' | 'integrations'
 
+    // parts[3] is the category subdirectory for both packages:
+    // utils:        ['packages','utils','src','function','get','index.md']        → parts[3] = 'function'
+    // integrations: ['packages','integrations','src','tanstack-query','useQuery.md'] → parts[3] = 'tanstack-query'
+    const libSubDir = parts[3]
+
     const ext = path.extname(sourcePath)
     const filename = path.basename(sourcePath, ext)
     // Handle index.md → use parent directory name
     const slug = filename === 'index' ? path.basename(path.dirname(sourcePath)) : filename
 
-    const targetPath = path.join(ASTRO_ROOT, 'src', 'content', 'docs', packageName, `${slug}.md`)
-    const relativePath = `/${packageName}/${slug}`
+    const targetPath = libSubDir
+      ? path.join(ASTRO_ROOT, 'src', 'content', 'docs', packageName, libSubDir, `${slug}.md`)
+      : path.join(ASTRO_ROOT, 'src', 'content', 'docs', packageName, `${slug}.md`)
+    const relativePath = libSubDir
+      ? `/${packageName}/${libSubDir}/${slug}`
+      : `/${packageName}/${slug}`
 
     docFiles.push({
       sourcePath,
@@ -275,7 +284,7 @@ async function cleanGeneratedFiles(packageName: string): Promise<void> {
     for (const file of files) {
       if (file !== 'index.md') {
         const filePath = path.join(targetDir, file)
-        await fs.rm(filePath, { force: true })
+        await fs.rm(filePath, { force: true, recursive: true })
       }
     }
   } catch (err) {
@@ -361,9 +370,7 @@ async function transformAndWriteDocFiles(docFiles: DocFile[]): Promise<void> {
 
     // --- Determine output extension ---
     const targetExt = hasDemo ? '.mdx' : '.md'
-    const targetPath = path.join(
-      ASTRO_ROOT, 'src', 'content', 'docs', doc.package, `${doc.filename}${targetExt}`
-    )
+    const targetPath = doc.targetPath.replace(/\.md$/, targetExt)
 
     // --- Build final content ---
     const frontmatterLines: string[] = []

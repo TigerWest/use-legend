@@ -51,3 +51,10 @@ Thumbs.db
 .cache
 .temp
 tmp
+
+.omc
+example
+
+packages/docs/src/content/docs/**/*.mdx
+packages/docs/src/content/docs/**/*.md
+!packages/docs/src/content/docs/index.mdx
