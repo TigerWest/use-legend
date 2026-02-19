@@ -14,14 +14,19 @@
     "collect-docs": "tsx scripts/collect-docs.ts"
   },
   "dependencies": {
+    "@astrojs/mdx": "^4.0.0",
+    "@astrojs/react": "^4.0.0",
     "@astrojs/starlight": "^0.37.6",
     "astro": "^5.6.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "sharp": "^0.34.2"
   },
   "devDependencies": {
     "gray-matter": "^4.0.3",
     "chokidar": "^4.0.3",
     "tsx": "^4.19.2",
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "typescript": "^5.0.0"
   }
 }
