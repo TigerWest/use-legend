@@ -96,7 +96,7 @@ describe("useSupported() — mount re-evaluation", () => {
 
   it("reflects a browser API check after mount", () => {
     const { result } = renderHook(() =>
-      useSupported(() => typeof window !== "undefined" && "matchMedia" in window),
+      useSupported(() => "matchMedia" in window),
     );
     expect(result.current.get()).toBe(true);
   });
