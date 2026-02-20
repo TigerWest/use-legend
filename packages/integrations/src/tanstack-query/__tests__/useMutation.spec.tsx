@@ -501,4 +501,97 @@ describe('useMutation', () => {
       expect(externalState).toBe('pending')
     })
   })
+
+  describe('mutateAsync + Unmount', () => {
+    it('mutate() + unmount: should not throw and mutation completes silently', async () => {
+      const { wrapper } = createWrapper()
+
+      const { result, unmount } = renderHook(
+        () =>
+          useMutation({
+            mutationFn: async () => {
+              await new Promise((resolve) => setTimeout(resolve, 100))
+              return { id: 1 }
+            },
+          }),
+        { wrapper }
+      )
+
+      result.current.mutate()
+
+      await waitFor(() => {
+        expect(result.current.isPending.get()).toBe(true)
+      })
+
+      // Unmount while fire-and-forget mutate() is in progress
+      // mutate() does not return a Promise to the caller, so there is nothing to hang
+      unmount()
+
+      // Wait longer than the mutationFn delay — no errors should be thrown
+      await new Promise((resolve) => setTimeout(resolve, 150))
+
+      // No assertion needed beyond "no unhandled rejection / no throw"
+      expect(true).toBe(true)
+    })
+
+    it(
+      // KNOWN LIMITATION: mutateAsync() + unmount causes a permanently pending Promise
+      //
+      // TanStack Query's MutationObserver#notify() guards per-mutation callbacks
+      // (the onSuccess/onError that resolve/reject the mutateAsync Promise) behind
+      // `this.#mutateOptions && this.hasListeners()`.
+      //
+      // When the component unmounts, the observer loses all subscribers
+      // (hasListeners() === false), so neither the resolve nor the reject callback
+      // is ever called, leaving the Promise in a permanently pending state.
+      //
+      // Workaround: prefer mutate() (fire-and-forget) when the component may
+      // unmount before the mutation settles, or manage the Promise lifecycle
+      // externally with AbortController / cleanup flags.
+      'mutateAsync() + unmount: Promise remains pending (known limitation — per-mutation callbacks skipped when hasListeners() is false)',
+      async () => {
+        const { wrapper } = createWrapper()
+
+        const { result, unmount } = renderHook(
+          () =>
+            useMutation({
+              mutationFn: async () => {
+                await new Promise((resolve) => setTimeout(resolve, 100))
+                return { id: 1 }
+              },
+            }),
+          { wrapper }
+        )
+
+        const mutateAsyncPromise = result.current.mutateAsync()
+
+        await waitFor(() => {
+          expect(result.current.isPending.get()).toBe(true)
+        })
+
+        // Unmount while mutateAsync() is still in-flight
+        unmount()
+
+        // Sentinel value to detect whether the Promise settled within the race window
+        const TIMEOUT_SENTINEL = '__timeout__' as const
+
+        const timeout = (ms: number) =>
+          new Promise<typeof TIMEOUT_SENTINEL>((resolve) =>
+            setTimeout(() => resolve(TIMEOUT_SENTINEL), ms)
+          )
+
+        // Race the mutateAsync Promise against a 300 ms timeout.
+        // The mutationFn itself resolves after 100 ms, but because the component
+        // has already unmounted (hasListeners() === false) TanStack Query's
+        // MutationObserver will NOT invoke the per-mutation resolve callback,
+        // so the Promise never settles — the timeout wins the race.
+        const winner = await Promise.race([
+          mutateAsyncPromise.then(() => 'resolved' as const).catch(() => 'rejected' as const),
+          timeout(300),
+        ])
+
+        expect(winner).toBe(TIMEOUT_SENTINEL)
+      }
+    )
+  })
 })
