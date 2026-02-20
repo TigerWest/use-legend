@@ -1,8 +1,7 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useMount, useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
-import type { El$ } from "../useEl$";
-import type { MaybeObservable } from "../../types";
+import type { MaybeElement } from "../useEl$";
 import { normalizeTargets } from "../useResizeObserver";
 
 export interface UseMutationObserverOptions extends MutationObserverInit {}
@@ -13,10 +12,8 @@ export interface UseMutationObserverReturn {
   takeRecords: () => MutationRecord[];
 }
 
-type MutationTarget = El$<Element> | MaybeObservable<Element | null>;
-
 export function useMutationObserver(
-  target: MutationTarget | MutationTarget[],
+  target: MaybeElement | MaybeElement[],
   callback: MutationCallback,
   options?: UseMutationObserverOptions,
 ): UseMutationObserverReturn {

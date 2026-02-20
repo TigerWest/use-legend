@@ -1,13 +1,4 @@
-import { isObservable } from "@legendapp/state";
-import type { Observable, OpaqueObject } from "@legendapp/state";
-import type { El$ } from "../../elements/useEl$";
-import type { MaybeObservable } from "../../types";
-
-/**
- * A single observable-element target accepted by observer hooks.
- * Supports El$, Observable<Element|null>, and plain Element values.
- */
-export type MaybeTargetEl = El$<any> | MaybeObservable<Element | null>;
+import { getElement, type MaybeElement } from "../../elements/useEl$";
 
 /**
  * Normalizes one or more observable-element targets into a plain Element[].
@@ -23,22 +14,13 @@ export type MaybeTargetEl = El$<any> | MaybeObservable<Element | null>;
  * useIntersectionObserver, useMutationObserver will use this once implemented.
  */
 export function normalizeTargets(
-  target: MaybeTargetEl | MaybeTargetEl[] | null | undefined,
+  target?: MaybeElement | MaybeElement[],
 ): Element[] {
   if (target == null) return [];
   const arr = Array.isArray(target) ? target : [target];
   return arr
     .map((t) => {
-      // El$: non-observable callable with .get()/.peek()
-      if (typeof t === "function" && !isObservable(t) && "get" in t) {
-        const val = (t as El$<Element>).get();
-        return val ? (val as OpaqueObject<Element>).valueOf() : null;
-      }
-      // Observable<Element | null>
-      if (isObservable(t)) {
-        return (t as Observable<Element | null>).get();
-      }
-      return t as Element | null;
+      return getElement(t) as any;
     })
     .filter((el): el is Element => el != null);
 }

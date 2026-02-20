@@ -8,6 +8,7 @@ export default function UseResizeObserverDemo() {
 
   useResizeObserver(el$, (entries) => {
     const { width, height } = entries[0].contentRect;
+
     size$.assign({
       width: Math.round(width),
       height: Math.round(height),

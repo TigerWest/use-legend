@@ -19,6 +19,7 @@ import { MaybeObservable } from "../../types";
  * ```
  */
 export function get<T>(maybeObservable: MaybeObservable<T>): T;
+export function get<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 
 /**
  * Extracts a property value from a MaybeObservable object

@@ -147,13 +147,18 @@ describe("useIntersectionObserver()", () => {
   it("works with El$ target", () => {
     const div = document.createElement("div");
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useEl$<Element>();
       return { el$, io: useIntersectionObserver(el$, vi.fn()) };
     });
+
+    // Before assignment — observe not yet called
+    expect(mockObserve).not.toHaveBeenCalled();
 
     // Assign element via act after mount
     act(() => result.current.el$(div));
 
+    // After assignment — observer must have been called with the element
+    expect(mockObserve).toHaveBeenCalledWith(div);
     expect(result.current.io.isSupported.get()).toBe(true);
   });
 
@@ -246,5 +251,228 @@ describe("useIntersectionObserver()", () => {
     });
 
     expect(cb).toHaveBeenCalledWith([entry], expect.anything());
+  });
+
+  it("passes root option to IntersectionObserver", () => {
+    const el = document.createElement("div");
+    const root = document.createElement("div");
+    renderHook(() =>
+      useIntersectionObserver(el, vi.fn(), { root }),
+    );
+
+    expect(MockIntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ root }),
+    );
+  });
+
+  it("passes Observable root to IntersectionObserver", () => {
+    const el = document.createElement("div");
+    const root = document.createElement("div");
+    const root$ = observable<HTMLElement | null>(root);
+    renderHook(() =>
+      useIntersectionObserver(el, vi.fn(), { root: root$ }),
+    );
+
+    expect(MockIntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ root }),
+    );
+  });
+
+  it("reactively recreates observer when Observable root changes from null to element", () => {
+    const el = document.createElement("div");
+    const rootB = document.createElement("div");
+    // Start with null — @legendapp/state reliably tracks null→element transitions
+    const root$ = observable<HTMLElement | null>(null);
+
+    renderHook(() =>
+      useIntersectionObserver(el, vi.fn(), { root: root$ }),
+    );
+
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+    mockDisconnect.mockClear();
+    MockIntersectionObserver.mockClear();
+
+    act(() => {
+      root$.set(rootB);
+    });
+
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+    expect(MockIntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ root: rootB }),
+    );
+  });
+
+  it("delays setup until El$ root is mounted", () => {
+    const el = document.createElement("div");
+    const rootDiv = document.createElement("div");
+
+    const { result } = renderHook(() => {
+      const root$ = useEl$<HTMLElement>();
+      return { root$, io: useIntersectionObserver(el, vi.fn(), { root: root$ }) };
+    });
+
+    // root El$ is null — observer must not be created yet
+    expect(MockIntersectionObserver).not.toHaveBeenCalled();
+
+    // assign the root element
+    act(() => result.current.root$(rootDiv));
+
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+    expect(MockIntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ root: rootDiv }),
+    );
+  });
+
+  it("reactively recreates observer when El$ root changes", () => {
+    const el = document.createElement("div");
+    const rootA = document.createElement("div");
+    const rootB = document.createElement("div");
+
+    const { result } = renderHook(() => {
+      const root$ = useEl$<HTMLElement>();
+      return { root$, io: useIntersectionObserver(el, vi.fn(), { root: root$ }) };
+    });
+
+    act(() => result.current.root$(rootA));
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+
+    mockDisconnect.mockClear();
+    MockIntersectionObserver.mockClear();
+
+    act(() => result.current.root$(rootB));
+
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+    expect(MockIntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ root: rootB }),
+    );
+  });
+
+  it("passes threshold array [0, 0.5, 1] to IntersectionObserver", () => {
+    const el = document.createElement("div");
+    renderHook(() =>
+      useIntersectionObserver(el, vi.fn(), { threshold: [0, 0.5, 1] }),
+    );
+
+    expect(MockIntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ threshold: [0, 0.5, 1] }),
+    );
+  });
+
+  it("pause → resume → stop sequence transitions states correctly", () => {
+    const el = document.createElement("div");
+    const { result } = renderHook(() => useIntersectionObserver(el, vi.fn()));
+
+    expect(result.current.isActive.get()).toBe(true);
+
+    // pause
+    act(() => result.current.pause());
+    expect(result.current.isActive.get()).toBe(false);
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+
+    // resume
+    mockObserve.mockClear();
+    MockIntersectionObserver.mockClear();
+    act(() => result.current.resume());
+    expect(result.current.isActive.get()).toBe(true);
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+    expect(mockObserve).toHaveBeenCalledWith(el);
+
+    // stop
+    mockDisconnect.mockClear();
+    act(() => result.current.stop());
+    expect(result.current.isActive.get()).toBe(false);
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+
+    // resume after stop has no effect
+    MockIntersectionObserver.mockClear();
+    act(() => result.current.resume());
+    expect(MockIntersectionObserver).not.toHaveBeenCalled();
+    expect(result.current.isActive.get()).toBe(false);
+  });
+
+  it("recreates observer when El$ target changes to a different element", () => {
+    const elA = document.createElement("div");
+    const elB = document.createElement("div");
+
+    const { result } = renderHook(() => {
+      const el$ = useEl$<Element>();
+      return { el$, io: useIntersectionObserver(el$, vi.fn()) };
+    });
+
+    act(() => result.current.el$(elA));
+
+    expect(mockObserve).toHaveBeenCalledWith(elA);
+    mockObserve.mockClear();
+    mockDisconnect.mockClear();
+    MockIntersectionObserver.mockClear();
+
+    act(() => result.current.el$(elB));
+
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+    expect(mockObserve).toHaveBeenCalledWith(elB);
+  });
+
+  it("multiple resume() calls after stop() are all ignored", () => {
+    const el = document.createElement("div");
+    const { result } = renderHook(() => useIntersectionObserver(el, vi.fn()));
+
+    act(() => result.current.stop());
+    MockIntersectionObserver.mockClear();
+
+    act(() => {
+      result.current.resume();
+      result.current.resume();
+      result.current.resume();
+    });
+
+    expect(MockIntersectionObserver).not.toHaveBeenCalled();
+    expect(result.current.isActive.get()).toBe(false);
+  });
+
+  it("pause() after unmount does not throw", () => {
+    const el = document.createElement("div");
+    const { result, unmount } = renderHook(() =>
+      useIntersectionObserver(el, vi.fn()),
+    );
+
+    unmount();
+    mockDisconnect.mockClear();
+
+    expect(() => act(() => result.current.pause())).not.toThrow();
+    // No additional disconnect after unmount cleanup
+    expect(mockDisconnect).not.toHaveBeenCalled();
+  });
+
+  it("resume() after unmount does not recreate observer", () => {
+    const el = document.createElement("div");
+    const { result, unmount } = renderHook(() =>
+      useIntersectionObserver(el, vi.fn()),
+    );
+
+    unmount();
+    MockIntersectionObserver.mockClear();
+
+    expect(() => act(() => result.current.resume())).not.toThrow();
+    expect(MockIntersectionObserver).not.toHaveBeenCalled();
+  });
+
+  it("stop() after unmount does not throw", () => {
+    const el = document.createElement("div");
+    const { result, unmount } = renderHook(() =>
+      useIntersectionObserver(el, vi.fn()),
+    );
+
+    unmount();
+
+    expect(() => act(() => result.current.stop())).not.toThrow();
   });
 });

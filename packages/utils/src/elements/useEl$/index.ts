@@ -1,7 +1,8 @@
-import { opaqueObject } from "@legendapp/state";
-import type { OpaqueObject } from "@legendapp/state";
+import { isObservable, ObservableHint } from "@legendapp/state";
+import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { type Ref, type RefObject, useMemo, useRef } from "react";
+import type { MaybeObservable } from "../../types";
 
 export type El$<T extends Element = Element> = ((node: T | null) => void) & {
   /** returns element, registers tracking when called inside useObserve */
@@ -9,6 +10,11 @@ export type El$<T extends Element = Element> = ((node: T | null) => void) & {
   /** returns element without registering tracking */
   peek(): OpaqueObject<T> | null;
 };
+
+/** A value that resolves to an Element, Document, or null — via El$, Observable, or raw value */
+export type MaybeElement = El$<any> | MaybeObservable<HTMLElement | Document | null>;
+
+
 
 /**
  * Creates an observable element ref. Can be used as a drop-in replacement for
@@ -41,7 +47,7 @@ export type El$<T extends Element = Element> = ((node: T | null) => void) & {
  * ```
  */
 export function useEl$<T extends Element = Element>(
-  externalRef?: Ref<T> | null
+  externalRef?: Ref<T> | null,
 ): El$<T> {
   const el$ = useObservable<OpaqueObject<T> | null>(null);
 
@@ -59,13 +65,41 @@ export function useEl$<T extends Element = Element>(
           } else if (ext != null && "current" in ext) {
             (ext as RefObject<T | null>).current = node;
           }
-          (el$ as any).set(node ? opaqueObject(node) : null);
+          (el$ as any).set(node ? ObservableHint.opaque(node) : null);
         },
         {
           get: () => el$.get(),
           peek: () => el$.peek(),
-        }
+        },
       ) as El$<T>,
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    [], // eslint-disable-line react-hooks/exhaustive-deps
   );
+}
+
+
+/** Type guard for El$ — distinguishes it from Observable and raw values */
+export function isEl$(v: unknown): v is El$<Element> {
+  return typeof v === "function" && !isObservable(v) && "get" in v && "peek" in v;
+}
+
+/** Unwraps MaybeElement with tracking (use inside useObserve) */
+export function getElement(v: MaybeElement): HTMLElement | Document | null {
+  if (isEl$(v)) {
+    const raw = v.get();
+    return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
+  }
+  if (isObservable(v))
+    return (v as Observable<HTMLElement | Document | null>).get() as unknown as HTMLElement | Document | null;
+  return v as HTMLElement | Document | null;
+}
+
+/** Unwraps MaybeElement without tracking (use inside setup/peek) */
+export function peekElement(v: MaybeElement): HTMLElement | Document | null {
+  if (isEl$(v)) {
+    const raw = v.peek();
+    return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
+  }
+  if (isObservable(v))
+    return (v as Observable<HTMLElement | Document | null>).peek() as unknown as HTMLElement | Document | null;
+  return v as HTMLElement | Document | null;
 }

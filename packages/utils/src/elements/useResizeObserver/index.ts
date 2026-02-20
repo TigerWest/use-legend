@@ -1,12 +1,9 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
 import { useEffect, useRef } from "react";
-import {
-  normalizeTargets,
-  type MaybeTargetEl,
-} from "../../shared/normalizeTargets";
+import { normalizeTargets } from "../../shared/normalizeTargets";
+import { MaybeElement } from "../useEl$";
 
-export type { MaybeTargetEl } from "../../shared/normalizeTargets";
 export { normalizeTargets } from "../../shared/normalizeTargets";
 
 export interface UseResizeObserverOptions {
@@ -40,7 +37,7 @@ export interface UseResizeObserverReturn {
  * ```
  */
 export function useResizeObserver(
-  target: MaybeTargetEl | MaybeTargetEl[],
+  target: MaybeElement | MaybeElement[],
   callback: ResizeObserverCallback,
   options?: UseResizeObserverOptions,
 ): UseResizeObserverReturn {
