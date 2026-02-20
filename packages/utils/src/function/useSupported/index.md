@@ -41,15 +41,3 @@ function MyComponent() {
   )
 }
 ```
-
-### Checking API shape
-
-```typescript
-const isStorageSupported = useSupported(() => {
-  try {
-    return typeof localStorage !== 'undefined' && localStorage !== null
-  } catch {
-    return false
-  }
-})
-```
