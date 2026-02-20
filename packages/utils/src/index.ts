@@ -4,4 +4,5 @@ export * from "./function/get";
 
 export * from "./elements/useEl$";
 
+export * from "./elements/useMutationObserver";
 export * from "./elements/useResizeObserver";
