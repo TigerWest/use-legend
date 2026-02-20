@@ -12,3 +12,4 @@ export * from "./elements/useWindowFocus";
 export * from "./elements/useWindowSize";
 
 export * from "./browser/useEventListener";
+export * from "./browser/useMediaQuery";
