@@ -199,6 +199,7 @@ describe("useMediaQuery() — cleanup", () => {
     expect(mql.removeEventListener).toHaveBeenCalledWith(
       "change",
       expect.any(Function),
+      expect.objectContaining({ passive: true }),
     );
   });
 
@@ -259,7 +260,7 @@ describe("useMediaQuery() — reactive query (MaybeObservable<string>)", () => {
     act(() => query$.set("(max-width: 480px)"));
 
     expect(mqlMap.get("(min-width: 1024px)")!.mql.removeEventListener)
-      .toHaveBeenCalledWith("change", expect.any(Function));
+      .toHaveBeenCalledWith("change", expect.any(Function), expect.objectContaining({ passive: true }));
     expect(mqlMap.get("(max-width: 480px)")!.mql.addEventListener)
       .toHaveBeenCalledWith("change", expect.any(Function), { passive: true });
   });

@@ -1,7 +1,6 @@
 "use client";
 import { ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
-import { useEffect, useRef } from "react";
 import { get } from "../../function/get";
 import { useSupported } from "../../function/useSupported";
 import type { MaybeObservable } from "../../types";
@@ -84,9 +83,14 @@ export function useMediaQuery(
     matches$.set(mql.matches.valueOf());
   });
 
-  useEventListener(mql$, "change", (e: Event) => {
-    matches$.set((e as MediaQueryListEvent).matches);
-  });
+  useEventListener(
+    mql$,
+    "change",
+    (e: Event) => {
+      matches$.set((e as MediaQueryListEvent).matches);
+    },
+    { passive: true },
+  );
 
   return matches$;
 }
