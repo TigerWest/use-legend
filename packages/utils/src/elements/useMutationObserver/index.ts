@@ -9,6 +9,7 @@ export interface UseMutationObserverOptions extends MutationObserverInit {}
 export interface UseMutationObserverReturn {
   isSupported: Observable<boolean>;
   stop: () => void;
+  resume: () => void;
   takeRecords: () => MutationRecord[];
 }
 
@@ -61,5 +62,5 @@ export function useMutationObserver(
     return observerRef.current?.takeRecords() ?? [];
   };
 
-  return { isSupported: isSupported$, stop: cleanup, takeRecords };
+  return { isSupported: isSupported$, stop: cleanup, resume: setup, takeRecords };
 }

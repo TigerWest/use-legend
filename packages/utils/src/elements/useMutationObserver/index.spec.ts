@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
+import { observable } from "@legendapp/state";
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { useEl$ } from "../useEl$";
 import { useMutationObserver } from ".";
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
@@ -8,6 +10,7 @@ const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
 describe("useMutationObserver()", () => {
   afterEach(() => {
     document.body.innerHTML = "";
+    vi.unstubAllGlobals();
   });
 
   it("isSupported is true when MutationObserver is available", () => {
@@ -210,5 +213,206 @@ describe("useMutationObserver()", () => {
 
     expect(disconnectSpy).toHaveBeenCalled();
     disconnectSpy.mockRestore();
+  });
+
+  // ── isSupported: false ──────────────────────────────────────────────────────
+
+  it("isSupported is false and no observer is created when MutationObserver is unavailable", () => {
+    vi.stubGlobal("MutationObserver", undefined);
+
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const callback = vi.fn();
+
+    const { result } = renderHook(() =>
+      useMutationObserver(el, callback, { attributes: true }),
+    );
+
+    expect(result.current.isSupported.get()).toBe(false);
+    el.setAttribute("data-x", "1");
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  // ── Observable / El$ target reactivity ─────────────────────────────────────
+
+  it("reacts to Observable<Element|null> target — starts observing after value is set", async () => {
+    const callback = vi.fn();
+    const target$ = observable<Element | null>(null);
+
+    renderHook(() =>
+      useMutationObserver(target$ as any, callback, { attributes: true }),
+    );
+
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+
+    act(() => {
+      target$.set(el);
+    });
+
+    await act(async () => {
+      el.setAttribute("data-obs", "1");
+      await flush();
+    });
+
+    expect(callback).toHaveBeenCalled();
+    const records: MutationRecord[] = callback.mock.calls[0][0];
+    expect(records[0].type).toBe("attributes");
+  });
+
+  it("reacts to El$ target — starts observing after element is assigned", async () => {
+    const callback = vi.fn();
+
+    const { result } = renderHook(() => {
+      const el$ = useEl$<HTMLDivElement>();
+      const mo = useMutationObserver(el$ as any, callback, { attributes: true });
+      return { el$, mo };
+    });
+
+    const div = document.createElement("div");
+    document.body.appendChild(div);
+
+    act(() => result.current.el$(div));
+
+    await act(async () => {
+      div.setAttribute("data-el", "1");
+      await flush();
+    });
+
+    expect(callback).toHaveBeenCalled();
+    const records: MutationRecord[] = callback.mock.calls[0][0];
+    expect(records[0].type).toBe("attributes");
+  });
+
+  // ── subtree ─────────────────────────────────────────────────────────────────
+
+  it("detects mutation in a descendant node when subtree: true", async () => {
+    const callback = vi.fn();
+    const parent = document.createElement("div");
+    const child = document.createElement("span");
+    parent.appendChild(child);
+    document.body.appendChild(parent);
+
+    renderHook(() =>
+      useMutationObserver(parent, callback, { attributes: true, subtree: true }),
+    );
+
+    await act(async () => {
+      child.setAttribute("data-deep", "1");
+      await flush();
+    });
+
+    expect(callback).toHaveBeenCalled();
+    const records: MutationRecord[] = callback.mock.calls[0][0];
+    expect(records[0].target).toBe(child);
+    expect(records[0].type).toBe("attributes");
+  });
+
+  // ── attributeFilter ─────────────────────────────────────────────────────────
+
+  it("fires only for attributes listed in attributeFilter", async () => {
+    const callback = vi.fn();
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+
+    renderHook(() =>
+      useMutationObserver(el, callback, {
+        attributes: true,
+        attributeFilter: ["data-allowed"],
+      }),
+    );
+
+    await act(async () => {
+      el.setAttribute("data-blocked", "x");
+      await flush();
+    });
+    expect(callback).not.toHaveBeenCalled();
+
+    await act(async () => {
+      el.setAttribute("data-allowed", "y");
+      await flush();
+    });
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  // ── attributeOldValue ───────────────────────────────────────────────────────
+
+  it("includes oldValue in record when attributeOldValue: true", async () => {
+    const callback = vi.fn();
+    const el = document.createElement("div");
+    el.setAttribute("data-val", "before");
+    document.body.appendChild(el);
+
+    renderHook(() =>
+      useMutationObserver(el, callback, {
+        attributes: true,
+        attributeOldValue: true,
+      }),
+    );
+
+    await act(async () => {
+      el.setAttribute("data-val", "after");
+      await flush();
+    });
+
+    expect(callback).toHaveBeenCalled();
+    const records: MutationRecord[] = callback.mock.calls[0][0];
+    expect(records[0].oldValue).toBe("before");
+  });
+
+  // ── resume ──────────────────────────────────────────────────────────────────
+
+  it("resume() restarts observation after stop()", async () => {
+    const callback = vi.fn();
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+
+    const { result } = renderHook(() =>
+      useMutationObserver(el, callback, { attributes: true }),
+    );
+
+    act(() => result.current.stop());
+
+    await act(async () => {
+      el.setAttribute("data-after-stop", "1");
+      await flush();
+    });
+    expect(callback).not.toHaveBeenCalled();
+
+    act(() => result.current.resume());
+
+    await act(async () => {
+      el.setAttribute("data-after-resume", "1");
+      await flush();
+    });
+    expect(callback).toHaveBeenCalledOnce();
+    const records: MutationRecord[] = callback.mock.calls[0][0];
+    expect(records[0].attributeName).toBe("data-after-resume");
+  });
+
+  // ── stale callback regression ───────────────────────────────────────────────
+
+  it("uses stale callback after re-render — regression guard: no callbackRef pattern", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const cb1 = vi.fn();
+    const cb2 = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ cb }) => useMutationObserver(el, cb, { attributes: true }),
+      { initialProps: { cb: cb1 } },
+    );
+
+    rerender({ cb: cb2 });
+
+    await act(async () => {
+      el.setAttribute("data-stale", "1");
+      await flush();
+    });
+
+    // Observer was created with cb1 and is not recreated on re-render alone.
+    // This test documents the current behavior — absence of callbackRef pattern.
+    expect(cb1).toHaveBeenCalledOnce();
+    expect(cb2).not.toHaveBeenCalled();
   });
 });
