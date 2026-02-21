@@ -51,8 +51,18 @@ If there is a demonstrable example, write a demo.tsx and import it to enable int
 
 You may include multiple code examples and descriptions based on the code.
 
+**When writing code blocks in `## Usage`, use TwoSlash for type hover support:**
+
+```tsx twoslash
+// @noErrors
+import { useSomething } from '@las/utils'
+// hover shows inferred types
+```
+
+> Use the `/twoslash-docs` skill for full TwoSlash syntax guide and rules.
+
 ```typescript
-// Actual usage example code
+// Plain typescript (no hover) — use for short option-only snippets
 ```
 ````
 

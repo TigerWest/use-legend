@@ -35,12 +35,21 @@ importers:
       '@astrojs/starlight':
         specifier: ^0.37.6
         version: 0.37.6(astro@5.17.2)
+      '@las/integrations':
+        specifier: workspace:*
+        version: link:../integrations
+      '@las/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@legendapp/state':
         specifier: 3.0.0-beta.44
         version: 3.0.0-beta.44(react@19.2.3)
       astro:
         specifier: ^5.6.1
         version: 5.17.2(tsx@4.21.0)(typescript@5.9.3)
+      expressive-code-twoslash:
+        specifier: ^0.5.3
+        version: 0.5.3(@expressive-code/core@0.41.6)(expressive-code@0.41.6)(typescript@5.9.3)
       react:
         specifier: ^19.0.0
         version: 19.2.3
@@ -2819,6 +2828,17 @@ packages:
       eslint-visitor-keys: 4.2.1
     dev: true
 
+  /@typescript/vfs@1.6.4(typescript@5.9.3):
+    resolution: {integrity: sha512-PJFXFS4ZJKiJ9Qiuix6Dz/OwEIqHD7Dme1UwZhTK11vR+5dqW2ACbdndWQexBzCx+CPuMe5WBYQWCsFyGlQLlQ==}
+    peerDependencies:
+      typescript: '*'
+    dependencies:
+      debug: 4.4.3
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /@ungap/structured-clone@1.3.0:
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
     dev: false
@@ -4681,6 +4701,24 @@ packages:
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
     dev: true
+
+  /expressive-code-twoslash@0.5.3(@expressive-code/core@0.41.6)(expressive-code@0.41.6)(typescript@5.9.3):
+    resolution: {integrity: sha512-BcttA3taicvhesKpQ4TvRxoDHByDr2FH6bvjc6elxC8TXVU3GVZv0wHvdcNz9xrVEUcwbDbsprqsGF7M7Yq59A==}
+    peerDependencies:
+      '@expressive-code/core': '>=0.40.0'
+      expressive-code: '>=0.40.0'
+      typescript: ^5.7
+    dependencies:
+      '@expressive-code/core': 0.41.6
+      expressive-code: 0.41.6
+      mdast-util-from-markdown: 2.0.2
+      mdast-util-gfm: 3.1.0
+      mdast-util-to-hast: 13.2.1
+      twoslash: 0.2.12(typescript@5.9.3)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /expressive-code@0.41.6:
     resolution: {integrity: sha512-W/5+IQbrpCIM5KGLjO35wlp1NCwDOOVQb+PAvzEoGkW1xjGM807ZGfBKptNWH6UECvt6qgmLyWolCMYKh7eQmA==}
@@ -8404,6 +8442,22 @@ packages:
       get-tsconfig: 4.13.6
     optionalDependencies:
       fsevents: 2.3.3
+
+  /twoslash-protocol@0.2.12:
+    resolution: {integrity: sha512-5qZLXVYfZ9ABdjqbvPc4RWMr7PrpPaaDSeaYY55vl/w1j6H6kzsWK/urAEIXlzYlyrFmyz1UbwIt+AA0ck+wbg==}
+    dev: false
+
+  /twoslash@0.2.12(typescript@5.9.3):
+    resolution: {integrity: sha512-tEHPASMqi7kqwfJbkk7hc/4EhlrKCSLcur+TcvYki3vhIfaRMXnXjaYFgXpoZRbT6GdprD4tGuVBEmTpUgLBsw==}
+    peerDependencies:
+      typescript: '*'
+    dependencies:
+      '@typescript/vfs': 1.6.4(typescript@5.9.3)
+      twoslash-protocol: 0.2.12
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}

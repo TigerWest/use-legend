@@ -137,7 +137,7 @@ export default function UseIntersectionObserverDemo() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            height: "400px",
+            height: "200px",
             color: "var(--sl-color-gray-3, #94a3b8)",
             fontSize: "13px",
             fontFamily: "monospace",
