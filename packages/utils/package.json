@@ -12,6 +12,9 @@
       "require": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "es-toolkit": "^1.0.0"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
