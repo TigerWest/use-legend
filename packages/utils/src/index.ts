@@ -12,5 +12,8 @@ export * from "./elements/useDocumentVisibility";
 export * from "./elements/useWindowFocus";
 export * from "./elements/useWindowSize";
 
+export * from "./sensors/useScroll";
+export * from "./sensors/useWindowScroll";
+
 export * from "./browser/useEventListener";
 export * from "./browser/useMediaQuery";

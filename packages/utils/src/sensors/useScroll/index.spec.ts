@@ -100,25 +100,25 @@ describe("useScroll()", () => {
   });
 
   // -------------------------------------------------------------------------
-  // 초기값
+  // Initial values
   // -------------------------------------------------------------------------
 
-  describe("초기값", () => {
-    it("마운트 시 element.scrollLeft/scrollTop을 x/y 초기값으로 설정한다", () => {
+  describe("initial values", () => {
+    it("sets element.scrollLeft/scrollTop as initial x/y values on mount", () => {
       const el = makeEl({ scrollLeft: 50, scrollTop: 100 });
       const { result } = renderHook(() => useScroll(el));
       expect(result.current.x.get()).toBe(50);
       expect(result.current.y.get()).toBe(100);
     });
 
-    it("마운트 시 window.scrollX/scrollY를 x/y 초기값으로 설정한다 (Window target)", () => {
+    it("sets window.scrollX/scrollY as initial x/y values on mount (Window target)", () => {
       setWindowDimensions({ scrollX: 20, scrollY: 40 });
       const { result } = renderHook(() => useScroll(window));
       expect(result.current.x.get()).toBe(20);
       expect(result.current.y.get()).toBe(40);
     });
 
-    it("마운트 시 documentElement.scrollLeft/scrollTop을 x/y 초기값으로 설정한다 (Document target)", () => {
+    it("sets documentElement.scrollLeft/scrollTop as initial x/y values on mount (Document target)", () => {
       Object.defineProperty(document.documentElement, "scrollLeft", {
         writable: true,
         configurable: true,
@@ -134,7 +134,7 @@ describe("useScroll()", () => {
       expect(result.current.y.get()).toBe(30);
     });
 
-    it("초기 arrivedState는 top=true, left=true, right=false, bottom=false이다", () => {
+    it("initial arrivedState is top=true, left=true, right=false, bottom=false", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(el));
       expect(result.current.arrivedState.top.get()).toBe(true);
@@ -143,7 +143,7 @@ describe("useScroll()", () => {
       expect(result.current.arrivedState.bottom.get()).toBe(false);
     });
 
-    it("초기 isScrolling은 false이다", () => {
+    it("initial isScrolling is false", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(el));
       // advance timers to let idle expire
@@ -151,7 +151,7 @@ describe("useScroll()", () => {
       expect(result.current.isScrolling.get()).toBe(false);
     });
 
-    it("초기 directions는 모두 false이다", () => {
+    it("initial directions are all false", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(el));
       const d = result.current.directions;
@@ -163,11 +163,11 @@ describe("useScroll()", () => {
   });
 
   // -------------------------------------------------------------------------
-  // x / y 업데이트
+  // x / y updates
   // -------------------------------------------------------------------------
 
-  describe("x / y 업데이트", () => {
-    it("아래로 스크롤 시 y가 증가한다", () => {
+  describe("x / y updates", () => {
+    it("y increases when scrolling down", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -179,7 +179,7 @@ describe("useScroll()", () => {
       expect(result.current.y.get()).toBe(200);
     });
 
-    it("위로 스크롤 시 y가 감소한다", () => {
+    it("y decreases when scrolling up", () => {
       const el = makeEl({ scrollTop: 300 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -191,7 +191,7 @@ describe("useScroll()", () => {
       expect(result.current.y.get()).toBe(100);
     });
 
-    it("오른쪽으로 스크롤 시 x가 증가한다", () => {
+    it("x increases when scrolling right", () => {
       const el = makeEl({ scrollLeft: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -203,7 +203,7 @@ describe("useScroll()", () => {
       expect(result.current.x.get()).toBe(150);
     });
 
-    it("왼쪽으로 스크롤 시 x가 감소한다", () => {
+    it("x decreases when scrolling left", () => {
       const el = makeEl({ scrollLeft: 200 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -215,7 +215,7 @@ describe("useScroll()", () => {
       expect(result.current.x.get()).toBe(50);
     });
 
-    it("수직 스크롤만 발생 시 x는 변경되지 않는다", () => {
+    it("x does not change when only vertical scroll occurs", () => {
       const el = makeEl({ scrollLeft: 0, scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -227,7 +227,7 @@ describe("useScroll()", () => {
       expect(result.current.x.get()).toBe(0);
     });
 
-    it("수평 스크롤만 발생 시 y는 변경되지 않는다", () => {
+    it("y does not change when only horizontal scroll occurs", () => {
       const el = makeEl({ scrollLeft: 0, scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -245,13 +245,13 @@ describe("useScroll()", () => {
   // -------------------------------------------------------------------------
 
   describe("arrivedState", () => {
-    it("scrollTop이 0일 때 top=true이다", () => {
+    it("top=true when scrollTop is 0", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
       expect(result.current.arrivedState.top.get()).toBe(true);
     });
 
-    it("scrollTop이 0보다 클 때 top=false이다", () => {
+    it("top=false when scrollTop is greater than 0", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -263,7 +263,7 @@ describe("useScroll()", () => {
       expect(result.current.arrivedState.top.get()).toBe(false);
     });
 
-    it("scrollTop이 maxScrollY에 도달했을 때 bottom=true이다", () => {
+    it("bottom=true when scrollTop reaches maxScrollY", () => {
       // scrollHeight=1000, clientHeight=400 → maxY=600
       const el = makeEl({ scrollTop: 0, scrollHeight: 1000, clientHeight: 400 });
       const { result } = renderHook(() => useScroll(el));
@@ -276,13 +276,13 @@ describe("useScroll()", () => {
       expect(result.current.arrivedState.bottom.get()).toBe(true);
     });
 
-    it("scrollLeft가 0일 때 left=true이다", () => {
+    it("left=true when scrollLeft is 0", () => {
       const el = makeEl({ scrollLeft: 0 });
       const { result } = renderHook(() => useScroll(el));
       expect(result.current.arrivedState.left.get()).toBe(true);
     });
 
-    it("scrollLeft가 maxScrollX에 도달했을 때 right=true이다", () => {
+    it("right=true when scrollLeft reaches maxScrollX", () => {
       // scrollWidth=500, clientWidth=300 → maxX=200
       const el = makeEl({ scrollLeft: 0, scrollWidth: 500, clientWidth: 300 });
       const { result } = renderHook(() => useScroll(el));
@@ -295,7 +295,7 @@ describe("useScroll()", () => {
       expect(result.current.arrivedState.right.get()).toBe(true);
     });
 
-    it("offset.top 설정 시 scrollTop <= offset.top 이면 top=true이다", () => {
+    it("top=true when scrollTop <= offset.top with offset.top set", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() =>
         useScroll(el, { offset: { top: 50 } }),
@@ -309,7 +309,7 @@ describe("useScroll()", () => {
       expect(result.current.arrivedState.top.get()).toBe(true);
     });
 
-    it("offset.bottom 설정 시 maxScrollY - scrollTop <= offset.bottom 이면 bottom=true이다", () => {
+    it("bottom=true when scrollTop >= maxScrollY - offset.bottom with offset.bottom set", () => {
       // scrollHeight=1000, clientHeight=400 → maxY=600
       const el = makeEl({ scrollTop: 0, scrollHeight: 1000, clientHeight: 400 });
       const { result } = renderHook(() =>
@@ -317,7 +317,7 @@ describe("useScroll()", () => {
       );
 
       act(() => {
-        // 600 - 50 = 550 → scrollTop >= 550 이면 bottom=true
+        // 600 - 50 = 550 → bottom=true when scrollTop >= 550
         (el as any).scrollTop = 550;
         el.dispatchEvent(new Event("scroll"));
       });
@@ -325,7 +325,7 @@ describe("useScroll()", () => {
       expect(result.current.arrivedState.bottom.get()).toBe(true);
     });
 
-    it("스크롤 불가능한 요소(scrollHeight === clientHeight)에서 top=true, bottom=true이다", () => {
+    it("top=true and bottom=true for non-scrollable element (scrollHeight === clientHeight)", () => {
       // maxY = 400 - 400 = 0
       const el = makeEl({ scrollTop: 0, scrollHeight: 400, clientHeight: 400 });
       const { result } = renderHook(() => useScroll(el));
@@ -344,7 +344,7 @@ describe("useScroll()", () => {
   // -------------------------------------------------------------------------
 
   describe("directions", () => {
-    it("아래로 스크롤 시 bottom=true, top=false이다", () => {
+    it("bottom=true and top=false when scrolling down", () => {
       const el = makeEl({ scrollTop: 100 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -357,7 +357,7 @@ describe("useScroll()", () => {
       expect(result.current.directions.top.get()).toBe(false);
     });
 
-    it("위로 스크롤 시 top=true, bottom=false이다", () => {
+    it("top=true and bottom=false when scrolling up", () => {
       const el = makeEl({ scrollTop: 200 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -370,7 +370,7 @@ describe("useScroll()", () => {
       expect(result.current.directions.bottom.get()).toBe(false);
     });
 
-    it("오른쪽으로 스크롤 시 right=true, left=false이다", () => {
+    it("right=true and left=false when scrolling right", () => {
       const el = makeEl({ scrollLeft: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -383,7 +383,7 @@ describe("useScroll()", () => {
       expect(result.current.directions.left.get()).toBe(false);
     });
 
-    it("왼쪽으로 스크롤 시 left=true, right=false이다", () => {
+    it("left=true and right=false when scrolling left", () => {
       const el = makeEl({ scrollLeft: 200 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -402,7 +402,7 @@ describe("useScroll()", () => {
   // -------------------------------------------------------------------------
 
   describe("isScrolling", () => {
-    it("scroll 이벤트 발생 시 true가 된다", () => {
+    it("becomes true when scroll event fires", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(el));
 
@@ -413,7 +413,7 @@ describe("useScroll()", () => {
       expect(result.current.isScrolling.get()).toBe(true);
     });
 
-    it("idle 시간(기본 200ms) 후 false가 된다", () => {
+    it("becomes false after idle time (default 200ms)", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(el));
 
@@ -425,7 +425,7 @@ describe("useScroll()", () => {
       expect(result.current.isScrolling.get()).toBe(false);
     });
 
-    it("idle 옵션으로 대기 시간을 조정할 수 있다", () => {
+    it("idle option adjusts the wait time", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(el, { idle: 500 }));
 
@@ -441,7 +441,7 @@ describe("useScroll()", () => {
       expect(result.current.isScrolling.get()).toBe(false);
     });
 
-    it("idle 만료 시 onStop 콜백이 호출된다", () => {
+    it("onStop callback is called when idle expires", () => {
       const onStop = vi.fn();
       const el = makeEl();
       renderHook(() => useScroll(el, { onStop, idle: 100 }));
@@ -454,7 +454,7 @@ describe("useScroll()", () => {
       expect(onStop).toHaveBeenCalledOnce();
     });
 
-    it("idle 만료 전 추가 스크롤 발생 시 타이머가 리셋된다", () => {
+    it("timer resets when additional scroll occurs before idle expires", () => {
       const onStop = vi.fn();
       const el = makeEl();
       renderHook(() => useScroll(el, { onStop, idle: 200 }));
@@ -479,7 +479,7 @@ describe("useScroll()", () => {
   // -------------------------------------------------------------------------
 
   describe("measure()", () => {
-    it("수동 호출 시 현재 스크롤 상태를 재계산한다", () => {
+    it("recalculates current scroll state on manual call", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -491,7 +491,7 @@ describe("useScroll()", () => {
       expect(result.current.y.get()).toBe(300);
     });
 
-    it("measure() 호출 시 x/y/arrivedState/directions가 모두 갱신된다", () => {
+    it("all of x/y/arrivedState/directions are updated when measure() is called", () => {
       // scrollHeight=1000, clientHeight=400 → maxY=600
       const el = makeEl({ scrollTop: 0, scrollHeight: 1000, clientHeight: 400 });
       const { result } = renderHook(() => useScroll(el));
@@ -508,11 +508,11 @@ describe("useScroll()", () => {
   });
 
   // -------------------------------------------------------------------------
-  // throttle 옵션
+  // throttle option
   // -------------------------------------------------------------------------
 
-  describe("throttle 옵션", () => {
-    it("throttle 미설정 시 매 scroll 이벤트마다 measure가 호출된다", () => {
+  describe("throttle option", () => {
+    it("measure is called on every scroll event when throttle is not set", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -526,7 +526,7 @@ describe("useScroll()", () => {
       expect(result.current.y.get()).toBe(200);
     });
 
-    it("throttle 설정 시 지정된 ms 이내의 연속 호출은 무시된다", () => {
+    it("consecutive calls within specified ms are ignored when throttle is set", () => {
       vi.useRealTimers(); // real timers needed for Date.now()
 
       const el = makeEl({ scrollTop: 0 });
@@ -550,11 +550,11 @@ describe("useScroll()", () => {
   });
 
   // -------------------------------------------------------------------------
-  // target 타입별 동작
+  // behavior by target type
   // -------------------------------------------------------------------------
 
-  describe("target 타입별 동작", () => {
-    it("Window target — scrollX/scrollY 기준으로 동작한다", () => {
+  describe("behavior by target type", () => {
+    it("Window target — uses scrollX/scrollY", () => {
       setWindowDimensions({ scrollX: 0, scrollY: 0 });
       const { result } = renderHook(() => useScroll(window));
 
@@ -566,7 +566,7 @@ describe("useScroll()", () => {
       expect(result.current.y.get()).toBe(500);
     });
 
-    it("Document target — documentElement.scrollLeft/scrollTop 기준으로 동작한다", () => {
+    it("Document target — uses documentElement.scrollLeft/scrollTop", () => {
       Object.defineProperty(document.documentElement, "scrollLeft", {
         writable: true,
         configurable: true,
@@ -592,7 +592,7 @@ describe("useScroll()", () => {
       expect(result.current.y.get()).toBe(300);
     });
 
-    it("HTMLElement target — scrollLeft/scrollTop 기준으로 동작한다", () => {
+    it("HTMLElement target — uses scrollLeft/scrollTop", () => {
       const el = makeEl({ scrollLeft: 0, scrollTop: 0 });
       const { result } = renderHook(() => useScroll(el));
 
@@ -606,17 +606,17 @@ describe("useScroll()", () => {
   });
 
   // -------------------------------------------------------------------------
-  // 엣지케이스: null target
+  // edge case: null target
   // -------------------------------------------------------------------------
 
-  describe("엣지케이스: null target", () => {
-    it("null target 전달 시 에러 없이 x=0, y=0을 반환한다", () => {
+  describe("edge case: null target", () => {
+    it("returns x=0, y=0 without error when null target is passed", () => {
       const { result } = renderHook(() => useScroll(null));
       expect(result.current.x.get()).toBe(0);
       expect(result.current.y.get()).toBe(0);
     });
 
-    it("null target 전달 시 arrivedState/directions는 초기 기본값을 유지한다", () => {
+    it("arrivedState/directions maintain initial defaults when null target is passed", () => {
       const { result } = renderHook(() => useScroll(null));
       expect(result.current.arrivedState.top.get()).toBe(true);
       expect(result.current.arrivedState.left.get()).toBe(true);
@@ -624,7 +624,7 @@ describe("useScroll()", () => {
       expect(result.current.arrivedState.bottom.get()).toBe(false);
     });
 
-    it("null target 전달 시 scroll 이벤트 리스너를 등록하지 않는다", () => {
+    it("does not register scroll event listener when null target is passed", () => {
       const addSpy = vi.spyOn(window, "addEventListener");
       renderHook(() => useScroll(null));
       const scrollCalls = addSpy.mock.calls.filter(([type]) => type === "scroll");
@@ -633,11 +633,11 @@ describe("useScroll()", () => {
   });
 
   // -------------------------------------------------------------------------
-  // 언마운트 / cleanup
+  // unmount / cleanup
   // -------------------------------------------------------------------------
 
-  describe("언마운트 / cleanup", () => {
-    it("언마운트 시 scroll 이벤트 리스너가 제거된다", async () => {
+  describe("unmount / cleanup", () => {
+    it("removes scroll event listener on unmount", async () => {
       const el = makeEl();
       const addSpy = vi.spyOn(el, "addEventListener");
       const removeSpy = vi.spyOn(el, "removeEventListener");
@@ -650,7 +650,7 @@ describe("useScroll()", () => {
       expect(removeSpy.mock.calls.some(([type]) => type === "scroll")).toBe(true);
     });
 
-    it("언마운트 시 진행 중인 idle 타이머가 정리된다", async () => {
+    it("cleans up pending idle timer on unmount", async () => {
       const onStop = vi.fn();
       const el = makeEl();
       const { unmount } = renderHook(() =>
