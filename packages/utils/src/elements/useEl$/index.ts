@@ -3,6 +3,7 @@ import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { type Ref, type RefObject, useMemo, useRef } from "react";
 import type { MaybeObservable } from "../../types";
+import { isWindow } from "../../shared";
 
 export type El$<T extends Element = Element> = ((node: T | null) => void) & {
   /** returns element, registers tracking when called inside useObserve */
@@ -11,8 +12,8 @@ export type El$<T extends Element = Element> = ((node: T | null) => void) & {
   peek(): OpaqueObject<T> | null;
 };
 
-/** A value that resolves to an Element, Document, or null — via El$, Observable, or raw value */
-export type MaybeElement = El$<any> | MaybeObservable<HTMLElement | Document | null>;
+/** A value that resolves to an Element, Document, Window, or null — via El$, Observable, or raw value */
+export type MaybeElement = El$<any> | MaybeObservable<HTMLElement | Document | Window | null>;
 
 
 
@@ -83,23 +84,25 @@ export function isEl$(v: unknown): v is El$<Element> {
 }
 
 /** Unwraps MaybeElement with tracking (use inside useObserve) */
-export function getElement(v: MaybeElement): HTMLElement | Document | null {
+export function getElement(v: MaybeElement): HTMLElement | Document | Window | null {
   if (isEl$(v)) {
     const raw = v.get();
     return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
+  if (isWindow(v)) return v;
   if (isObservable(v))
-    return (v as Observable<HTMLElement | Document | null>).get() as unknown as HTMLElement | Document | null;
-  return v as HTMLElement | Document | null;
+    return (v as Observable<HTMLElement | Document | Window | null>).get() as unknown as HTMLElement | Document | Window | null;
+  return v as HTMLElement | Document | Window | null;
 }
 
 /** Unwraps MaybeElement without tracking (use inside setup/peek) */
-export function peekElement(v: MaybeElement): HTMLElement | Document | null {
+export function peekElement(v: MaybeElement): HTMLElement | Document | Window | null {
   if (isEl$(v)) {
     const raw = v.peek();
     return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
+  if (isWindow(v)) return v;
   if (isObservable(v))
-    return (v as Observable<HTMLElement | Document | null>).peek() as unknown as HTMLElement | Document | null;
-  return v as HTMLElement | Document | null;
+    return (v as Observable<HTMLElement | Document | Window | null>).peek() as unknown as HTMLElement | Document | Window | null;
+  return v as HTMLElement | Document | Window | null;
 }
