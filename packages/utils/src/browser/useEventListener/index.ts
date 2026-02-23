@@ -4,6 +4,8 @@ import { useObservable, useObserve } from "@legendapp/state/react";
 import { useEffect, useRef } from "react";
 import { isEl$, type MaybeElement } from "../../elements/useEl$";
 import { normalizeTargets } from "../../shared/normalizeTargets";
+import { get } from "../../function/get";
+import type { MaybeObservable } from "../../types";
 
 // ---------------------------------------------------------------------------
 // Local helpers
@@ -51,7 +53,7 @@ export interface GeneralEventListener<E = Event> {
 export function useEventListener<E extends keyof WindowEventMap>(
   event: Arrayable<E>,
   listener: Arrayable<(ev: WindowEventMap[E]) => any>,
-  options?: boolean | AddEventListenerOptions,
+  options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
 /**
@@ -64,7 +66,7 @@ export function useEventListener<E extends keyof WindowEventMap>(
   target: Window,
   event: Arrayable<E>,
   listener: Arrayable<(ev: WindowEventMap[E]) => any>,
-  options?: boolean | AddEventListenerOptions,
+  options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
 /**
@@ -77,7 +79,7 @@ export function useEventListener<E extends keyof DocumentEventMap>(
   target: Document,
   event: Arrayable<E>,
   listener: Arrayable<(ev: DocumentEventMap[E]) => any>,
-  options?: boolean | AddEventListenerOptions,
+  options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
 /**
@@ -91,7 +93,7 @@ export function useEventListener<E extends keyof HTMLElementEventMap>(
   target: MaybeElement | MaybeElement[] | null | undefined,
   event: Arrayable<E>,
   listener: Arrayable<(ev: HTMLElementEventMap[E]) => any>,
-  options?: boolean | AddEventListenerOptions,
+  options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
 /**
@@ -106,7 +108,7 @@ export function useEventListener<EventType = Event>(
   target: Observable<any>,
   event: Arrayable<string>,
   listener: Arrayable<GeneralEventListener<EventType>>,
-  options?: boolean | AddEventListenerOptions,
+  options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
 /**
@@ -119,7 +121,7 @@ export function useEventListener<EventType = Event>(
   target: EventTarget | null | undefined,
   event: Arrayable<string>,
   listener: Arrayable<GeneralEventListener<EventType>>,
-  options?: boolean | AddEventListenerOptions,
+  options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
 // ---------------------------------------------------------------------------
@@ -136,7 +138,7 @@ export function useEventListener(...args: any[]): () => void {
   const rawListener: Arrayable<(...a: any[]) => any> = hasTarget
     ? args[2]
     : args[1];
-  const rawOptions: boolean | AddEventListenerOptions | undefined = hasTarget
+  const rawOptions: MaybeObservable<boolean | AddEventListenerOptions> | undefined = hasTarget
     ? args[3]
     : args[2];
 
@@ -214,10 +216,11 @@ export function useEventListener(...args: any[]): () => void {
     const events = toArray(rawEvent);
     if (!events.length || !listenersRef.current.length) return;
 
+    const resolvedOpts = get(optionsRef.current);
     const opts =
-      typeof optionsRef.current === "object" && optionsRef.current !== null
-        ? { ...optionsRef.current }
-        : optionsRef.current;
+      typeof resolvedOpts === "object" && resolvedOpts !== null
+        ? { ...resolvedOpts }
+        : resolvedOpts;
 
     const fn = forwarder.current;
     cleanupsRef.current = targets.flatMap((el) =>
