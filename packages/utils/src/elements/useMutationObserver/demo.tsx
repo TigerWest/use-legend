@@ -1,6 +1,7 @@
 import { useEl$ } from "../useEl$";
 import { useMutationObserver } from ".";
 import { Computed, useObservable } from "@legendapp/state/react";
+import { batch, beginBatch, endBatch } from "@legendapp/state";
 
 const MAX_LOG = 6;
 
@@ -48,23 +49,32 @@ export default function UseMutationObserverDemo() {
           .filter(Boolean)
           .join(", ")}`;
       });
-      log$.set((prev) => [...lines, ...prev].slice(0, MAX_LOG));
+      batch(() => {
+        log$.unshift(...lines);
+        if (MAX_LOG < log$.peek().length) {
+          log$.splice(-1, 1);
+        }
+      });
     },
     { attributes: true, attributeOldValue: true, childList: true },
   );
 
   const toggleAttr = () => {
-    const el = el$.peek();
-    if (!el) return;
-    const next = !active$.peek();
-    active$.set(next);
-    if (next) el.setAttribute("data-active", "true");
-    else el.removeAttribute("data-active");
+    batch(() => {
+      const el = el$.peek();
+      if (!el) return;
+
+      const next = !active$.peek();
+      active$.set(next);
+      if (next) el.setAttribute("data-active", "true");
+      else el.removeAttribute("data-active");
+    });
   };
 
   const addChild = () => {
     const el = el$.peek();
     if (!el) return;
+    beginBatch();
     childCount$.set((n) => n + 1);
     const span = document.createElement("span");
     span.textContent = `child-${childCount$.peek()}`;
@@ -72,6 +82,7 @@ export default function UseMutationObserverDemo() {
       "display:block;font-size:12px;font-family:monospace;" +
       "color:var(--sl-color-gray-2,#475569);padding:1px 0";
     el.appendChild(span);
+    endBatch();
   };
 
   const removeChild = () => {

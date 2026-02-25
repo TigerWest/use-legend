@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable } from "@legendapp/state";
+import { observable, ObservableHint } from "@legendapp/state";
+import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useEl$ } from "../useEl$";
 import { useResizeObserver } from ".";
+
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock
@@ -71,7 +74,7 @@ describe("useResizeObserver()", () => {
     const div = document.createElement("div");
     const cb = vi.fn();
 
-    renderHook(() => useResizeObserver(div, cb));
+    renderHook(() => useResizeObserver(wrapEl(div), cb));
 
     const instance = ResizeObserverMock.instances.at(-1)!;
     act(() => instance.trigger(div));
@@ -84,7 +87,7 @@ describe("useResizeObserver()", () => {
     const b = document.createElement("span");
     const cb = vi.fn();
 
-    renderHook(() => useResizeObserver([a, b], cb));
+    renderHook(() => useResizeObserver([wrapEl(a), wrapEl(b)], cb));
 
     const instance = ResizeObserverMock.instances.at(-1)!;
     expect(instance.observed).toContain(a);
@@ -95,7 +98,7 @@ describe("useResizeObserver()", () => {
     const div = document.createElement("div");
     const cb = vi.fn();
 
-    const { result } = renderHook(() => useResizeObserver(div, cb));
+    const { result } = renderHook(() => useResizeObserver(wrapEl(div), cb));
 
     act(() => result.current.stop());
 
@@ -110,7 +113,7 @@ describe("useResizeObserver()", () => {
     const observeSpy = vi.spyOn(ResizeObserverMock.prototype, "observe");
 
     renderHook(() =>
-      useResizeObserver(div, vi.fn(), { box: "border-box" })
+      useResizeObserver(wrapEl(div), vi.fn(), { box: "border-box" })
     );
 
     expect(observeSpy).toHaveBeenCalledWith(div, { box: "border-box" });
@@ -118,7 +121,7 @@ describe("useResizeObserver()", () => {
 
   it("returns isSupported: true when ResizeObserver is available", () => {
     const div = document.createElement("div");
-    const { result } = renderHook(() => useResizeObserver(div, vi.fn()));
+    const { result } = renderHook(() => useResizeObserver(wrapEl(div), vi.fn()));
     expect(result.current.isSupported.get()).toBe(true);
   });
 
@@ -127,7 +130,7 @@ describe("useResizeObserver()", () => {
 
     const div = document.createElement("div");
     const cb = vi.fn();
-    const { result } = renderHook(() => useResizeObserver(div, cb));
+    const { result } = renderHook(() => useResizeObserver(wrapEl(div), cb));
 
     expect(result.current.isSupported.get()).toBe(false);
     expect(ResizeObserverMock.instances).toHaveLength(0);
@@ -212,7 +215,7 @@ describe("useResizeObserver()", () => {
 
   it("disconnects the active observer on unmount", () => {
     const div = document.createElement("div");
-    const { unmount } = renderHook(() => useResizeObserver(div, vi.fn()));
+    const { unmount } = renderHook(() => useResizeObserver(wrapEl(div), vi.fn()));
 
     const activeInstance = ResizeObserverMock.instances.at(-1)!;
     expect(activeInstance.disconnected).toBe(false);
@@ -277,7 +280,7 @@ describe("useResizeObserver()", () => {
     const cb2 = vi.fn();
 
     const { rerender } = renderHook(
-      ({ cb }) => useResizeObserver(div, cb),
+      ({ cb }) => useResizeObserver(wrapEl(div), cb),
       { initialProps: { cb: cb1 } },
     );
 
@@ -299,7 +302,7 @@ describe("useResizeObserver()", () => {
     const observeSpy = vi.spyOn(ResizeObserverMock.prototype, "observe");
 
     renderHook(() =>
-      useResizeObserver(div, vi.fn(), { box: "device-pixel-content-box" }),
+      useResizeObserver(wrapEl(div), vi.fn(), { box: "device-pixel-content-box" }),
     );
 
     expect(observeSpy).toHaveBeenCalledWith(div, {

@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable } from "@legendapp/state";
+import { observable, ObservableHint } from "@legendapp/state";
+import type { OpaqueObject } from "@legendapp/state";
 import { useState } from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
+
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 import { useEl$ } from "../../elements/useEl$";
 import { useEventListener } from ".";
 
@@ -229,7 +232,7 @@ describe("useEventListener() — Arrayable targets / events / listeners", () => 
     const b = document.createElement("span");
     const listener = vi.fn();
 
-    renderHook(() => useEventListener([a, b], "click", listener));
+    renderHook(() => useEventListener([wrapEl(a), wrapEl(b)], "click", listener));
 
     act(() => {
       a.dispatchEvent(new Event("click"));
@@ -246,7 +249,7 @@ describe("useEventListener() — Arrayable targets / events / listeners", () => 
     const spyB = vi.spyOn(b, "addEventListener");
     const listener = vi.fn();
 
-    renderHook(() => useEventListener([a, b], "click", listener));
+    renderHook(() => useEventListener([wrapEl(a), wrapEl(b)], "click", listener));
 
     expect(spyA).toHaveBeenCalledTimes(1);
     expect(spyB).toHaveBeenCalledTimes(1);
@@ -302,7 +305,7 @@ describe("useEventListener() — Arrayable targets / events / listeners", () => 
     const removeB = vi.spyOn(b, "removeEventListener");
     const listener = vi.fn();
     const { unmount } = renderHook(() =>
-      useEventListener([a, b], "click", listener),
+      useEventListener([wrapEl(a), wrapEl(b)], "click", listener),
     );
 
     unmount();
@@ -408,12 +411,13 @@ describe("useEventListener() — returned cleanup function", () => {
 describe("useEventListener() — stale closure safety", () => {
   it("calls the latest listener after state changes without re-registering", () => {
     const div = document.createElement("div");
+    const wrappedDiv = wrapEl(div);
     const addSpy = vi.spyOn(div, "addEventListener");
 
     const latestListener = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ listener }) => useEventListener(div, "click", listener),
+    const { rerender } = renderHook<() => void, { listener: (ev: MouseEvent) => void }>(
+      ({ listener }) => useEventListener(wrappedDiv, "click", listener),
       { initialProps: { listener: vi.fn() } },
     );
 

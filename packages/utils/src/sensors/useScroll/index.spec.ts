@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
+import { observable, ObservableHint } from "@legendapp/state";
+import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useScroll } from ".";
+
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
 
@@ -106,7 +110,7 @@ describe("useScroll()", () => {
   describe("initial values", () => {
     it("sets element.scrollLeft/scrollTop as initial x/y values on mount", () => {
       const el = makeEl({ scrollLeft: 50, scrollTop: 100 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
       expect(result.current.x.get()).toBe(50);
       expect(result.current.y.get()).toBe(100);
     });
@@ -136,7 +140,7 @@ describe("useScroll()", () => {
 
     it("initial arrivedState is top=true, left=true, right=false, bottom=false", () => {
       const el = makeEl();
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
       expect(result.current.arrivedState.top.get()).toBe(true);
       expect(result.current.arrivedState.left.get()).toBe(true);
       expect(result.current.arrivedState.right.get()).toBe(false);
@@ -145,7 +149,7 @@ describe("useScroll()", () => {
 
     it("initial isScrolling is false", () => {
       const el = makeEl();
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
       // advance timers to let idle expire
       act(() => { vi.runAllTimers(); });
       expect(result.current.isScrolling.get()).toBe(false);
@@ -153,7 +157,7 @@ describe("useScroll()", () => {
 
     it("initial directions are all false", () => {
       const el = makeEl();
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
       const d = result.current.directions;
       expect(d.left.get()).toBe(false);
       expect(d.right.get()).toBe(false);
@@ -169,7 +173,7 @@ describe("useScroll()", () => {
   describe("x / y updates", () => {
     it("y increases when scrolling down", () => {
       const el = makeEl({ scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 200;
@@ -181,7 +185,7 @@ describe("useScroll()", () => {
 
     it("y decreases when scrolling up", () => {
       const el = makeEl({ scrollTop: 300 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 100;
@@ -193,7 +197,7 @@ describe("useScroll()", () => {
 
     it("x increases when scrolling right", () => {
       const el = makeEl({ scrollLeft: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollLeft = 150;
@@ -205,7 +209,7 @@ describe("useScroll()", () => {
 
     it("x decreases when scrolling left", () => {
       const el = makeEl({ scrollLeft: 200 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollLeft = 50;
@@ -217,7 +221,7 @@ describe("useScroll()", () => {
 
     it("x does not change when only vertical scroll occurs", () => {
       const el = makeEl({ scrollLeft: 0, scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 100;
@@ -229,7 +233,7 @@ describe("useScroll()", () => {
 
     it("y does not change when only horizontal scroll occurs", () => {
       const el = makeEl({ scrollLeft: 0, scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollLeft = 100;
@@ -247,13 +251,13 @@ describe("useScroll()", () => {
   describe("arrivedState", () => {
     it("top=true when scrollTop is 0", () => {
       const el = makeEl({ scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
       expect(result.current.arrivedState.top.get()).toBe(true);
     });
 
     it("top=false when scrollTop is greater than 0", () => {
       const el = makeEl({ scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 10;
@@ -266,7 +270,7 @@ describe("useScroll()", () => {
     it("bottom=true when scrollTop reaches maxScrollY", () => {
       // scrollHeight=1000, clientHeight=400 → maxY=600
       const el = makeEl({ scrollTop: 0, scrollHeight: 1000, clientHeight: 400 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 600;
@@ -278,14 +282,14 @@ describe("useScroll()", () => {
 
     it("left=true when scrollLeft is 0", () => {
       const el = makeEl({ scrollLeft: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
       expect(result.current.arrivedState.left.get()).toBe(true);
     });
 
     it("right=true when scrollLeft reaches maxScrollX", () => {
       // scrollWidth=500, clientWidth=300 → maxX=200
       const el = makeEl({ scrollLeft: 0, scrollWidth: 500, clientWidth: 300 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollLeft = 200;
@@ -298,7 +302,7 @@ describe("useScroll()", () => {
     it("top=true when scrollTop <= offset.top with offset.top set", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() =>
-        useScroll(el, { offset: { top: 50 } }),
+        useScroll(wrapEl(el), { offset: { top: 50 } }),
       );
 
       act(() => {
@@ -313,7 +317,7 @@ describe("useScroll()", () => {
       // scrollHeight=1000, clientHeight=400 → maxY=600
       const el = makeEl({ scrollTop: 0, scrollHeight: 1000, clientHeight: 400 });
       const { result } = renderHook(() =>
-        useScroll(el, { offset: { bottom: 50 } }),
+        useScroll(wrapEl(el), { offset: { bottom: 50 } }),
       );
 
       act(() => {
@@ -328,7 +332,7 @@ describe("useScroll()", () => {
     it("top=true and bottom=true for non-scrollable element (scrollHeight === clientHeight)", () => {
       // maxY = 400 - 400 = 0
       const el = makeEl({ scrollTop: 0, scrollHeight: 400, clientHeight: 400 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         el.dispatchEvent(new Event("scroll"));
@@ -346,7 +350,7 @@ describe("useScroll()", () => {
   describe("directions", () => {
     it("bottom=true and top=false when scrolling down", () => {
       const el = makeEl({ scrollTop: 100 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 200;
@@ -359,7 +363,7 @@ describe("useScroll()", () => {
 
     it("top=true and bottom=false when scrolling up", () => {
       const el = makeEl({ scrollTop: 200 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 100;
@@ -372,7 +376,7 @@ describe("useScroll()", () => {
 
     it("right=true and left=false when scrolling right", () => {
       const el = makeEl({ scrollLeft: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollLeft = 100;
@@ -385,7 +389,7 @@ describe("useScroll()", () => {
 
     it("left=true and right=false when scrolling left", () => {
       const el = makeEl({ scrollLeft: 200 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollLeft = 50;
@@ -404,7 +408,7 @@ describe("useScroll()", () => {
   describe("isScrolling", () => {
     it("becomes true when scroll event fires", () => {
       const el = makeEl();
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         el.dispatchEvent(new Event("scroll"));
@@ -415,7 +419,7 @@ describe("useScroll()", () => {
 
     it("becomes false after idle time (default 200ms)", () => {
       const el = makeEl();
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         el.dispatchEvent(new Event("scroll"));
@@ -427,7 +431,7 @@ describe("useScroll()", () => {
 
     it("idle option adjusts the wait time", () => {
       const el = makeEl();
-      const { result } = renderHook(() => useScroll(el, { idle: 500 }));
+      const { result } = renderHook(() => useScroll(wrapEl(el), { idle: 500 }));
 
       act(() => {
         el.dispatchEvent(new Event("scroll"));
@@ -444,7 +448,7 @@ describe("useScroll()", () => {
     it("onStop callback is called when idle expires", () => {
       const onStop = vi.fn();
       const el = makeEl();
-      renderHook(() => useScroll(el, { onStop, idle: 100 }));
+      renderHook(() => useScroll(wrapEl(el), { onStop, idle: 100 }));
 
       act(() => {
         el.dispatchEvent(new Event("scroll"));
@@ -457,7 +461,7 @@ describe("useScroll()", () => {
     it("timer resets when additional scroll occurs before idle expires", () => {
       const onStop = vi.fn();
       const el = makeEl();
-      renderHook(() => useScroll(el, { onStop, idle: 200 }));
+      renderHook(() => useScroll(wrapEl(el), { onStop, idle: 200 }));
 
       act(() => {
         el.dispatchEvent(new Event("scroll"));
@@ -481,7 +485,7 @@ describe("useScroll()", () => {
   describe("measure()", () => {
     it("recalculates current scroll state on manual call", () => {
       const el = makeEl({ scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 300;
@@ -494,7 +498,7 @@ describe("useScroll()", () => {
     it("all of x/y/arrivedState/directions are updated when measure() is called", () => {
       // scrollHeight=1000, clientHeight=400 → maxY=600
       const el = makeEl({ scrollTop: 0, scrollHeight: 1000, clientHeight: 400 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 600;
@@ -514,7 +518,7 @@ describe("useScroll()", () => {
   describe("throttle option", () => {
     it("measure is called on every scroll event when throttle is not set", () => {
       const el = makeEl({ scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 100;
@@ -530,7 +534,7 @@ describe("useScroll()", () => {
       vi.useRealTimers(); // real timers needed for Date.now()
 
       const el = makeEl({ scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el, { throttle: 100 }));
+      const { result } = renderHook(() => useScroll(wrapEl(el), { throttle: 100 }));
 
       act(() => {
         (el as any).scrollTop = 50;
@@ -594,7 +598,7 @@ describe("useScroll()", () => {
 
     it("HTMLElement target — uses scrollLeft/scrollTop", () => {
       const el = makeEl({ scrollLeft: 0, scrollTop: 0 });
-      const { result } = renderHook(() => useScroll(el));
+      const { result } = renderHook(() => useScroll(wrapEl(el)));
 
       act(() => {
         (el as any).scrollTop = 150;
@@ -642,7 +646,7 @@ describe("useScroll()", () => {
       const addSpy = vi.spyOn(el, "addEventListener");
       const removeSpy = vi.spyOn(el, "removeEventListener");
 
-      const { unmount } = renderHook(() => useScroll(el));
+      const { unmount } = renderHook(() => useScroll(wrapEl(el)));
       unmount();
       await flush();
 
@@ -654,7 +658,7 @@ describe("useScroll()", () => {
       const onStop = vi.fn();
       const el = makeEl();
       const { unmount } = renderHook(() =>
-        useScroll(el, { onStop, idle: 200 }),
+        useScroll(wrapEl(el), { onStop, idle: 200 }),
       );
 
       act(() => {

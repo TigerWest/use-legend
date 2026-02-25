@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable } from "@legendapp/state";
+import { observable, ObservableHint } from "@legendapp/state";
+import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect } from "vitest";
 import { useEl$ } from "../../elements/useEl$";
 import type { El$ } from "../../elements/useEl$";
 import { normalizeTargets } from ".";
+
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 describe("normalizeTargets()", () => {
   it("returns empty array for null plain value", () => {
@@ -19,25 +22,24 @@ describe("normalizeTargets()", () => {
     expect(normalizeTargets([])).toEqual([]);
   });
 
-  it("returns element for plain Element input", () => {
+  it("returns element for Observable<OpaqueObject<Element>> input", () => {
     const div = document.createElement("div");
-    expect(normalizeTargets(div)).toEqual([div]);
+    expect(normalizeTargets(wrapEl(div))).toEqual([div]);
   });
 
-  it("returns elements for array of plain Elements", () => {
+  it("returns elements for array of Observable<OpaqueObject<Element>>", () => {
     const a = document.createElement("div");
     const b = document.createElement("span");
-    expect(normalizeTargets([a, b])).toEqual([a, b]);
+    expect(normalizeTargets([wrapEl(a), wrapEl(b)])).toEqual([a, b]);
   });
 
-  it("unwraps Observable<Element>", () => {
+  it("unwraps Observable<OpaqueObject<Element>>", () => {
     const div = document.createElement("div");
-    const obs = observable<Element | null>(div);
-    expect(normalizeTargets(obs)).toEqual([div]);
+    expect(normalizeTargets(wrapEl(div))).toEqual([div]);
   });
 
   it("filters out Observable<null>", () => {
-    const obs = observable<Element | null>(null);
+    const obs = observable<ReturnType<typeof ObservableHint.opaque<Element>> | null>(null);
     expect(normalizeTargets(obs)).toEqual([]);
   });
 
@@ -58,7 +60,7 @@ describe("normalizeTargets()", () => {
     expect(elements).toEqual([]);
   });
 
-  it("handles mixed array of El$, Observable, and plain Element", () => {
+  it("handles mixed array of El$, Observable, and wrapped Element", () => {
     const div = document.createElement("div");
     const span = document.createElement("span");
     const p = document.createElement("p");
@@ -66,9 +68,9 @@ describe("normalizeTargets()", () => {
     const { result } = renderHook(() => useEl$<HTMLDivElement>());
     act(() => result.current(div));
 
-    const obs = observable<Element | null>(span);
+    const obs = wrapEl(span);
 
-    const elements = normalizeTargets([result.current as El$<Element>, obs, p]);
+    const elements = normalizeTargets([result.current as El$<Element>, obs, wrapEl(p)]);
     expect(elements).toEqual([div, span, p]);
   });
 });

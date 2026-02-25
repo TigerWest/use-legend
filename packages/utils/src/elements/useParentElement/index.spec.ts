@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 import { act, renderHook } from "@testing-library/react";
-import { observable } from "@legendapp/state";
+import { observable, ObservableHint } from "@legendapp/state";
+import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, afterEach } from "vitest";
 import { useEl$ } from "../useEl$";
 import { useParentElement } from ".";
+
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 // ---------------------------------------------------------------------------
 // DOM helpers
@@ -34,7 +37,7 @@ describe("useParentElement()", () => {
     const child = document.createElement("span");
     const { parent } = attachToBody(child);
 
-    const { result } = renderHook(() => useParentElement(child));
+    const { result } = renderHook(() => useParentElement(wrapEl(child)));
 
     expect(result.current.get()).toBe(parent);
   });
@@ -43,7 +46,7 @@ describe("useParentElement()", () => {
     const el = document.createElement("div");
     // not appended anywhere
 
-    const { result } = renderHook(() => useParentElement(el));
+    const { result } = renderHook(() => useParentElement(wrapEl(el)));
 
     expect(result.current.get()).toBeNull();
   });
@@ -126,7 +129,7 @@ describe("useParentElement()", () => {
     const child = document.createElement("span");
     attachToBody(child);
 
-    const { result, unmount } = renderHook(() => useParentElement(child));
+    const { result, unmount } = renderHook(() => useParentElement(wrapEl(child)));
 
     expect(result.current.get()).not.toBeNull();
     unmount();
@@ -176,11 +179,11 @@ describe("useParentElement()", () => {
     expect(result.current.get()).toBe(parent);
   });
 
-  it("does NOT update when plain element is moved to a different parent", () => {
+  it("does NOT update when element's Observable value is unchanged (only DOM moved)", () => {
     const child = document.createElement("span");
     const { parent: parentA } = attachToBody(child);
 
-    const { result } = renderHook(() => useParentElement(child));
+    const { result } = renderHook(() => useParentElement(wrapEl(child)));
     expect(result.current.get()).toBe(parentA);
 
     const parentB = document.createElement("div");

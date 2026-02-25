@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { get } from "../../function/get";
 import type { MaybeObservable } from "../../types";
 import { getElement, isEl$, peekElement } from "../useEl$";
+import { isWindow } from "../../shared";
 import type { MaybeElement } from "../useEl$";
 import { normalizeTargets } from "../useResizeObserver";
 
@@ -73,9 +74,11 @@ export function useIntersectionObserver(
 
     let root: HTMLElement | Document | null | undefined = undefined;
     if (options?.root !== undefined) {
-      root = peekElement(options.root);
+      const resolvedRoot = peekElement(options.root);
+      // Window is not a valid IntersectionObserver root — treat as default viewport (null)
+      root = isWindow(resolvedRoot) ? null : (resolvedRoot as HTMLElement | Document | null);
       // El$ not yet mounted — skip setup until element is available
-      if (isEl$(options.root) && root === null) return;
+      if (isEl$(options.root) && resolvedRoot === null) return;
     }
     const rootMargin = get(options?.rootMargin);
 

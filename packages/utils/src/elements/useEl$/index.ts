@@ -2,7 +2,6 @@ import { isObservable, ObservableHint } from "@legendapp/state";
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { type Ref, type RefObject, useMemo, useRef } from "react";
-import type { MaybeObservable } from "../../types";
 import { isWindow } from "../../shared";
 
 export type El$<T extends Element = Element> = ((node: T | null) => void) & {
@@ -12,8 +11,23 @@ export type El$<T extends Element = Element> = ((node: T | null) => void) & {
   peek(): OpaqueObject<T> | null;
 };
 
-/** A value that resolves to an Element, Document, Window, or null — via El$, Observable, or raw value */
-export type MaybeElement = El$<any> | MaybeObservable<HTMLElement | Document | Window | null>;
+/**
+ * A value that resolves to an Element, Document, Window, or null.
+ *
+ * - `El$<T>` — React-managed element ref (created via `useEl$()`). Primary choice.
+ * - `Document` / `Window` — stable global singletons, always safe to pass raw.
+ * - `Observable<OpaqueObject<Element> | null>` — for imperatively obtained elements.
+ *   Use `ObservableHint.opaque(el)` when storing: `observable(ObservableHint.opaque(el))`.
+ *
+ * Raw `HTMLElement` is intentionally excluded: in React's render model, elements
+ * don't exist at hook call time, making raw element references inherently stale.
+ */
+export type MaybeElement =
+  | El$<any>
+  | Document
+  | Window
+  | null
+  | Observable<OpaqueObject<Element> | null>;
 
 
 
@@ -90,9 +104,11 @@ export function getElement(v: MaybeElement): HTMLElement | Document | Window | n
     return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
   if (isWindow(v)) return v;
-  if (isObservable(v))
-    return (v as Observable<HTMLElement | Document | Window | null>).get() as unknown as HTMLElement | Document | Window | null;
-  return v as HTMLElement | Document | Window | null;
+  if (isObservable(v)) {
+    const val = (v as Observable<OpaqueObject<Element> | null>).get();
+    return val ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
+  }
+  return v as Document | null;
 }
 
 /** Unwraps MaybeElement without tracking (use inside setup/peek) */
@@ -102,7 +118,9 @@ export function peekElement(v: MaybeElement): HTMLElement | Document | Window | 
     return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
   if (isWindow(v)) return v;
-  if (isObservable(v))
-    return (v as Observable<HTMLElement | Document | Window | null>).peek() as unknown as HTMLElement | Document | Window | null;
-  return v as HTMLElement | Document | Window | null;
+  if (isObservable(v)) {
+    const val = (v as Observable<OpaqueObject<Element> | null>).peek();
+    return val ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
+  }
+  return v as Document | null;
 }

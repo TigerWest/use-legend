@@ -86,8 +86,9 @@ export function useEventListener<E extends keyof DocumentEventMap>(
  * Register using addEventListener on mounted, and removeEventListener
  * automatically on unmounted.
  *
- * Overload 4: `MaybeElement` target — supports El$, Observable<Element>,
- * plain HTMLElement, or an array of those (Legend-State reactive).
+ * Overload 4: `MaybeElement` target — supports El$, Observable<OpaqueObject<Element>>,
+ * Document, Window, or an array of those (Legend-State reactive).
+ * Raw HTMLElement is excluded — use El$ or Observable<OpaqueObject<Element>> instead.
  */
 export function useEventListener<E extends keyof HTMLElementEventMap>(
   target: MaybeElement | MaybeElement[] | null | undefined,
@@ -206,7 +207,7 @@ export function useEventListener(...args: any[]): () => void {
           }
           return [];
         }
-        // Raw EventTarget (Window, Document, HTMLElement, etc.)
+        // Raw EventTarget (Window, Document — stable singletons)
         return [item as EventTarget];
       });
     })();
