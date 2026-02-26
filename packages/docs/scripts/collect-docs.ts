@@ -33,7 +33,7 @@ interface DocFile {
   targetPath: string
   relativePath: string
   metadata: DocMetadata
-  package: 'utils' | 'integrations'
+  package: 'core' | 'integrations'
   filename: string
 }
 
@@ -192,7 +192,7 @@ async function findMarkdownFiles(dir: string): Promise<string[]> {
 async function scanSourceFiles(): Promise<DocFile[]> {
   console.log('📂 Scanning for markdown files...')
 
-  const utilsDir = path.join(PACKAGES_ROOT, 'packages', 'utils', 'src')
+  const utilsDir = path.join(PACKAGES_ROOT, 'packages', 'core', 'src')
   const integrationsDir = path.join(PACKAGES_ROOT, 'packages', 'integrations', 'src')
 
   const utilsFiles = await findMarkdownFiles(utilsDir)
@@ -215,10 +215,10 @@ async function scanSourceFiles(): Promise<DocFile[]> {
 
     const relativeToPackages = path.relative(PACKAGES_ROOT, sourcePath)
     const parts = relativeToPackages.split(path.sep)
-    const packageName = parts[1] as 'utils' | 'integrations'
+    const packageName = parts[1] as 'core' | 'integrations'
 
     // parts[3] is the category subdirectory for both packages:
-    // utils:        ['packages','utils','src','function','get','index.md']        → parts[3] = 'function'
+    // core:         ['packages','core','src','function','get','index.md']         → parts[3] = 'function'
     // integrations: ['packages','integrations','src','tanstack-query','useQuery.md'] → parts[3] = 'tanstack-query'
     const libSubDir = parts[3]
 
@@ -299,7 +299,7 @@ async function cleanGeneratedFiles(packageName: string): Promise<void> {
 async function transformAndWriteDocFiles(docFiles: DocFile[]): Promise<void> {
   console.log('\n📝 Transforming and writing documentation files...')
 
-  await cleanGeneratedFiles('utils')
+  await cleanGeneratedFiles('core')
   await cleanGeneratedFiles('integrations')
 
   let written = 0

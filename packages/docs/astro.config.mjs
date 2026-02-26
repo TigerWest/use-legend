@@ -11,7 +11,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        "@demos/utils": fileURLToPath(new URL("../utils/src", import.meta.url)),
+        "@demos/core": fileURLToPath(new URL("../core/src", import.meta.url)),
         "@demos/integrations": fileURLToPath(
           new URL("../integrations/src", import.meta.url),
         ),
@@ -63,8 +63,8 @@ export default defineConfig({
           autogenerate: { directory: "reference" },
         },
         {
-          label: "Utils",
-          autogenerate: { directory: "utils" },
+          label: "Core",
+          autogenerate: { directory: "core" },
         },
         {
           label: "Integrations",

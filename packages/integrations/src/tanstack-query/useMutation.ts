@@ -62,7 +62,7 @@ export interface MutationState<
  * @example
  * ```tsx
  * import { QueryClient } from '@tanstack/react-query'
- * import { QueryClientProvider, useMutation } from '@las/integrations'
+ * import { QueryClientProvider, useMutation } from '@usels/integrations'
  *
  * // QueryClient를 생성하고 Provider로 제공
  * const queryClient = new QueryClient()

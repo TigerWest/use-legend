@@ -5,7 +5,7 @@ import { isObservable } from "@legendapp/state";
 import { QueryKey, QueryObserver } from "@tanstack/query-core";
 import { useRef } from "react";
 import type { Observable } from "@legendapp/state";
-import { get, type MaybeObservable } from "@las/utils";
+import { get, type MaybeObservable } from "@usels/core";
 import { useQueryClient } from "./useQueryClient";
 
 /**
@@ -89,7 +89,7 @@ export interface QueryState<TData = unknown> {
  * @example
  * ```tsx
  * import { QueryClient } from '@tanstack/react-query'
- * import { QueryClientProvider, useQuery } from '@las/integrations'
+ * import { QueryClientProvider, useQuery } from '@usels/integrations'
  *
  * // QueryClient를 생성하고 Provider로 제공
  * const queryClient = new QueryClient()

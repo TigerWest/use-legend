@@ -8,7 +8,7 @@ export const collections = {
     schema: docsSchema({
       extend: z.object({
         category: z.string().optional(),
-        package: z.enum(['integrations', 'utils']).optional(),
+        package: z.enum(['integrations', 'core']).optional(),
         sourceFile: z.string().optional(),
         lastChanged: z.coerce.string().optional(),
         contributors: z.array(z.object({

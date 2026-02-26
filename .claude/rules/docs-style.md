@@ -1,6 +1,6 @@
 ---
 paths:
-  - "packages/utils/src/**/*.{md,mdx}"
+  - "packages/core/src/**/*.{md,mdx}"
   - "packages/integrations/src/**/*.{md,mdx}"
   - "packages/docs/**/*.{md,mdx}"
 ---
@@ -23,7 +23,7 @@ packages/
 
 Examples:
 
-- `packages/utils/src/function/get/index.md`
+- `packages/core/src/function/get/index.md`
 - `packages/integrations/src/tanstack-query/useQuery/index.md`
 
 ## Frontmatter (Required/Optional)
@@ -55,7 +55,7 @@ You may include multiple code examples and descriptions based on the code.
 
 ```tsx twoslash
 // @noErrors
-import { useSomething } from "@las/utils";
+import { useSomething } from "@usels/core";
 // hover shows inferred types
 ```
 

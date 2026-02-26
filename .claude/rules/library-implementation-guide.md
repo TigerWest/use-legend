@@ -1,6 +1,6 @@
 ---
 paths:
-  - "packages/utils/src/**/*.ts"
+  - "packages/core/src/**/*.ts"
   - "packages/integrations/src/**/*.ts"
 ---
 
@@ -43,7 +43,7 @@ function useMyHook(element: MaybeElement) {
 ### Creating El$ Refs in Components
 
 ```tsx
-import { useEl$ } from "@las/utils";
+import { useEl$ } from "@usels/core";
 
 function MyComponent() {
   const el$ = useEl$<HTMLDivElement>();
@@ -223,7 +223,7 @@ Some options are intentionally captured **once at mount** and never updated reac
 - `initialValue` — seeds the initial state of an Observable; later changes have no meaning
 - `once` — lifecycle behavior determined at mount; dynamic changes do not apply retroactively
 
-For these fields, use `peek()` from `@las/utils` — the non-reactive counterpart to `get()`.
+For these fields, use `peek()` from `@usels/core` — the non-reactive counterpart to `get()`.
 This is **intentional** and explicitly signals "read once, fixed at mount" — distinct from
 the Anti-pattern in Rule 2 where `get()` is accidentally used for fields that *should* be reactive.
 

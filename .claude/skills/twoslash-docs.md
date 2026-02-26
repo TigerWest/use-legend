@@ -21,12 +21,12 @@ Do NOT use `twoslash` on:
 
 ## Code Block Syntax
 
-### Basic (with noErrors — required for @las/utils imports)
+### Basic (with noErrors — required for @usels/core imports)
 
 ```md
 \`\`\`tsx twoslash
 // @noErrors
-import { useSomething } from '@las/utils'
+import { useSomething } from '@usels/core'
 
 function Component() {
   const result = useSomething()
@@ -37,7 +37,7 @@ function Component() {
 
 ### Always include `// @noErrors` when
 
-- Importing from `@las/utils` (TwoSlash VFS cannot resolve workspace packages at runtime)
+- Importing from `@usels/core` (TwoSlash VFS cannot resolve workspace packages at runtime)
 - Using DOM APIs (`console`, `HTMLElement`, etc.) without explicit lib setup
 - Using complex `@legendapp/state` Observable types (may trigger "type instantiation too deep")
 
@@ -54,7 +54,7 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useEl$ } from '@las/utils'
+import { useEl$ } from '@usels/core'
 const el$ = useEl$()
 //    ^? shows type of el$
 ```
@@ -66,7 +66,7 @@ const el$ = useEl$()
 
 ```tsx twoslash
 // @noErrors
-import { useWindowSize } from '@las/utils'
+import { useWindowSize } from '@usels/core'
 
 function Component() {
   const size$ = useWindowSize()
@@ -102,7 +102,7 @@ ecTwoSlash({
 |-------|-------|-----|
 | **2589** Type instantiation too deep | `declare const el: HTMLElement` + Legend-State hook in TwoSlash | Use `function Component() { ... }` wrapper instead of top-level `declare const` |
 | **2584** Cannot find name 'console' | DOM globals unavailable in some TwoSlash VFS contexts | Remove `console.*` from TwoSlash blocks; replace with `// ...` comment or use plain `tsx` |
-| **Cannot find module '@las/utils'** | Workspace package not in TwoSlash VFS | Always add `// @noErrors` when importing from `@las/utils` |
+| **Cannot find module '@usels/core'** | Workspace package not in TwoSlash VFS | Always add `// @noErrors` when importing from `@usels/core` |
 
 ### Pattern to avoid (causes 2589)
 
@@ -117,7 +117,7 @@ const { y } = useScroll(el) // → TS2589
 
 ```tsx twoslash
 // @noErrors
-import { useScroll, useEl$ } from '@las/utils'
+import { useScroll, useEl$ } from '@usels/core'
 
 // ✅ full component: types resolve correctly
 function Component() {
@@ -128,7 +128,7 @@ function Component() {
 
 ## Checklist before writing twoslash block
 
-- [ ] Does the block import from `@las/utils`? → add `// @noErrors`
+- [ ] Does the block import from `@usels/core`? → add `// @noErrors`
 - [ ] Does the block use `declare const` + a hook? → use full `function Component()` instead
 - [ ] Does the block use `console.*`? → replace with comment or use plain `tsx`
 - [ ] Is the type info meaningful for the reader? → use `//    ^?`

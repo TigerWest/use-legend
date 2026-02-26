@@ -9,7 +9,7 @@ import {
 } from "@tanstack/query-core";
 import { useRef } from "react";
 import type { Observable } from "@legendapp/state";
-import { get, type MaybeObservable } from "@las/utils";
+import { get, type MaybeObservable } from "@usels/core";
 import { useQueryClient } from "./useQueryClient";
 
 /**

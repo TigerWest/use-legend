@@ -10,7 +10,7 @@ import { QueryClientContext } from './QueryClientProvider'
  *
  * @example
  * ```tsx
- * import { useQueryClient } from '@las/integrations'
+ * import { useQueryClient } from '@usels/integrations'
  *
  * function MyComponent() {
  *   const queryClient = useQueryClient()

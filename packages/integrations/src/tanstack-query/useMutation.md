@@ -10,7 +10,7 @@ React hook for performing mutations with observable state management.
 ## Usage
 
 ```typescript
-import { useMutation } from '@las/integrations'
+import { useMutation } from '@usels/integrations'
 
 function CreateUser() {
   const mutation = useMutation({

@@ -24,6 +24,37 @@ importers:
         specifier: ^1.2.2
         version: 1.6.1
 
+  packages/core:
+    dependencies:
+      '@legendapp/state':
+        specifier: 3.0.0-beta.44
+        version: 3.0.0-beta.44(react@19.2.3)
+      es-toolkit:
+        specifier: ^1.0.0
+        version: 1.44.0
+      react:
+        specifier: ^18.0.0 || ^19.0.0
+        version: 19.2.3
+    devDependencies:
+      '@testing-library/react':
+        specifier: ^16.1.0
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3)(@types/react@19.2.14)(react-dom@19.2.3)(react@19.2.3)
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      jsdom:
+        specifier: ^25.0.0
+        version: 25.0.1
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   packages/docs:
     dependencies:
       '@astrojs/mdx':
@@ -35,15 +66,15 @@ importers:
       '@astrojs/starlight':
         specifier: ^0.37.6
         version: 0.37.6(astro@5.17.2)
-      '@las/integrations':
-        specifier: workspace:*
-        version: link:../integrations
-      '@las/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@legendapp/state':
         specifier: 3.0.0-beta.44
         version: 3.0.0-beta.44(react@19.2.3)
+      '@usels/core':
+        specifier: workspace:*
+        version: link:../core
+      '@usels/integrations':
+        specifier: workspace:*
+        version: link:../integrations
       astro:
         specifier: ^5.6.1
         version: 5.17.2(tsx@4.21.0)(typescript@5.9.3)
@@ -84,12 +115,12 @@ importers:
 
   packages/example:
     dependencies:
-      '@las/integrations':
-        specifier: workspace:^
-        version: link:../integrations
       '@legendapp/state':
         specifier: 3.0.0-beta.44
         version: 3.0.0-beta.44(react@19.2.3)
+      '@usels/integrations':
+        specifier: workspace:^
+        version: link:../integrations
       next:
         specifier: 16.1.6
         version: 16.1.6(@babel/core@7.29.0)(react-dom@19.2.3)(react@19.2.3)
@@ -127,12 +158,12 @@ importers:
 
   packages/integrations:
     dependencies:
-      '@las/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@tanstack/query-core':
         specifier: ^5.90.20
         version: 5.90.20
+      '@usels/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@legendapp/state':
         specifier: 3.0.0-beta.44
@@ -166,37 +197,6 @@ importers:
         version: 8.5.1(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
-        version: 5.9.3
-
-  packages/utils:
-    dependencies:
-      '@legendapp/state':
-        specifier: 3.0.0-beta.44
-        version: 3.0.0-beta.44(react@19.2.3)
-      es-toolkit:
-        specifier: ^1.0.0
-        version: 1.44.0
-      react:
-        specifier: ^18.0.0 || ^19.0.0
-        version: 19.2.3
-    devDependencies:
-      '@testing-library/react':
-        specifier: ^16.1.0
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3)(@types/react@19.2.14)(react-dom@19.2.3)(react@19.2.3)
-      '@types/react':
-        specifier: ^19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      jsdom:
-        specifier: ^25.0.0
-        version: 25.0.1
-      tsup:
-        specifier: ^8.3.5
-        version: 8.5.1(typescript@5.9.3)
-      typescript:
-        specifier: ^5.7.3
         version: 5.9.3
 
 packages:

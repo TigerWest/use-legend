@@ -8,7 +8,7 @@ Legend App State Utils provides a collection of well-tested, production-ready pa
 
 ## Packages
 
-### [@las/utils](./packages/utils)
+### [@usels/core](./packages/core)
 Utility functions and helpers for working with Legend-State. Provides common patterns, adapters, and tools to simplify state management workflows.
 
 **Key Features:**
@@ -17,7 +17,7 @@ Utility functions and helpers for working with Legend-State. Provides common pat
 - Type-safe utilities
 - Tree-shakeable exports
 
-### [@las/integrations](./packages/integrations)
+### [@usels/integrations](./packages/integrations)
 Third-party integrations for Legend-State. Seamlessly connect your state management with popular libraries and services.
 
 **Supported Integrations:**

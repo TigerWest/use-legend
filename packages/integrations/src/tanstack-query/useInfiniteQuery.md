@@ -21,7 +21,7 @@ Observable containing infinite query state with `data`, `fetchNextPage`, etc.
 ## Usage
 
 ```typescript
-import { useInfiniteQuery } from '@las/integrations'
+import { useInfiniteQuery } from '@usels/integrations'
 
 function InfiniteList() {
   const query = useInfiniteQuery({

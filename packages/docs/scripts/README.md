@@ -4,7 +4,7 @@ This directory contains scripts for managing documentation in the Astro-based do
 
 ## Overview
 
-The documentation system automatically collects Markdown files from the source packages (`@las/utils` and `@las/integrations`) and copies them to the Astro content directory. This ensures that documentation stays close to the code while being easily accessible in the documentation site.
+The documentation system automatically collects Markdown files from the source packages (`@usels/core` and `@usels/integrations`) and copies them to the Astro content directory. This ensures that documentation stays close to the code while being easily accessible in the documentation site.
 
 ## Scripts
 
@@ -13,7 +13,7 @@ The documentation system automatically collects Markdown files from the source p
 Scans the source packages for Markdown files and copies them to the Astro content directory.
 
 **Features:**
-- Scans `packages/utils/src` and `packages/integrations/src` for `.md` files
+- Scans `packages/core/src` and `packages/integrations/src` for `.md` files
 - Validates frontmatter (requires `title` field)
 - Detects duplicate target paths
 - Preserves `index.md` files during cleanup
@@ -39,7 +39,7 @@ category: Optional - Category for grouping
 Watches source packages for changes to Markdown files and automatically runs `collect-docs.ts` when changes are detected.
 
 **Features:**
-- Watches `packages/utils/src/**/*.md` and `packages/integrations/src/**/*.md`
+- Watches `packages/core/src/**/*.md` and `packages/integrations/src/**/*.md`
 - Ignores `__tests__` and `__mocks__` directories
 - Debounces updates (500ms delay)
 - Graceful shutdown on SIGINT (Ctrl+C)
@@ -70,7 +70,7 @@ packages/astro/
 └── astro.config.mjs       # Astro configuration with autogenerate sidebar
 
 Source packages:
-packages/utils/src/         # Source documentation files
+packages/core/src/         # Source documentation files
 packages/integrations/src/  # Source documentation files
 ```
 
@@ -83,7 +83,7 @@ packages/integrations/src/  # Source documentation files
    This runs both the watcher and Astro dev server concurrently.
 
 2. **Make changes to source documentation:**
-   - Edit `.md` files in `packages/utils/src/` or `packages/integrations/src/`
+   - Edit `.md` files in `packages/core/src/` or `packages/integrations/src/`
    - The watcher detects changes and automatically copies them to Astro
    - Astro's dev server hot-reloads the changes
 

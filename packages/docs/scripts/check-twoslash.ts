@@ -6,8 +6,8 @@
  *   pnpm twoslash:check          (from monorepo root)
  *   tsx scripts/check-twoslash   (from packages/docs)
  *
- * Note: Build packages first so @las/* types are available.
- *   pnpm --filter @las/utils build
+ * Note: Build packages first so @usels/* types are available.
+ *   pnpm --filter @usels/core build
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -48,7 +48,7 @@ function findMdFiles(dir: string): string[] {
 }
 
 const SOURCE_DIRS = [
-  path.join(MONO_ROOT, "packages/utils/src"),
+  path.join(MONO_ROOT, "packages/core/src"),
   path.join(MONO_ROOT, "packages/integrations/src"),
 ];
 

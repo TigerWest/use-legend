@@ -1,5 +1,5 @@
 {
-  "name": "@las/integrations",
+  "name": "@usels/integrations",
   "version": "0.0.1",
   "description": "Third-party integrations for Legend-App State utilities",
   "main": "./dist/index.js",
@@ -26,7 +26,7 @@
     "zustand"
   ],
   "dependencies": {
-    "@las/utils": "workspace:*",
+    "@usels/core": "workspace:*",
     "@tanstack/query-core": "^5.90.20"
   },
   "peerDependencies": {

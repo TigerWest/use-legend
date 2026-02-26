@@ -20,7 +20,7 @@ export interface QueryClientProviderProps {
  * @example
  * ```tsx
  * import { QueryClient } from '@tanstack/react-query'
- * import { QueryClientProvider } from '@las/integrations'
+ * import { QueryClientProvider } from '@usels/integrations'
  *
  * const queryClient = new QueryClient()
  *

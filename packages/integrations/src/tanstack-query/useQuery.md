@@ -10,7 +10,7 @@ React hook for data fetching with automatic refetch when observable query keys c
 ## Usage
 
 ```typescript
-import { useQuery } from '@las/integrations'
+import { useQuery } from '@usels/integrations'
 import { observable } from '@legendapp/state'
 
 const userId$ = observable(1)

@@ -4,7 +4,7 @@
   "exclude": ["dist"],
   "compilerOptions": {
     "paths": {
-      "@demos/utils/*": ["../utils/src/*"],
+      "@demos/core/*": ["../core/src/*"],
       "@demos/integrations/*": ["../integrations/src/*"]
     }
   }

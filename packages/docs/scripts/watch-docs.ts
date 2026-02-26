@@ -7,8 +7,8 @@ const ASTRO_ROOT = process.cwd()
 const PACKAGES_ROOT = path.join(ASTRO_ROOT, '..', '..')
 
 const watchPatterns = [
-  path.join(PACKAGES_ROOT, 'packages', 'utils', 'src', '**/*.{md,mdx}'),
-  path.join(PACKAGES_ROOT, 'packages', 'utils', 'src', '**/demo.tsx'),
+  path.join(PACKAGES_ROOT, 'packages', 'core', 'src', '**/*.{md,mdx}'),
+  path.join(PACKAGES_ROOT, 'packages', 'core', 'src', '**/demo.tsx'),
   path.join(PACKAGES_ROOT, 'packages', 'integrations', 'src', '**/*.{md,mdx}'),
   path.join(PACKAGES_ROOT, 'packages', 'integrations', 'src', '**/demo.tsx'),
 ]
