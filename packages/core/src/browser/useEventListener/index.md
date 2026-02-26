@@ -4,7 +4,7 @@ category: browser
 ---
 
 Registers an event listener with `addEventListener` on mount and automatically removes it with `removeEventListener` on unmount.
-Targets can be `El$`, `Observable<Element|null>`, a plain `Element`, `Window`, or `Document`.
+Targets can be `Ref$`, `Observable<Element|null>`, a plain `Element`, `Window`, or `Document`.
 The listener is always called with the latest closure value — state changes never cause stale callbacks.
 
 ## Usage
@@ -28,10 +28,10 @@ function Component() {
 ### Element target
 
 ```tsx
-import { useEl$, useEventListener } from '@usels/core'
+import { useRef$, useEventListener } from '@usels/core'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
 
   useEventListener(el$, 'click', (ev) => {
     console.log('clicked', ev.target)
@@ -41,12 +41,12 @@ function Component() {
 }
 ```
 
-### Reactive El$ target
+### Reactive Ref$ target
 
-When an `El$` or `Observable<Element>` is passed as the target, the listener is automatically re-registered whenever the element changes.
+When an `Ref$` or `Observable<Element>` is passed as the target, the listener is automatically re-registered whenever the element changes.
 
 ```tsx
-const el$ = useEl$<HTMLButtonElement>()
+const el$ = useRef$<HTMLButtonElement>()
 
 useEventListener(el$, 'pointerdown', (ev) => {
   ev.preventDefault()
@@ -96,7 +96,7 @@ stop()
 
 ## Notes
 
-**Plain element targets are not reactive.** If you pass a plain `HTMLElement` or `null` value and that reference changes after mount (e.g. via `useState`), the hook does not detect the change. Use `El$` or `Observable<Element>` for targets that change over time.
+**Plain element targets are not reactive.** If you pass a plain `HTMLElement` or `null` value and that reference changes after mount (e.g. via `useState`), the hook does not detect the change. Use `Ref$` or `Observable<Element>` for targets that change over time.
 
 ```tsx
 // ❌ listener stays on the original element if el changes via state
@@ -104,6 +104,6 @@ const [el, setEl] = useState<HTMLDivElement | null>(null)
 useEventListener(el, 'click', handler)
 
 // ✅ listener is re-registered automatically when el$ changes
-const el$ = useEl$<HTMLDivElement>()
+const el$ = useRef$<HTMLDivElement>()
 useEventListener(el$, 'click', handler)
 ```

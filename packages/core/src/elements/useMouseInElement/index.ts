@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { isWindow } from "../../shared";
 import { useMayObservableOptions } from "../../function/useMayObservableOptions";
 import type { DeepMaybeObservable } from "../../types";
-import { type MaybeElement, peekElement } from "../useEl$";
+import { type MaybeElement, peekElement } from "../useRef$";
 import { useResizeObserver } from "../useResizeObserver";
 import { useMutationObserver } from "../useMutationObserver";
 import { useEventListener } from "../../browser/useEventListener";
@@ -51,13 +51,13 @@ const win = typeof window !== "undefined" ? window : null;
  * Observes mousemove, document mouseleave, ResizeObserver, MutationObserver
  * (style/class changes), window scroll, and resize.
  *
- * @param target - Element to observe: El$, Observable<OpaqueObject<Element>|null>, Document, Window, or null
+ * @param target - Element to observe: Ref$, Observable<OpaqueObject<Element>|null>, Document, Window, or null
  * @param options - Configuration options
  * @returns Reactive mouse position values relative to the element, plus a manual `stop()` function
  *
  * @example
  * ```tsx
- * const el$ = useEl$<HTMLDivElement>();
+ * const el$ = useRef$<HTMLDivElement>();
  * const { elementX, elementY, isOutside } = useMouseInElement(el$);
  * return <div ref={el$} />;
  * ```

@@ -1,9 +1,9 @@
 import { Computed } from "@legendapp/state/react";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useElementSize } from ".";
 
 export default function UseElementSizeDemo() {
-  const el$ = useEl$<HTMLTextAreaElement>();
+  const el$ = useRef$<HTMLTextAreaElement>();
   const { width, height } = useElementSize(el$);
 
   return (

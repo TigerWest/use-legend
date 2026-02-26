@@ -4,7 +4,7 @@ import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useIntersectionObserver } from ".";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
@@ -146,10 +146,10 @@ describe("useIntersectionObserver()", () => {
     expect(mockObserve).not.toHaveBeenCalled();
   });
 
-  it("works with El$ target", () => {
+  it("works with Ref$ target", () => {
     const div = document.createElement("div");
     const { result } = renderHook(() => {
-      const el$ = useEl$<Element>();
+      const el$ = useRef$<Element>();
       return { el$, io: useIntersectionObserver(el$, vi.fn()) };
     });
 
@@ -310,16 +310,16 @@ describe("useIntersectionObserver()", () => {
     );
   });
 
-  it("delays setup until El$ root is mounted", () => {
+  it("delays setup until Ref$ root is mounted", () => {
     const el = document.createElement("div");
     const rootDiv = document.createElement("div");
 
     const { result } = renderHook(() => {
-      const root$ = useEl$<HTMLElement>();
+      const root$ = useRef$<HTMLElement>();
       return { root$, io: useIntersectionObserver(wrapEl(el),vi.fn(), { root: root$ }) };
     });
 
-    // root El$ is null — observer must not be created yet
+    // root Ref$ is null — observer must not be created yet
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
 
     // assign the root element
@@ -332,13 +332,13 @@ describe("useIntersectionObserver()", () => {
     );
   });
 
-  it("reactively recreates observer when El$ root changes", () => {
+  it("reactively recreates observer when Ref$ root changes", () => {
     const el = document.createElement("div");
     const rootA = document.createElement("div");
     const rootB = document.createElement("div");
 
     const { result } = renderHook(() => {
-      const root$ = useEl$<HTMLElement>();
+      const root$ = useRef$<HTMLElement>();
       return { root$, io: useIntersectionObserver(wrapEl(el),vi.fn(), { root: root$ }) };
     });
 
@@ -402,12 +402,12 @@ describe("useIntersectionObserver()", () => {
     expect(result.current.isActive.get()).toBe(false);
   });
 
-  it("recreates observer when El$ target changes to a different element", () => {
+  it("recreates observer when Ref$ target changes to a different element", () => {
     const elA = document.createElement("div");
     const elB = document.createElement("div");
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<Element>();
+      const el$ = useRef$<Element>();
       return { el$, io: useIntersectionObserver(el$, vi.fn()) };
     });
 

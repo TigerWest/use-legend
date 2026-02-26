@@ -2,7 +2,7 @@
 import { isObservable, type Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
 import { useEffect, useRef } from "react";
-import { isEl$, type MaybeElement } from "../../elements/useEl$";
+import { isRef$, type MaybeElement } from "../../elements/useRef$";
 import { normalizeTargets } from "../../shared/normalizeTargets";
 import { get } from "../../function/get";
 import type { MaybeObservable } from "../../types";
@@ -86,9 +86,9 @@ export function useEventListener<E extends keyof DocumentEventMap>(
  * Register using addEventListener on mounted, and removeEventListener
  * automatically on unmounted.
  *
- * Overload 4: `MaybeElement` target — supports El$, Observable<OpaqueObject<Element>>,
+ * Overload 4: `MaybeElement` target — supports Ref$, Observable<OpaqueObject<Element>>,
  * Document, Window, or an array of those (Legend-State reactive).
- * Raw HTMLElement is excluded — use El$ or Observable<OpaqueObject<Element>> instead.
+ * Raw HTMLElement is excluded — use Ref$ or Observable<OpaqueObject<Element>> instead.
  */
 export function useEventListener<E extends keyof HTMLElementEventMap>(
   target: MaybeElement | MaybeElement[] | null | undefined,
@@ -102,7 +102,7 @@ export function useEventListener<E extends keyof HTMLElementEventMap>(
  * automatically on unmounted.
  *
  * Overload 5: Observable<EventTarget> — reactive target (e.g.
- * Observable<MediaQueryList>, El$<HTMLElement>, etc.).
+ * Observable<MediaQueryList>, Ref$<HTMLElement>, etc.).
  * The observer re-fires whenever the observable value changes.
  */
 export function useEventListener<EventType = Event>(
@@ -187,8 +187,8 @@ export function useEventListener(...args: any[]): () => void {
         : [rawTarget];
       return items.flatMap((item): EventTarget[] => {
         if (item == null) return [];
-        // El$ references — normalizeTargets handles OpaqueObject.valueOf() unwrapping.
-        if (isEl$(item)) {
+        // Ref$ references — normalizeTargets handles OpaqueObject.valueOf() unwrapping.
+        if (isRef$(item)) {
           return normalizeTargets([item as MaybeElement]) as EventTarget[];
         }
         // Observable targets — .get() unwraps and registers reactive dependency.

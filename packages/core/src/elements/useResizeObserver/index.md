@@ -4,7 +4,7 @@ category: elements
 ---
 
 Observes one or more elements for size changes using the [ResizeObserver API](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver).
-Targets can be `El$`, `Observable<Element|null>`, or a plain `Element`.
+Targets can be `Ref$`, `Observable<Element|null>`, or a plain `Element`.
 
 ## Demo
 
@@ -12,10 +12,10 @@ Targets can be `El$`, `Observable<Element|null>`, or a plain `Element`.
 
 ```tsx
 import { useCallback } from 'react'
-import { useEl$, useResizeObserver } from '@usels/core'
+import { useRef$, useResizeObserver } from '@usels/core'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
 
   const handleResize = useCallback<ResizeObserverCallback>((entries) => {
     const { width, height } = entries[0].contentRect

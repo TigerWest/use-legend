@@ -1,5 +1,5 @@
 import { Computed } from "@legendapp/state/react";
-import { useEl$ } from "../../elements/useEl$";
+import { useRef$ } from "../../elements/useRef$";
 import { useScroll } from ".";
 
 const badge = (active: boolean): React.CSSProperties => ({
@@ -20,7 +20,7 @@ const badge = (active: boolean): React.CSSProperties => ({
 });
 
 export default function UseScrollDemo() {
-  const el$ = useEl$<HTMLDivElement>();
+  const el$ = useRef$<HTMLDivElement>();
   const { x, y, isScrolling, arrivedState, directions } = useScroll(el$);
 
   return (

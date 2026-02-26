@@ -6,31 +6,31 @@ paths:
 
 # Library Implementation Guide
 
-## Rule 1 — Element Parameters: Use `useEl$` and `MaybeElement`
+## Rule 1 — Element Parameters: Use `useRef$` and `MaybeElement`
 
 When a hook accepts a DOM element, use `MaybeElement` as the parameter type.
-This allows callers to pass an `El$` ref, a raw element, or an Observable element.
+This allows callers to pass an `Ref$` ref, a raw element, or an Observable element.
 
 ```ts
 // ❌ Bad — raw HTMLElement only
 function useMyHook(element: HTMLElement | null) { ... }
 
-// ✅ Good — accepts El$, Observable, or raw element
-import type { MaybeElement } from "../useEl$";
+// ✅ Good — accepts Ref$, Observable, or raw element
+import type { MaybeElement } from "../useRef$";
 
 function useMyHook(element: MaybeElement) { ... }
 ```
 
 ### Resolving MaybeElement Internally
 
-Use `getElement` / `peekElement` / `isEl$` from `useEl$`:
+Use `getElement` / `peekElement` / `isRef$` from `useRef$`:
 
 ```ts
-import { getElement, peekElement, isEl$ } from "../useEl$";
+import { getElement, peekElement, isRef$ } from "../useRef$";
 
 function useMyHook(element: MaybeElement) {
   useObserve(() => {
-    // Reactive read — registers tracking dependency on El$ or Observable element
+    // Reactive read — registers tracking dependency on Ref$ or Observable element
     const el = getElement(element);
     if (el) setup(el);
   });
@@ -40,13 +40,13 @@ function useMyHook(element: MaybeElement) {
 }
 ```
 
-### Creating El$ Refs in Components
+### Creating Ref$ Refs in Components
 
 ```tsx
-import { useEl$ } from "@usels/core";
+import { useRef$ } from "@usels/core";
 
 function MyComponent() {
-  const el$ = useEl$<HTMLDivElement>();
+  const el$ = useRef$<HTMLDivElement>();
   useMyHook(el$);
   return <div ref={el$} />;
 }
@@ -68,12 +68,12 @@ const el$ = observable<OpaqueObject<HTMLElement> | null>(null);
 el$.set(ObservableHint.opaque(document.querySelector("#root")));
 ```
 
-This is exactly what `useEl$` does internally:
+This is exactly what `useRef$` does internally:
 ```ts
 el$.set(node ? ObservableHint.opaque(node) : null);
 ```
 
-**`El$` (from `useEl$`) is the preferred way to hold reactive element references**
+**`Ref$` (from `useRef$`) is the preferred way to hold reactive element references**
 because it handles opaque wrapping automatically.
 
 ---
@@ -170,7 +170,7 @@ Pass an optional `FieldTransformMap<T>` as the second argument to control how ea
 ### Standard Pattern (with HTMLElement field)
 
 Use `'get.element'` hint for `MaybeElement` fields.
-`getElement()` in a reactive context registers dep on El$ mount/unmount and handles opaque wrapping automatically.
+`getElement()` in a reactive context registers dep on Ref$ mount/unmount and handles opaque wrapping automatically.
 
 ```ts
 interface UseMyHookOptions {
@@ -180,7 +180,7 @@ interface UseMyHookOptions {
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   const opts$ = useMayObservableOptions(options, {
-    scrollTarget: 'get.element', // resolves El$/Observable<Element> reactively, wraps in opaque
+    scrollTarget: 'get.element', // resolves Ref$/Observable<Element> reactively, wraps in opaque
   });
 
   useObserve(() => {
@@ -191,8 +191,8 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 }
 ```
 
-> `'get.element'` internally calls `getElement(fieldValue)` → registers dep on El$'s internal Observable.
-> When El$ mounts, `opts$` recomputes → `opts$.scrollTarget` updates → `useObserve` re-runs.
+> `'get.element'` internally calls `getElement(fieldValue)` → registers dep on Ref$'s internal Observable.
+> When Ref$ mounts, `opts$` recomputes → `opts$.scrollTarget` updates → `useObserve` re-runs.
 
 ### Passthrough Pattern (delegating to hooks with internal `useObserve`)
 

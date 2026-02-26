@@ -5,7 +5,7 @@ import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useMutationObserver } from ".";
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
@@ -236,7 +236,7 @@ describe("useMutationObserver()", () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  // ── Observable / El$ target reactivity ─────────────────────────────────────
+  // ── Observable / Ref$ target reactivity ─────────────────────────────────────
 
   it("reacts to Observable<Element|null> target — starts observing after value is set", async () => {
     const callback = vi.fn();
@@ -263,11 +263,11 @@ describe("useMutationObserver()", () => {
     expect(records[0].type).toBe("attributes");
   });
 
-  it("reacts to El$ target — starts observing after element is assigned", async () => {
+  it("reacts to Ref$ target — starts observing after element is assigned", async () => {
     const callback = vi.fn();
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       const mo = useMutationObserver(el$ as any, callback, { attributes: true });
       return { el$, mo };
     });

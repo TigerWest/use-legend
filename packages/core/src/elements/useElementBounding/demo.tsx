@@ -1,9 +1,9 @@
 import { Computed } from "@legendapp/state/react";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useElementBounding } from ".";
 
 export default function UseElementBoundingDemo() {
-  const el$ = useEl$<HTMLDivElement>();
+  const el$ = useRef$<HTMLDivElement>();
   const { x, y, top, left, width, height } = useElementBounding(el$);
 
   return (

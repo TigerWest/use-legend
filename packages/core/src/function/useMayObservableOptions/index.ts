@@ -8,8 +8,8 @@ import { useMemo, useRef } from "react";
 import { get } from "../get";
 import { peek } from "../peek";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
-import { getElement, peekElement } from "../../elements/useEl$";
-import type { MaybeElement } from "../../elements/useEl$";
+import { getElement, peekElement } from "../../elements/useRef$";
+import type { MaybeElement } from "../../elements/useRef$";
 
 /**
  * Per-field resolution hint for the object-form transform.

@@ -3,7 +3,7 @@ import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import type { DeepMaybeObservable } from "../../types";
 import { useMayObservableOptions } from "../../function/useMayObservableOptions";
-import type { MaybeElement } from "../useEl$";
+import type { MaybeElement } from "../useRef$";
 import { useIntersectionObserver } from "../useIntersectionObserver";
 import type { UseIntersectionObserverOptions } from "../useIntersectionObserver";
 
@@ -38,7 +38,7 @@ export interface UseElementVisibilityOptions {
  *
  * @example
  * ```tsx
- * const el$ = useEl$<HTMLDivElement>();
+ * const el$ = useRef$<HTMLDivElement>();
  * const isVisible$ = useElementVisibility(el$);
  * return <div ref={el$} />;
  * ```

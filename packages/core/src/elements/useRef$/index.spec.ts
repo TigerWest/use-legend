@@ -3,18 +3,18 @@ import { render, renderHook, act } from "@testing-library/react";
 import { useObserve } from "@legendapp/state/react";
 import { createElement, createRef, forwardRef, useRef } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { useEl$ } from ".";
+import { useRef$ } from ".";
 
 const noop = () => {};
 
-describe("useEl$()", () => {
+describe("useRef$()", () => {
   it("initial value is null", () => {
-    const { result } = renderHook(() => useEl$<HTMLDivElement>(noop));
+    const { result } = renderHook(() => useRef$<HTMLDivElement>(noop));
     expect(result.current.get()).toBe(null);
   });
 
   it("registers element in observable when called with an element", () => {
-    const { result } = renderHook(() => useEl$<HTMLDivElement>(noop));
+    const { result } = renderHook(() => useRef$<HTMLDivElement>(noop));
     const div = document.createElement("div");
 
     act(() => {
@@ -25,7 +25,7 @@ describe("useEl$()", () => {
   });
 
   it("resets observable to null when called with null", () => {
-    const { result } = renderHook(() => useEl$<HTMLDivElement>(noop));
+    const { result } = renderHook(() => useRef$<HTMLDivElement>(noop));
     const div = document.createElement("div");
 
     act(() => result.current(div));
@@ -35,7 +35,7 @@ describe("useEl$()", () => {
   });
 
   it("el$ maintains stable reference across re-renders", () => {
-    const { result, rerender } = renderHook(() => useEl$<HTMLDivElement>(noop));
+    const { result, rerender } = renderHook(() => useRef$<HTMLDivElement>(noop));
     const el$1 = result.current;
 
     rerender();
@@ -44,7 +44,7 @@ describe("useEl$()", () => {
   });
 
   it("el$ is callable and exposes get/peek as functions", () => {
-    const { result } = renderHook(() => useEl$(noop));
+    const { result } = renderHook(() => useRef$(noop));
     expect(typeof result.current).toBe("function");
     expect(typeof result.current.get).toBe("function");
     expect(typeof result.current.peek).toBe("function");
@@ -56,7 +56,7 @@ describe("useEl$()", () => {
       callOrder.push("externalRef");
     });
 
-    const { result } = renderHook(() => useEl$<HTMLDivElement>(externalRef));
+    const { result } = renderHook(() => useRef$<HTMLDivElement>(externalRef));
     const div = document.createElement("div");
 
     act(() => {
@@ -72,7 +72,7 @@ describe("useEl$()", () => {
     let currentRef = vi.fn();
 
     const { result, rerender } = renderHook(
-      ({ ref }) => useEl$<HTMLDivElement>(ref),
+      ({ ref }) => useRef$<HTMLDivElement>(ref),
       { initialProps: { ref: currentRef } }
     );
 
@@ -89,7 +89,7 @@ describe("useEl$()", () => {
   });
 
   it("works without any argument (standalone useRef replacement)", () => {
-    const { result } = renderHook(() => useEl$<HTMLDivElement>());
+    const { result } = renderHook(() => useRef$<HTMLDivElement>());
     const div = document.createElement("div");
 
     act(() => result.current(div));
@@ -100,7 +100,7 @@ describe("useEl$()", () => {
   it("syncs RefObject.current when RefObject is provided", () => {
     const refObject = createRef<HTMLDivElement>();
 
-    const { result } = renderHook(() => useEl$<HTMLDivElement>(refObject));
+    const { result } = renderHook(() => useRef$<HTMLDivElement>(refObject));
     const div = document.createElement("div");
 
     act(() => result.current(div));
@@ -112,7 +112,7 @@ describe("useEl$()", () => {
   it("clears RefObject.current to null on unmount", () => {
     const refObject = createRef<HTMLDivElement>();
 
-    const { result } = renderHook(() => useEl$<HTMLDivElement>(refObject));
+    const { result } = renderHook(() => useRef$<HTMLDivElement>(refObject));
     const div = document.createElement("div");
 
     act(() => result.current(div));
@@ -123,7 +123,7 @@ describe("useEl$()", () => {
   });
 
   it("handles null externalRef gracefully (forwardRef passing null)", () => {
-    const { result } = renderHook(() => useEl$<HTMLDivElement>(null));
+    const { result } = renderHook(() => useRef$<HTMLDivElement>(null));
     const div = document.createElement("div");
 
     act(() => result.current(div));
@@ -133,7 +133,7 @@ describe("useEl$()", () => {
 
   it("updates latest RefObject when externalRef changes between renders", () => {
     const { result, rerender } = renderHook(
-      ({ ref }) => useEl$<HTMLDivElement>(ref),
+      ({ ref }) => useRef$<HTMLDivElement>(ref),
       { initialProps: { ref: createRef<HTMLDivElement>() } }
     );
 
@@ -149,7 +149,7 @@ describe("useEl$()", () => {
   it("can be used with useRef inside forwardRef pattern", () => {
     const { result } = renderHook(() => {
       const localRef = useRef<HTMLDivElement>(null);
-      return { el$: useEl$<HTMLDivElement>(localRef), localRef };
+      return { el$: useRef$<HTMLDivElement>(localRef), localRef };
     });
 
     const div = document.createElement("div");
@@ -163,7 +163,7 @@ describe("useEl$()", () => {
     const observeSpy = vi.fn();
 
     const Component = forwardRef<HTMLDivElement, object>((_, ref) => {
-      const el$ = useEl$(ref);
+      const el$ = useRef$(ref);
       useObserve(() => {
         el$.get();
         observeSpy();
@@ -183,7 +183,7 @@ describe("useEl$()", () => {
     const observeSpy = vi.fn();
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>(noop);
+      const el$ = useRef$<HTMLDivElement>(noop);
       useObserve(() => {
         el$.get(); // register as selector
         observeSpy();

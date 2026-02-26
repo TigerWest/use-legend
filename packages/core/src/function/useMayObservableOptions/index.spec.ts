@@ -4,7 +4,7 @@ import { describe, it, expect, vi } from "vitest";
 import { isObservable, observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { useMayObservableOptions } from ".";
-import { useEl$ } from "../../elements/useEl$";
+import { useRef$ } from "../../elements/useRef$";
 
 interface SimpleOpts {
   val: string;
@@ -342,19 +342,19 @@ describe("useMayObservableOptions() — object-form: 'get.element'", () => {
     expect((stored as OpaqueObject<HTMLElement>).valueOf()).toBe(div);
   });
 
-  it("El$ not yet mounted (null) → result[key] = null", () => {
+  it("Ref$ not yet mounted (null) → result[key] = null", () => {
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       return useMayObservableOptions<{ el: any }>({ el: el$ }, { el: 'get.element' });
     });
     result.current.get(); // trigger lazy compute
     expect(result.current.el.get()).toBeNull();
   });
 
-  it("El$ mounted after render → opts$ recomputes, result[key] updates to OpaqueObject", () => {
+  it("Ref$ mounted after render → opts$ recomputes, result[key] updates to OpaqueObject", () => {
     const div = document.createElement("div");
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       return { el$, opts$: useMayObservableOptions<{ el: any }>({ el: el$ }, { el: 'get.element' }) };
     });
     expect(result.current.opts$.el.get()).toBeNull();

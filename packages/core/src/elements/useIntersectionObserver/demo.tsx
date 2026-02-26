@@ -1,4 +1,4 @@
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useIntersectionObserver } from ".";
 import { Computed, useObservable } from "@legendapp/state/react";
 
@@ -15,8 +15,8 @@ const btnStyle: React.CSSProperties = {
 };
 
 export default function UseIntersectionObserverDemo() {
-  const el$ = useEl$<HTMLDivElement>();
-  const containerEl$ = useEl$<HTMLElement>();
+  const el$ = useRef$<HTMLDivElement>();
+  const containerRef$ = useRef$<HTMLElement>();
   const isVisible$ = useObservable(false);
   const rootMargin$ = useObservable(DEFAULT_ROOT_MARGIN);
 
@@ -29,7 +29,7 @@ export default function UseIntersectionObserverDemo() {
     (entries) => {
       isVisible$.set(entries[0]?.isIntersecting ?? false);
     },
-    { threshold: 0.5, rootMargin: marginString$, root: containerEl$ },
+    { threshold: 0.5, rootMargin: marginString$, root: containerRef$ },
   );
 
   return (
@@ -123,7 +123,7 @@ export default function UseIntersectionObserverDemo() {
 
       {/* Scrollable container — used as root for IntersectionObserver */}
       <div
-        ref={containerEl$}
+        ref={containerRef$}
         style={{
           height: "200px",
           overflowY: "auto",

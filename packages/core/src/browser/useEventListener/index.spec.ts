@@ -6,7 +6,7 @@ import { useState } from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-import { useEl$ } from "../../elements/useEl$";
+import { useRef$ } from "../../elements/useRef$";
 import { useEventListener } from ".";
 
 afterEach(() => {
@@ -463,14 +463,14 @@ describe("useEventListener() — stale closure safety", () => {
 });
 
 // ---------------------------------------------------------------------------
-// useEventListener — El$ reactive target
+// useEventListener — Ref$ reactive target
 // ---------------------------------------------------------------------------
 
-describe("useEventListener() — El$ reactive target", () => {
-  it("does not register listener before El$ is assigned", () => {
+describe("useEventListener() — Ref$ reactive target", () => {
+  it("does not register listener before Ref$ is assigned", () => {
     const listener = vi.fn();
     renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       useEventListener(el$ as any, "click", listener);
       return { el$ };
     });
@@ -481,10 +481,10 @@ describe("useEventListener() — El$ reactive target", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it("starts listening after El$ receives an element", () => {
+  it("starts listening after Ref$ receives an element", () => {
     const listener = vi.fn();
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       useEventListener(el$ as any, "click", listener);
       return { el$ };
     });
@@ -503,10 +503,10 @@ describe("useEventListener() — El$ reactive target", () => {
     );
   });
 
-  it("invokes listener when event fires after El$ element is assigned", () => {
+  it("invokes listener when event fires after Ref$ element is assigned", () => {
     const listener = vi.fn();
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       useEventListener(el$ as any, "click", listener);
       return { el$ };
     });
@@ -522,10 +522,10 @@ describe("useEventListener() — El$ reactive target", () => {
     expect(listener).toHaveBeenCalledOnce();
   });
 
-  it("removes listener from old element and registers on new element when El$ changes", () => {
+  it("removes listener from old element and registers on new element when Ref$ changes", () => {
     const listener = vi.fn();
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       useEventListener(el$ as any, "click", listener);
       return { el$ };
     });
@@ -547,10 +547,10 @@ describe("useEventListener() — El$ reactive target", () => {
     expect(addSpyB).toHaveBeenCalledTimes(1);
   });
 
-  it("removes El$ listener on unmount", () => {
+  it("removes Ref$ listener on unmount", () => {
     const listener = vi.fn();
     const { result, unmount } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       useEventListener(el$ as any, "click", listener);
       return { el$ };
     });

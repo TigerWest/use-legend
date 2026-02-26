@@ -1,4 +1,4 @@
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useMutationObserver } from ".";
 import { Computed, useObservable } from "@legendapp/state/react";
 import { batch, beginBatch, endBatch } from "@legendapp/state";
@@ -28,7 +28,7 @@ const rowLabel: React.CSSProperties = {
 };
 
 export default function UseMutationObserverDemo() {
-  const el$ = useEl$<HTMLDivElement>();
+  const el$ = useRef$<HTMLDivElement>();
   const log$ = useObservable<string[]>([]);
   const active$ = useObservable(false);
   const childCount$ = useObservable(0);

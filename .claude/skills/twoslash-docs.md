@@ -54,8 +54,8 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useEl$ } from '@usels/core'
-const el$ = useEl$()
+import { useRef$ } from '@usels/core'
+const el$ = useRef$()
 //    ^? shows type of el$
 ```
 
@@ -117,11 +117,11 @@ const { y } = useScroll(el) // → TS2589
 
 ```tsx twoslash
 // @noErrors
-import { useScroll, useEl$ } from '@usels/core'
+import { useScroll, useRef$ } from '@usels/core'
 
 // ✅ full component: types resolve correctly
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const { y } = useScroll(el$)
 }
 ```

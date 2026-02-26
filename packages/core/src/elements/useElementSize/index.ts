@@ -1,7 +1,7 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { getElement, MaybeElement } from "../useEl$";
+import { getElement, MaybeElement } from "../useRef$";
 import { useResizeObserver } from "../useResizeObserver";
 
 export interface UseElementSizeOptions {
@@ -18,14 +18,14 @@ export interface UseElementSizeReturn {
  * Tracks the width and height of a DOM element using ResizeObserver.
  * SVG elements use getBoundingClientRect() as fallback.
  *
- * @param target - Element to observe (El$, Observable<Element|null>, Document, Window, or null)
+ * @param target - Element to observe (Ref$, Observable<Element|null>, Document, Window, or null)
  * @param initialSize - Initial size values (default: { width: 0, height: 0 })
  * @param options - Optional box model option
  * @returns `{ width, height, stop }` — reactive size observables and manual stop function
  *
  * @example
  * ```tsx
- * const el$ = useEl$<HTMLDivElement>();
+ * const el$ = useRef$<HTMLDivElement>();
  * const { width, height } = useElementSize(el$);
  * return <div ref={el$}>{width.get()} x {height.get()}</div>;
  * ```
@@ -80,7 +80,7 @@ export function useElementSize(
   const { stop } = useResizeObserver(target, onResize, { box: options?.box });
 
   // Set initial size from offsetWidth/Height after element mounts.
-  // Uses getElement (tracked) so this re-runs when target El$ changes.
+  // Uses getElement (tracked) so this re-runs when target Ref$ changes.
   useObserveEffect(() => {
     const el = getElement(target) as HTMLElement | null;
     if (!el) {

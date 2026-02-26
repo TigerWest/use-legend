@@ -1,9 +1,9 @@
-import { getElement, type MaybeElement } from "../../elements/useEl$";
+import { getElement, type MaybeElement } from "../../elements/useRef$";
 
 /**
  * Normalizes one or more observable-element targets into a plain Element[].
  *
- * - `El$<T>` — calls `.get()` and unwraps the OpaqueObject via `.valueOf()`
+ * - `Ref$<T>` — calls `.get()` and unwraps the OpaqueObject via `.valueOf()`
  * - `Observable<OpaqueObject<Element> | null>` — calls `.get()` and unwraps via `.valueOf()`
  * - `Document` / `Window` — filtered out (not an Element, handled by callers)
  * - `null` — filtered out

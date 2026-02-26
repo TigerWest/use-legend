@@ -4,8 +4,8 @@ category: elements
 ---
 
 Returns the `parentElement` of a target DOM node as a reactive `Observable`.
-Re-evaluates whenever the target `El$` or `Observable` changes.
-Targets can be `El$`, `Observable<Element|null>`, or a plain `Element`.
+Re-evaluates whenever the target `Ref$` or `Observable` changes.
+Targets can be `Ref$`, `Observable<Element|null>`, or a plain `Element`.
 
 ## Demo
 
@@ -13,10 +13,10 @@ Targets can be `El$`, `Observable<Element|null>`, or a plain `Element`.
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useParentElement } from '@usels/core'
+import { useRef$, useParentElement } from '@usels/core'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const parent$ = useParentElement(el$)
 
   return <div ref={el$} />
@@ -29,11 +29,11 @@ Use inside an `observer` component to reactively render based on the parent:
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useParentElement } from '@usels/core'
+import { useRef$, useParentElement } from '@usels/core'
 import { observer } from '@legendapp/state/react'
 
 const Component = observer(() => {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const parent$ = useParentElement(el$)
 
   return <div ref={el$}>{parent$.get()?.tagName}</div>

@@ -5,7 +5,7 @@ export * from "./function/peek";
 export * from "./function/useSupported";
 export * from "./function/useWhenMounted";
 
-export * from "./elements/useEl$";
+export * from "./elements/useRef$";
 export * from "./elements/useResizeObserver";
 export * from "./elements/useElementSize";
 export * from "./elements/useElementBounding";

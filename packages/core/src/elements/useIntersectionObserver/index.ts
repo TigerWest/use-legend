@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useMayObservableOptions } from "../../function/useMayObservableOptions";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 import { isWindow } from "../../shared";
-import type { MaybeElement } from "../useEl$";
+import type { MaybeElement } from "../useRef$";
 import { normalizeTargets } from "../useResizeObserver";
 import { get } from "../../function/get";
 
@@ -31,14 +31,14 @@ export interface UseIntersectionObserverReturn {
  * Reactive wrapper around the IntersectionObserver API.
  * Observes one or more elements for intersection changes with pause/resume/stop support.
  *
- * @param target - Element(s) to observe: El$, Observable, raw Element, or array of these
+ * @param target - Element(s) to observe: Ref$, Observable, raw Element, or array of these
  * @param callback - Called when intersection state changes
  * @param options - IntersectionObserver options plus an `immediate` flag
  * @returns `{ isSupported, isActive, pause, resume, stop }`
  *
  * @example
  * ```tsx
- * const el$ = useEl$<HTMLDivElement>();
+ * const el$ = useRef$<HTMLDivElement>();
  * const { isActive, pause, resume } = useIntersectionObserver(
  *   el$,
  *   (entries) => {

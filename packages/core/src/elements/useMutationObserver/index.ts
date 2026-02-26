@@ -1,7 +1,7 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useMount, useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
-import type { MaybeElement } from "../useEl$";
+import type { MaybeElement } from "../useRef$";
 import { normalizeTargets } from "../useResizeObserver";
 
 export interface UseMutationObserverOptions extends MutationObserverInit {}

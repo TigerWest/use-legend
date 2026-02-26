@@ -13,11 +13,11 @@ SVG elements use `getBoundingClientRect()` as a fallback. Supports all three box
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementSize } from '@usels/core'
+import { useRef$, useElementSize } from '@usels/core'
 import { Computed } from '@legendapp/state/react'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const { width, height } = useElementSize(el$)
 
   return (
@@ -36,9 +36,9 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementSize } from '@usels/core'
+import { useRef$, useElementSize } from '@usels/core'
 
-const el$ = useEl$<HTMLDivElement>()
+const el$ = useRef$<HTMLDivElement>()
 const { width, height } = useElementSize(el$, { width: 320, height: 240 })
 ```
 
@@ -46,9 +46,9 @@ const { width, height } = useElementSize(el$, { width: 320, height: 240 })
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementSize } from '@usels/core'
+import { useRef$, useElementSize } from '@usels/core'
 
-const el$ = useEl$<HTMLDivElement>()
+const el$ = useRef$<HTMLDivElement>()
 const { width, height } = useElementSize(el$, undefined, { box: 'border-box' })
 ```
 
@@ -56,9 +56,9 @@ const { width, height } = useElementSize(el$, undefined, { box: 'border-box' })
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementSize } from '@usels/core'
+import { useRef$, useElementSize } from '@usels/core'
 
-const el$ = useEl$<HTMLDivElement>()
+const el$ = useRef$<HTMLDivElement>()
 const { width, height, stop } = useElementSize(el$)
 
 stop()

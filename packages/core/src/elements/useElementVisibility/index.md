@@ -14,10 +14,10 @@ All option values accept either a plain value or an `Observable<T>`.
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementVisibility } from '@usels/core'
+import { useRef$, useElementVisibility } from '@usels/core'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const isVisible$ = useElementVisibility(el$)
 
   return <div ref={el$} />
@@ -28,8 +28,8 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementVisibility } from '@usels/core'
-declare const el$: ReturnType<typeof useEl$<HTMLDivElement>>
+import { useRef$, useElementVisibility } from '@usels/core'
+declare const el$: ReturnType<typeof useRef$<HTMLDivElement>>
 // ---cut---
 const isVisible$ = useElementVisibility(el$, { initialValue: true })
 ```
@@ -40,8 +40,8 @@ Use `once: true` to automatically stop observing after the element becomes visib
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementVisibility } from '@usels/core'
-declare const el$: ReturnType<typeof useEl$<HTMLDivElement>>
+import { useRef$, useElementVisibility } from '@usels/core'
+declare const el$: ReturnType<typeof useRef$<HTMLDivElement>>
 // ---cut---
 const isVisible$ = useElementVisibility(el$, { once: true })
 ```
@@ -52,10 +52,10 @@ Pass a `scrollTarget` to observe intersection within a scrollable container inst
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementVisibility } from '@usels/core'
-declare const el$: ReturnType<typeof useEl$<HTMLDivElement>>
+import { useRef$, useElementVisibility } from '@usels/core'
+declare const el$: ReturnType<typeof useRef$<HTMLDivElement>>
 // ---cut---
-const container$ = useEl$<HTMLDivElement>()
+const container$ = useRef$<HTMLDivElement>()
 const isVisible$ = useElementVisibility(el$, { scrollTarget: container$ })
 ```
 
@@ -63,8 +63,8 @@ const isVisible$ = useElementVisibility(el$, { scrollTarget: container$ })
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementVisibility } from '@usels/core'
-declare const el$: ReturnType<typeof useEl$<HTMLDivElement>>
+import { useRef$, useElementVisibility } from '@usels/core'
+declare const el$: ReturnType<typeof useRef$<HTMLDivElement>>
 // ---cut---
 const isVisible$ = useElementVisibility(el$, {
   threshold: 0.5,
@@ -79,8 +79,8 @@ All options accept `Observable<T>` for reactive control:
 ```tsx twoslash
 // @noErrors
 import { observable } from '@legendapp/state'
-import { useEl$, useElementVisibility } from '@usels/core'
-declare const el$: ReturnType<typeof useEl$<HTMLDivElement>>
+import { useRef$, useElementVisibility } from '@usels/core'
+declare const el$: ReturnType<typeof useRef$<HTMLDivElement>>
 // ---cut---
 const threshold$ = observable<number | number[]>(0.5)
 const rootMargin$ = observable('0px')

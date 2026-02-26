@@ -2,7 +2,7 @@ import type { Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
 import { useEffect, useRef } from "react";
 import { normalizeTargets } from "../../shared/normalizeTargets";
-import { MaybeElement } from "../useEl$";
+import { MaybeElement } from "../useRef$";
 
 export { normalizeTargets } from "../../shared/normalizeTargets";
 
@@ -18,7 +18,7 @@ export interface UseResizeObserverReturn {
 /**
  * Observes one or more elements for size changes using the ResizeObserver API.
  *
- * @param target - Element(s) to observe: El$, Observable<Element|null>, plain Element, or an array
+ * @param target - Element(s) to observe: Ref$, Observable<Element|null>, plain Element, or an array
  * @param callback - ResizeObserver callback. Wrap in `useCallback` to avoid stale closures —
  *   the observer is only recreated when targets change, not on every render.
  * @param options - Optional box model option. Note: dynamic `box` changes are not reactively
@@ -27,7 +27,7 @@ export interface UseResizeObserverReturn {
  *
  * @example
  * ```tsx
- * const el$ = useEl$<HTMLDivElement>();
+ * const el$ = useRef$<HTMLDivElement>();
  * const handleResize = useCallback<ResizeObserverCallback>((entries) => {
  *   const { width, height } = entries[0].contentRect;
  *   width$.set(width);
@@ -93,7 +93,7 @@ export function useResizeObserver(
     };
   }, []);
 
-  // Re-run setup whenever observable targets (El$ or Observable<Element>) change.
+  // Re-run setup whenever observable targets (Ref$ or Observable<Element>) change.
   // Reading normalizeTargets(target) here registers observable dependencies so
   // useObserve re-fires when a tracked target value changes.
   // mountedRef guard prevents a redundant setup on the initial synchronous run.

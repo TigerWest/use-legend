@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, afterEach } from "vitest";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useParentElement } from ".";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
@@ -57,12 +57,12 @@ describe("useParentElement()", () => {
     expect(result.current.get()).toBeNull();
   });
 
-  it("reacts to El$ — returns parent after element is assigned", () => {
+  it("reacts to Ref$ — returns parent after element is assigned", () => {
     const child = document.createElement("span");
     const { parent } = attachToBody(child);
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLSpanElement>();
+      const el$ = useRef$<HTMLSpanElement>();
       return { el$, parent$: useParentElement(el$) };
     });
 
@@ -91,7 +91,7 @@ describe("useParentElement()", () => {
     expect(result.current.get()).toBe(parent);
   });
 
-  it("updates when El$ is reassigned to a different element", () => {
+  it("updates when Ref$ is reassigned to a different element", () => {
     const childA = document.createElement("span");
     const { parent: parentA } = attachToBody(childA);
 
@@ -99,7 +99,7 @@ describe("useParentElement()", () => {
     const { parent: parentB } = attachToBody(childB);
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLElement>();
+      const el$ = useRef$<HTMLElement>();
       return { el$, parent$: useParentElement(el$) };
     });
 
@@ -158,15 +158,15 @@ describe("useParentElement()", () => {
     expect(result.current.get()).toBeNull();
   });
 
-  it("reads parent of El$ that already holds an element at mount time", () => {
+  it("reads parent of Ref$ that already holds an element at mount time", () => {
     const child = document.createElement("span");
     const { parent } = attachToBody(child);
 
     // Phase 1: create el$ and assign the element
-    let sharedEl$: ReturnType<typeof useEl$<HTMLSpanElement>>;
+    let sharedRef$: ReturnType<typeof useRef$<HTMLSpanElement>>;
     const { result: elResult } = renderHook(() => {
-      const el$ = useEl$<HTMLSpanElement>();
-      sharedEl$ = el$;
+      const el$ = useRef$<HTMLSpanElement>();
+      sharedRef$ = el$;
       return el$;
     });
 
@@ -174,7 +174,7 @@ describe("useParentElement()", () => {
 
     // Phase 2: pass the pre-assigned el$ to useParentElement
     // useMount should pick up the existing element value immediately
-    const { result } = renderHook(() => useParentElement(sharedEl$!));
+    const { result } = renderHook(() => useParentElement(sharedRef$!));
 
     expect(result.current.get()).toBe(parent);
   });

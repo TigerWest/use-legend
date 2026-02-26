@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useResizeObserver } from ".";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
@@ -136,11 +136,11 @@ describe("useResizeObserver()", () => {
     expect(ResizeObserverMock.instances).toHaveLength(0);
   });
 
-  it("reacts to El$ target — starts observing after element is assigned", () => {
+  it("reacts to Ref$ target — starts observing after element is assigned", () => {
     const cb = vi.fn();
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       const ro = useResizeObserver(el$, cb);
       return { el$, ro };
     });
@@ -185,14 +185,14 @@ describe("useResizeObserver()", () => {
     expect(activeInstance).toBeDefined();
   });
 
-  it("handles mixed array of El$, Observable, and plain Element", () => {
+  it("handles mixed array of Ref$, Observable, and plain Element", () => {
     const plainEl = document.createElement("section");
     const obsEl = document.createElement("span");
     const el$El = document.createElement("p");
     const target$ = observable<Element | null>(obsEl);
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLParagraphElement>();
+      const el$ = useRef$<HTMLParagraphElement>();
       const ro = useResizeObserver([el$ as any, target$ as any, plainEl], vi.fn());
       return { el$, ro };
     });
@@ -203,10 +203,10 @@ describe("useResizeObserver()", () => {
     expect(instance.observed).toContain(obsEl);
     expect(instance.observed).not.toContain(el$El);
 
-    // Assign El$ element
+    // Assign Ref$ element
     act(() => result.current.el$(el$El));
 
-    // After El$ assigned, all three observed
+    // After Ref$ assigned, all three observed
     instance = ResizeObserverMock.instances.at(-1)!;
     expect(instance.observed).toContain(el$El);
     expect(instance.observed).toContain(obsEl);
@@ -243,13 +243,13 @@ describe("useResizeObserver()", () => {
     expect(activeInstances).toHaveLength(0);
   });
 
-  it("stops observing old element and observes new element when El$ target changes", () => {
+  it("stops observing old element and observes new element when Ref$ target changes", () => {
     const elA = document.createElement("div");
     const elB = document.createElement("div");
     const cb = vi.fn();
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       return { el$, ro: useResizeObserver(el$ as any, cb) };
     });
 

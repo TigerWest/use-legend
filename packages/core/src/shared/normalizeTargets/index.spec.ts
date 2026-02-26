@@ -3,8 +3,8 @@ import { renderHook, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect } from "vitest";
-import { useEl$ } from "../../elements/useEl$";
-import type { El$ } from "../../elements/useEl$";
+import { useRef$ } from "../../elements/useRef$";
+import type { Ref$ } from "../../elements/useRef$";
 import { normalizeTargets } from ".";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
@@ -43,34 +43,34 @@ describe("normalizeTargets()", () => {
     expect(normalizeTargets(obs)).toEqual([]);
   });
 
-  it("unwraps El$ target and returns the raw DOM element", () => {
+  it("unwraps Ref$ target and returns the raw DOM element", () => {
     const div = document.createElement("div");
-    const { result } = renderHook(() => useEl$<HTMLDivElement>());
+    const { result } = renderHook(() => useRef$<HTMLDivElement>());
 
     act(() => result.current(div));
 
-    const elements = normalizeTargets(result.current as El$<Element>);
+    const elements = normalizeTargets(result.current as Ref$<Element>);
     expect(elements).toEqual([div]);
   });
 
-  it("returns empty array when El$ has no element assigned", () => {
-    const { result } = renderHook(() => useEl$<HTMLDivElement>());
+  it("returns empty array when Ref$ has no element assigned", () => {
+    const { result } = renderHook(() => useRef$<HTMLDivElement>());
 
-    const elements = normalizeTargets(result.current as El$<Element>);
+    const elements = normalizeTargets(result.current as Ref$<Element>);
     expect(elements).toEqual([]);
   });
 
-  it("handles mixed array of El$, Observable, and wrapped Element", () => {
+  it("handles mixed array of Ref$, Observable, and wrapped Element", () => {
     const div = document.createElement("div");
     const span = document.createElement("span");
     const p = document.createElement("p");
 
-    const { result } = renderHook(() => useEl$<HTMLDivElement>());
+    const { result } = renderHook(() => useRef$<HTMLDivElement>());
     act(() => result.current(div));
 
     const obs = wrapEl(span);
 
-    const elements = normalizeTargets([result.current as El$<Element>, obs, wrapEl(p)]);
+    const elements = normalizeTargets([result.current as Ref$<Element>, obs, wrapEl(p)]);
     expect(elements).toEqual([div, span, p]);
   });
 });

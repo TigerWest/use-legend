@@ -1,9 +1,9 @@
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useResizeObserver } from ".";
 import { Computed, useObservable } from "@legendapp/state/react";
 
 export default function UseResizeObserverDemo() {
-  const el$ = useEl$<HTMLTextAreaElement>();
+  const el$ = useRef$<HTMLTextAreaElement>();
   const size$ = useObservable({ width: 0, height: 0 });
 
   useResizeObserver(el$, (entries) => {

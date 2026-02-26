@@ -1,8 +1,8 @@
 import type { Observable, OpaqueObject } from "@legendapp/state";
-import { opaqueObject } from "@legendapp/state";
+import { ObservableHint } from "@legendapp/state";
 import { useMount, useObservable, useObserve } from "@legendapp/state/react";
-import { getElement } from "../useEl$";
-import type { MaybeElement } from "../useEl$";
+import { getElement } from "../useRef$";
+import type { MaybeElement } from "../useRef$";
 
 export function useParentElement(
   element?: MaybeElement,
@@ -12,9 +12,9 @@ export function useParentElement(
   );
 
   /**
-   * NOTE: plain element (non-Observable, non-El$)을 전달한 경우,
+   * NOTE: plain element (non-Observable, non-Ref$)을 전달한 경우,
    * 해당 요소가 DOM 내에서 다른 부모로 이동하더라도 자동으로 갱신되지 않습니다.
-   * 동적 감지가 필요하면 El$ 또는 Observable<Element>를 사용하세요.
+   * 동적 감지가 필요하면 Ref$ 또는 Observable<Element>를 사용하세요.
    */
   const update = () => {
     if (!element) return;
@@ -23,7 +23,7 @@ export function useParentElement(
     const parent = (el as HTMLElement | null)?.parentElement ?? null;
     parent$.set(
       parent
-        ? opaqueObject(parent as unknown as HTMLElement | SVGElement)
+        ? ObservableHint.opaque(parent as unknown as HTMLElement | SVGElement)
         : null,
     );
   };

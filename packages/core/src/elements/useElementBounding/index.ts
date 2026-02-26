@@ -1,7 +1,7 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback, useEffect, useRef } from "react";
-import { type MaybeElement, peekElement } from "../useEl$";
+import { type MaybeElement, peekElement } from "../useRef$";
 import { useResizeObserver } from "../useResizeObserver";
 import { useMutationObserver } from "../useMutationObserver";
 import { useEventListener } from "../../browser/useEventListener";
@@ -52,13 +52,13 @@ const win = typeof window !== "undefined" ? window : null;
  * Tracks the bounding rect of a DOM element (x, y, top, right, bottom, left, width, height).
  * Observes ResizeObserver, MutationObserver (style/class changes), window scroll, and resize.
  *
- * @param target - Element to observe: El$, Observable<OpaqueObject<Element>|null>, Document, Window, or null
+ * @param target - Element to observe: Ref$, Observable<OpaqueObject<Element>|null>, Document, Window, or null
  * @param options - Configuration options
  * @returns Reactive bounding rect values plus a manual `update()` function
  *
  * @example
  * ```tsx
- * const el$ = useEl$<HTMLDivElement>();
+ * const el$ = useRef$<HTMLDivElement>();
  * const { top, left, width, height } = useElementBounding(el$);
  * return <div ref={el$} />;
  * ```

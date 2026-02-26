@@ -1,9 +1,9 @@
 import { Computed } from "@legendapp/state/react";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useElementVisibility } from ".";
 
 export default function UseElementVisibilityDemo() {
-  const el$ = useEl$<HTMLDivElement>();
+  const el$ = useRef$<HTMLDivElement>();
   const isVisible$ = useElementVisibility(el$, { threshold: 0.5 });
 
   return (

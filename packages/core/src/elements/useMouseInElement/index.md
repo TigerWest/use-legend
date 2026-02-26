@@ -13,11 +13,11 @@ All return values are reactive `Observable<number | boolean>`.
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useMouseInElement } from '@usels/core'
+import { useRef$, useMouseInElement } from '@usels/core'
 import { Computed } from '@legendapp/state/react'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const { elementX, elementY, isOutside } = useMouseInElement(el$)
 
   return (
@@ -54,9 +54,9 @@ const { elementX, elementY } = useMouseInElement(el$, {
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useMouseInElement } from '@usels/core'
+import { useRef$, useMouseInElement } from '@usels/core'
 
-const el$ = useEl$<HTMLDivElement>()
+const el$ = useRef$<HTMLDivElement>()
 const { elementX, elementY, stop } = useMouseInElement(el$)
 
 // Tear down all event listeners and observers
@@ -69,8 +69,8 @@ The raw `clientX` / `clientY` values are also exposed as `x` and `y`.
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useMouseInElement } from '@usels/core'
+import { useRef$, useMouseInElement } from '@usels/core'
 
-const el$ = useEl$<HTMLDivElement>()
+const el$ = useRef$<HTMLDivElement>()
 const { x, y, elementX, elementY } = useMouseInElement(el$)
 ```

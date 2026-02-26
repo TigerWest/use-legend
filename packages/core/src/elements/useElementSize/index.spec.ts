@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useElementSize } from ".";
 
 const wrapEl = (el: Element) =>
@@ -230,9 +230,9 @@ describe("useElementSize()", () => {
     expect(result.current.height.get()).toBe(100);
   });
 
-  it("El$ target: sets offsetWidth/offsetHeight as initial size after element is assigned", () => {
+  it("Ref$ target: sets offsetWidth/offsetHeight as initial size after element is assigned", () => {
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       const size = useElementSize(el$);
       return { el$, size };
     });
@@ -252,11 +252,11 @@ describe("useElementSize()", () => {
     expect(result.current.size.height.get()).toBe(480);
   });
 
-  it("resets to initialSize when target El$ becomes null", () => {
+  it("resets to initialSize when target Ref$ becomes null", () => {
     const div = document.createElement("div");
 
     const { result } = renderHook(() => {
-      const el$ = useEl$<HTMLDivElement>();
+      const el$ = useRef$<HTMLDivElement>();
       const size = useElementSize(el$, { width: 5, height: 10 });
       return { el$, size };
     });

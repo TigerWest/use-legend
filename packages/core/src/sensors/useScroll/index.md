@@ -13,11 +13,11 @@ Tracks the scroll position, scroll direction, arrived state (top/bottom/left/rig
 
 ```tsx twoslash
 // @noErrors
-import { useScroll, useEl$ } from '@usels/core'
+import { useScroll, useRef$ } from '@usels/core'
 import { Computed } from '@legendapp/state/react'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const { x, y, arrivedState } = useScroll(el$)
 
   return (
@@ -50,10 +50,10 @@ function Component() {
 ### Scroll direction
 
 ```tsx
-import { useScroll, useEl$ } from '@usels/core'
+import { useScroll, useRef$ } from '@usels/core'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const { directions } = useScroll(el$)
 
   // directions.bottom.get() → true while scrolling down

@@ -1,5 +1,5 @@
 ---
-title: useEl$
+title: useRef$
 category: elements
 ---
 
@@ -10,10 +10,10 @@ An observable element ref hook that serves as a drop-in replacement for `useRef`
 ### Standalone (useRef replacement)
 
 ```tsx
-import { useEl$ } from '@usels/core'
+import { useRef$ } from '@usels/core'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
 
   return <div ref={el$} />
 }
@@ -25,10 +25,10 @@ Calling `el$.get()` inside `useObserve` automatically re-runs the observer when 
 
 ```tsx
 import { useObserve } from '@legendapp/state/react'
-import { useEl$ } from '@usels/core'
+import { useRef$ } from '@usels/core'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
 
   useObserve(() => {
     const el = el$.get()
@@ -45,10 +45,10 @@ function Component() {
 
 ```tsx
 import { forwardRef } from 'react'
-import { useEl$ } from '@usels/core'
+import { useRef$ } from '@usels/core'
 
 const Component = forwardRef<HTMLDivElement>((props, ref) => {
-  const el$ = useEl$(ref)
+  const el$ = useRef$(ref)
 
   useObserve(() => {
     const el = el$.get()

@@ -1,4 +1,4 @@
-import { opaqueObject } from "@legendapp/state";
+import { ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { Computed, useObservable } from "@legendapp/state/react";
 import { useEventListener } from "../../browser/useEventListener";
@@ -34,7 +34,7 @@ export default function UseParentElementDemo() {
     "mousemove",
     (e: MouseEvent) => {
       const el = document.elementFromPoint(e.clientX, e.clientY);
-      element$.set(el ? opaqueObject(el) : null);
+      element$.set(el ? ObservableHint.opaque(el) : null);
     },
     { passive: true },
   );

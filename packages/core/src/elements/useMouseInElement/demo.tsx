@@ -1,9 +1,9 @@
 import { Computed } from "@legendapp/state/react";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useMouseInElement } from ".";
 
 export default function UseMouseInElementDemo() {
-  const el$ = useEl$<HTMLDivElement>();
+  const el$ = useRef$<HTMLDivElement>();
   const { elementX, elementY, isOutside, elementWidth, elementHeight, x, y: _y } =
     useMouseInElement(el$);
 

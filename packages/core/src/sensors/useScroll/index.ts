@@ -3,7 +3,7 @@ import type { Observable } from "@legendapp/state";
 import { useMount, useObservable } from "@legendapp/state/react";
 import { useMemo, useRef } from "react";
 import { throttle } from "es-toolkit";
-import { type MaybeElement, peekElement } from "../../elements/useEl$";
+import { type MaybeElement, peekElement } from "../../elements/useRef$";
 import { isWindow } from "../../shared";
 import type { MaybeObservable } from "../../types";
 import { useEventListener } from "../../browser/useEventListener";

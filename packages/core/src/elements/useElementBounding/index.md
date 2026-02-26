@@ -13,11 +13,11 @@ Uses [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObs
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementBounding } from '@usels/core'
+import { useRef$, useElementBounding } from '@usels/core'
 import { Computed } from '@legendapp/state/react'
 
 function Component() {
-  const el$ = useEl$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>()
   const { top, left, width, height } = useElementBounding(el$)
 
   return (
@@ -36,9 +36,9 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useEl$, useElementBounding } from '@usels/core'
+import { useRef$, useElementBounding } from '@usels/core'
 
-const el$ = useEl$<HTMLDivElement>()
+const el$ = useRef$<HTMLDivElement>()
 const { top, left, update } = useElementBounding(el$)
 
 // Force-recalculate bounding rect imperatively

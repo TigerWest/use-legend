@@ -15,9 +15,9 @@
  *    The outer useObservable callback is NOT re-evaluated on inner field changes.
  *
  *  Case 3 — useElementVisibility with Element (scrollTarget) options
- *    Per-field scrollTarget as El$, Observable<HTMLElement | null>(null), plain HTMLElement
+ *    Per-field scrollTarget as Ref$, Observable<HTMLElement | null>(null), plain HTMLElement
  *    Note: Observable<HTMLElement> starting from non-null is NOT reliably tracked
- *    (Legend-State deeply proxies HTMLElements; use El$ or start from null).
+ *    (Legend-State deeply proxies HTMLElements; use Ref$ or start from null).
  */
 import { act, renderHook } from "@testing-library/react";
 import { isObservable, observable, ObservableHint } from "@legendapp/state";
@@ -27,7 +27,7 @@ import { useObservable } from "@legendapp/state/react";
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { get } from "../../function/get";
-import { useEl$ } from "../useEl$";
+import { useRef$ } from "../useRef$";
 import { useElementVisibility } from ".";
 import { useIntersectionObserver } from "../useIntersectionObserver";
 
@@ -260,39 +260,39 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
     );
   });
 
-  it("El$ as scrollTarget — delays IntersectionObserver until El$ is mounted", () => {
+  it("Ref$ as scrollTarget — delays IntersectionObserver until Ref$ is mounted", () => {
     const el = document.createElement("div");
     const scrollContainer = document.createElement("div");
 
     const { result } = renderHook(() => {
-      const scrollTarget$ = useEl$<HTMLElement>();
+      const scrollTarget$ = useRef$<HTMLElement>();
       return {
         scrollTarget$,
         visibility: useElementVisibility(wrapEl(el), { scrollTarget: scrollTarget$ }),
       };
     });
 
-    // El$ is null → useIntersectionObserver's null guard skips setup
+    // Ref$ is null → useIntersectionObserver's null guard skips setup
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
 
     act(() => {
       result.current.scrollTarget$(scrollContainer);
     });
 
-    // El$ mounted → useIntersectionObserver's useObserve re-runs → setup() with root
+    // Ref$ mounted → useIntersectionObserver's useObserve re-runs → setup() with root
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
       expect.objectContaining({ root: scrollContainer }),
     );
   });
 
-  it("El$ scrollTarget change → IntersectionObserver recreated with new root", () => {
+  it("Ref$ scrollTarget change → IntersectionObserver recreated with new root", () => {
     const el = document.createElement("div");
     const containerA = document.createElement("div");
     const containerB = document.createElement("div");
 
     const { result } = renderHook(() => {
-      const scrollTarget$ = useEl$<HTMLElement>();
+      const scrollTarget$ = useRef$<HTMLElement>();
       return {
         scrollTarget$,
         visibility: useElementVisibility(wrapEl(el), { scrollTarget: scrollTarget$ }),
