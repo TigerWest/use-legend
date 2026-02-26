@@ -5,17 +5,8 @@ import { useEffect, useRef } from "react";
 import { isRef$, type MaybeElement } from "../../elements/useRef$";
 import { normalizeTargets } from "../../shared/normalizeTargets";
 import { get } from "../../function/get";
-import type { MaybeObservable } from "../../types";
-
-// ---------------------------------------------------------------------------
-// Local helpers
-// ---------------------------------------------------------------------------
-
-type Arrayable<T> = T | T[];
-
-function toArray<T>(v: Arrayable<T>): T[] {
-  return Array.isArray(v) ? v : [v];
-}
+import type { Arrayable, MaybeObservable } from "../../types";
+import { toArray } from "../../shared/utils";
 
 /**
  * Returns true if the value looks like an event name argument (string or

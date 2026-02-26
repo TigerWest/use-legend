@@ -34,3 +34,23 @@ export type MaybeObservable<T = any> = T | Observable<T>;
 export type DeepMaybeObservable<T> = Observable<T> | {
   [K in keyof T]?: MaybeObservable<NonNullable<T[K]>>;
 };
+
+// --- TIER 0-A: Base utility types (VueUse equivalents) ---
+
+export type Fn = () => void
+export type AnyFn = (...args: any[]) => any
+export type Arrayable<T> = T[] | T
+export type Awaitable<T> = Promise<T> | T
+export type TimerHandle = ReturnType<typeof setTimeout> | undefined
+
+export interface Pausable {
+  readonly isActive: Observable<boolean>
+  pause: Fn
+  resume: Fn
+}
+
+export interface Stoppable<StartFnArgs extends any[] = any[]> {
+  readonly isPending: Observable<boolean>
+  stop: Fn
+  start: (...args: StartFnArgs) => void
+}
