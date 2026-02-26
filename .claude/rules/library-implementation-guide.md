@@ -113,17 +113,20 @@ produce a **one-time snapshot**. Observable changes after mount are silently ign
 
 ---
 
-### Standard Pattern — `useObservable(() => get(options), [options])`
+### Standard Pattern — `useMayObservableOptions(options, transform?)`
 
-Normalize `DeepMaybeObservable` into a stable computed Observable at the top of the hook.
-This handles both outer `Observable<Options>` and per-field `{ field: Observable<T> }` cases.
+`useMayObservableOptions` normalizes `DeepMaybeObservable<T>` into a stable computed
+`Observable<T | undefined>`. Use it at the top of every hook that accepts `DeepMaybeObservable` options.
 
 ```ts
+import { useMayObservableOptions } from "../function/useMayObservableOptions";
+
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useObservable(() => get(options), [options]);
+  const opts$ = useMayObservableOptions(options);
   //
-  // Outer Observable case:  get(options$) → options$.get() in reactive context → dep registered
-  // Per-field case:         Legend-State auto-dereferences + field-level dep tracking
+  // Outer Observable case:  get(options$) → dep registered on options$
+  //                         child-field notifications propagate via parent dep
+  // Per-field case:         Legend-State auto-derefs inner Observables
   //                         opts$.rootMargin.get() returns "0px", not Observable<string>
   //                         Changes to rootMargin$ ARE reflected in opts$.rootMargin
 
@@ -135,36 +138,39 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 }
 ```
 
-> **⚠️ Outer Observable — child-field change vs full-object replace**
+> **⚠️ Outer Observable — child-field mutation vs full-object replace**
 >
-> `useObservable(() => get(options$), [options$])` tracks `options$` as a whole.
-> - `options$.set({ rootMargin: "20px" })` — full replace → `useObservable` re-evaluates → `opts$` updated ✓
-> - `options$.rootMargin.set("20px")` — child-field change → `useObservable` **may not re-evaluate**
+> When `options` is `Observable<Options>`:
+> - `options$.set({ rootMargin: "20px" })` — full replace → `opts$` recomputes → reactive ✓
+> - `options$.rootMargin.set("20px")` — child-field mutation → behavior **may vary** by Legend-State version
 >
-> To reactively track child-field changes, use `linked` to establish an explicit two-way binding
-> (similar to Vue's writable computed ref):
->
-> ```ts
-> import { linked } from "@legendapp/state";
->
-> // opts$ is linked to options$ — child-field changes are propagated
-> const opts$ = useObservable(() =>
->   linked({
->     get: () => get(options),
->     set: ({ value }) => isObservable(options) && options.set(value),
->   })
-> );
-> ```
->
-> This is only needed when the caller mutates `options$` at the child-field level.
-> For most hook usage patterns (full replace or per-field Observable), the
-> **Standard Pattern alone is sufficient**.
+> Reliable workarounds when callers mutate at child-field level:
+> - Pass `rootMargin` as a per-field Observable: `{ rootMargin: observable("0px") }` ✓
+> - Use full-object replace: `options$.set({ rootMargin: "20px" })` ✓
+
+### FieldHint — per-field transform hints
+
+Pass an optional `FieldTransformMap<T>` as the second argument to control how each field is resolved.
+
+| Hint | Behavior | Use when |
+|------|----------|----------|
+| _(omitted)_ / `'get'` | no-op — Legend-State auto-derefs + registers dep at call site | reactive plain fields (default) |
+| `'peek'` | `peek(fieldValue)` — no dep, mount-time snapshot | fields fixed at mount (`initialValue`, `once`) |
+| `'get.element'` | `getElement(fieldValue)` (reactive) + `ObservableHint.opaque()` | `MaybeElement` fields that should be reactive |
+| `'peek.element'` | `peekElement(fieldValue)` (non-reactive) + `ObservableHint.opaque()` | `MaybeElement` fields fixed at mount |
+| `'get.opaque'` | `get(fieldValue)` + `ObservableHint.opaque()` | non-element objects needing opaque wrapping |
+| `'get.plain'` | `get(fieldValue)` + `ObservableHint.plain()` | prevent nested auto-deref |
+| `'get.function'` | `get(fieldValue)` + `ObservableHint.function()` | callback fields |
+| `(value) => R` | custom transform function | escape hatch for complex cases |
+
+> **Note:** Object-form hints are skipped when `options` is an outer `Observable<T>`.
+> In that case, `opts$` proxies `options$` directly (preserving reference-equality tracking).
+> Use per-field Observables or plain objects when per-field hints are needed.
 
 ### Standard Pattern (with HTMLElement field)
 
-When the options object contains a `MaybeElement` field, resolve and wrap with
-`ObservableHint.opaque()` inside the `useObservable` callback.
-`getElement()` in a reactive context registers dep on El$ mount/unmount.
+Use `'get.element'` hint for `MaybeElement` fields.
+`getElement()` in a reactive context registers dep on El$ mount/unmount and handles opaque wrapping automatically.
 
 ```ts
 interface UseMyHookOptions {
@@ -173,14 +179,9 @@ interface UseMyHookOptions {
 }
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useObservable(() => {
-    const opt = get(options);
-    const el = getElement(opt?.scrollTarget); // reactive: tracks El$ mount + Observable changes
-    return {
-      ...opt,
-      scrollTarget: el ? ObservableHint.opaque(el) : null,
-    };
-  }, [options]);
+  const opts$ = useMayObservableOptions(options, {
+    scrollTarget: 'get.element', // resolves El$/Observable<Element> reactively, wraps in opaque
+  });
 
   useObserve(() => {
     const root = opts$.scrollTarget.peek(); // OpaqueObject<HTMLElement> | null
@@ -190,22 +191,20 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 }
 ```
 
-> `getElement(El$)` calls `El$.get()` → registers dep on El$'s internal Observable.
-> When El$ mounts, `useObservable` recomputes → `opts$.scrollTarget` updates → `useObserve` re-runs.
+> `'get.element'` internally calls `getElement(fieldValue)` → registers dep on El$'s internal Observable.
+> When El$ mounts, `opts$` recomputes → `opts$.scrollTarget` updates → `useObserve` re-runs.
 
 ### Passthrough Pattern (delegating to hooks with internal `useObserve`)
 
 When delegating to a hook that already tracks options reactively inside its own `useObserve`
-(e.g., `useIntersectionObserver`), use Standard Pattern to normalize first, then pass
+(e.g., `useIntersectionObserver`), normalize first with `useMayObservableOptions`, then pass
 the computed Observable child fields as references.
 
 ```ts
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useObservable(() => {
-    const opt = get(options);
-    const el = getElement(opt?.scrollTarget);
-    return { ...opt, scrollTarget: el ? ObservableHint.opaque(el) : null };
-  }, [options]);
+  const opts$ = useMayObservableOptions(options, {
+    scrollTarget: 'get.element',
+  });
 
   // Pass computed Observable child fields — downstream useObserve tracks them
   useIntersectionObserver(element, callback, {
@@ -229,7 +228,7 @@ This is **intentional** and explicitly signals "read once, fixed at mount" — d
 the Anti-pattern in Rule 2 where `get()` is accidentally used for fields that *should* be reactive.
 
 ```ts
-import { get, peek } from "@las/utils";
+import { useMayObservableOptions } from "../function/useMayObservableOptions";
 
 interface UseMyHookOptions {
   initialValue?: boolean;  // mount-time-only — fixed at mount
@@ -238,14 +237,15 @@ interface UseMyHookOptions {
 }
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useObservable(() => get(options), [options]);
+  const opts$ = useMayObservableOptions(options, {
+    initialValue: 'peek', // ✅ mount-time-only — no dep registered
+    once: 'peek',         // ✅ mount-time-only — no dep registered
+    // rootMargin: omitted → default 'get' → Legend-State auto-deref → reactive
+  });
 
-  // ✅ peek() — intentional one-time read. Documents that this value is mount-time-only.
-  //    Using get() here would be misleading: it implies reactivity that is never honored.
-  const initialValue = peek(opts$, "initialValue") ?? false;
-  const once = peek(opts$, "once") ?? false;
-
-  const state$ = useObservable<boolean>(initialValue);
+  // opts$.initialValue.peek() / opts$.once.peek() — no dep, intentional one-time read
+  const state$ = useObservable<boolean>(opts$.initialValue.peek() ?? false);
+  const once = opts$.once.peek() ?? false;
 
   const { stop } = useIntersectionObserver(element, (entries) => {
     const latest = entries.at(-1);
@@ -253,17 +253,17 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
     state$.set(latest.isIntersecting);
     if (once && latest.isIntersecting) stop();
   }, {
-    rootMargin: opts$.rootMargin, // ✅ get() path — reactive
+    rootMargin: opts$.rootMargin, // ✅ Observable child — downstream useObserve tracks it
   });
 
   return state$;
 }
 ```
 
-> **`peek()` vs `get()` decision rule**
+> **`'peek'` hint vs omitted (default `'get'`) decision rule**
 >
-> | Field characteristic | Read method | Reason |
-> |----------------------|-------------|--------|
-> | Changes should re-trigger setup | `get(opts$, "field")` inside `useObserve` | registers dep → reactive |
-> | Fixed at mount by design | `peek(opts$, "field")` outside reactive context | explicit one-time read, no dep |
-> | Mount-time seed for an Observable | `peek(opts$, "field")` as `useObservable(seed)` arg | Observable ignores later changes anyway |
+> | Field characteristic | FieldHint | Reason |
+> |----------------------|-----------|--------|
+> | Changes should re-trigger setup | _(omitted)_ — `'get'` | Legend-State auto-deref registers dep at call site |
+> | Fixed at mount by design | `'peek'` | mount-time snapshot, no dep — explicit and intentional |
+> | Mount-time seed for an Observable | `'peek'` | Observable ignores later changes anyway; `peek` makes intent clear |
