@@ -20,7 +20,7 @@ function Component() {
   useMutationObserver(
     el$,
     (records) => {
-      records.forEach((r) => console.log(r.type, r.target))
+      records.forEach((r) => { /* handle r.type, r.target */ })
     },
     { attributes: true, childList: true },
   )

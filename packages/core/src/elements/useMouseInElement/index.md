@@ -54,9 +54,9 @@ const { elementX, elementY } = useMouseInElement(el$, {
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useMouseInElement } from '@usels/core'
-
-const el$ = useRef$<HTMLDivElement>()
+import { useRef$, Ref$, useMouseInElement } from '@usels/core'
+declare const el$: Ref$<HTMLDivElement>
+// ---cut---
 const { elementX, elementY, stop } = useMouseInElement(el$)
 
 // Tear down all event listeners and observers
@@ -69,8 +69,8 @@ The raw `clientX` / `clientY` values are also exposed as `x` and `y`.
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useMouseInElement } from '@usels/core'
-
-const el$ = useRef$<HTMLDivElement>()
+import { useRef$, Ref$, useMouseInElement } from '@usels/core'
+declare const el$: Ref$<HTMLDivElement>
+// ---cut---
 const { x, y, elementX, elementY } = useMouseInElement(el$)
 ```

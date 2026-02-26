@@ -36,9 +36,9 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useElementSize } from '@usels/core'
-
-const el$ = useRef$<HTMLDivElement>()
+import { useRef$, Ref$, useElementSize } from '@usels/core'
+declare const el$: Ref$<HTMLDivElement>
+// ---cut---
 const { width, height } = useElementSize(el$, { width: 320, height: 240 })
 ```
 
@@ -46,9 +46,9 @@ const { width, height } = useElementSize(el$, { width: 320, height: 240 })
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useElementSize } from '@usels/core'
-
-const el$ = useRef$<HTMLDivElement>()
+import { useRef$, Ref$, useElementSize } from '@usels/core'
+declare const el$: Ref$<HTMLDivElement>
+// ---cut---
 const { width, height } = useElementSize(el$, undefined, { box: 'border-box' })
 ```
 
@@ -56,9 +56,9 @@ const { width, height } = useElementSize(el$, undefined, { box: 'border-box' })
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useElementSize } from '@usels/core'
-
-const el$ = useRef$<HTMLDivElement>()
+import { useRef$, Ref$, useElementSize } from '@usels/core'
+declare const el$: Ref$<HTMLDivElement>
+// ---cut---
 const { width, height, stop } = useElementSize(el$)
 
 stop()

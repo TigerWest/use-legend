@@ -20,7 +20,7 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: "legendapp-state-utils",
+      title: "use-ls",
       social: [
         {
           icon: "github",

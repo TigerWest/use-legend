@@ -36,9 +36,9 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useElementBounding } from '@usels/core'
-
-const el$ = useRef$<HTMLDivElement>()
+import { useRef$, Ref$, useElementBounding } from '@usels/core'
+declare const el$: Ref$<HTMLDivElement>
+// ---cut---
 const { top, left, update } = useElementBounding(el$)
 
 // Force-recalculate bounding rect imperatively
