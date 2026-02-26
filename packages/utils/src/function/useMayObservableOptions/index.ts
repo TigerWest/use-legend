@@ -16,7 +16,7 @@ import type { MaybeElement } from "../../elements/useEl$";
  * Per-field resolution hint for the object-form transform.
  *
  * Resolution axis (`get` / `peek`):
- * - `'get'`          — `get(fieldValue)` — registers dep, stores plain value. **Default.**
+ * - `'get'`          — no-op; Legend-State auto-derefs the field Observable and registers the dep at the call site. **Default.**
  * - `'peek'`         — `peek(fieldValue)` — no dep, mount-time-only snapshot.
  *
  * Legend-State wrapping axis (dot-notation):

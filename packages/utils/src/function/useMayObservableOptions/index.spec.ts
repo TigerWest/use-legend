@@ -50,9 +50,10 @@ describe("useMayObservableOptions() — no transform", () => {
     expect(result.current.val.get()).toBe("b");
   });
 
-  it("outer Observable child-field mutation → opts$ recomputes (Legend-State tracks children via .get())", () => {
-    // options$.get() inside the reactive compute context tracks the observable AND its children.
-    // Child-field mutations therefore DO trigger a recompute of opts$.
+  it("outer Observable child-field mutation → opts$ recomputes (get() dep on options$ catches child notifications)", () => {
+    // compute() calls get(raw) which is options$.get() — this registers dep on options$.
+    // Legend-State notifies parent deps when a child field mutates,
+    // so opts$ recomputes and returns the updated value.
     const options$ = observable<SimpleOpts>({ val: "a" });
     const { result } = renderHook(() =>
       useMayObservableOptions<SimpleOpts>(options$),

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { observable } from "@legendapp/state";
 import { useWindowSize } from ".";
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
@@ -225,6 +226,28 @@ describe("useWindowSize()", () => {
 
     await act(async () => {
       rerender({ type: "outer" });
+      await flush();
+    });
+
+    expect(result.current.width.get()).toBe(1100);
+    expect(result.current.height.get()).toBe(850);
+  });
+
+  it("type as Observable → reactive re-measurement when Observable value changes", async () => {
+    (window as any).outerWidth = 1100;
+    (window as any).outerHeight = 850;
+
+    const type$ = observable<"inner" | "outer" | "visual">("inner");
+
+    const { result } = renderHook(() => useWindowSize({ type: type$ }));
+
+    // Initial: 'inner' → reads innerWidth/innerHeight
+    expect(result.current.width.get()).toBe(1024);
+    expect(result.current.height.get()).toBe(768);
+
+    // Change Observable value — useObserveEffect tracks opts$.type.get() → re-measurement
+    await act(async () => {
+      type$.set("outer");
       await flush();
     });
 
