@@ -103,6 +103,7 @@ ecTwoSlash({
 | **2589** Type instantiation too deep | `declare const el: HTMLElement` + Legend-State hook in TwoSlash | Use `function Component() { ... }` wrapper instead of top-level `declare const` |
 | **2584** Cannot find name 'console' | DOM globals unavailable in some TwoSlash VFS contexts | Remove `console.*` from TwoSlash blocks; replace with `// ...` comment or use plain `tsx` |
 | **Cannot find module '@usels/core'** | Workspace package not in TwoSlash VFS | Always add `// @noErrors` when importing from `@usels/core` |
+| **Vite dev 60s timeout** | `ReturnType<typeof fn<T>>` instantiation expression repeated across multiple blocks | Replace with the concrete return type directly (e.g. `Ref$<HTMLDivElement>`) |
 
 ### Pattern to avoid (causes 2589)
 
@@ -130,6 +131,7 @@ function Component() {
 
 - [ ] Does the block import from `@usels/core`? → add `// @noErrors`
 - [ ] Does the block use `declare const` + a hook? → use full `function Component()` instead
+- [ ] Does `declare const` use `ReturnType<typeof fn<T>>`? → use the concrete type (e.g. `Ref$<HTMLDivElement>`) to avoid dev-mode timeout
 - [ ] Does the block use `console.*`? → replace with comment or use plain `tsx`
 - [ ] Is the type info meaningful for the reader? → use `//    ^?`
 - [ ] Run `pnpm build` in `packages/docs` to verify no build errors
