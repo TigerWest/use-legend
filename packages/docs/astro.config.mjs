@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://tigerwest.github.io/use-ls',
-  base: '/use-ls',
+  site: "https://tigerwest.github.io/use-ls",
+  base: "/use-ls",
   vite: {
     resolve: {
       alias: {
@@ -23,6 +23,24 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "use-ls",
+      head: [
+        {
+          tag: "script",
+          attrs: {
+            src: "https://www.googletagmanager.com/gtag/js?id=G-7JDXH9F2LZ",
+            async: true,
+          },
+        },
+        {
+          tag: "script",
+          content: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7JDXH9F2LZ');
+          `,
+        },
+      ],
       social: [
         {
           icon: "github",
