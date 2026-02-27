@@ -6,7 +6,7 @@ description: Install use-ls and explore observable-native React hooks built on L
 ## Installation
 
 ```bash
-npm install @usels/core @legendapp/state react
+npm install @usels/core@beta @legendapp/state react
 ```
 
 ---

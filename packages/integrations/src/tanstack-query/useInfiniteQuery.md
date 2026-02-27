@@ -1,6 +1,7 @@
 ---
 title: useInfiniteQuery
 description: TanStack infinite query hook with pagination support
+draft: true
 category: Hooks
 ---
 
