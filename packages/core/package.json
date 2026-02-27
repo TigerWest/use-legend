@@ -47,5 +47,8 @@
     "utilities",
     "helpers"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }
