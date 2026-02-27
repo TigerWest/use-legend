@@ -3,14 +3,11 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "tsx scripts/collect-docs.ts && concurrently \"tsx scripts/watch-docs.ts\" \"astro dev\"",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "tsx scripts/collect-docs.ts && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "docs:dev": "tsx scripts/collect-docs.ts && concurrently \"tsx scripts/watch-docs.ts\" \"astro dev\"",
-    "docs:build": "tsx scripts/collect-docs.ts && astro build",
-    "docs:preview": "astro preview",
     "collect-docs": "tsx scripts/collect-docs.ts",
     "twoslash:check": "tsx scripts/check-twoslash.ts"
   },
