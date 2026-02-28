@@ -6,6 +6,7 @@ import { useSupported } from "../../function/useSupported";
 import type { MaybeObservable } from "../../types";
 import { useWhenMounted } from "../../function/useWhenMounted";
 import { useEventListener } from "../useEventListener";
+import { defaultWindow } from "../../shared/configurable";
 
 // ---------------------------------------------------------------------------
 // Local helpers
@@ -61,7 +62,10 @@ export function useMediaQuery(
   const { ssrWidth } = options;
 
   const isSupported = useSupported(
-    () => "matchMedia" in window && typeof window.matchMedia === "function",
+    () =>
+      !!defaultWindow &&
+      "matchMedia" in defaultWindow &&
+      typeof defaultWindow.matchMedia === "function",
   );
 
   const matches$ = useObservable(() =>
@@ -72,7 +76,7 @@ export function useMediaQuery(
 
   const mql$ = useWhenMounted(() =>
     isSupported.get()
-      ? ObservableHint.opaque(window.matchMedia(get(query)))
+      ? ObservableHint.opaque(defaultWindow!.matchMedia(get(query)))
       : null,
   );
   useObserve(() => {

@@ -1,6 +1,7 @@
 "use client";
 import type { Observable } from "@legendapp/state";
 import { useObservable, useMount } from "@legendapp/state/react";
+import { defaultDocument } from "../../shared/configurable";
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useDocumentVisibility(): Observable<DocumentVisibilityState> {
@@ -9,16 +10,19 @@ export function useDocumentVisibility(): Observable<DocumentVisibilityState> {
   const visibility$ = useObservable<DocumentVisibilityState>("visible");
 
   useMount(() => {
-    visibility$.set(document.visibilityState);
+    const doc = defaultDocument;
+    if (!doc) return;
+
+    visibility$.set(doc.visibilityState);
 
     const handler = () => {
-      visibility$.set(document.visibilityState);
+      visibility$.set(doc.visibilityState);
     };
 
-    document.addEventListener("visibilitychange", handler, { passive: true });
+    doc.addEventListener("visibilitychange", handler, { passive: true });
 
     return () => {
-      document.removeEventListener("visibilitychange", handler);
+      doc.removeEventListener("visibilitychange", handler);
     };
   });
 

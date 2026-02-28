@@ -9,6 +9,7 @@ import { useEventListener } from "../../browser/useEventListener";
 import { useMediaQuery } from "../../browser/useMediaQuery";
 import { useMayObservableOptions } from "../../function/useMayObservableOptions";
 import { useWhenMounted } from "../../function/useWhenMounted";
+import { defaultWindow, defaultDocument } from "../../shared/configurable";
 import type { DeepMaybeObservable } from "../../types";
 
 export interface UseWindowSizeOptions {
@@ -40,7 +41,8 @@ export function useWindowSize(
   });
 
   const update = () => {
-    if (typeof window === "undefined") return;
+    const win = defaultWindow;
+    if (!win) return;
 
     const type = opts$.type.peek() ?? "inner";
     const includeScrollbar = opts$.includeScrollbar.peek() !== false;
@@ -49,24 +51,24 @@ export function useWindowSize(
     let height: number;
 
     if (type === "outer") {
-      width = window.outerWidth;
-      height = window.outerHeight;
+      width = win.outerWidth;
+      height = win.outerHeight;
     } else if (type === "visual") {
-      const vp = window.visualViewport;
+      const vp = win.visualViewport;
       if (vp) {
         width = vp.width * vp.scale;
         height = vp.height * vp.scale;
       } else {
-        width = window.innerWidth;
-        height = window.innerHeight;
+        width = win.innerWidth;
+        height = win.innerHeight;
       }
     } else {
       if (includeScrollbar) {
-        width = window.innerWidth;
-        height = window.innerHeight;
+        width = win.innerWidth;
+        height = win.innerHeight;
       } else {
-        width = document.documentElement.clientWidth;
-        height = document.documentElement.clientHeight;
+        width = defaultDocument!.documentElement.clientWidth;
+        height = defaultDocument!.documentElement.clientHeight;
       }
     }
 
@@ -78,7 +80,7 @@ export function useWindowSize(
   useEventListener("resize", update, { passive: true });
 
   const vp$ = useWhenMounted(() =>
-    opts$.type.peek() === "visual" ? window.visualViewport : null,
+    opts$.type.peek() === "visual" ? (defaultWindow?.visualViewport ?? null) : null,
   );
 
   useEventListener(vp$, "resize", update);

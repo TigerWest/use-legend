@@ -3,6 +3,7 @@ import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useMount } from "@legendapp/state/react";
 import { useEventListener } from "../../browser/useEventListener";
+import { defaultDocument } from "../../shared/configurable";
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useWindowFocus(): Observable<boolean> {
@@ -11,7 +12,7 @@ export function useWindowFocus(): Observable<boolean> {
   const focused$ = useObservable<boolean>(false);
 
   useMount(() => {
-    focused$.set(document.hasFocus());
+    focused$.set(defaultDocument?.hasFocus() ?? false);
   });
 
   useEventListener("focus", () => focused$.set(true), { passive: true });
