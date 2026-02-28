@@ -4,7 +4,7 @@ category: browser
 ---
 
 Registers an event listener with `addEventListener` on mount and automatically removes it with `removeEventListener` on unmount.
-Targets can be `Ref$`, `Observable<Element|null>`, a plain `Element`, `Window`, or `Document`.
+Targets can be `Ref$`, `MaybeElement`, a plain `Element`, `Window`, or `Document`.
 The listener is always called with the latest closure value — state changes never cause stale callbacks.
 
 ## Usage
@@ -43,7 +43,7 @@ function Component() {
 
 ### Reactive Ref$ target
 
-When an `Ref$` or `Observable<Element>` is passed as the target, the listener is automatically re-registered whenever the element changes.
+When an `Ref$` or `MaybeElement` is passed as the target, the listener is automatically re-registered whenever the element changes.
 
 ```tsx
 const el$ = useRef$<HTMLButtonElement>()
@@ -96,7 +96,7 @@ stop()
 
 ## Notes
 
-**Plain element targets are not reactive.** If you pass a plain `HTMLElement` or `null` value and that reference changes after mount (e.g. via `useState`), the hook does not detect the change. Use `Ref$` or `Observable<Element>` for targets that change over time.
+**Plain element targets are not reactive.** If you pass a plain `HTMLElement` or `null` value and that reference changes after mount (e.g. via `useState`), the hook does not detect the change. Use `Ref$` or `MaybeElement` for targets that change over time.
 
 ```tsx
 // ❌ listener stays on the original element if el changes via state

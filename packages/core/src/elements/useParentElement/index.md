@@ -5,7 +5,7 @@ category: elements
 
 Returns the `parentElement` of a target DOM node as a reactive `Observable`.
 Re-evaluates whenever the target `Ref$` or `Observable` changes.
-Targets can be `Ref$`, `Observable<Element|null>`, or a plain `Element`.
+Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
 
 ## Demo
 

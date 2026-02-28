@@ -1,5 +1,4 @@
 import { useWindowSize } from ".";
-import { Computed } from "@legendapp/state/react";
 
 const row: React.CSSProperties = {
   display: "flex",
@@ -28,14 +27,10 @@ export default function UseWindowSizeDemo() {
         background: "var(--sl-color-gray-6, #f1f5f9)",
       }}
     >
-      <Computed>
-        {() => (
-          <div style={row}>
-            <span>width: {width$.get()}px</span>
-            <span>height: {height$.get()}px</span>
-          </div>
-        )}
-      </Computed>
+      <div style={row}>
+        <span>width: {width$.get()}px</span>
+        <span>height: {height$.get()}px</span>
+      </div>
 
       <p
         style={{

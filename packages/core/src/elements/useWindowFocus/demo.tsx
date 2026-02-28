@@ -1,5 +1,4 @@
 import { useWindowFocus } from ".";
-import { Computed } from "@legendapp/state/react";
 
 const dot: React.CSSProperties = {
   display: "inline-block",
@@ -23,47 +22,40 @@ export default function UseWindowFocusDemo() {
         fontSize: "13px",
       }}
     >
-      <Computed>
-        {() => {
-          const focused = focused$.get();
-          return (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "10px 14px",
-                borderRadius: "6px",
-                border: `1px solid ${focused ? "var(--sl-color-green, #22c55e)" : "var(--sl-color-gray-4, #94a3b8)"}`,
-                background: focused
-                  ? "var(--sl-color-green-low, #f0fdf4)"
-                  : "var(--sl-color-gray-6, #f8fafc)",
-                transition: "border-color 0.2s, background 0.2s",
-              }}
-            >
-              <span
-                style={{
-                  ...dot,
-                  background: focused
-                    ? "var(--sl-color-green, #22c55e)"
-                    : "var(--sl-color-gray-4, #94a3b8)",
-                }}
-              />
-              <span>
-                focused$.get() ={" "}
-                <strong
-                  style={{
-                    color: focused
-                      ? "var(--sl-color-green, #22c55e)"
-                      : "var(--sl-color-gray-3, #64748b)",
-                  }}
-                >
-                  {String(focused)}
-                </strong>
-              </span>
-            </div>
-          );
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          padding: "10px 14px",
+          borderRadius: "6px",
+          border: `1px solid ${focused$.get() ? "var(--sl-color-green, #22c55e)" : "var(--sl-color-gray-4, #94a3b8)"}`,
+          background: focused$.get()
+            ? "var(--sl-color-green-low, #f0fdf4)"
+            : "var(--sl-color-gray-6, #f8fafc)",
+          transition: "border-color 0.2s, background 0.2s",
         }}
-      </Computed>
+      >
+        <span
+          style={{
+            ...dot,
+            background: focused$.get()
+              ? "var(--sl-color-green, #22c55e)"
+              : "var(--sl-color-gray-4, #94a3b8)",
+          }}
+        />
+        <span>
+          focused$.get() ={" "}
+          <strong
+            style={{
+              color: focused$.get()
+                ? "var(--sl-color-green, #22c55e)"
+                : "var(--sl-color-gray-3, #64748b)",
+            }}
+          >
+            {String(focused$.get())}
+          </strong>
+        </span>
+      </div>
 
       <p
         style={{

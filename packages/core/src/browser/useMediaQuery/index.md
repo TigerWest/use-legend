@@ -13,15 +13,12 @@ SSR-safe: accepts an optional `ssrWidth` to statically evaluate `min-width`/`max
 
 ```tsx
 import { useMediaQuery } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const isLarge$ = useMediaQuery('(min-width: 1024px)')
 
   return (
-    <Computed>
-      {() => <p>{isLarge$.get() ? 'Large screen' : 'Small screen'}</p>}
-    </Computed>
+    <p>{isLarge$.get() ? 'Large screen' : 'Small screen'}</p>
   )
 }
 ```

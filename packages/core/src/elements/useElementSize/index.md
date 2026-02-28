@@ -14,20 +14,15 @@ SVG elements use `getBoundingClientRect()` as a fallback. Supports all three box
 ```tsx twoslash
 // @noErrors
 import { useRef$, useElementSize } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
   const { width, height } = useElementSize(el$)
 
   return (
-    <Computed>
-      {() => (
-        <div ref={el$}>
-          {width.get()} × {height.get()}
-        </div>
-      )}
-    </Computed>
+    <div ref={el$}>
+      {width.get()} × {height.get()}
+    </div>
   )
 }
 ```

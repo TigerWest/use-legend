@@ -14,20 +14,15 @@ All return values are reactive `Observable<number | boolean>`.
 ```tsx twoslash
 // @noErrors
 import { useRef$, useMouseInElement } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
   const { elementX, elementY, isOutside } = useMouseInElement(el$)
 
   return (
-    <Computed>
-      {() => (
-        <div ref={el$}>
-          {isOutside.get() ? 'outside' : `${elementX.get()}, ${elementY.get()}`}
-        </div>
-      )}
-    </Computed>
+    <div ref={el$}>
+      {isOutside.get() ? 'outside' : `${elementX.get()}, ${elementY.get()}`}
+    </div>
   )
 }
 ```

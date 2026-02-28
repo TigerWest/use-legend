@@ -1,0 +1,33 @@
+{
+  "name": "@usels/vite-plugin-legend-memo",
+  "version": "0.1.0",
+  "description": "Vite plugin to auto-wrap Legend-State observable .get() calls in JSX with <Auto> component",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@babel/core": ">=7.0.0",
+    "@usels/babel-plugin-legend-memo": "workspace:*",
+    "vite": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@types/babel__core": "^7.20.0",
+    "@usels/babel-plugin-legend-memo": "workspace:*",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}

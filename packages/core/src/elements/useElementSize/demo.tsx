@@ -1,4 +1,3 @@
-import { Computed } from "@legendapp/state/react";
 import { useRef$ } from "../useRef$";
 import { useElementSize } from ".";
 
@@ -19,18 +18,14 @@ export default function UseElementSizeDemo() {
           borderRadius: "6px",
         }}
       >
-        <Computed>
-          {() => (
-            <>
-              <span>
-                width: <strong>{Math.round(width.get())}px</strong>
-              </span>
-              <span>
-                height: <strong>{Math.round(height.get())}px</strong>
-              </span>
-            </>
-          )}
-        </Computed>
+        <>
+          <span>
+            width: <strong>{Math.round(width.get())}px</strong>
+          </span>
+          <span>
+            height: <strong>{Math.round(height.get())}px</strong>
+          </span>
+        </>
       </div>
       <textarea
         ref={el$}

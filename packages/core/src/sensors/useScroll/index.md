@@ -14,7 +14,6 @@ Tracks the scroll position, scroll direction, arrived state (top/bottom/left/rig
 ```tsx twoslash
 // @noErrors
 import { useScroll, useRef$ } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
@@ -22,14 +21,10 @@ function Component() {
 
   return (
     <div ref={el$} style={{ overflow: 'auto', height: 300 }}>
-      <Computed>
-        {() => (
-          <p>
-            scrollX: {x.get()}, scrollY: {y.get()}
-            {arrivedState.bottom.get() && ' — reached bottom'}
-          </p>
-        )}
-      </Computed>
+      <p>
+        scrollX: {x.get()}, scrollY: {y.get()}
+        {arrivedState.bottom.get() && ' — reached bottom'}
+      </p>
     </div>
   )
 }
@@ -110,7 +105,7 @@ const { y } = useScroll(target)
 
 ## Notes
 
-**Reactive observables, not state.** All returned values (`x`, `y`, `isScrolling`, `arrivedState`, `directions`) are Legend-State `Observable`s. Read them with `.get()` inside a reactive context (`Computed`, `useObserve`, etc.) to avoid unnecessary re-renders.
+**Reactive observables, not state.** All returned values (`x`, `y`, `isScrolling`, `arrivedState`, `directions`) are Legend-State `Observable`s. Read them with `.get()` inside a reactive context (`useObserve`, etc.) to avoid unnecessary re-renders.
 
 **`measure()` is synchronous.** It immediately reads the current scroll values from the DOM and updates all observables. Useful after programmatic scroll operations.
 

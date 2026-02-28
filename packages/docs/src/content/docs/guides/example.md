@@ -15,7 +15,7 @@ npm install @usels/core@beta @legendapp/state react
 
 `use-ls` hooks don't use `useState` internally. Instead, they return **Legend-State observables** — fine-grained reactive values that update without re-rendering the entire component tree.
 
-Read values with `.get()` inside a `<Computed>` block. Only that subtree re-renders when the value changes, not the parent component.
+Write `.get()` naturally in JSX. `@usels/vite-plugin-legend-memo` automatically wraps each reactive expression in a fine-grained `<Memo>` boundary — only the expressions that read observables re-render, not the parent component.
 
 ---
 
@@ -28,7 +28,6 @@ The foundation of `use-ls`. `useRef$` works like React's `useRef` but returns a 
 ```tsx
 import { useRef$, useEventListener } from '@usels/core';
 import { observable } from '@legendapp/state';
-import { Computed } from '@legendapp/state/react';
 
 function ClickCounter() {
   const button$ = useRef$<HTMLButtonElement>();
@@ -40,7 +39,7 @@ function ClickCounter() {
 
   return (
     <button ref={button$}>
-      Clicked <Computed>{() => count$.get()}</Computed> times
+      Clicked {count$.get()} times
     </button>
   );
 }
@@ -56,7 +55,6 @@ Tracks an element's dimensions as an observable. No manual `ResizeObserver` setu
 
 ```tsx
 import { useRef$, useElementSize } from '@usels/core';
-import { Computed } from '@legendapp/state/react';
 
 function SizeDisplay() {
   const el$ = useRef$<HTMLDivElement>();
@@ -64,15 +62,13 @@ function SizeDisplay() {
 
   return (
     <div ref={el$} style={{ resize: 'both', overflow: 'auto', padding: 16 }}>
-      <Computed>
-        {() => `${size$.width.get().toFixed(0)} × ${size$.height.get().toFixed(0)}`}
-      </Computed>
+      {`${size$.width.get().toFixed(0)} × ${size$.height.get().toFixed(0)}`}
     </div>
   );
 }
 ```
 
-`size$.width` and `size$.height` update whenever the element resizes. Only the `<Computed>` subtree re-renders.
+`size$.width` and `size$.height` update whenever the element resizes. Only the expression that reads the observable re-renders.
 
 ---
 
@@ -82,7 +78,6 @@ Tracks an element's scroll position as an observable.
 
 ```tsx
 import { useRef$, useScroll } from '@usels/core';
-import { Computed } from '@legendapp/state/react';
 
 function ScrollTracker() {
   const container$ = useRef$<HTMLDivElement>();
@@ -91,9 +86,7 @@ function ScrollTracker() {
   return (
     <div ref={container$} style={{ height: 300, overflowY: 'scroll' }}>
       <div style={{ height: 1000, paddingTop: 16 }}>
-        <Computed>
-          {() => `scrollY: ${scroll$.y.get().toFixed(0)}px`}
-        </Computed>
+        {`scrollY: ${scroll$.y.get().toFixed(0)}px`}
       </div>
     </div>
   );
@@ -110,15 +103,12 @@ Returns a CSS media query result as an observable boolean. Breakpoint logic can 
 
 ```tsx
 import { useMediaQuery } from '@usels/core';
-import { Computed } from '@legendapp/state/react';
 
 function Layout() {
   const isMobile$ = useMediaQuery('(max-width: 768px)');
 
   return (
-    <Computed>
-      {() => isMobile$.get() ? <MobileNav /> : <DesktopNav />}
-    </Computed>
+    {isMobile$.get() ? <MobileNav /> : <DesktopNav />}
   );
 }
 ```

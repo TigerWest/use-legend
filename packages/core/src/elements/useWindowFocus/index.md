@@ -13,15 +13,12 @@ SSR-safe: returns `false` when `document` is not available.
 
 ```tsx
 import { useWindowFocus } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const focused$ = useWindowFocus()
 
   return (
-    <Computed>
-      {() => <p>Window is {focused$.get() ? 'focused' : 'blurred'}</p>}
-    </Computed>
+    <p>Window is {focused$.get() ? 'focused' : 'blurred'}</p>
   )
 }
 ```

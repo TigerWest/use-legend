@@ -1,4 +1,3 @@
-import { Computed } from "@legendapp/state/react";
 import { useRef$ } from "../useRef$";
 import { useElementBounding } from ".";
 
@@ -9,37 +8,33 @@ export default function UseElementBoundingDemo() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
       {/* Bounding values readout */}
-      <Computed>
-        {() => (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "6px",
-              fontFamily: "monospace",
-              fontSize: "13px",
-              padding: "10px 14px",
-              background: "var(--sl-color-gray-6, #f1f5f9)",
-              borderRadius: "6px",
-            }}
-          >
-            {(
-              [
-                ["x", x.get()],
-                ["y", y.get()],
-                ["top", top.get()],
-                ["left", left.get()],
-                ["width", width.get()],
-                ["height", height.get()],
-              ] as [string, number][]
-            ).map(([label, val]) => (
-              <span key={label}>
-                {label}: <strong>{Math.round(val)}px</strong>
-              </span>
-            ))}
-          </div>
-        )}
-      </Computed>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "6px",
+          fontFamily: "monospace",
+          fontSize: "13px",
+          padding: "10px 14px",
+          background: "var(--sl-color-gray-6, #f1f5f9)",
+          borderRadius: "6px",
+        }}
+      >
+        {(
+          [
+            ["x", x.get()],
+            ["y", y.get()],
+            ["top", top.get()],
+            ["left", left.get()],
+            ["width", width.get()],
+            ["height", height.get()],
+          ] as [string, number][]
+        ).map(([label, val]) => (
+          <span key={label}>
+            {label}: <strong>{Math.round(val)}px</strong>
+          </span>
+        ))}
+      </div>
 
       {/* Resizable target element */}
       <div

@@ -14,20 +14,15 @@ Uses [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObs
 ```tsx twoslash
 // @noErrors
 import { useRef$, useElementBounding } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
   const { top, left, width, height } = useElementBounding(el$)
 
   return (
-    <Computed>
-      {() => (
-        <div ref={el$}>
-          {width.get()} × {height.get()} at ({left.get()}, {top.get()})
-        </div>
-      )}
-    </Computed>
+    <div ref={el$}>
+      {width.get()} × {height.get()} at ({left.get()}, {top.get()})
+    </div>
   )
 }
 ```

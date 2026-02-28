@@ -13,19 +13,14 @@ SSR-safe: returns `initialWidth`/`initialHeight` (default `0`) when `window` is 
 
 ```tsx
 import { useWindowSize } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const size$ = useWindowSize()
 
   return (
-    <Computed>
-      {() => (
-        <p>
-          {size$.width.get()} × {size$.height.get()}
-        </p>
-      )}
-    </Computed>
+    <p>
+      {size$.width.get()} × {size$.height.get()}
+    </p>
   )
 }
 ```

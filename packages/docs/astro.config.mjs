@@ -5,12 +5,14 @@ import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import ecTwoSlash from "expressive-code-twoslash";
 import { fileURLToPath } from "node:url";
+import { autoWrap } from "@usels/vite-plugin-legend-memo";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://tigerwest.github.io/use-ls",
   base: "/use-ls",
   vite: {
+    plugins: [autoWrap({ allGet: true })],
     resolve: {
       alias: {
         "@demos/core": fileURLToPath(new URL("../core/src", import.meta.url)),
@@ -22,7 +24,7 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: "use-ls",
+      title: "use-legend",
       head: [
         {
           tag: "script",

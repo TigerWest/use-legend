@@ -1,5 +1,4 @@
 import { useMediaQuery } from ".";
-import { Computed } from "@legendapp/state/react";
 
 const row: React.CSSProperties = {
   display: "inline-flex",
@@ -39,25 +38,21 @@ export default function UseMediaQueryDemo() {
         fontSize: "13px",
       }}
     >
-      <Computed>
-        {() => (
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-            }}
-          >
-            <div style={row}>
-              <span style={label}>isLargeScreen</span>
-              <span style={value}>{String(isLargeScreen$.get())}</span>
-            </div>
-            <div style={row}>
-              <span style={label}>prefersDark</span>
-              <span style={value}>{String(prefersDark$.get())}</span>
-            </div>
-          </div>
-        )}
-      </Computed>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+        }}
+      >
+        <div style={row}>
+          <span style={label}>isLargeScreen</span>
+          <span style={value}>{String(isLargeScreen$.get())}</span>
+        </div>
+        <div style={row}>
+          <span style={label}>prefersDark</span>
+          <span style={value}>{String(prefersDark$.get())}</span>
+        </div>
+      </div>
     </div>
   );
 }

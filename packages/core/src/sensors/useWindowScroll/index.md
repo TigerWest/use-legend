@@ -14,20 +14,15 @@ Tracks the window scroll position, direction, arrived state, and scrolling statu
 ```tsx twoslash
 // @noErrors
 import { useWindowScroll } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const { x, y, arrivedState } = useWindowScroll()
 
   return (
-    <Computed>
-      {() => (
-        <p>
-          scrollX: {x.get()}, scrollY: {y.get()}
-          {arrivedState.bottom.get() && ' — reached bottom'}
-        </p>
-      )}
-    </Computed>
+    <p>
+      scrollX: {x.get()}, scrollY: {y.get()}
+      {arrivedState.bottom.get() && ' — reached bottom'}
+    </p>
   )
 }
 ```
@@ -37,21 +32,16 @@ function Component() {
 ```tsx twoslash
 // @noErrors
 import { useWindowScroll } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function BackToTop() {
   const { arrivedState } = useWindowScroll()
 
   return (
-    <Computed>
-      {() =>
-        !arrivedState.top.get() ? (
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            ↑ Back to top
-          </button>
-        ) : null
-      }
-    </Computed>
+    !arrivedState.top.get() ? (
+      <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        ↑ Back to top
+      </button>
+    ) : null
   )
 }
 ```

@@ -26,6 +26,9 @@
     "sharp": "^0.34.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@usels/babel-plugin-legend-memo": "workspace:*",
+    "@usels/vite-plugin-legend-memo": "workspace:*",
     "chokidar": "^4.0.3",
     "concurrently": "^9.1.0",
     "gray-matter": "^4.0.3",

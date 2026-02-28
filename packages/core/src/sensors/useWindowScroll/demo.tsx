@@ -1,4 +1,3 @@
-import { Computed } from "@legendapp/state/react";
 import { useWindowScroll } from ".";
 
 const card: React.CSSProperties = {
@@ -31,38 +30,30 @@ export default function UseWindowScrollDemo() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <Computed>
-        {() => (
-          <div style={card}>
-            <span>
-              x: <strong>{x.get()}</strong>
-            </span>
-            <span>
-              y: <strong>{y.get()}</strong>
-            </span>
-            <span style={chip(isScrolling.get())}>
-              {isScrolling.get() ? "scrolling" : "idle"}
-            </span>
-          </div>
-        )}
-      </Computed>
+      <div style={card}>
+        <span>
+          x: <strong>{x.get()}</strong>
+        </span>
+        <span>
+          y: <strong>{y.get()}</strong>
+        </span>
+        <span style={chip(isScrolling.get())}>
+          {isScrolling.get() ? "scrolling" : "idle"}
+        </span>
+      </div>
 
-      <Computed>
-        {() => (
-          <div style={card}>
-            <span style={chip(arrivedState.top.get())}>top</span>
-            <span style={chip(arrivedState.bottom.get())}>bottom</span>
-            <span style={chip(arrivedState.left.get())}>left</span>
-            <span style={chip(arrivedState.right.get())}>right</span>
-            <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>
-              {directions.top.get() && "↑ "}
-              {directions.bottom.get() && "↓ "}
-              {directions.left.get() && "← "}
-              {directions.right.get() && "→ "}
-            </span>
-          </div>
-        )}
-      </Computed>
+      <div style={card}>
+        <span style={chip(arrivedState.top.get())}>top</span>
+        <span style={chip(arrivedState.bottom.get())}>bottom</span>
+        <span style={chip(arrivedState.left.get())}>left</span>
+        <span style={chip(arrivedState.right.get())}>right</span>
+        <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>
+          {directions.top.get() && "↑ "}
+          {directions.bottom.get() && "↓ "}
+          {directions.left.get() && "← "}
+          {directions.right.get() && "→ "}
+        </span>
+      </div>
 
       <p
         style={{

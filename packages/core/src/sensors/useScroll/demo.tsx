@@ -1,4 +1,3 @@
-import { Computed } from "@legendapp/state/react";
 import { useRef$ } from "../../elements/useRef$";
 import { useScroll } from ".";
 
@@ -26,41 +25,37 @@ export default function UseScrollDemo() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       {/* Stats */}
-      <Computed>
-        {() => (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--sl-color-gray-5, #e2e8f0)",
-              background: "var(--sl-color-gray-6, #f8fafc)",
-              fontFamily: "monospace",
-              fontSize: "13px",
-            }}
-          >
-            <span>
-              x: <strong>{x.get()}</strong>
-            </span>
-            <span>
-              y: <strong>{y.get()}</strong>
-            </span>
-            <span style={badge(isScrolling.get())}>
-              {isScrolling.get() ? "scrolling" : "idle"}
-            </span>
-            <span style={badge(arrivedState.top.get())}>top</span>
-            <span style={badge(arrivedState.bottom.get())}>bottom</span>
-            <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>
-              {directions.top.get() && "↑"}
-              {directions.bottom.get() && "↓"}
-              {directions.left.get() && "←"}
-              {directions.right.get() && "→"}
-            </span>
-          </div>
-        )}
-      </Computed>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px",
+          padding: "8px 12px",
+          borderRadius: "6px",
+          border: "1px solid var(--sl-color-gray-5, #e2e8f0)",
+          background: "var(--sl-color-gray-6, #f8fafc)",
+          fontFamily: "monospace",
+          fontSize: "13px",
+        }}
+      >
+        <span>
+          x: <strong>{x.get()}</strong>
+        </span>
+        <span>
+          y: <strong>{y.get()}</strong>
+        </span>
+        <span style={badge(isScrolling.get())}>
+          {isScrolling.get() ? "scrolling" : "idle"}
+        </span>
+        <span style={badge(arrivedState.top.get())}>top</span>
+        <span style={badge(arrivedState.bottom.get())}>bottom</span>
+        <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>
+          {directions.top.get() && "↑"}
+          {directions.bottom.get() && "↓"}
+          {directions.left.get() && "←"}
+          {directions.right.get() && "→"}
+        </span>
+      </div>
 
       {/* Scrollable container */}
       <div

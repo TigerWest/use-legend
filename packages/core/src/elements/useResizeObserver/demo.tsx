@@ -28,18 +28,12 @@ export default function UseResizeObserverDemo() {
           borderRadius: "6px",
         }}
       >
-        <Computed>
-          {() => (
-            <>
-              <span>
-                width: <strong>{size$.width.get()}px</strong>
-              </span>
-              <span>
-                height: <strong>{size$.height.get()}px</strong>
-              </span>
-            </>
-          )}
-        </Computed>
+        <span>
+          width: <strong>{size$.width.get()}px</strong>
+        </span>
+        <span>
+          height: <strong>{size$.height.get()}px</strong>
+        </span>
       </div>
       <textarea
         ref={el$}
