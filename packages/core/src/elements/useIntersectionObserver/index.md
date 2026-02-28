@@ -17,7 +17,7 @@ import { useRef$, useIntersectionObserver } from '@usels/core'
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
 
-  const { isActive, pause, resume } = useIntersectionObserver(
+  const { isActive$, pause, resume } = useIntersectionObserver(
     el$,
     (entries) => {
       entries.forEach((entry) => {
@@ -78,8 +78,8 @@ resume() // starts observing
 ```tsx
 const { pause, resume } = useIntersectionObserver(el$, callback)
 
-pause()   // disconnects the observer, isActive → false
-resume()  // reconnects the observer, isActive → true
+pause()   // disconnects the observer, isActive$ → false
+resume()  // reconnects the observer, isActive$ → true
 ```
 
 ### Permanent stop
@@ -93,7 +93,7 @@ stop() // disconnects and prevents future resume()
 ### Checking browser support
 
 ```tsx
-const { isSupported } = useIntersectionObserver(el$, callback)
+const { isSupported$ } = useIntersectionObserver(el$, callback)
 
-console.log(isSupported.get()) // Observable<boolean>
+console.log(isSupported$.get()) // Observable<boolean>
 ```

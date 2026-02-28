@@ -45,7 +45,7 @@ stop()
 ### Checking browser support
 
 ```tsx
-const { isSupported } = useResizeObserver(el$, handleResize)
+const { isSupported$ } = useResizeObserver(el$, handleResize)
 
-console.log(isSupported.get()) // Observable<boolean>
+console.log(isSupported$.get()) // Observable<boolean>
 ```

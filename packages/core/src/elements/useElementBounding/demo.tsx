@@ -3,7 +3,7 @@ import { useElementBounding } from ".";
 
 export default function UseElementBoundingDemo() {
   const el$ = useRef$<HTMLDivElement>();
-  const { x, y, top, left, width, height } = useElementBounding(el$);
+  const { x$, y$, top$, left$, width$, height$ } = useElementBounding(el$);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -22,12 +22,12 @@ export default function UseElementBoundingDemo() {
       >
         {(
           [
-            ["x", x.get()],
-            ["y", y.get()],
-            ["top", top.get()],
-            ["left", left.get()],
-            ["width", width.get()],
-            ["height", height.get()],
+            ["x", x$.get()],
+            ["y", y$.get()],
+            ["top", top$.get()],
+            ["left", left$.get()],
+            ["width", width$.get()],
+            ["height", height$.get()],
           ] as [string, number][]
         ).map(([label, val]) => (
           <span key={label}>

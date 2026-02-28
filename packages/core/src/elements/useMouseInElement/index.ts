@@ -20,23 +20,23 @@ export interface UseMouseInElementOptions {
 
 export interface UseMouseInElementReturn {
   /** Mouse X position relative to the element */
-  elementX: Observable<number>;
+  elementX$: Observable<number>;
   /** Mouse Y position relative to the element */
-  elementY: Observable<number>;
+  elementY$: Observable<number>;
   /** Element's absolute X position on the page */
-  elementPositionX: Observable<number>;
+  elementPositionX$: Observable<number>;
   /** Element's absolute Y position on the page */
-  elementPositionY: Observable<number>;
+  elementPositionY$: Observable<number>;
   /** Element width */
-  elementWidth: Observable<number>;
+  elementWidth$: Observable<number>;
   /** Element height */
-  elementHeight: Observable<number>;
+  elementHeight$: Observable<number>;
   /** Whether the mouse is outside the element */
-  isOutside: Observable<boolean>;
+  isOutside$: Observable<boolean>;
   /** Global mouse X (clientX) */
-  x: Observable<number>;
+  x$: Observable<number>;
   /** Global mouse Y (clientY) */
-  y: Observable<number>;
+  y$: Observable<number>;
   /** Stop all observers and event listeners */
   stop: () => void;
 }
@@ -58,7 +58,7 @@ const win = typeof window !== "undefined" ? window : null;
  * @example
  * ```tsx
  * const el$ = useRef$<HTMLDivElement>();
- * const { elementX, elementY, isOutside } = useMouseInElement(el$);
+ * const { elementX$, elementY$, isOutside$ } = useMouseInElement(el$);
  * return <div ref={el$} />;
  * ```
  */
@@ -195,15 +195,15 @@ export function useMouseInElement(
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
-    elementX: state$.elementX,
-    elementY: state$.elementY,
-    elementPositionX: state$.elementPositionX,
-    elementPositionY: state$.elementPositionY,
-    elementWidth: state$.elementWidth,
-    elementHeight: state$.elementHeight,
-    isOutside: state$.isOutside,
-    x: mouse$.x,
-    y: mouse$.y,
+    elementX$: state$.elementX,
+    elementY$: state$.elementY,
+    elementPositionX$: state$.elementPositionX,
+    elementPositionY$: state$.elementPositionY,
+    elementWidth$: state$.elementWidth,
+    elementHeight$: state$.elementHeight,
+    isOutside$: state$.isOutside,
+    x$: mouse$.x,
+    y$: mouse$.y,
     stop,
   };
 }

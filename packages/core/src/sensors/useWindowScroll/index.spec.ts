@@ -59,11 +59,11 @@ describe("useWindowScroll()", () => {
 
   it("returns an object matching UseScrollReturn shape", () => {
     const { result } = renderHook(() => useWindowScroll());
-    expect(typeof result.current.x.get).toBe("function");
-    expect(typeof result.current.y.get).toBe("function");
-    expect(typeof result.current.isScrolling.get).toBe("function");
-    expect(typeof result.current.arrivedState.get).toBe("function");
-    expect(typeof result.current.directions.get).toBe("function");
+    expect(typeof result.current.x$.get).toBe("function");
+    expect(typeof result.current.y$.get).toBe("function");
+    expect(typeof result.current.isScrolling$.get).toBe("function");
+    expect(typeof result.current.arrivedState$.get).toBe("function");
+    expect(typeof result.current.directions$.get).toBe("function");
     expect(typeof result.current.measure).toBe("function");
   });
 });

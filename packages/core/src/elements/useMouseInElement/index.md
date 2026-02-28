@@ -17,11 +17,11 @@ import { useRef$, useMouseInElement } from '@usels/core'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
-  const { elementX, elementY, isOutside } = useMouseInElement(el$)
+  const { elementX$, elementY$, isOutside$ } = useMouseInElement(el$)
 
   return (
     <div ref={el$}>
-      {isOutside.get() ? 'outside' : `${elementX.get()}, ${elementY.get()}`}
+      {isOutside$.get() ? 'outside' : `${elementX$.get()}, ${elementY$.get()}`}
     </div>
   )
 }
@@ -29,17 +29,17 @@ function Component() {
 
 ### Disable outside tracking
 
-By default `elementX`/`elementY` continue to update even when the cursor leaves the element.
+By default `elementX$`/`elementY$` continue to update even when the cursor leaves the element.
 Pass `handleOutside: false` to freeze the last in-element position once the cursor exits.
 
 ```typescript
-const { elementX, elementY } = useMouseInElement(el$, { handleOutside: false })
+const { elementX$, elementY$ } = useMouseInElement(el$, { handleOutside: false })
 ```
 
 ### Disable scroll / resize recalculation
 
 ```typescript
-const { elementX, elementY } = useMouseInElement(el$, {
+const { elementX$, elementY$ } = useMouseInElement(el$, {
   windowScroll: false,
   windowResize: false,
 })
@@ -52,7 +52,7 @@ const { elementX, elementY } = useMouseInElement(el$, {
 import { useRef$, Ref$, useMouseInElement } from '@usels/core'
 declare const el$: Ref$<HTMLDivElement>
 // ---cut---
-const { elementX, elementY, stop } = useMouseInElement(el$)
+const { elementX$, elementY$, stop } = useMouseInElement(el$)
 
 // Tear down all event listeners and observers
 stop()
@@ -60,12 +60,12 @@ stop()
 
 ### Global mouse coordinates
 
-The raw `clientX` / `clientY` values are also exposed as `x` and `y`.
+The raw `clientX` / `clientY` values are also exposed as `x$` and `y$`.
 
 ```tsx twoslash
 // @noErrors
 import { useRef$, Ref$, useMouseInElement } from '@usels/core'
 declare const el$: Ref$<HTMLDivElement>
 // ---cut---
-const { x, y, elementX, elementY } = useMouseInElement(el$)
+const { x$, y$, elementX$, elementY$ } = useMouseInElement(el$)
 ```

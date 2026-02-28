@@ -7,7 +7,7 @@ import { normalizeTargets } from "../useResizeObserver";
 export interface UseMutationObserverOptions extends MutationObserverInit {}
 
 export interface UseMutationObserverReturn {
-  isSupported: Observable<boolean>;
+  isSupported$: Observable<boolean>;
   stop: () => void;
   resume: () => void;
   takeRecords: () => MutationRecord[];
@@ -62,5 +62,5 @@ export function useMutationObserver(
     return observerRef.current?.takeRecords() ?? [];
   };
 
-  return { isSupported: isSupported$, stop: cleanup, resume: setup, takeRecords };
+  return { isSupported$, stop: cleanup, resume: setup, takeRecords };
 }

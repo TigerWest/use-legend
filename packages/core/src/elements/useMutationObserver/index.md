@@ -93,7 +93,7 @@ const pending = takeRecords()
 ### Checking browser support
 
 ```tsx
-const { isSupported } = useMutationObserver(el$, callback, { attributes: true })
+const { isSupported$ } = useMutationObserver(el$, callback, { attributes: true })
 
-console.log(isSupported.get()) // Observable<boolean>
+console.log(isSupported$.get()) // Observable<boolean>
 ```

@@ -21,7 +21,7 @@ describe("useMutationObserver()", () => {
     const { result } = renderHook(() =>
       useMutationObserver(wrapEl(el), vi.fn(), { attributes: true }),
     );
-    expect(result.current.isSupported.get()).toBe(true);
+    expect(result.current.isSupported$.get()).toBe(true);
   });
 
   it("calls callback when attribute changes", async () => {
@@ -231,7 +231,7 @@ describe("useMutationObserver()", () => {
       useMutationObserver(wrapEl(el), callback, { attributes: true }),
     );
 
-    expect(result.current.isSupported.get()).toBe(false);
+    expect(result.current.isSupported$.get()).toBe(false);
     el.setAttribute("data-x", "1");
     expect(callback).not.toHaveBeenCalled();
   });

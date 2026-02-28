@@ -110,15 +110,15 @@ describe("useMouseInElement()", () => {
     const div = createDiv();
     const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
 
-    expect(result.current.elementX.get()).toBe(0);
-    expect(result.current.elementY.get()).toBe(0);
-    expect(result.current.elementPositionX.get()).toBe(0);
-    expect(result.current.elementPositionY.get()).toBe(0);
-    expect(result.current.elementWidth.get()).toBe(0);
-    expect(result.current.elementHeight.get()).toBe(0);
-    expect(result.current.isOutside.get()).toBe(true);
-    expect(result.current.x.get()).toBe(0);
-    expect(result.current.y.get()).toBe(0);
+    expect(result.current.elementX$.get()).toBe(0);
+    expect(result.current.elementY$.get()).toBe(0);
+    expect(result.current.elementPositionX$.get()).toBe(0);
+    expect(result.current.elementPositionY$.get()).toBe(0);
+    expect(result.current.elementWidth$.get()).toBe(0);
+    expect(result.current.elementHeight$.get()).toBe(0);
+    expect(result.current.isOutside$.get()).toBe(true);
+    expect(result.current.x$.get()).toBe(0);
+    expect(result.current.y$.get()).toBe(0);
   });
 
   it("mousemove inside rect → updates elementX/Y and sets isOutside = false", () => {
@@ -135,9 +135,9 @@ describe("useMouseInElement()", () => {
 
     fireMouseMove(60, 70); // inside: 60-10=50, 70-20=50
 
-    expect(result.current.isOutside.get()).toBe(false);
-    expect(result.current.elementX.get()).toBe(50);
-    expect(result.current.elementY.get()).toBe(50);
+    expect(result.current.isOutside$.get()).toBe(false);
+    expect(result.current.elementX$.get()).toBe(50);
+    expect(result.current.elementY$.get()).toBe(50);
   });
 
   it("exposes raw clientX/clientY as x and y", () => {
@@ -146,8 +146,8 @@ describe("useMouseInElement()", () => {
 
     fireMouseMove(350, 420);
 
-    expect(result.current.x.get()).toBe(350);
-    expect(result.current.y.get()).toBe(420);
+    expect(result.current.x$.get()).toBe(350);
+    expect(result.current.y$.get()).toBe(420);
   });
 
   it("elementPositionX/Y includes window.scrollX/scrollY", () => {
@@ -167,9 +167,9 @@ describe("useMouseInElement()", () => {
     fireMouseMove(60, 70); // inside
 
     // elementPositionX = rect.left + scrollX = 10 + 100 = 110
-    expect(result.current.elementPositionX.get()).toBe(110);
+    expect(result.current.elementPositionX$.get()).toBe(110);
     // elementPositionY = rect.top + scrollY = 20 + 200 = 220
-    expect(result.current.elementPositionY.get()).toBe(220);
+    expect(result.current.elementPositionY$.get()).toBe(220);
   });
 
   it("exposes elementWidth and elementHeight from matched rect", () => {
@@ -185,8 +185,8 @@ describe("useMouseInElement()", () => {
 
     fireMouseMove(50, 50); // inside
 
-    expect(result.current.elementWidth.get()).toBe(300);
-    expect(result.current.elementHeight.get()).toBe(150);
+    expect(result.current.elementWidth$.get()).toBe(300);
+    expect(result.current.elementHeight$.get()).toBe(150);
   });
 
   it("mousemove outside rect → isOutside = true", () => {
@@ -201,10 +201,10 @@ describe("useMouseInElement()", () => {
     const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
 
     fireMouseMove(50, 50); // inside first
-    expect(result.current.isOutside.get()).toBe(false);
+    expect(result.current.isOutside$.get()).toBe(false);
 
     fireMouseMove(500, 500); // outside
-    expect(result.current.isOutside.get()).toBe(true);
+    expect(result.current.isOutside$.get()).toBe(true);
   });
 
   it("handleOutside: true (default) — still updates elementX/Y when outside", () => {
@@ -222,9 +222,9 @@ describe("useMouseInElement()", () => {
 
     fireMouseMove(300, 400); // outside: elementX = 300-0, elementY = 400-0
 
-    expect(result.current.isOutside.get()).toBe(true);
-    expect(result.current.elementX.get()).toBe(300);
-    expect(result.current.elementY.get()).toBe(400);
+    expect(result.current.isOutside$.get()).toBe(true);
+    expect(result.current.elementX$.get()).toBe(300);
+    expect(result.current.elementY$.get()).toBe(400);
   });
 
   it("handleOutside: false — elementX/Y frozen at last inside position after leaving", () => {
@@ -241,13 +241,13 @@ describe("useMouseInElement()", () => {
     );
 
     fireMouseMove(80, 60); // inside
-    expect(result.current.elementX.get()).toBe(80);
-    expect(result.current.elementY.get()).toBe(60);
+    expect(result.current.elementX$.get()).toBe(80);
+    expect(result.current.elementY$.get()).toBe(60);
 
     fireMouseMove(500, 500); // outside — should NOT update elementX/Y
-    expect(result.current.isOutside.get()).toBe(true);
-    expect(result.current.elementX.get()).toBe(80);
-    expect(result.current.elementY.get()).toBe(60);
+    expect(result.current.isOutside$.get()).toBe(true);
+    expect(result.current.elementX$.get()).toBe(80);
+    expect(result.current.elementY$.get()).toBe(60);
   });
 
   it("document mouseleave → sets isOutside = true regardless of cursor position", () => {
@@ -262,13 +262,13 @@ describe("useMouseInElement()", () => {
     const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
 
     fireMouseMove(50, 50); // inside
-    expect(result.current.isOutside.get()).toBe(false);
+    expect(result.current.isOutside$.get()).toBe(false);
 
     act(() => {
       document.dispatchEvent(new MouseEvent("mouseleave", { bubbles: false }));
     });
 
-    expect(result.current.isOutside.get()).toBe(true);
+    expect(result.current.isOutside$.get()).toBe(true);
   });
 
   it("scroll event triggers recalculation (windowScroll: true by default)", () => {
@@ -355,7 +355,7 @@ describe("useMouseInElement()", () => {
     const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
 
     fireMouseMove(80, 60); // inside
-    expect(result.current.elementX.get()).toBe(80);
+    expect(result.current.elementX$.get()).toBe(80);
 
     act(() => result.current.stop());
 
@@ -371,8 +371,8 @@ describe("useMouseInElement()", () => {
     });
 
     // x/y raw values should not have updated
-    expect(result.current.x.get()).toBe(80);
-    expect(result.current.y.get()).toBe(60);
+    expect(result.current.x$.get()).toBe(80);
+    expect(result.current.y$.get()).toBe(60);
   });
 
   it("does not throw when target is null", () => {
@@ -391,8 +391,8 @@ describe("useMouseInElement()", () => {
     fireMouseMove(50, 50);
 
     // No rect → state stays at initial values
-    expect(result.current.isOutside.get()).toBe(true);
-    expect(result.current.elementX.get()).toBe(0);
-    expect(result.current.elementY.get()).toBe(0);
+    expect(result.current.isOutside$.get()).toBe(true);
+    expect(result.current.elementX$.get()).toBe(0);
+    expect(result.current.elementY$.get()).toBe(0);
   });
 });

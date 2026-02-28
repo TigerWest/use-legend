@@ -17,13 +17,13 @@ import { useScroll, useRef$ } from '@usels/core'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
-  const { x, y, arrivedState } = useScroll(el$)
+  const { x$, y$, arrivedState$ } = useScroll(el$)
 
   return (
     <div ref={el$} style={{ overflow: 'auto', height: 300 }}>
       <p>
-        scrollX: {x.get()}, scrollY: {y.get()}
-        {arrivedState.bottom.get() && ' — reached bottom'}
+        scrollX: {x$.get()}, scrollY: {y$.get()}
+        {arrivedState$.bottom.get() && ' — reached bottom'}
       </p>
     </div>
   )
@@ -38,7 +38,7 @@ Use `useWindowScroll` for the common case, or pass `window` directly.
 import { useScroll } from '@usels/core'
 
 function Component() {
-  const { y, arrivedState, isScrolling } = useScroll(window)
+  const { y$, arrivedState$, isScrolling$ } = useScroll(window)
 }
 ```
 
@@ -49,10 +49,10 @@ import { useScroll, useRef$ } from '@usels/core'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
-  const { directions } = useScroll(el$)
+  const { directions$ } = useScroll(el$)
 
-  // directions.bottom.get() → true while scrolling down
-  // directions.top.get()    → true while scrolling up
+  // directions$.bottom.get() → true while scrolling down
+  // directions$.top.get()    → true while scrolling up
 }
 ```
 
@@ -61,7 +61,7 @@ function Component() {
 Use `offset` to declare a threshold (in px) before the edge is considered "arrived".
 
 ```typescript
-const { arrivedState } = useScroll(el$, {
+const { arrivedState$ } = useScroll(el$, {
   offset: { bottom: 100 }, // bottom=true when within 100px of the end
 })
 ```
@@ -69,7 +69,7 @@ const { arrivedState } = useScroll(el$, {
 ### isScrolling + onStop
 
 ```typescript
-const { isScrolling } = useScroll(el$, {
+const { isScrolling$ } = useScroll(el$, {
   idle: 300,           // ms to wait before isScrolling becomes false (default: 200)
   onStop: () => {
     // called when scrolling stops
@@ -80,13 +80,13 @@ const { isScrolling } = useScroll(el$, {
 ### Throttle
 
 ```typescript
-const { x, y } = useScroll(el$, { throttle: 50 }) // handler fires at most once per 50ms
+const { x$, y$ } = useScroll(el$, { throttle: 50 }) // handler fires at most once per 50ms
 ```
 
 ### Manual re-measure
 
 ```typescript
-const { y, measure } = useScroll(el$)
+const { y$, measure } = useScroll(el$)
 
 // Call measure() to force-sync scroll state without a scroll event
 measure()
@@ -100,12 +100,12 @@ Passing `null` is safe — all observables stay at their initial values and no e
 import { useScroll } from '@usels/core'
 
 const target = typeof window !== 'undefined' ? document : null
-const { y } = useScroll(target)
+const { y$ } = useScroll(target)
 ```
 
 ## Notes
 
-**Reactive observables, not state.** All returned values (`x`, `y`, `isScrolling`, `arrivedState`, `directions`) are Legend-State `Observable`s. Read them with `.get()` inside a reactive context (`useObserve`, etc.) to avoid unnecessary re-renders.
+**Reactive observables, not state.** All returned values (`x$`, `y$`, `isScrolling$`, `arrivedState$`, `directions$`) are Legend-State `Observable`s. Read them with `.get()` inside a reactive context (`useObserve`, etc.) to avoid unnecessary re-renders.
 
 **`measure()` is synchronous.** It immediately reads the current scroll values from the DOM and updates all observables. Useful after programmatic scroll operations.
 

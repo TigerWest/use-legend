@@ -9,8 +9,8 @@ export interface UseElementSizeOptions {
 }
 
 export interface UseElementSizeReturn {
-  width: Observable<number>;
-  height: Observable<number>;
+  width$: Observable<number>;
+  height$: Observable<number>;
   stop: () => void;
 }
 
@@ -21,13 +21,13 @@ export interface UseElementSizeReturn {
  * @param target - Element to observe (Ref$, Observable<Element|null>, Document, Window, or null)
  * @param initialSize - Initial size values (default: { width: 0, height: 0 })
  * @param options - Optional box model option
- * @returns `{ width, height, stop }` — reactive size observables and manual stop function
+ * @returns `{ width$, height$, stop }` — reactive size observables and manual stop function
  *
  * @example
  * ```tsx
  * const el$ = useRef$<HTMLDivElement>();
- * const { width, height } = useElementSize(el$);
- * return <div ref={el$}>{width.get()} x {height.get()}</div>;
+ * const { width$, height$ } = useElementSize(el$);
+ * return <div ref={el$}>{width$.get()} x {height$.get()}</div>;
  * ```
  */
 export function useElementSize(
@@ -96,5 +96,5 @@ export function useElementSize(
     }
   });
 
-  return { width: size$.width, height: size$.height, stop };
+  return { width$: size$.width, height$: size$.height, stop };
 }

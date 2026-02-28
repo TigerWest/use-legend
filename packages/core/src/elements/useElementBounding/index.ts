@@ -23,14 +23,14 @@ export interface UseElementBoundingOptions {
 }
 
 export interface UseElementBoundingReturn {
-  x: Observable<number>;
-  y: Observable<number>;
-  top: Observable<number>;
-  right: Observable<number>;
-  bottom: Observable<number>;
-  left: Observable<number>;
-  width: Observable<number>;
-  height: Observable<number>;
+  x$: Observable<number>;
+  y$: Observable<number>;
+  top$: Observable<number>;
+  right$: Observable<number>;
+  bottom$: Observable<number>;
+  left$: Observable<number>;
+  width$: Observable<number>;
+  height$: Observable<number>;
   update: () => void;
 }
 
@@ -59,7 +59,7 @@ const win = typeof window !== "undefined" ? window : null;
  * @example
  * ```tsx
  * const el$ = useRef$<HTMLDivElement>();
- * const { top, left, width, height } = useElementBounding(el$);
+ * const { top$, left$, width$, height$ } = useElementBounding(el$);
  * return <div ref={el$} />;
  * ```
  */
@@ -146,14 +146,14 @@ export function useElementBounding(
   }, []);
 
   return {
-    x: bounding$.x,
-    y: bounding$.y,
-    top: bounding$.top,
-    right: bounding$.right,
-    bottom: bounding$.bottom,
-    left: bounding$.left,
-    width: bounding$.width,
-    height: bounding$.height,
+    x$: bounding$.x,
+    y$: bounding$.y,
+    top$: bounding$.top,
+    right$: bounding$.right,
+    bottom$: bounding$.bottom,
+    left$: bounding$.left,
+    width$: bounding$.width,
+    height$: bounding$.height,
     update,
   };
 }

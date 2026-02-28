@@ -42,11 +42,11 @@ export interface ScrollDirections {
 }
 
 export interface UseScrollReturn {
-  x: Observable<number>;
-  y: Observable<number>;
-  isScrolling: Observable<boolean>;
-  arrivedState: Observable<ArrivedState>;
-  directions: Observable<ScrollDirections>;
+  x$: Observable<number>;
+  y$: Observable<number>;
+  isScrolling$: Observable<boolean>;
+  arrivedState$: Observable<ArrivedState>;
+  directions$: Observable<ScrollDirections>;
   measure: () => void;
 }
 
@@ -191,11 +191,11 @@ export function useScroll(
   });
 
   return {
-    x: x$,
-    y: y$,
-    isScrolling: isScrolling$,
-    arrivedState: arrivedState$,
-    directions: directions$,
+    x$,
+    y$,
+    isScrolling$,
+    arrivedState$,
+    directions$,
     measure,
   };
 }

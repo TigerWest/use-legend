@@ -11,7 +11,7 @@ export interface UseResizeObserverOptions {
 }
 
 export interface UseResizeObserverReturn {
-  isSupported: Observable<boolean>;
+  isSupported$: Observable<boolean>;
   stop: () => void;
 }
 
@@ -23,7 +23,7 @@ export interface UseResizeObserverReturn {
  *   the observer is only recreated when targets change, not on every render.
  * @param options - Optional box model option. Note: dynamic `box` changes are not reactively
  *   tracked; remount the hook or change a tracked target to pick up a new box value.
- * @returns `{ isSupported, stop }` — reactive support flag and manual stop function
+ * @returns `{ isSupported$, stop }` — reactive support flag and manual stop function
  *
  * @example
  * ```tsx
@@ -102,5 +102,5 @@ export function useResizeObserver(
     if (mountedRef.current) setup();
   });
 
-  return { isSupported: isSupported$, stop: cleanup };
+  return { isSupported$, stop: cleanup };
 }

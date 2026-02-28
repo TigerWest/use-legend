@@ -26,32 +26,32 @@ const chip = (active: boolean): React.CSSProperties => ({
 });
 
 export default function UseWindowScrollDemo() {
-  const { x, y, isScrolling, arrivedState, directions } = useWindowScroll();
+  const { x$, y$, isScrolling$, arrivedState$, directions$ } = useWindowScroll();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
       <div style={card}>
         <span>
-          x: <strong>{x.get()}</strong>
+          x: <strong>{x$.get()}</strong>
         </span>
         <span>
-          y: <strong>{y.get()}</strong>
+          y: <strong>{y$.get()}</strong>
         </span>
-        <span style={chip(isScrolling.get())}>
-          {isScrolling.get() ? "scrolling" : "idle"}
+        <span style={chip(isScrolling$.get())}>
+          {isScrolling$.get() ? "scrolling" : "idle"}
         </span>
       </div>
 
       <div style={card}>
-        <span style={chip(arrivedState.top.get())}>top</span>
-        <span style={chip(arrivedState.bottom.get())}>bottom</span>
-        <span style={chip(arrivedState.left.get())}>left</span>
-        <span style={chip(arrivedState.right.get())}>right</span>
+        <span style={chip(arrivedState$.top.get())}>top</span>
+        <span style={chip(arrivedState$.bottom.get())}>bottom</span>
+        <span style={chip(arrivedState$.left.get())}>left</span>
+        <span style={chip(arrivedState$.right.get())}>right</span>
         <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>
-          {directions.top.get() && "↑ "}
-          {directions.bottom.get() && "↓ "}
-          {directions.left.get() && "← "}
-          {directions.right.get() && "→ "}
+          {directions$.top.get() && "↑ "}
+          {directions$.bottom.get() && "↓ "}
+          {directions$.left.get() && "← "}
+          {directions$.right.get() && "→ "}
         </span>
       </div>
 

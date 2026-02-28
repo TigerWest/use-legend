@@ -3,7 +3,7 @@ import { useElementSize } from ".";
 
 export default function UseElementSizeDemo() {
   const el$ = useRef$<HTMLTextAreaElement>();
-  const { width, height } = useElementSize(el$);
+  const { width$, height$ } = useElementSize(el$);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -20,10 +20,10 @@ export default function UseElementSizeDemo() {
       >
         <>
           <span>
-            width: <strong>{Math.round(width.get())}px</strong>
+            width: <strong>{Math.round(width$.get())}px</strong>
           </span>
           <span>
-            height: <strong>{Math.round(height.get())}px</strong>
+            height: <strong>{Math.round(height$.get())}px</strong>
           </span>
         </>
       </div>

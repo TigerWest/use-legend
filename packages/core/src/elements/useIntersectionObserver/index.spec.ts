@@ -44,14 +44,14 @@ describe("useIntersectionObserver()", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
 
-    expect(result.current.isSupported.get()).toBe(true);
+    expect(result.current.isSupported$.get()).toBe(true);
   });
 
   it("isActive is true by default", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
 
-    expect(result.current.isActive.get()).toBe(true);
+    expect(result.current.isActive$.get()).toBe(true);
   });
 
   it("does not start observer when immediate is false", () => {
@@ -69,7 +69,7 @@ describe("useIntersectionObserver()", () => {
       useIntersectionObserver(wrapEl(el),vi.fn(), { immediate: false }),
     );
 
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
   });
 
   it("pause() disconnects observer and sets isActive to false", () => {
@@ -81,7 +81,7 @@ describe("useIntersectionObserver()", () => {
     });
 
     expect(mockDisconnect).toHaveBeenCalled();
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
   });
 
   it("resume() restarts the observer after pause", () => {
@@ -95,7 +95,7 @@ describe("useIntersectionObserver()", () => {
 
     act(() => result.current.resume());
 
-    expect(result.current.isActive.get()).toBe(true);
+    expect(result.current.isActive$.get()).toBe(true);
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(mockObserve).toHaveBeenCalledWith(el);
   });
@@ -107,7 +107,7 @@ describe("useIntersectionObserver()", () => {
     act(() => result.current.stop());
 
     expect(mockDisconnect).toHaveBeenCalled();
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
   });
 
   it("resume() has no effect after stop()", () => {
@@ -161,7 +161,7 @@ describe("useIntersectionObserver()", () => {
 
     // After assignment — observer must have been called with the element
     expect(mockObserve).toHaveBeenCalledWith(div);
-    expect(result.current.io.isSupported.get()).toBe(true);
+    expect(result.current.io.isSupported$.get()).toBe(true);
   });
 
   it("passes threshold option to IntersectionObserver", () => {
@@ -238,7 +238,7 @@ describe("useIntersectionObserver()", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
 
-    expect(result.current.isSupported.get()).toBe(false);
+    expect(result.current.isSupported$.get()).toBe(false);
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
   });
 
@@ -374,32 +374,32 @@ describe("useIntersectionObserver()", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
 
-    expect(result.current.isActive.get()).toBe(true);
+    expect(result.current.isActive$.get()).toBe(true);
 
     // pause
     act(() => result.current.pause());
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
     expect(mockDisconnect).toHaveBeenCalledTimes(1);
 
     // resume
     mockObserve.mockClear();
     MockIntersectionObserver.mockClear();
     act(() => result.current.resume());
-    expect(result.current.isActive.get()).toBe(true);
+    expect(result.current.isActive$.get()).toBe(true);
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(mockObserve).toHaveBeenCalledWith(el);
 
     // stop
     mockDisconnect.mockClear();
     act(() => result.current.stop());
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
     expect(mockDisconnect).toHaveBeenCalledTimes(1);
 
     // resume after stop has no effect
     MockIntersectionObserver.mockClear();
     act(() => result.current.resume());
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
   });
 
   it("recreates observer when Ref$ target changes to a different element", () => {
@@ -439,7 +439,7 @@ describe("useIntersectionObserver()", () => {
     });
 
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
   });
 
   it("pause() after unmount does not throw", () => {

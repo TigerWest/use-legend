@@ -111,15 +111,15 @@ describe("useScroll()", () => {
     it("sets element.scrollLeft/scrollTop as initial x/y values on mount", () => {
       const el = makeEl({ scrollLeft: 50, scrollTop: 100 });
       const { result } = renderHook(() => useScroll(wrapEl(el)));
-      expect(result.current.x.get()).toBe(50);
-      expect(result.current.y.get()).toBe(100);
+      expect(result.current.x$.get()).toBe(50);
+      expect(result.current.y$.get()).toBe(100);
     });
 
     it("sets window.scrollX/scrollY as initial x/y values on mount (Window target)", () => {
       setWindowDimensions({ scrollX: 20, scrollY: 40 });
       const { result } = renderHook(() => useScroll(window));
-      expect(result.current.x.get()).toBe(20);
-      expect(result.current.y.get()).toBe(40);
+      expect(result.current.x$.get()).toBe(20);
+      expect(result.current.y$.get()).toBe(40);
     });
 
     it("sets documentElement.scrollLeft/scrollTop as initial x/y values on mount (Document target)", () => {
@@ -134,17 +134,17 @@ describe("useScroll()", () => {
         value: 30,
       });
       const { result } = renderHook(() => useScroll(document));
-      expect(result.current.x.get()).toBe(10);
-      expect(result.current.y.get()).toBe(30);
+      expect(result.current.x$.get()).toBe(10);
+      expect(result.current.y$.get()).toBe(30);
     });
 
     it("initial arrivedState is top=true, left=true, right=false, bottom=false", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(wrapEl(el)));
-      expect(result.current.arrivedState.top.get()).toBe(true);
-      expect(result.current.arrivedState.left.get()).toBe(true);
-      expect(result.current.arrivedState.right.get()).toBe(false);
-      expect(result.current.arrivedState.bottom.get()).toBe(false);
+      expect(result.current.arrivedState$.top.get()).toBe(true);
+      expect(result.current.arrivedState$.left.get()).toBe(true);
+      expect(result.current.arrivedState$.right.get()).toBe(false);
+      expect(result.current.arrivedState$.bottom.get()).toBe(false);
     });
 
     it("initial isScrolling is false", () => {
@@ -152,13 +152,13 @@ describe("useScroll()", () => {
       const { result } = renderHook(() => useScroll(wrapEl(el)));
       // advance timers to let idle expire
       act(() => { vi.runAllTimers(); });
-      expect(result.current.isScrolling.get()).toBe(false);
+      expect(result.current.isScrolling$.get()).toBe(false);
     });
 
     it("initial directions are all false", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(wrapEl(el)));
-      const d = result.current.directions;
+      const d = result.current.directions$;
       expect(d.left.get()).toBe(false);
       expect(d.right.get()).toBe(false);
       expect(d.top.get()).toBe(false);
@@ -180,7 +180,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.y.get()).toBe(200);
+      expect(result.current.y$.get()).toBe(200);
     });
 
     it("y decreases when scrolling up", () => {
@@ -192,7 +192,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.y.get()).toBe(100);
+      expect(result.current.y$.get()).toBe(100);
     });
 
     it("x increases when scrolling right", () => {
@@ -204,7 +204,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.x.get()).toBe(150);
+      expect(result.current.x$.get()).toBe(150);
     });
 
     it("x decreases when scrolling left", () => {
@@ -216,7 +216,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.x.get()).toBe(50);
+      expect(result.current.x$.get()).toBe(50);
     });
 
     it("x does not change when only vertical scroll occurs", () => {
@@ -228,7 +228,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.x.get()).toBe(0);
+      expect(result.current.x$.get()).toBe(0);
     });
 
     it("y does not change when only horizontal scroll occurs", () => {
@@ -240,7 +240,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.y.get()).toBe(0);
+      expect(result.current.y$.get()).toBe(0);
     });
   });
 
@@ -252,7 +252,7 @@ describe("useScroll()", () => {
     it("top=true when scrollTop is 0", () => {
       const el = makeEl({ scrollTop: 0 });
       const { result } = renderHook(() => useScroll(wrapEl(el)));
-      expect(result.current.arrivedState.top.get()).toBe(true);
+      expect(result.current.arrivedState$.top.get()).toBe(true);
     });
 
     it("top=false when scrollTop is greater than 0", () => {
@@ -264,7 +264,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.arrivedState.top.get()).toBe(false);
+      expect(result.current.arrivedState$.top.get()).toBe(false);
     });
 
     it("bottom=true when scrollTop reaches maxScrollY", () => {
@@ -277,13 +277,13 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.arrivedState.bottom.get()).toBe(true);
+      expect(result.current.arrivedState$.bottom.get()).toBe(true);
     });
 
     it("left=true when scrollLeft is 0", () => {
       const el = makeEl({ scrollLeft: 0 });
       const { result } = renderHook(() => useScroll(wrapEl(el)));
-      expect(result.current.arrivedState.left.get()).toBe(true);
+      expect(result.current.arrivedState$.left.get()).toBe(true);
     });
 
     it("right=true when scrollLeft reaches maxScrollX", () => {
@@ -296,7 +296,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.arrivedState.right.get()).toBe(true);
+      expect(result.current.arrivedState$.right.get()).toBe(true);
     });
 
     it("top=true when scrollTop <= offset.top with offset.top set", () => {
@@ -310,7 +310,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.arrivedState.top.get()).toBe(true);
+      expect(result.current.arrivedState$.top.get()).toBe(true);
     });
 
     it("bottom=true when scrollTop >= maxScrollY - offset.bottom with offset.bottom set", () => {
@@ -326,7 +326,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.arrivedState.bottom.get()).toBe(true);
+      expect(result.current.arrivedState$.bottom.get()).toBe(true);
     });
 
     it("top=true and bottom=true for non-scrollable element (scrollHeight === clientHeight)", () => {
@@ -338,8 +338,8 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.arrivedState.top.get()).toBe(true);
-      expect(result.current.arrivedState.bottom.get()).toBe(true);
+      expect(result.current.arrivedState$.top.get()).toBe(true);
+      expect(result.current.arrivedState$.bottom.get()).toBe(true);
     });
   });
 
@@ -357,8 +357,8 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.directions.bottom.get()).toBe(true);
-      expect(result.current.directions.top.get()).toBe(false);
+      expect(result.current.directions$.bottom.get()).toBe(true);
+      expect(result.current.directions$.top.get()).toBe(false);
     });
 
     it("top=true and bottom=false when scrolling up", () => {
@@ -370,8 +370,8 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.directions.top.get()).toBe(true);
-      expect(result.current.directions.bottom.get()).toBe(false);
+      expect(result.current.directions$.top.get()).toBe(true);
+      expect(result.current.directions$.bottom.get()).toBe(false);
     });
 
     it("right=true and left=false when scrolling right", () => {
@@ -383,8 +383,8 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.directions.right.get()).toBe(true);
-      expect(result.current.directions.left.get()).toBe(false);
+      expect(result.current.directions$.right.get()).toBe(true);
+      expect(result.current.directions$.left.get()).toBe(false);
     });
 
     it("left=true and right=false when scrolling left", () => {
@@ -396,8 +396,8 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.directions.left.get()).toBe(true);
-      expect(result.current.directions.right.get()).toBe(false);
+      expect(result.current.directions$.left.get()).toBe(true);
+      expect(result.current.directions$.right.get()).toBe(false);
     });
   });
 
@@ -414,7 +414,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.isScrolling.get()).toBe(true);
+      expect(result.current.isScrolling$.get()).toBe(true);
     });
 
     it("becomes false after idle time (default 200ms)", () => {
@@ -426,7 +426,7 @@ describe("useScroll()", () => {
         vi.advanceTimersByTime(200);
       });
 
-      expect(result.current.isScrolling.get()).toBe(false);
+      expect(result.current.isScrolling$.get()).toBe(false);
     });
 
     it("idle option adjusts the wait time", () => {
@@ -437,12 +437,12 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
         vi.advanceTimersByTime(200);
       });
-      expect(result.current.isScrolling.get()).toBe(true);
+      expect(result.current.isScrolling$.get()).toBe(true);
 
       act(() => {
         vi.advanceTimersByTime(300);
       });
-      expect(result.current.isScrolling.get()).toBe(false);
+      expect(result.current.isScrolling$.get()).toBe(false);
     });
 
     it("onStop callback is called when idle expires", () => {
@@ -492,7 +492,7 @@ describe("useScroll()", () => {
         result.current.measure();
       });
 
-      expect(result.current.y.get()).toBe(300);
+      expect(result.current.y$.get()).toBe(300);
     });
 
     it("all of x/y/arrivedState/directions are updated when measure() is called", () => {
@@ -505,9 +505,9 @@ describe("useScroll()", () => {
         result.current.measure();
       });
 
-      expect(result.current.y.get()).toBe(600);
-      expect(result.current.arrivedState.bottom.get()).toBe(true);
-      expect(result.current.directions.bottom.get()).toBe(true);
+      expect(result.current.y$.get()).toBe(600);
+      expect(result.current.arrivedState$.bottom.get()).toBe(true);
+      expect(result.current.directions$.bottom.get()).toBe(true);
     });
   });
 
@@ -527,7 +527,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.y.get()).toBe(200);
+      expect(result.current.y$.get()).toBe(200);
     });
 
     it("consecutive calls within specified ms are ignored when throttle is set", () => {
@@ -540,7 +540,7 @@ describe("useScroll()", () => {
         (el as any).scrollTop = 50;
         el.dispatchEvent(new Event("scroll"));
       });
-      const firstY = result.current.y.get();
+      const firstY = result.current.y$.get();
       expect(firstY).toBe(50);
 
       act(() => {
@@ -549,7 +549,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
       // y should remain 50 (throttled)
-      expect(result.current.y.get()).toBe(50);
+      expect(result.current.y$.get()).toBe(50);
     });
   });
 
@@ -567,7 +567,7 @@ describe("useScroll()", () => {
         window.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.y.get()).toBe(500);
+      expect(result.current.y$.get()).toBe(500);
     });
 
     it("Document target — uses documentElement.scrollLeft/scrollTop", () => {
@@ -593,7 +593,7 @@ describe("useScroll()", () => {
         document.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.y.get()).toBe(300);
+      expect(result.current.y$.get()).toBe(300);
     });
 
     it("HTMLElement target — uses scrollLeft/scrollTop", () => {
@@ -605,7 +605,7 @@ describe("useScroll()", () => {
         el.dispatchEvent(new Event("scroll"));
       });
 
-      expect(result.current.y.get()).toBe(150);
+      expect(result.current.y$.get()).toBe(150);
     });
   });
 
@@ -616,16 +616,16 @@ describe("useScroll()", () => {
   describe("edge case: null target", () => {
     it("returns x=0, y=0 without error when null target is passed", () => {
       const { result } = renderHook(() => useScroll(null));
-      expect(result.current.x.get()).toBe(0);
-      expect(result.current.y.get()).toBe(0);
+      expect(result.current.x$.get()).toBe(0);
+      expect(result.current.y$.get()).toBe(0);
     });
 
     it("arrivedState/directions maintain initial defaults when null target is passed", () => {
       const { result } = renderHook(() => useScroll(null));
-      expect(result.current.arrivedState.top.get()).toBe(true);
-      expect(result.current.arrivedState.left.get()).toBe(true);
-      expect(result.current.arrivedState.right.get()).toBe(false);
-      expect(result.current.arrivedState.bottom.get()).toBe(false);
+      expect(result.current.arrivedState$.top.get()).toBe(true);
+      expect(result.current.arrivedState$.left.get()).toBe(true);
+      expect(result.current.arrivedState$.right.get()).toBe(false);
+      expect(result.current.arrivedState$.bottom.get()).toBe(false);
     });
 
     it("does not register scroll event listener when null target is passed", () => {

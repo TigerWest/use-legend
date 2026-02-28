@@ -20,7 +20,7 @@ const badge = (active: boolean): React.CSSProperties => ({
 
 export default function UseScrollDemo() {
   const el$ = useRef$<HTMLDivElement>();
-  const { x, y, isScrolling, arrivedState, directions } = useScroll(el$);
+  const { x$, y$, isScrolling$, arrivedState$, directions$ } = useScroll(el$);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -39,21 +39,21 @@ export default function UseScrollDemo() {
         }}
       >
         <span>
-          x: <strong>{x.get()}</strong>
+          x: <strong>{x$.get()}</strong>
         </span>
         <span>
-          y: <strong>{y.get()}</strong>
+          y: <strong>{y$.get()}</strong>
         </span>
-        <span style={badge(isScrolling.get())}>
-          {isScrolling.get() ? "scrolling" : "idle"}
+        <span style={badge(isScrolling$.get())}>
+          {isScrolling$.get() ? "scrolling" : "idle"}
         </span>
-        <span style={badge(arrivedState.top.get())}>top</span>
-        <span style={badge(arrivedState.bottom.get())}>bottom</span>
+        <span style={badge(arrivedState$.top.get())}>top</span>
+        <span style={badge(arrivedState$.bottom.get())}>bottom</span>
         <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>
-          {directions.top.get() && "↑"}
-          {directions.bottom.get() && "↓"}
-          {directions.left.get() && "←"}
-          {directions.right.get() && "→"}
+          {directions$.top.get() && "↑"}
+          {directions$.bottom.get() && "↓"}
+          {directions$.left.get() && "←"}
+          {directions$.right.get() && "→"}
         </span>
       </div>
 

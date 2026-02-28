@@ -93,8 +93,8 @@ describe("useElementSize()", () => {
       instance.trigger(div, { contentRect: { width: 320, height: 240 } }),
     );
 
-    expect(result.current.width.get()).toBe(320);
-    expect(result.current.height.get()).toBe(240);
+    expect(result.current.width$.get()).toBe(320);
+    expect(result.current.height$.get()).toBe(240);
   });
 
   it("uses getBoundingClientRect() for SVG elements", () => {
@@ -117,8 +117,8 @@ describe("useElementSize()", () => {
     act(() => instance.trigger(svg));
 
     expect(svg.getBoundingClientRect).toHaveBeenCalled();
-    expect(result.current.width.get()).toBe(150);
-    expect(result.current.height.get()).toBe(75);
+    expect(result.current.width$.get()).toBe(150);
+    expect(result.current.height$.get()).toBe(75);
   });
 
   it("reads borderBoxSize when box option is 'border-box'", () => {
@@ -135,8 +135,8 @@ describe("useElementSize()", () => {
       }),
     );
 
-    expect(result.current.width.get()).toBe(400);
-    expect(result.current.height.get()).toBe(300);
+    expect(result.current.width$.get()).toBe(400);
+    expect(result.current.height$.get()).toBe(300);
   });
 
   it("reads devicePixelContentBoxSize when box option is 'device-pixel-content-box'", () => {
@@ -155,8 +155,8 @@ describe("useElementSize()", () => {
       }),
     );
 
-    expect(result.current.width.get()).toBe(800);
-    expect(result.current.height.get()).toBe(600);
+    expect(result.current.width$.get()).toBe(800);
+    expect(result.current.height$.get()).toBe(600);
   });
 
   it("falls back to contentBoxSize when present and no specific box matched", () => {
@@ -172,8 +172,8 @@ describe("useElementSize()", () => {
       }),
     );
 
-    expect(result.current.width.get()).toBe(500);
-    expect(result.current.height.get()).toBe(250);
+    expect(result.current.width$.get()).toBe(500);
+    expect(result.current.height$.get()).toBe(250);
   });
 
   it("falls back to contentRect when no boxSize arrays are present", () => {
@@ -186,8 +186,8 @@ describe("useElementSize()", () => {
       instance.trigger(div, { contentRect: { width: 123, height: 456 } }),
     );
 
-    expect(result.current.width.get()).toBe(123);
-    expect(result.current.height.get()).toBe(456);
+    expect(result.current.width$.get()).toBe(123);
+    expect(result.current.height$.get()).toBe(456);
   });
 
   it("returns initialSize when target is null", () => {
@@ -195,15 +195,15 @@ describe("useElementSize()", () => {
       useElementSize(null as any, { width: 10, height: 20 }),
     );
 
-    expect(result.current.width.get()).toBe(10);
-    expect(result.current.height.get()).toBe(20);
+    expect(result.current.width$.get()).toBe(10);
+    expect(result.current.height$.get()).toBe(20);
   });
 
   it("returns default initialSize { width: 0, height: 0 } when no initialSize provided and target is null", () => {
     const { result } = renderHook(() => useElementSize(null as any));
 
-    expect(result.current.width.get()).toBe(0);
-    expect(result.current.height.get()).toBe(0);
+    expect(result.current.width$.get()).toBe(0);
+    expect(result.current.height$.get()).toBe(0);
   });
 
   it("stop() suppresses further size updates", () => {
@@ -217,7 +217,7 @@ describe("useElementSize()", () => {
     act(() =>
       instance.trigger(div, { contentRect: { width: 100, height: 100 } }),
     );
-    expect(result.current.width.get()).toBe(100);
+    expect(result.current.width$.get()).toBe(100);
 
     // Stop observing
     act(() => result.current.stop());
@@ -226,8 +226,8 @@ describe("useElementSize()", () => {
     act(() =>
       instance.trigger(div, { contentRect: { width: 999, height: 999 } }),
     );
-    expect(result.current.width.get()).toBe(100);
-    expect(result.current.height.get()).toBe(100);
+    expect(result.current.width$.get()).toBe(100);
+    expect(result.current.height$.get()).toBe(100);
   });
 
   it("Ref$ target: sets offsetWidth/offsetHeight as initial size after element is assigned", () => {
@@ -238,8 +238,8 @@ describe("useElementSize()", () => {
     });
 
     // Before assignment — initial values
-    expect(result.current.size.width.get()).toBe(0);
-    expect(result.current.size.height.get()).toBe(0);
+    expect(result.current.size.width$.get()).toBe(0);
+    expect(result.current.size.height$.get()).toBe(0);
 
     const div = document.createElement("div");
     // jsdom returns 0 for offsetWidth/Height by default, but we can override
@@ -248,8 +248,8 @@ describe("useElementSize()", () => {
 
     act(() => result.current.el$(div));
 
-    expect(result.current.size.width.get()).toBe(640);
-    expect(result.current.size.height.get()).toBe(480);
+    expect(result.current.size.width$.get()).toBe(640);
+    expect(result.current.size.height$.get()).toBe(480);
   });
 
   it("resets to initialSize when target Ref$ becomes null", () => {
@@ -267,8 +267,8 @@ describe("useElementSize()", () => {
     // Then set element to null (passing null simulates unmounting)
     act(() => result.current.el$(null));
 
-    expect(result.current.size.width.get()).toBe(5);
-    expect(result.current.size.height.get()).toBe(10);
+    expect(result.current.size.width$.get()).toBe(5);
+    expect(result.current.size.height$.get()).toBe(10);
   });
 
   it("accumulates multiple borderBoxSize entries", () => {
@@ -289,7 +289,7 @@ describe("useElementSize()", () => {
     );
 
     // Accumulated: 100+200=300, 50+100=150
-    expect(result.current.width.get()).toBe(300);
-    expect(result.current.height.get()).toBe(150);
+    expect(result.current.width$.get()).toBe(300);
+    expect(result.current.height$.get()).toBe(150);
   });
 });

@@ -3,7 +3,7 @@ import { useMouseInElement } from ".";
 
 export default function UseMouseInElementDemo() {
   const el$ = useRef$<HTMLDivElement>();
-  const { elementX, elementY, isOutside, elementWidth, elementHeight, x, y: _y } =
+  const { elementX$, elementY$, isOutside$, elementWidth$, elementHeight$, x$, y$: _y$ } =
     useMouseInElement(el$);
 
   return (
@@ -23,12 +23,12 @@ export default function UseMouseInElementDemo() {
       >
         {(
           [
-            ["elementX", `${Math.round(elementX.get())}px`],
-            ["elementY", `${Math.round(elementY.get())}px`],
-            ["isOutside", String(isOutside.get())],
-            ["width", `${Math.round(elementWidth.get())}px`],
-            ["height", `${Math.round(elementHeight.get())}px`],
-            ["x (global)", `${Math.round(x.get())}px`],
+            ["elementX", `${Math.round(elementX$.get())}px`],
+            ["elementY", `${Math.round(elementY$.get())}px`],
+            ["isOutside", String(isOutside$.get())],
+            ["width", `${Math.round(elementWidth$.get())}px`],
+            ["height", `${Math.round(elementHeight$.get())}px`],
+            ["x (global)", `${Math.round(x$.get())}px`],
           ] as [string, string][]
         ).map(([label, val]) => (
           <span key={label}>
@@ -61,15 +61,15 @@ export default function UseMouseInElementDemo() {
         <div
           style={{
             position: "absolute",
-            left: elementX.get(),
-            top: elementY.get(),
+            left: elementX$.get(),
+            top: elementY$.get(),
             width: "10px",
             height: "10px",
             borderRadius: "50%",
             background: "var(--sl-color-accent, #818cf8)",
             transform: "translate(-50%, -50%)",
             pointerEvents: "none",
-            opacity: isOutside.get() ? 0 : 1,
+            opacity: isOutside$.get() ? 0 : 1,
             transition: "opacity 0.15s",
           }}
         />

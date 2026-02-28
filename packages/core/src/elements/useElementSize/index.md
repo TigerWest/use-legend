@@ -17,11 +17,11 @@ import { useRef$, useElementSize } from '@usels/core'
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>()
-  const { width, height } = useElementSize(el$)
+  const { width$, height$ } = useElementSize(el$)
 
   return (
     <div ref={el$}>
-      {width.get()} × {height.get()}
+      {width$.get()} × {height$.get()}
     </div>
   )
 }
@@ -34,7 +34,7 @@ function Component() {
 import { useRef$, Ref$, useElementSize } from '@usels/core'
 declare const el$: Ref$<HTMLDivElement>
 // ---cut---
-const { width, height } = useElementSize(el$, { width: 320, height: 240 })
+const { width$, height$ } = useElementSize(el$, { width: 320, height: 240 })
 ```
 
 ### With `border-box`
@@ -44,7 +44,7 @@ const { width, height } = useElementSize(el$, { width: 320, height: 240 })
 import { useRef$, Ref$, useElementSize } from '@usels/core'
 declare const el$: Ref$<HTMLDivElement>
 // ---cut---
-const { width, height } = useElementSize(el$, undefined, { box: 'border-box' })
+const { width$, height$ } = useElementSize(el$, undefined, { box: 'border-box' })
 ```
 
 ### Stopping observation manually
@@ -54,7 +54,7 @@ const { width, height } = useElementSize(el$, undefined, { box: 'border-box' })
 import { useRef$, Ref$, useElementSize } from '@usels/core'
 declare const el$: Ref$<HTMLDivElement>
 // ---cut---
-const { width, height, stop } = useElementSize(el$)
+const { width$, height$, stop } = useElementSize(el$)
 
 stop()
 ```

@@ -20,8 +20,8 @@ export interface UseIntersectionObserverOptions {
 }
 
 export interface UseIntersectionObserverReturn {
-  isSupported: Observable<boolean>;
-  isActive: Observable<boolean>;
+  isSupported$: Observable<boolean>;
+  isActive$: Observable<boolean>;
   stop: () => void;
   pause: () => void;
   resume: () => void;
@@ -34,12 +34,12 @@ export interface UseIntersectionObserverReturn {
  * @param target - Element(s) to observe: Ref$, Observable, raw Element, or array of these
  * @param callback - Called when intersection state changes
  * @param options - IntersectionObserver options plus an `immediate` flag
- * @returns `{ isSupported, isActive, pause, resume, stop }`
+ * @returns `{ isSupported$, isActive$, pause, resume, stop }`
  *
  * @example
  * ```tsx
  * const el$ = useRef$<HTMLDivElement>();
- * const { isActive, pause, resume } = useIntersectionObserver(
+ * const { isActive$, pause, resume } = useIntersectionObserver(
  *   el$,
  *   (entries) => {
  *     entries.forEach(entry => console.log(entry.isIntersecting));
@@ -140,8 +140,8 @@ export function useIntersectionObserver(
   };
 
   return {
-    isSupported: isSupported$,
-    isActive: isActive$,
+    isSupported$,
+    isActive$,
     stop,
     pause,
     resume,

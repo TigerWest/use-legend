@@ -24,7 +24,7 @@ export default function UseIntersectionObserverDemo() {
     const m = Number(rootMargin$.get());
     return `${isNaN(m) ? 0 : m}px`;
   });
-  const { isActive, pause, resume } = useIntersectionObserver(
+  const { isActive$, pause, resume } = useIntersectionObserver(
     el$,
     (entries) => {
       isVisible$.set(entries[0]?.isIntersecting ?? false);
@@ -52,14 +52,14 @@ export default function UseIntersectionObserverDemo() {
             <span>
               isIntersecting:{" "}
               <strong>
-                {isActive.get() ? String(isVisible$.get()) : "— (paused)"}
+                {isActive$.get() ? String(isVisible$.get()) : "— (paused)"}
               </strong>
             </span>
           )}
         </Computed>
         <Computed>
           {() =>
-            isActive.get() ? (
+            isActive$.get() ? (
               <button onClick={pause} style={btnStyle}>
                 pause
               </button>

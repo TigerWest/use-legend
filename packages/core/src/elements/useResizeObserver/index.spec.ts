@@ -122,7 +122,7 @@ describe("useResizeObserver()", () => {
   it("returns isSupported: true when ResizeObserver is available", () => {
     const div = document.createElement("div");
     const { result } = renderHook(() => useResizeObserver(wrapEl(div), vi.fn()));
-    expect(result.current.isSupported.get()).toBe(true);
+    expect(result.current.isSupported$.get()).toBe(true);
   });
 
   it("returns isSupported: false and skips setup when ResizeObserver is unavailable", () => {
@@ -132,7 +132,7 @@ describe("useResizeObserver()", () => {
     const cb = vi.fn();
     const { result } = renderHook(() => useResizeObserver(wrapEl(div), cb));
 
-    expect(result.current.isSupported.get()).toBe(false);
+    expect(result.current.isSupported$.get()).toBe(false);
     expect(ResizeObserverMock.instances).toHaveLength(0);
   });
 
