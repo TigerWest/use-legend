@@ -13,15 +13,12 @@ SSR-safe: returns `'visible'` when `document` is not available.
 
 ```tsx
 import { useDocumentVisibility } from '@usels/core'
-import { Computed } from '@legendapp/state/react'
 
 function Component() {
   const visibility$ = useDocumentVisibility()
 
   return (
-    <Computed>
-      {() => <p>Tab is {visibility$.get()}</p>}
-    </Computed>
+    <p>Tab is {visibility$.get()}</p>
   )
 }
 ```

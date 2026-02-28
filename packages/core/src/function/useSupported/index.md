@@ -23,7 +23,6 @@ if (isMatchMediaSupported.get()) {
 
 ```typescript
 import { useSupported } from '@usels/core'
-import { Memo } from '@legendapp/state/react'
 
 const isIntersectionObserverSupported = useSupported(
   () => 'IntersectionObserver' in window
@@ -31,13 +30,9 @@ const isIntersectionObserverSupported = useSupported(
 
 function MyComponent() {
   return (
-    <Memo>
-      {() =>
-        isIntersectionObserverSupported.get()
-          ? <FeatureComponent />
-          : <Fallback />
-      }
-    </Memo>
+    isIntersectionObserverSupported.get()
+      ? <FeatureComponent />
+      : <Fallback />
   )
 }
 ```
