@@ -6,7 +6,11 @@ description: Install use-ls and explore observable-native React hooks built on L
 ## Installation
 
 ```bash
+# Core + required peer deps
 npm install @usels/core@beta @legendapp/state react
+
+# Auto Memo transform plugin (recommended)
+npm install -D @usels/vite-plugin-legend-memo
 ```
 
 ---
@@ -15,11 +19,73 @@ npm install @usels/core@beta @legendapp/state react
 
 `use-ls` hooks don't use `useState` internally. Instead, they return **Legend-State observables** — fine-grained reactive values that update without re-rendering the entire component tree.
 
-Write `.get()` naturally in JSX. `@usels/vite-plugin-legend-memo` automatically wraps each reactive expression in a fine-grained `<Memo>` boundary — only the expressions that read observables re-render, not the parent component.
+---
+
+## Auto Memo — Vite & Babel plugin
+
+Legend-State's `<Memo>` subscribes to its function child with fine-grained reactivity. Writing this wrapper by hand is repetitive — the plugin automates it at build time.
+
+```tsx
+// Without the plugin — manual wrapping required
+<button>
+  <Memo>{() => count$.get()}</Memo> times
+</button>
+
+// With the plugin — write count$.get() as-is
+<button>
+  {count$.get()} times  {/* compiled to the same output above */}
+</button>
+```
+
+### Vite setup
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { autoWrap } from '@usels/vite-plugin-legend-memo';
+
+export default defineConfig({
+  plugins: [
+    autoWrap(), // must come before react()
+    react(),
+  ],
+});
+```
+
+> `autoWrap()` runs with `enforce: "pre"`, so it transforms JSX before `@vitejs/plugin-react`'s esbuild pass.
+
+### Babel-only setup
+
+```bash
+npm install -D @usels/babel-plugin-legend-memo
+```
+
+```javascript
+// babel.config.js
+module.exports = {
+  plugins: ['@usels/babel-plugin-legend-memo'],
+};
+```
+
+### Detection rules
+
+| Expression | Transformed | Reason |
+|------------|:-----------:|--------|
+| `count$.get()` | ✅ | `$`-suffixed variable, no arguments |
+| `user$.name.get()` | ✅ | nested paths are detected |
+| `obs$?.get()` | ✅ | optional chaining supported |
+| `list$.get(0)` | ❌ | has arguments (key access) |
+| `count.get()` | ❌ | no `$` suffix |
+| `.get()` inside `observer` | ❌ | already inside a reactive context |
+
+> Set `allGet: true` to detect every `.get()` call regardless of the `$` suffix.
 
 ---
 
 ## Explore the hooks
+
+> The examples below assume `@usels/vite-plugin-legend-memo` is configured. Every `count$.get()` expression is automatically compiled into `<Memo>{() => count$.get()}</Memo>` — only that expression re-renders when the observable changes, not the parent component.
 
 ### Observable element ref — `useRef$`
 

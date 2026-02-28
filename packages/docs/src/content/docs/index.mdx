@@ -1,15 +1,15 @@
 ---
-title: use-ls
+title: use-legend
 description: Observable-native React utility hooks built on Legend-State.
 template: splash
 hero:
   tagline: Reactive React hooks that integrate seamlessly with Legend-State. Every hook is observable-native — no wrappers, no adapters, just reactivity.
   actions:
     - text: Get Started
-      link: /use-ls/guides/example/
+      link: /use-legend/guides/example/
       icon: right-arrow
     - text: GitHub
-      link: https://github.com/TigerWest/use-ls
+      link: https://github.com/TigerWest/use-legend
       icon: external
       variant: minimal
 ---
@@ -24,5 +24,11 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
   </Card>
   <Card title="@usels/integrations" icon="rocket">
     third-party integration built for Legend-State
+  </Card>
+  <Card title="@usels/vite-plugin-legend-memo" icon="setting">
+    Vite plugin that automatically wraps `obs$.get()` calls in JSX with `<Memo>` at build time — no manual wrapping needed. Place before `@vitejs/plugin-react` in your config.
+  </Card>
+  <Card title="@usels/babel-plugin-legend-memo" icon="seti:config">
+    Babel plugin that transforms `obs$.get()` into fine-grained `<Memo>` boundaries. Use directly with babel or via the Vite plugin wrapper.
   </Card>
 </CardGrid>

@@ -9,8 +9,8 @@ import { autoWrap } from "@usels/vite-plugin-legend-memo";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://tigerwest.github.io/use-ls",
-  base: "/use-ls",
+  site: "https://tigerwest.github.io/use-legend",
+  base: "/use-legend",
   vite: {
     plugins: [autoWrap({ allGet: true })],
     resolve: {
@@ -47,7 +47,7 @@ export default defineConfig({
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/TigerWest/use-ls",
+          href: "https://github.com/TigerWest/use-legend",
         },
       ],
       expressiveCode: {

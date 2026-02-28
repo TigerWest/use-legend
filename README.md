@@ -1,4 +1,4 @@
-# use-ls
+# use-legend
 
 Utility and integration packages for [Legend-State](https://legendapp.com/open-source/state/).
 
