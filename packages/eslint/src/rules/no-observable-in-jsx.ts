@@ -1,10 +1,6 @@
-import { ESLintUtils } from "@typescript-eslint/utils";
 import type { TSESTree } from "@typescript-eslint/utils";
 import { isObservableExpression, getJsxElementName } from "../utils/ast-helpers";
-
-const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://github.com/your-org/usels/blob/main/packages/eslint/docs/rules/${name}.md`
-);
+import { createRule } from "../utils/create-rule";
 
 type AllowedProps = Record<string, string[]>;
 

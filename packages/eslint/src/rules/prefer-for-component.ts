@@ -112,7 +112,7 @@ export const preferForComponent = createRule<[Partial<Options>], MessageIds>({
   defaultOptions: [{}],
   create(context, [userOptions]) {
     const forComponents = userOptions.forComponents ?? ["For"];
-    const requireKeyProp = userOptions.requireKeyProp ?? true;
+    const requireKeyProp = userOptions.requireKeyProp ?? false;
 
     /**
      * Returns true if the node is already inside a <For> component.
