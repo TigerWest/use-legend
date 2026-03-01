@@ -1,12 +1,21 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  test: {
-    // Test environment
-    environment: 'node',
+  // Anchor root to this file's directory so vitest always runs from main/,
+  // even if invoked from a parent directory.
+  root: fileURLToPath(new URL('.', import.meta.url)),
 
+  test: {
     // Global test APIs (describe, it, expect, etc.)
     globals: true,
+
+    // Projects: each package defines its own environment/include/exclude
+    projects: [
+      'packages/babel/vitest.config.ts',
+      'packages/core/vitest.config.ts',
+      'packages/integrations/vitest.config.ts',
+    ],
 
     // Coverage configuration
     coverage: {
@@ -21,7 +30,6 @@ export default defineConfig({
         '**/*.config.ts',
         '**/index.ts',
       ],
-      all: true,
       thresholds: {
         lines: 80,
         functions: 80,

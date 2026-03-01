@@ -12,7 +12,7 @@ const mockDisconnect = vi.fn();
 let capturedCallback: IntersectionObserverCallback;
 
 const MockIntersectionObserver = vi.fn(
-  (cb: IntersectionObserverCallback, init?: IntersectionObserverInit) => {
+  function(cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
     capturedCallback = cb;
     void init;
     return { observe: mockObserve, disconnect: mockDisconnect };

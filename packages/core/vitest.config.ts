@@ -2,8 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // Test files to include
+    // Test files to include (exclude browser-specific specs)
     include: ['src/**/*.spec.ts'],
+    exclude: ['src/**/*.browser.spec.ts', 'node_modules'],
 
     // Test environment
     environment: 'node',

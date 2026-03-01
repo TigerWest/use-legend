@@ -19,7 +19,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "test:browser": "vitest --config vitest.browser.config.ts"
   },
   "peerDependencies": {
     "@legendapp/state": "^2.0.0 || ^3.0.0-beta.0",
@@ -37,7 +38,11 @@
     "@testing-library/react": "^16.1.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.0.18",
     "jsdom": "^25.0.0",
+    "playwright": "^1.58.2",
     "tsup": "^8.3.5",
     "typescript": "^5.7.3"
   },

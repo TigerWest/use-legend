@@ -16,7 +16,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "test:browser": "vitest --config vitest.browser.config.ts"
   },
   "keywords": [
     "legendapp",
@@ -26,8 +27,8 @@
     "zustand"
   ],
   "dependencies": {
-    "@usels/core": "workspace:*",
-    "@tanstack/query-core": "^5.90.20"
+    "@tanstack/query-core": "^5.90.20",
+    "@usels/core": "workspace:*"
   },
   "peerDependencies": {
     "@legendapp/state": "^2.0.0 || ^3.0.0-beta.0",
@@ -46,18 +47,23 @@
     }
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "tsup": "^8.0.1",
     "@legendapp/state": "3.0.0-beta.44",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
     "@tanstack/query-core": "^5.90.20",
     "@tanstack/react-query": "^5.60.0",
-    "@testing-library/react": "^16.1.0",
     "@testing-library/jest-dom": "^6.6.0",
-    "jsdom": "^25.0.0"
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "vitest": "^4.0.18",
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.0.18",
+    "jsdom": "^25.0.0",
+    "playwright": "^1.58.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
   },
   "files": [
     "dist"
