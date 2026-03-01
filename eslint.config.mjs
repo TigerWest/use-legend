@@ -4,12 +4,12 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 import reactHooks from "eslint-plugin-react-hooks";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 
-const files = ["packages/core/src/**/*.ts", "packages/core/src/**/*.tsx"];
+const files = ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx"];
 
 const specFiles = [
-  "packages/core/src/**/*.spec.ts",
-  "packages/core/src/**/*.spec.tsx",
-  "packages/core/src/**/*.browser.spec.ts",
+  "packages/*/src/**/*.spec.ts",
+  "packages/*/src/**/*.spec.tsx",
+  "packages/*/src/**/*.browser.spec.ts",
 ];
 
 export default [

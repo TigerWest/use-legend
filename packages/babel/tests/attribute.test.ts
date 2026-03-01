@@ -50,9 +50,7 @@ pluginTester({
       output: `
         import { Memo } from "@legendapp/state/react";
         function App() {
-          return (
-            <Memo>{() => <Component value={obs$.get()} label={name$.get()} />}</Memo>
-          );
+          return <Memo>{() => <Component value={obs$.get()} label={name$.get()} />}</Memo>;
         }
       `,
     },
@@ -66,9 +64,7 @@ pluginTester({
       output: `
         import { Memo } from "@legendapp/state/react";
         function App() {
-          return (
-            <Memo>{() => <div className={theme$.get()}>{count$.get()}</div>}</Memo>
-          );
+          return <Memo>{() => <div className={theme$.get()}>{count$.get()}</div>}</Memo>;
         }
       `,
     },

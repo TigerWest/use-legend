@@ -179,9 +179,7 @@ pluginTester({
           return (
             <ul>
               {items.map((item$) => (
-                <Memo>
-                  {() => <li className={item$.class.get()}>{item$.name.get()}</li>}
-                </Memo>
+                <Memo>{() => <li className={item$.class.get()}>{item$.name.get()}</li>}</Memo>
               ))}
             </ul>
           );
