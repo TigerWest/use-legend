@@ -96,65 +96,9 @@ describe("useDropZone()", () => {
     vi.restoreAllMocks();
   });
 
-  it("valid file type drop updates files$ and resets isOverDropZone$", () => {
-    const div = createDiv();
-    const file = createFile("image.png", "image/png");
-
-    const { result } = renderHook(() =>
-      useDropZone(wrapEl(div) as any, { dataTypes: ["image/png"] }),
-    );
-
-    const dropEvent = createDragEvent("drop", [file], ["image/png"]);
-    fireDragEvent(div, dropEvent);
-
-    expect(result.current.files$.get()).toHaveLength(1);
-    expect(result.current.files$.get()![0].type).toBe("image/png");
-    expect(result.current.isOverDropZone$.get()).toBe(false);
-  });
-
-  it("invalid file type drop keeps files$ null and calls onDrop(null)", () => {
-    const div = createDiv();
-    const onDrop = vi.fn();
-    const file = createFile("doc.txt", "text/plain");
-
-    const { result } = renderHook(() =>
-      useDropZone(wrapEl(div) as any, {
-        dataTypes: ["image/png"],
-        onDrop,
-      }),
-    );
-
-    const dropEvent = createDragEvent("drop", [file], ["text/plain"]);
-    fireDragEvent(div, dropEvent);
-
-    expect(result.current.files$.get()).toBeNull();
-    expect(onDrop).toHaveBeenCalledTimes(1);
-    expect(onDrop.mock.calls[0][0]).toBeNull();
-  });
-
-  it("nested child dragenter/dragleave keeps isOverDropZone$ stable", () => {
-    const div = createDiv();
-    const child = document.createElement("div");
-    div.appendChild(child);
-
-    const { result } = renderHook(() => useDropZone(wrapEl(div) as any));
-
-    // dragenter on target → counter = 1
-    fireDragEvent(div, createDragEvent("dragenter", [], []));
-    expect(result.current.isOverDropZone$.get()).toBe(true);
-
-    // dragenter on child → counter = 2
-    fireDragEvent(div, createDragEvent("dragenter", [], []));
-    expect(result.current.isOverDropZone$.get()).toBe(true);
-
-    // dragleave from target → counter = 1 (moved to child)
-    fireDragEvent(div, createDragEvent("dragleave", [], []));
-    expect(result.current.isOverDropZone$.get()).toBe(true); // counter > 0, still over
-
-    // dragleave from child → counter = 0 (fully left zone)
-    fireDragEvent(div, createDragEvent("dragleave", [], []));
-    expect(result.current.isOverDropZone$.get()).toBe(false);
-  });
+  // TCs moved to index.browser.spec.ts (Type-A: real browser DataTransfer needed):
+  // - valid file drop detected, invalid file type filtered,
+  // - nested dragenter/dragleave sequence, dragenter→drop isOverDropZone$ transitions
 
   it("dragleave when counter is 0 does not underflow", () => {
     const div = createDiv();
@@ -285,17 +229,6 @@ describe("useDropZone()", () => {
     fireDragEvent(div, createDragEvent("dragleave", [], []));
     expect(onLeave).toHaveBeenCalledTimes(1);
     expect(onLeave.mock.calls[0][0]).toBeNull();
-  });
-
-  it("isOverDropZone$ is true after dragenter, false after drop", () => {
-    const div = createDiv();
-    const { result } = renderHook(() => useDropZone(wrapEl(div) as any));
-
-    fireDragEvent(div, createDragEvent("dragenter", [], []));
-    expect(result.current.isOverDropZone$.get()).toBe(true);
-
-    fireDragEvent(div, createDragEvent("drop", [], []));
-    expect(result.current.isOverDropZone$.get()).toBe(false);
   });
 
   it("drop with no files keeps files$ null", () => {
