@@ -1,10 +1,9 @@
-import { ESLintUtils } from '@typescript-eslint/utils';
-import type { TSESTree } from '@typescript-eslint/utils';
-import { isObservableExpression, getJsxElementName } from '../utils/ast-helpers';
+import { ESLintUtils } from "@typescript-eslint/utils";
+import type { TSESTree } from "@typescript-eslint/utils";
+import { isObservableExpression, getJsxElementName } from "../utils/ast-helpers";
 
 const createRule = ESLintUtils.RuleCreator(
-  (name) =>
-    `https://github.com/your-org/usels/blob/main/packages/eslint/docs/rules/${name}.md`,
+  (name) => `https://github.com/your-org/usels/blob/main/packages/eslint/docs/rules/${name}.md`
 );
 
 type AllowedProps = Record<string, string[]>;
@@ -16,30 +15,29 @@ interface Options {
   allowedGlobalProps: string[];
 }
 
-type MessageIds = 'observableInJsx';
+type MessageIds = "observableInJsx";
 
 /**
  * Renders a human-readable name for an observable node.
  * e.g. `count$` → `'count$'`, `user$.name` → `'user$.name'`
  */
 function getObservableName(node: TSESTree.Node): string {
-  if (node.type === 'Identifier') return node.name;
-  if (node.type === 'MemberExpression') {
+  if (node.type === "Identifier") return node.name;
+  if (node.type === "MemberExpression") {
     const obj = getObservableName(node.object);
     if (node.computed) return `${obj}[...]`;
-    if (node.property.type === 'Identifier') return `${obj}.${node.property.name}`;
+    if (node.property.type === "Identifier") return `${obj}.${node.property.name}`;
     return obj;
   }
-  return '(observable)';
+  return "(observable)";
 }
 
 export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
-  name: 'no-observable-in-jsx',
+  name: "no-observable-in-jsx",
   meta: {
-    type: 'problem',
+    type: "problem",
     docs: {
-      description:
-        'Disallow using observables directly in JSX expressions without calling .get()',
+      description: "Disallow using observables directly in JSX expressions without calling .get()",
     },
     messages: {
       observableInJsx:
@@ -47,22 +45,22 @@ export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
     },
     schema: [
       {
-        type: 'object',
+        type: "object",
         properties: {
           allowedJsxComponents: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
           },
           allowedProps: {
-            type: 'object',
+            type: "object",
             additionalProperties: {
-              type: 'array',
-              items: { type: 'string' },
+              type: "array",
+              items: { type: "string" },
             },
           },
           allowedGlobalProps: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
           },
         },
         additionalProperties: false,
@@ -72,28 +70,26 @@ export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
   defaultOptions: [{}],
   create(context, [userOptions]) {
     const allowedJsxComponents: string[] = userOptions.allowedJsxComponents ?? [
-      'Show',
-      'For',
-      'Switch',
-      'Memo',
-      'Computed',
+      "Show",
+      "For",
+      "Switch",
+      "Memo",
+      "Computed",
     ];
     const allowedProps: AllowedProps = userOptions.allowedProps ?? {
-      Show: ['if', 'ifReady', 'else'],
-      For: ['each'],
-      Switch: ['value'],
+      Show: ["if", "ifReady", "else"],
+      For: ["each"],
+      Switch: ["value"],
     };
     // `ref` is always valid: React accepts observable refs from useRef$
-    const allowedGlobalProps: string[] = userOptions.allowedGlobalProps ?? ['ref'];
+    const allowedGlobalProps: string[] = userOptions.allowedGlobalProps ?? ["ref"];
 
     return {
       JSXExpressionContainer(node: TSESTree.JSXExpressionContainer) {
         const { expression } = node;
 
         // Skip empty expressions ({}) and spread elements
-        if (
-          expression.type === 'JSXEmptyExpression'
-        ) {
+        if (expression.type === "JSXEmptyExpression") {
           return;
         }
 
@@ -106,10 +102,9 @@ export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
 
         // Case 1: expression container is a JSX attribute value
         // e.g. <Show if={isLoading$}>
-        if (parent && parent.type === 'JSXAttribute') {
+        if (parent && parent.type === "JSXAttribute") {
           const attrNode = parent as TSESTree.JSXAttribute;
-          const attrName =
-            attrNode.name.type === 'JSXIdentifier' ? attrNode.name.name : null;
+          const attrName = attrNode.name.type === "JSXIdentifier" ? attrNode.name.name : null;
 
           // The opening element is the parent of the attribute
           const openingElement = attrNode.parent as TSESTree.JSXOpeningElement;
@@ -120,18 +115,14 @@ export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
             return;
           }
 
-          if (
-            attrName &&
-            componentName &&
-            allowedProps[componentName]?.includes(attrName)
-          ) {
+          if (attrName && componentName && allowedProps[componentName]?.includes(attrName)) {
             return; // allowed prop
           }
 
           // Not an allowed prop — report
           context.report({
             node,
-            messageId: 'observableInJsx',
+            messageId: "observableInJsx",
             data: { name: getObservableName(expression) },
           });
           return;
@@ -139,7 +130,7 @@ export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
 
         // Case 2: expression container is a child of a JSXElement
         // e.g. <Show>{obs$}</Show>
-        if (parent && parent.type === 'JSXElement') {
+        if (parent && parent.type === "JSXElement") {
           const jsxElement = parent as TSESTree.JSXElement;
           const componentName = getJsxElementName(jsxElement.openingElement);
 
@@ -151,7 +142,7 @@ export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
         // All other cases: report
         context.report({
           node,
-          messageId: 'observableInJsx',
+          messageId: "observableInJsx",
           data: { name: getObservableName(expression) },
         });
       },

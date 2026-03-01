@@ -29,7 +29,7 @@ describe("useQuery() — real browser", () => {
           queryKey: ["browser-test"],
           queryFn,
         }),
-      { wrapper },
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -55,7 +55,7 @@ describe("useQuery() — real browser", () => {
           queryKey: [key$],
           queryFn,
         }),
-      { wrapper },
+      { wrapper }
     );
 
     await waitFor(() => {

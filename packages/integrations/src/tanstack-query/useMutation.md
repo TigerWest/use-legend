@@ -7,7 +7,6 @@ category: Hooks
 
 React hook for performing mutations with observable state management.
 
-
 ## Usage
 
 ```typescript

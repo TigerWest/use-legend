@@ -103,10 +103,7 @@ function getScrollDimensions(el: HTMLElement | Document | Window | null): {
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useScroll(
-  element: MaybeElement,
-  options?: UseScrollOptions,
-): UseScrollReturn {
+export function useScroll(element: MaybeElement, options?: UseScrollOptions): UseScrollReturn {
   const initial = getScrollValues(peekElement(element));
 
   const x$ = useObservable<number>(initial.x);
@@ -176,14 +173,17 @@ export function useScroll(
   const handler = useMemo(() => {
     const ms = options?.throttle ?? 0;
     return ms > 0
-      // eslint-disable-next-line react-hooks/refs -- ref read inside useMemo callback, not directly during render
-      ? throttle(() => measureRef.current(), ms)
+      ? // eslint-disable-next-line react-hooks/refs -- ref read inside useMemo callback, not directly during render
+        throttle(() => measureRef.current(), ms)
       : () => measureRef.current();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeElement matches Overload 4 but TypeScript cannot resolve it through the union without a cast
-  useEventListener(element as any, "scroll", handler,
-    options?.eventListenerOptions ?? { capture: false, passive: true },
+  useEventListener(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeElement matches Overload 4 but TypeScript cannot resolve it through the union without a cast
+    element as any,
+    "scroll",
+    handler,
+    options?.eventListenerOptions ?? { capture: false, passive: true }
   );
 
   useMount(() => {

@@ -12,39 +12,39 @@ SSR-safe: returns `initialWidth`/`initialHeight` (default `0`) when `window` is 
 ## Usage
 
 ```tsx
-import { useWindowSize } from '@usels/core'
+import { useWindowSize } from "@usels/core";
 
 function Component() {
-  const size$ = useWindowSize()
+  const size$ = useWindowSize();
 
   return (
     <p>
       {size$.width.get()} × {size$.height.get()}
     </p>
-  )
+  );
 }
 ```
 
 ### Excluding scrollbar width
 
 ```tsx
-const size$ = useWindowSize({ includeScrollbar: false })
+const size$ = useWindowSize({ includeScrollbar: false });
 ```
 
 ### Outer window size
 
 ```tsx
-const size$ = useWindowSize({ type: 'outer' })
+const size$ = useWindowSize({ type: "outer" });
 ```
 
 ### Visual viewport (pinch-zoom aware)
 
 ```tsx
-const size$ = useWindowSize({ type: 'visual' })
+const size$ = useWindowSize({ type: "visual" });
 ```
 
 ### Custom initial size for SSR
 
 ```tsx
-const size$ = useWindowSize({ initialWidth: 1280, initialHeight: 800 })
+const size$ = useWindowSize({ initialWidth: 1280, initialHeight: 800 });
 ```

@@ -1,10 +1,10 @@
-import type { PluginObj, types as BabelTypes } from '@babel/core';
-import type { PluginState } from './types';
-import { createProgramVisitor } from './visitors/program';
-import { createJSXElementVisitor } from './visitors/jsxElement';
-import { createJSXExpressionContainerVisitor } from './visitors/jsxExpressionContainer';
+import type { PluginObj, types as BabelTypes } from "@babel/core";
+import type { PluginState } from "./types";
+import { createProgramVisitor } from "./visitors/program";
+import { createJSXElementVisitor } from "./visitors/jsxElement";
+import { createJSXExpressionContainerVisitor } from "./visitors/jsxExpressionContainer";
 
-export type { PluginOptions } from './types';
+export type { PluginOptions } from "./types";
 
 /**
  * @usels/babel-plugin-legend-memo
@@ -29,11 +29,10 @@ export default function autoWrapPlugin({
 }): PluginObj<PluginState> {
   const programVisitor = createProgramVisitor(t);
   const jsxElementVisitor = createJSXElementVisitor(t);
-  const jsxExpressionContainerVisitor =
-    createJSXExpressionContainerVisitor(t);
+  const jsxExpressionContainerVisitor = createJSXExpressionContainerVisitor(t);
 
   return {
-    name: '@usels/babel-plugin-legend-memo',
+    name: "@usels/babel-plugin-legend-memo",
     visitor: {
       Program: {
         enter: programVisitor.enter,

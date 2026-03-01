@@ -1,10 +1,6 @@
 import { useRef } from "react";
 import { useDocumentVisibility } from ".";
-import {
-  Computed,
-  useObservable,
-  useObserveEffect,
-} from "@legendapp/state/react";
+import { Computed, useObservable, useObserveEffect } from "@legendapp/state/react";
 
 const dot: React.CSSProperties = {
   display: "inline-block",
@@ -15,13 +11,7 @@ const dot: React.CSSProperties = {
   verticalAlign: "middle",
 };
 
-function StateRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: DocumentVisibilityState;
-}) {
+function StateRow({ label, value }: { label: string; value: DocumentVisibilityState }) {
   const visible = value === "visible";
   return (
     <div
@@ -46,14 +36,10 @@ function StateRow({
             : "var(--sl-color-orange, #f97316)",
         }}
       />
-      <span style={{ color: "var(--sl-color-gray-2, #64748b)", minWidth: "80px" }}>
-        {label}
-      </span>
+      <span style={{ color: "var(--sl-color-gray-2, #64748b)", minWidth: "80px" }}>{label}</span>
       <strong
         style={{
-          color: visible
-            ? "var(--sl-color-green, #22c55e)"
-            : "var(--sl-color-orange, #f97316)",
+          color: visible ? "var(--sl-color-green, #22c55e)" : "var(--sl-color-orange, #f97316)",
         }}
       >
         &quot;{value}&quot;
@@ -90,12 +76,8 @@ export default function UseDocumentVisibilityDemo() {
         fontSize: "13px",
       }}
     >
-      <Computed>
-        {() => <StateRow label="Instant" value={visibility$.get()} />}
-      </Computed>
-      <Computed>
-        {() => <StateRow label="2s delay" value={delayed$.get()} />}
-      </Computed>
+      <Computed>{() => <StateRow label="Instant" value={visibility$.get()} />}</Computed>
+      <Computed>{() => <StateRow label="2s delay" value={delayed$.get()} />}</Computed>
       <p
         style={{
           margin: 0,

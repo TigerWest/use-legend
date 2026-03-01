@@ -17,7 +17,7 @@ function makeEl(
     scrollHeight: number;
     clientWidth: number;
     clientHeight: number;
-  }> = {},
+  }> = {}
 ): HTMLDivElement {
   const el = document.createElement("div");
   const {
@@ -151,7 +151,9 @@ describe("useScroll()", () => {
       const el = makeEl();
       const { result } = renderHook(() => useScroll(wrapEl(el)));
       // advance timers to let idle expire
-      act(() => { vi.runAllTimers(); });
+      act(() => {
+        vi.runAllTimers();
+      });
       expect(result.current.isScrolling$.get()).toBe(false);
     });
 
@@ -301,9 +303,7 @@ describe("useScroll()", () => {
 
     it("top=true when scrollTop <= offset.top with offset.top set", () => {
       const el = makeEl({ scrollTop: 0 });
-      const { result } = renderHook(() =>
-        useScroll(wrapEl(el), { offset: { top: 50 } }),
-      );
+      const { result } = renderHook(() => useScroll(wrapEl(el), { offset: { top: 50 } }));
 
       act(() => {
         (el as any).scrollTop = 30;
@@ -316,9 +316,7 @@ describe("useScroll()", () => {
     it("bottom=true when scrollTop >= maxScrollY - offset.bottom with offset.bottom set", () => {
       // scrollHeight=1000, clientHeight=400 → maxY=600
       const el = makeEl({ scrollTop: 0, scrollHeight: 1000, clientHeight: 400 });
-      const { result } = renderHook(() =>
-        useScroll(wrapEl(el), { offset: { bottom: 50 } }),
-      );
+      const { result } = renderHook(() => useScroll(wrapEl(el), { offset: { bottom: 50 } }));
 
       act(() => {
         // 600 - 50 = 550 → bottom=true when scrollTop >= 550
@@ -657,9 +655,7 @@ describe("useScroll()", () => {
     it("cleans up pending idle timer on unmount", async () => {
       const onStop = vi.fn();
       const el = makeEl();
-      const { unmount } = renderHook(() =>
-        useScroll(wrapEl(el), { onStop, idle: 200 }),
-      );
+      const { unmount } = renderHook(() => useScroll(wrapEl(el), { onStop, idle: 200 }));
 
       act(() => {
         el.dispatchEvent(new Event("scroll"));

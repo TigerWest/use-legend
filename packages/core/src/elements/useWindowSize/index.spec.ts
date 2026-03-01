@@ -6,9 +6,7 @@ import { useWindowSize } from ".";
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
 
-function mockMatchMedia(
-  matches = false,
-): (query: string) => MediaQueryList {
+function mockMatchMedia(matches = false): (query: string) => MediaQueryList {
   return (_query: string) =>
     ({
       matches,
@@ -64,9 +62,7 @@ describe("useWindowSize()", () => {
 
   it("uses initialWidth/initialHeight before mount when window is undefined", () => {
     // Simulate SSR by checking initial values before any side effects run
-    const { result } = renderHook(() =>
-      useWindowSize({ initialWidth: 320, initialHeight: 480 }),
-    );
+    const { result } = renderHook(() => useWindowSize({ initialWidth: 320, initialHeight: 480 }));
     // After mount update fires, it reads actual window values
     // but the observable was initialized with the provided defaults
     expect(result.current.width.get()).toBeDefined();
@@ -120,9 +116,7 @@ describe("useWindowSize()", () => {
       value: 740,
     });
 
-    const { result } = renderHook(() =>
-      useWindowSize({ includeScrollbar: false }),
-    );
+    const { result } = renderHook(() => useWindowSize({ includeScrollbar: false }));
     expect(result.current.width.get()).toBe(1000);
     expect(result.current.height.get()).toBe(740);
   });
@@ -165,19 +159,21 @@ describe("useWindowSize()", () => {
   it("listenOrientation: false does not update size on orientation change", () => {
     let orientationListener: ((e: Event) => void) | null = null;
 
-    vi.stubGlobal("matchMedia", (_query: string) => ({
-      matches: false,
-      media: _query,
-      addEventListener: vi.fn((type: string, listener: EventListener) => {
-        if (type === "change") orientationListener = listener;
-      }),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    } as unknown as MediaQueryList));
-
-    const { result } = renderHook(() =>
-      useWindowSize({ listenOrientation: false }),
+    vi.stubGlobal(
+      "matchMedia",
+      (_query: string) =>
+        ({
+          matches: false,
+          media: _query,
+          addEventListener: vi.fn((type: string, listener: EventListener) => {
+            if (type === "change") orientationListener = listener;
+          }),
+          removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+        }) as unknown as MediaQueryList
     );
+
+    const { result } = renderHook(() => useWindowSize({ listenOrientation: false }));
 
     // Change innerWidth but do NOT dispatch a resize event
     (window as any).innerWidth = 500;
@@ -203,9 +199,7 @@ describe("useWindowSize()", () => {
     await flush();
 
     const resizeAdded = addSpy.mock.calls.some(([type]) => type === "resize");
-    const resizeRemoved = removeSpy.mock.calls.some(
-      ([type]) => type === "resize",
-    );
+    const resizeRemoved = removeSpy.mock.calls.some(([type]) => type === "resize");
 
     expect(resizeAdded).toBe(true);
     expect(resizeRemoved).toBe(true);
@@ -216,9 +210,8 @@ describe("useWindowSize()", () => {
     (window as any).outerHeight = 850;
 
     const { result, rerender } = renderHook(
-      (props: { type: "inner" | "outer" | "visual" }) =>
-        useWindowSize({ type: props.type }),
-      { initialProps: { type: "inner" as "inner" | "outer" | "visual" } },
+      (props: { type: "inner" | "outer" | "visual" }) => useWindowSize({ type: props.type }),
+      { initialProps: { type: "inner" as "inner" | "outer" | "visual" } }
     );
 
     expect(result.current.width.get()).toBe(1024);
@@ -270,7 +263,7 @@ describe("useWindowSize()", () => {
     const { result, rerender } = renderHook(
       (props: { includeScrollbar: boolean }) =>
         useWindowSize({ includeScrollbar: props.includeScrollbar }),
-      { initialProps: { includeScrollbar: true } },
+      { initialProps: { includeScrollbar: true } }
     );
 
     expect(result.current.width.get()).toBe(1024);

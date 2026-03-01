@@ -99,9 +99,7 @@ describe("useWhenMounted() — reactive re-evaluation", () => {
 
   it("re-evaluates when a reactive dependency inside the callback changes", () => {
     const count$ = observable(1);
-    const { result } = renderHook(() =>
-      useWhenMounted(() => count$.get() * 2),
-    );
+    const { result } = renderHook(() => useWhenMounted(() => count$.get() * 2));
 
     expect(result.current.get()).toBe(2);
 

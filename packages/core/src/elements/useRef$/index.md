@@ -10,12 +10,12 @@ An observable element ref hook that serves as a drop-in replacement for `useRef`
 ### Standalone (useRef replacement)
 
 ```tsx
-import { useRef$ } from '@usels/core'
+import { useRef$ } from "@usels/core";
 
 function Component() {
-  const el$ = useRef$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>();
 
-  return <div ref={el$} />
+  return <div ref={el$} />;
 }
 ```
 
@@ -24,39 +24,39 @@ function Component() {
 Calling `el$.get()` inside `useObserve` automatically re-runs the observer when the element is mounted or unmounted.
 
 ```tsx
-import { useObserve } from '@legendapp/state/react'
-import { useRef$ } from '@usels/core'
+import { useObserve } from "@legendapp/state/react";
+import { useRef$ } from "@usels/core";
 
 function Component() {
-  const el$ = useRef$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>();
 
   useObserve(() => {
-    const el = el$.get()
+    const el = el$.get();
     if (el) {
-      el.focus()
+      el.focus();
     }
-  })
+  });
 
-  return <div ref={el$} />
+  return <div ref={el$} />;
 }
 ```
 
 ### forwardRef pattern
 
 ```tsx
-import { forwardRef } from 'react'
-import { useRef$ } from '@usels/core'
+import { forwardRef } from "react";
+import { useRef$ } from "@usels/core";
 
 const Component = forwardRef<HTMLDivElement>((props, ref) => {
-  const el$ = useRef$(ref)
+  const el$ = useRef$(ref);
 
   useObserve(() => {
-    const el = el$.get()
+    const el = el$.get();
     if (el) {
-      console.log('element mounted:', el)
+      console.log("element mounted:", el);
     }
-  })
+  });
 
-  return <div ref={el$} />
-})
+  return <div ref={el$} />;
+});
 ```

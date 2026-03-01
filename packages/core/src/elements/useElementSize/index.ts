@@ -33,7 +33,7 @@ export interface UseElementSizeReturn {
 export function useElementSize(
   target: MaybeElement,
   initialSize?: { width: number; height: number },
-  options?: UseElementSizeOptions,
+  options?: UseElementSizeOptions
 ): UseElementSizeReturn {
   const initial = initialSize ?? { width: 0, height: 0 };
   const size$ = useObservable({ width: initial.width, height: initial.height });
@@ -56,10 +56,7 @@ export function useElementSize(
             w += b.inlineSize;
             h += b.blockSize;
           }
-        } else if (
-          box === "device-pixel-content-box" &&
-          entry.devicePixelContentBoxSize?.length
-        ) {
+        } else if (box === "device-pixel-content-box" && entry.devicePixelContentBoxSize?.length) {
           for (const b of entry.devicePixelContentBoxSize) {
             w += b.inlineSize;
             h += b.blockSize;

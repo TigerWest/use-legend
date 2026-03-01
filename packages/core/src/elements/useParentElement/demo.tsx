@@ -7,10 +7,7 @@ import { useParentElement } from ".";
 // HARD CODE OFFSET
 const OFFSET_Y = -15;
 
-function overlayStyle(
-  rect: DOMRect | null,
-  color: string,
-): React.CSSProperties {
+function overlayStyle(rect: DOMRect | null, color: string): React.CSSProperties {
   if (!rect || rect.width === 0) return { display: "none" };
   return {
     position: "fixed",
@@ -37,7 +34,7 @@ export default function UseParentElementDemo() {
       const el = document.elementFromPoint(e.clientX, e.clientY);
       element$.set(el ? ObservableHint.opaque(el) : null);
     },
-    { passive: true },
+    { passive: true }
   );
 
   useEventListener(
@@ -47,7 +44,7 @@ export default function UseParentElementDemo() {
       element$.set(null);
       element$.set(el);
     },
-    { passive: true, capture: true },
+    { passive: true, capture: true }
   );
 
   return (
@@ -100,18 +97,8 @@ export default function UseParentElementDemo() {
           const parent = parent$.get() as HTMLElement | null;
           return (
             <>
-              <div
-                style={overlayStyle(
-                  el?.getBoundingClientRect() ?? null,
-                  "#a5a5a528",
-                )}
-              />
-              <div
-                style={overlayStyle(
-                  parent?.getBoundingClientRect() ?? null,
-                  "#3eaf7c28",
-                )}
-              />
+              <div style={overlayStyle(el?.getBoundingClientRect() ?? null, "#a5a5a528")} />
+              <div style={overlayStyle(parent?.getBoundingClientRect() ?? null, "#3eaf7c28")} />
             </>
           );
         }}

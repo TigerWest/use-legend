@@ -14,13 +14,13 @@ All option values accept either a plain value or an `Observable<T>`.
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, Ref$, useElementVisibility } from '@usels/core'
+import { useRef$, Ref$, useElementVisibility } from "@usels/core";
 
 function Component() {
-  const el$ = useRef$<HTMLDivElement>()
-  const isVisible$ = useElementVisibility(el$)
+  const el$ = useRef$<HTMLDivElement>();
+  const isVisible$ = useElementVisibility(el$);
 
-  return <div ref={el$} />
+  return <div ref={el$} />;
 }
 ```
 
@@ -28,10 +28,10 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, Ref$, useElementVisibility } from '@usels/core'
-declare const el$: Ref$<HTMLDivElement>
+import { useRef$, Ref$, useElementVisibility } from "@usels/core";
+declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
-const isVisible$ = useElementVisibility(el$, { initialValue: true })
+const isVisible$ = useElementVisibility(el$, { initialValue: true });
 ```
 
 ### Stop after first visible
@@ -40,10 +40,10 @@ Use `once: true` to automatically stop observing after the element becomes visib
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, Ref$, useElementVisibility } from '@usels/core'
-declare const el$: Ref$<HTMLDivElement>
+import { useRef$, Ref$, useElementVisibility } from "@usels/core";
+declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
-const isVisible$ = useElementVisibility(el$, { once: true })
+const isVisible$ = useElementVisibility(el$, { once: true });
 ```
 
 ### Custom scroll container
@@ -52,24 +52,24 @@ Pass a `scrollTarget` to observe intersection within a scrollable container inst
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, Ref$, useElementVisibility } from '@usels/core'
-declare const el$: Ref$<HTMLDivElement>
+import { useRef$, Ref$, useElementVisibility } from "@usels/core";
+declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
-const container$ = useRef$<HTMLDivElement>()
-const isVisible$ = useElementVisibility(el$, { scrollTarget: container$ })
+const container$ = useRef$<HTMLDivElement>();
+const isVisible$ = useElementVisibility(el$, { scrollTarget: container$ });
 ```
 
 ### Threshold and rootMargin
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, Ref$, useElementVisibility } from '@usels/core'
-declare const el$: Ref$<HTMLDivElement>
+import { useRef$, Ref$, useElementVisibility } from "@usels/core";
+declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
 const isVisible$ = useElementVisibility(el$, {
   threshold: 0.5,
-  rootMargin: '0px 0px -100px 0px',
-})
+  rootMargin: "0px 0px -100px 0px",
+});
 ```
 
 ### Reactive options
@@ -78,21 +78,21 @@ All options accept `Observable<T>` for reactive control:
 
 ```tsx twoslash
 // @noErrors
-import { observable } from '@legendapp/state'
-import { useRef$, Ref$, useElementVisibility } from '@usels/core'
-declare const el$: Ref$<HTMLDivElement>
+import { observable } from "@legendapp/state";
+import { useRef$, Ref$, useElementVisibility } from "@usels/core";
+declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
-const threshold$ = observable<number | number[]>(0.5)
-const rootMargin$ = observable('0px')
-const once$ = observable(false)
+const threshold$ = observable<number | number[]>(0.5);
+const rootMargin$ = observable("0px");
+const once$ = observable(false);
 
 const isVisible$ = useElementVisibility(el$, {
   threshold: threshold$,
   rootMargin: rootMargin$,
   once: once$,
-})
+});
 
 // later — update reactively
-threshold$.set(0.75)
-rootMargin$.set('-50px 0px')
+threshold$.set(0.75);
+rootMargin$.set("-50px 0px");
 ```

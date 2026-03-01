@@ -133,7 +133,7 @@ export interface QueryState<TData = unknown> {
  * ```
  */
 export function useQuery<TData = unknown>(
-  options: MaybeObservable<UseQueryOptions<TData>>,
+  options: MaybeObservable<UseQueryOptions<TData>>
 ): Observable<QueryState<TData>> {
   const queryClient = useQueryClient();
   // Observer는 한 번만 생성

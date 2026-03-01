@@ -15,8 +15,7 @@ import { useIntersectionObserver } from ".";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 let el: HTMLDivElement;
 
@@ -51,7 +50,7 @@ describe("useIntersectionObserver() — real browser", () => {
     renderHook(() =>
       useIntersectionObserver(wrapEl(el), (entries) => {
         lastEntries = entries;
-      }),
+      })
     );
 
     await waitFor(
@@ -59,7 +58,7 @@ describe("useIntersectionObserver() — real browser", () => {
         expect(lastEntries.length).toBeGreaterThan(0);
         expect(lastEntries.some((e) => e.isIntersecting)).toBe(true);
       },
-      { timeout: 2000 },
+      { timeout: 2000 }
     );
   });
 
@@ -72,7 +71,7 @@ describe("useIntersectionObserver() — real browser", () => {
     renderHook(() =>
       useIntersectionObserver(wrapEl(el), (entries) => {
         lastEntries = entries;
-      }),
+      })
     );
 
     await waitFor(
@@ -80,7 +79,7 @@ describe("useIntersectionObserver() — real browser", () => {
         expect(lastEntries.length).toBeGreaterThan(0);
         expect(lastEntries.every((e) => !e.isIntersecting)).toBe(true);
       },
-      { timeout: 2000 },
+      { timeout: 2000 }
     );
   });
 
@@ -90,7 +89,7 @@ describe("useIntersectionObserver() — real browser", () => {
     const { result } = renderHook(() =>
       useIntersectionObserver(wrapEl(el), () => {
         callCount++;
-      }),
+      })
     );
 
     // Wait for the initial IO callback (element is in viewport)
@@ -108,7 +107,7 @@ describe("useIntersectionObserver() — real browser", () => {
 
     // Yield two animation frames — callback must NOT fire again
     await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
     );
 
     expect(callCount).toBe(countAfterInitial);

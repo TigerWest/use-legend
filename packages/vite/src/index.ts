@@ -1,5 +1,5 @@
-import type { Plugin } from 'vite';
-import type { PluginOptions } from '@usels/babel-plugin-legend-memo';
+import type { Plugin } from "vite";
+import type { PluginOptions } from "@usels/babel-plugin-legend-memo";
 
 /**
  * Vite plugin that applies @usels/babel-plugin-legend-memo during transform.
@@ -27,22 +27,22 @@ import type { PluginOptions } from '@usels/babel-plugin-legend-memo';
  */
 export function autoWrap(opts: PluginOptions = {}): Plugin {
   return {
-    name: '@usels/vite-plugin-legend-memo',
+    name: "@usels/vite-plugin-legend-memo",
     // Must run before esbuild JSX transform (before @vitejs/plugin-react)
-    enforce: 'pre',
+    enforce: "pre",
 
     async transform(code, id) {
       // Only process .jsx and .tsx files
       if (!/\.[jt]sx$/.test(id)) return null;
 
       // Lazy import @babel/core to avoid bundling it
-      const babel = await import('@babel/core');
+      const babel = await import("@babel/core");
 
       const result = await babel.transformAsync(code, {
         filename: id,
-        plugins: [['@usels/babel-plugin-legend-memo', opts]],
+        plugins: [["@usels/babel-plugin-legend-memo", opts]],
         parserOpts: {
-          plugins: ['jsx', 'typescript'],
+          plugins: ["jsx", "typescript"],
         },
         sourceMaps: true,
         configFile: false,

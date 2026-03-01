@@ -17,11 +17,9 @@ export interface UseMutationObserverReturn {
 export function useMutationObserver(
   target: MaybeElement | MaybeElement[],
   callback: MutationCallback,
-  options?: UseMutationObserverOptions,
+  options?: UseMutationObserverOptions
 ): UseMutationObserverReturn {
-  const isSupported$ = useObservable<boolean>(
-    typeof MutationObserver !== "undefined",
-  );
+  const isSupported$ = useObservable<boolean>(typeof MutationObserver !== "undefined");
   const observerRef = useRef<MutationObserver | null>(null);
   const isMounted = useRef(false);
 

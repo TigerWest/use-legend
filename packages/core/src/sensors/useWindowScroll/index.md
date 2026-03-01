@@ -13,17 +13,17 @@ Tracks the window scroll position, direction, arrived state, and scrolling statu
 
 ```tsx twoslash
 // @noErrors
-import { useWindowScroll } from '@usels/core'
+import { useWindowScroll } from "@usels/core";
 
 function Component() {
-  const { x, y, arrivedState } = useWindowScroll()
+  const { x, y, arrivedState } = useWindowScroll();
 
   return (
     <p>
       scrollX: {x.get()}, scrollY: {y.get()}
-      {arrivedState.bottom.get() && ' — reached bottom'}
+      {arrivedState.bottom.get() && " — reached bottom"}
     </p>
-  )
+  );
 }
 ```
 
@@ -31,25 +31,21 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useWindowScroll } from '@usels/core'
+import { useWindowScroll } from "@usels/core";
 
 function BackToTop() {
-  const { arrivedState } = useWindowScroll()
+  const { arrivedState } = useWindowScroll();
 
-  return (
-    !arrivedState.top.get() ? (
-      <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-        ↑ Back to top
-      </button>
-    ) : null
-  )
+  return !arrivedState.top.get() ? (
+    <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>↑ Back to top</button>
+  ) : null;
 }
 ```
 
 ### Scroll direction indicator
 
 ```tsx
-const { directions } = useWindowScroll()
+const { directions } = useWindowScroll();
 // directions.bottom.get() → true while scrolling down
 // directions.top.get()    → true while scrolling up
 ```
@@ -57,13 +53,13 @@ const { directions } = useWindowScroll()
 ### Infinite scroll trigger
 
 ```typescript
-import { useObserveEffect } from '@legendapp/state/react'
+import { useObserveEffect } from "@legendapp/state/react";
 
-const { arrivedState } = useWindowScroll({ offset: { bottom: 200 } })
+const { arrivedState } = useWindowScroll({ offset: { bottom: 200 } });
 
 useObserveEffect(arrivedState.bottom, (e) => {
-  if (e.value) fetchNextPage()
-})
+  if (e.value) fetchNextPage();
+});
 ```
 
 ### isScrolling + onStop
@@ -72,13 +68,13 @@ useObserveEffect(arrivedState.bottom, (e) => {
 const { isScrolling } = useWindowScroll({
   idle: 300,
   onStop: () => saveScrollPosition(),
-})
+});
 ```
 
 ### Throttled updates
 
 ```typescript
-const { y } = useWindowScroll({ throttle: 100 })
+const { y } = useWindowScroll({ throttle: 100 });
 ```
 
 ## Notes

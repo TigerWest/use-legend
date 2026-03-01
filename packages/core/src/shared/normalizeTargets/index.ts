@@ -14,9 +14,7 @@ import { getElement, type MaybeElement } from "../../elements/useRef$";
  * Currently shared by useResizeObserver.
  * useIntersectionObserver, useMutationObserver will use this once implemented.
  */
-export function normalizeTargets(
-  target?: MaybeElement | MaybeElement[],
-): Element[] {
+export function normalizeTargets(target?: MaybeElement | MaybeElement[]): Element[] {
   if (target == null) return [];
   const arr = Array.isArray(target) ? target : [target];
   return arr

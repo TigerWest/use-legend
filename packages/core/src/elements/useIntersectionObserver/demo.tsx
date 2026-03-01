@@ -29,7 +29,7 @@ export default function UseIntersectionObserverDemo() {
     (entries) => {
       isVisible$.set(entries[0]?.isIntersecting ?? false);
     },
-    { threshold: 0.5, rootMargin: marginString$, root: containerRef$ },
+    { threshold: 0.5, rootMargin: marginString$, root: containerRef$ }
   );
 
   return (
@@ -51,9 +51,7 @@ export default function UseIntersectionObserverDemo() {
           {() => (
             <span>
               isIntersecting:{" "}
-              <strong>
-                {isActive$.get() ? String(isVisible$.get()) : "— (paused)"}
-              </strong>
+              <strong>{isActive$.get() ? String(isVisible$.get()) : "— (paused)"}</strong>
             </span>
           )}
         </Computed>
@@ -85,9 +83,7 @@ export default function UseIntersectionObserverDemo() {
           borderRadius: "6px",
         }}
       >
-        <span style={{ color: "var(--sl-color-gray-2, #64748b)" }}>
-          rootMargin:
-        </span>
+        <span style={{ color: "var(--sl-color-gray-2, #64748b)" }}>rootMargin:</span>
         <Computed>
           {() => (
             <input
@@ -110,10 +106,7 @@ export default function UseIntersectionObserverDemo() {
         <Computed>
           {() =>
             rootMargin$.get() !== DEFAULT_ROOT_MARGIN ? (
-              <button
-                onClick={() => rootMargin$.set(DEFAULT_ROOT_MARGIN)}
-                style={btnStyle}
-              >
+              <button onClick={() => rootMargin$.set(DEFAULT_ROOT_MARGIN)} style={btnStyle}>
                 default
               </button>
             ) : null
@@ -163,9 +156,7 @@ export default function UseIntersectionObserverDemo() {
                     ? "var(--sl-color-green, #22c55e)"
                     : "var(--sl-color-gray-4, #94a3b8)"
                 }`,
-                background: isVisible$.get()
-                  ? "var(--sl-color-green-low, #dcfce7)"
-                  : "transparent",
+                background: isVisible$.get() ? "var(--sl-color-green-low, #dcfce7)" : "transparent",
               }}
             >
               target element

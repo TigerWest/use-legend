@@ -1,29 +1,29 @@
-import type { NodePath } from '@babel/core';
-import type { PluginOptions } from '../types';
-import { getRootObject } from './getRootObject';
+import type { NodePath } from "@babel/core";
+import type { PluginOptions } from "../types";
+import { getRootObject } from "./getRootObject";
 
 function isGetCallNode(node: any, opts: PluginOptions): boolean {
-  if (node.type === 'CallExpression') {
+  if (node.type === "CallExpression") {
     const { callee, arguments: args } = node;
-    if (callee.type !== 'MemberExpression') return false;
-    if (callee.property.type !== 'Identifier') return false;
-    if (callee.property.name !== 'get') return false;
+    if (callee.type !== "MemberExpression") return false;
+    if (callee.property.type !== "Identifier") return false;
+    if (callee.property.name !== "get") return false;
     if (args.length !== 0) return false;
     if (!opts.allGet) {
       const root = getRootObject(callee.object);
-      if (!root || !root.name?.endsWith('$')) return false;
+      if (!root || !root.name?.endsWith("$")) return false;
     }
     return true;
   }
-  if (node.type === 'OptionalCallExpression') {
+  if (node.type === "OptionalCallExpression") {
     const { callee, arguments: args } = node;
-    if (callee.type !== 'OptionalMemberExpression') return false;
-    if (callee.property?.type !== 'Identifier') return false;
-    if (callee.property?.name !== 'get') return false;
+    if (callee.type !== "OptionalMemberExpression") return false;
+    if (callee.property?.type !== "Identifier") return false;
+    if (callee.property?.name !== "get") return false;
     if (args.length !== 0) return false;
     if (!opts.allGet) {
       const root = getRootObject(callee.object);
-      if (!root || !root.name?.endsWith('$')) return false;
+      if (!root || !root.name?.endsWith("$")) return false;
     }
     return true;
   }
@@ -42,9 +42,9 @@ function isGetCallNode(node: any, opts: PluginOptions): boolean {
  * - When opts.allGet is false (default), root object must end with '$'
  */
 const FUNCTION_BOUNDARY_TYPES = new Set([
-  'ArrowFunctionExpression',
-  'FunctionExpression',
-  'FunctionDeclaration',
+  "ArrowFunctionExpression",
+  "FunctionExpression",
+  "FunctionDeclaration",
 ]);
 
 export function hasGetCall(exprPath: NodePath, opts: PluginOptions): boolean {

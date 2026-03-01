@@ -43,18 +43,16 @@ export function get<T>(maybeObservable: MaybeObservable<T> | undefined): T | und
  */
 export function get<T, K extends keyof T>(
   maybeObservable: MaybeObservable<T>,
-  key: K,
+  key: K
 ): T[K] | undefined;
 
 // Implementation
 export function get<T>(
   maybeObservable: MaybeObservable<T>,
-  key?: keyof T,
+  key?: keyof T
 ): T | T[keyof T] | undefined {
   // Extract the base value
-  const value = isObservable(maybeObservable)
-    ? maybeObservable.get()
-    : maybeObservable;
+  const value = isObservable(maybeObservable) ? maybeObservable.get() : maybeObservable;
 
   // If no key provided, return the value (single-arg overload)
   if (key === undefined) {

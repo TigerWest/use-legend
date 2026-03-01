@@ -24,11 +24,7 @@ describe("useEventListener() — no target (window default)", () => {
 
     renderHook(() => useEventListener("click", listener));
 
-    expect(addSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(addSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 
   it("invokes listener when the event fires on window", () => {
@@ -49,11 +45,7 @@ describe("useEventListener() — no target (window default)", () => {
 
     unmount();
 
-    expect(removeSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(removeSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 
   it("does not invoke listener after unmount", () => {
@@ -105,11 +97,7 @@ describe("useEventListener() — Window / Document target", () => {
 
     renderHook(() => useEventListener(window, "resize", listener));
 
-    expect(addSpy).toHaveBeenCalledWith(
-      "resize",
-      expect.any(Function),
-      undefined,
-    );
+    expect(addSpy).toHaveBeenCalledWith("resize", expect.any(Function), undefined);
   });
 
   it("registers listener on Document target", () => {
@@ -118,11 +106,7 @@ describe("useEventListener() — Window / Document target", () => {
 
     renderHook(() => useEventListener(document, "click", listener));
 
-    expect(addSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(addSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 
   it("invokes listener when event fires on Document", () => {
@@ -139,17 +123,11 @@ describe("useEventListener() — Window / Document target", () => {
   it("removes Document listener on unmount", () => {
     const removeSpy = vi.spyOn(document, "removeEventListener");
     const listener = vi.fn();
-    const { unmount } = renderHook(() =>
-      useEventListener(document, "click", listener),
-    );
+    const { unmount } = renderHook(() => useEventListener(document, "click", listener));
 
     unmount();
 
-    expect(removeSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(removeSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 });
 
@@ -165,11 +143,7 @@ describe("useEventListener() — HTMLElement target", () => {
 
     renderHook(() => useEventListener(div, "click", listener));
 
-    expect(addSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(addSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 
   it("invokes listener when event fires on element", () => {
@@ -188,17 +162,11 @@ describe("useEventListener() — HTMLElement target", () => {
     const div = document.createElement("div");
     const removeSpy = vi.spyOn(div, "removeEventListener");
     const listener = vi.fn();
-    const { unmount } = renderHook(() =>
-      useEventListener(div, "click", listener),
-    );
+    const { unmount } = renderHook(() => useEventListener(div, "click", listener));
 
     unmount();
 
-    expect(removeSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(removeSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 
   it("does not register when target is null", () => {
@@ -259,9 +227,7 @@ describe("useEventListener() — Arrayable targets / events / listeners", () => 
     const div = document.createElement("div");
     const listener = vi.fn();
 
-    renderHook(() =>
-      useEventListener(div, ["mouseenter", "mouseleave"], listener),
-    );
+    renderHook(() => useEventListener(div, ["mouseenter", "mouseleave"], listener));
 
     act(() => {
       div.dispatchEvent(new Event("mouseenter"));
@@ -305,7 +271,7 @@ describe("useEventListener() — Arrayable targets / events / listeners", () => 
     const removeB = vi.spyOn(b, "removeEventListener");
     const listener = vi.fn();
     const { unmount } = renderHook(() =>
-      useEventListener([wrapEl(a), wrapEl(b)], "click", listener),
+      useEventListener([wrapEl(a), wrapEl(b)], "click", listener)
     );
 
     unmount();
@@ -331,7 +297,7 @@ describe("useEventListener() — options", () => {
     expect(addSpy).toHaveBeenCalledWith(
       "click",
       expect.any(Function),
-      expect.objectContaining({ passive: true, capture: false }),
+      expect.objectContaining({ passive: true, capture: false })
     );
   });
 
@@ -351,9 +317,7 @@ describe("useEventListener() — options", () => {
     const listener = vi.fn();
     const opts: AddEventListenerOptions = { passive: true };
 
-    const { unmount } = renderHook(() =>
-      useEventListener(div, "click", listener, opts),
-    );
+    const { unmount } = renderHook(() => useEventListener(div, "click", listener, opts));
 
     opts.passive = false;
     unmount();
@@ -361,7 +325,7 @@ describe("useEventListener() — options", () => {
     expect(removeSpy).toHaveBeenCalledWith(
       "click",
       expect.any(Function),
-      expect.objectContaining({ passive: true }),
+      expect.objectContaining({ passive: true })
     );
   });
 });
@@ -375,9 +339,7 @@ describe("useEventListener() — returned cleanup function", () => {
     const div = document.createElement("div");
     const removeSpy = vi.spyOn(div, "removeEventListener");
     const listener = vi.fn();
-    const { result } = renderHook(() =>
-      useEventListener(div, "click", listener),
-    );
+    const { result } = renderHook(() => useEventListener(div, "click", listener));
 
     act(() => {
       result.current();
@@ -389,9 +351,7 @@ describe("useEventListener() — returned cleanup function", () => {
   it("does not invoke listener after manual cleanup", () => {
     const div = document.createElement("div");
     const listener = vi.fn();
-    const { result } = renderHook(() =>
-      useEventListener(div, "click", listener),
-    );
+    const { result } = renderHook(() => useEventListener(div, "click", listener));
 
     act(() => {
       result.current();
@@ -418,7 +378,7 @@ describe("useEventListener() — stale closure safety", () => {
 
     const { rerender } = renderHook<() => void, { listener: (ev: MouseEvent) => void }>(
       ({ listener }) => useEventListener(wrappedDiv, "click", listener),
-      { initialProps: { listener: vi.fn() } },
+      { initialProps: { listener: vi.fn() } }
     );
 
     const callsBefore = addSpy.mock.calls.length;
@@ -496,11 +456,7 @@ describe("useEventListener() — Ref$ reactive target", () => {
       result.current.el$(div);
     });
 
-    expect(addSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(addSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 
   it("invokes listener when event fires after Ref$ element is assigned", () => {
@@ -585,11 +541,7 @@ describe("useEventListener() — Observable<Element> reactive target", () => {
       target$.set(div);
     });
 
-    expect(addSpy).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      undefined,
-    );
+    expect(addSpy).toHaveBeenCalledWith("click", expect.any(Function), undefined);
   });
 
   it("invokes listener when event fires after Observable target is set", () => {

@@ -5,37 +5,29 @@ import { useRef } from "react";
 import type { Observable } from "@legendapp/state";
 import { useQueryClient } from "./useQueryClient";
 
-export interface UseMutationOptions<
-  TData = unknown,
-  TVariables = void,
-  TContext = unknown,
-> {
+export interface UseMutationOptions<TData = unknown, TVariables = void, TContext = unknown> {
   mutationKey?: MutationKey;
   mutationFn: (variables: TVariables) => Promise<TData>;
   onMutate?: (variables: TVariables) => TContext | Promise<TContext>;
   onSuccess?: (
     data: TData,
     variables: TVariables,
-    context: TContext | undefined,
+    context: TContext | undefined
   ) => void | Promise<void>;
   onError?: (
     error: Error,
     variables: TVariables,
-    context: TContext | undefined,
+    context: TContext | undefined
   ) => void | Promise<void>;
   onSettled?: (
     data: TData | undefined,
     error: Error | null,
     variables: TVariables,
-    context: TContext | undefined,
+    context: TContext | undefined
   ) => void | Promise<void>;
 }
 
-export interface MutationState<
-  TData = unknown,
-  TVariables = void,
-  TContext = unknown,
-> {
+export interface MutationState<TData = unknown, TVariables = void, TContext = unknown> {
   data: TData | undefined;
   error: Error | null;
   status: "idle" | "pending" | "error" | "success";
@@ -94,22 +86,13 @@ export interface MutationState<
  * }
  * ```
  */
-export function useMutation<
-  TData = unknown,
-  TVariables = void,
-  TContext = unknown,
->(
-  options: UseMutationOptions<TData, TVariables, TContext>,
+export function useMutation<TData = unknown, TVariables = void, TContext = unknown>(
+  options: UseMutationOptions<TData, TVariables, TContext>
 ): Observable<MutationState<TData, TVariables, TContext>> {
   const queryClient = useQueryClient();
 
   // Observer는 한 번만 생성
-  const observerRef = useRef<MutationObserver<
-    TData,
-    Error,
-    TVariables,
-    TContext
-  > | null>(null);
+  const observerRef = useRef<MutationObserver<TData, Error, TVariables, TContext> | null>(null);
 
   // Observable 상태 초기화 (mutate/mutateAsync/reset는 별도 함수로 분리 - observable 안에 넣으면 Observable<Function>이 됨)
   const state$ = useObservable({
@@ -151,12 +134,7 @@ export function useMutation<
   });
 
   if (!observerRef.current) {
-    observerRef.current = new MutationObserver<
-      TData,
-      Error,
-      TVariables,
-      TContext
-    >(queryClient, {
+    observerRef.current = new MutationObserver<TData, Error, TVariables, TContext>(queryClient, {
       mutationKey: options.mutationKey,
       mutationFn: options.mutationFn,
       onMutate: options.onMutate,

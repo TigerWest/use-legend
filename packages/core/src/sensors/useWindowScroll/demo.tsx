@@ -15,12 +15,8 @@ const card: React.CSSProperties = {
 const chip = (active: boolean): React.CSSProperties => ({
   padding: "2px 8px",
   borderRadius: "4px",
-  background: active
-    ? "var(--sl-color-green-low, #f0fdf4)"
-    : "var(--sl-color-gray-5, #f1f5f9)",
-  color: active
-    ? "var(--sl-color-green, #16a34a)"
-    : "var(--sl-color-gray-3, #64748b)",
+  background: active ? "var(--sl-color-green-low, #f0fdf4)" : "var(--sl-color-gray-5, #f1f5f9)",
+  color: active ? "var(--sl-color-green, #16a34a)" : "var(--sl-color-gray-3, #64748b)",
   border: `1px solid ${active ? "var(--sl-color-green, #22c55e)" : "var(--sl-color-gray-5, #e2e8f0)"}`,
   transition: "all 0.15s",
 });
@@ -37,9 +33,7 @@ export default function UseWindowScrollDemo() {
         <span>
           y: <strong>{y$.get()}</strong>
         </span>
-        <span style={chip(isScrolling$.get())}>
-          {isScrolling$.get() ? "scrolling" : "idle"}
-        </span>
+        <span style={chip(isScrolling$.get())}>{isScrolling$.get() ? "scrolling" : "idle"}</span>
       </div>
 
       <div style={card}>

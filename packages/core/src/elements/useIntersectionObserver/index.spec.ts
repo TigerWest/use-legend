@@ -11,13 +11,14 @@ const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(Observa
 const mockObserve = vi.fn();
 const mockDisconnect = vi.fn();
 
-const MockIntersectionObserver = vi.fn(
-  function(cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
-    void cb;
-    void init; // captured for assertion via toHaveBeenCalledWith
-    return { observe: mockObserve, disconnect: mockDisconnect };
-  },
-);
+const MockIntersectionObserver = vi.fn(function (
+  cb: IntersectionObserverCallback,
+  init?: IntersectionObserverInit
+) {
+  void cb;
+  void init; // captured for assertion via toHaveBeenCalledWith
+  return { observe: mockObserve, disconnect: mockDisconnect };
+});
 
 beforeEach(() => {
   vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
@@ -33,7 +34,7 @@ afterEach(() => {
 describe("useIntersectionObserver()", () => {
   it("creates observer and observes target on mount", () => {
     const el = document.createElement("div");
-    renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(mockObserve).toHaveBeenCalledWith(el);
@@ -41,23 +42,21 @@ describe("useIntersectionObserver()", () => {
 
   it("isSupported is true when IntersectionObserver is available", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     expect(result.current.isSupported$.get()).toBe(true);
   });
 
   it("isActive is true by default", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     expect(result.current.isActive$.get()).toBe(true);
   });
 
   it("does not start observer when immediate is false", () => {
     const el = document.createElement("div");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn(), { immediate: false }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { immediate: false }));
 
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
   });
@@ -65,7 +64,7 @@ describe("useIntersectionObserver()", () => {
   it("isActive is false when immediate is false", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn(), { immediate: false }),
+      useIntersectionObserver(wrapEl(el), vi.fn(), { immediate: false })
     );
 
     expect(result.current.isActive$.get()).toBe(false);
@@ -73,7 +72,7 @@ describe("useIntersectionObserver()", () => {
 
   it("pause() disconnects observer and sets isActive to false", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     act(() => {
       result.current.pause();
@@ -85,7 +84,7 @@ describe("useIntersectionObserver()", () => {
 
   it("resume() restarts the observer after pause", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     act(() => result.current.pause());
 
@@ -101,7 +100,7 @@ describe("useIntersectionObserver()", () => {
 
   it("stop() permanently stops the observer", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     act(() => result.current.stop());
 
@@ -111,7 +110,7 @@ describe("useIntersectionObserver()", () => {
 
   it("resume() has no effect after stop()", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     act(() => result.current.stop());
     MockIntersectionObserver.mockClear();
@@ -139,9 +138,7 @@ describe("useIntersectionObserver()", () => {
 
   it("skips null targets without throwing", () => {
     const el$ = observable<OpaqueObject<Element> | null>(null);
-    expect(() =>
-      renderHook(() => useIntersectionObserver(el$, vi.fn())),
-    ).not.toThrow();
+    expect(() => renderHook(() => useIntersectionObserver(el$, vi.fn()))).not.toThrow();
     expect(mockObserve).not.toHaveBeenCalled();
   });
 
@@ -165,47 +162,39 @@ describe("useIntersectionObserver()", () => {
 
   it("passes threshold option to IntersectionObserver", () => {
     const el = document.createElement("div");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn(), { threshold: 0.5 }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { threshold: 0.5 }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ threshold: 0.5 }),
+      expect.objectContaining({ threshold: 0.5 })
     );
   });
 
   it("passes rootMargin option to IntersectionObserver", () => {
     const el = document.createElement("div");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn(), { rootMargin: "10px" }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { rootMargin: "10px" }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ rootMargin: "10px" }),
+      expect.objectContaining({ rootMargin: "10px" })
     );
   });
 
   it("passes Observable rootMargin to IntersectionObserver", () => {
     const el = document.createElement("div");
     const rootMargin$ = observable("20px");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn(), { rootMargin: rootMargin$ }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { rootMargin: rootMargin$ }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ rootMargin: "20px" }),
+      expect.objectContaining({ rootMargin: "20px" })
     );
   });
 
   it("reactively recreates observer when Observable rootMargin changes", () => {
     const el = document.createElement("div");
     const rootMargin$ = observable("0px");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn(), { rootMargin: rootMargin$ }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { rootMargin: rootMargin$ }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     mockDisconnect.mockClear();
@@ -219,13 +208,13 @@ describe("useIntersectionObserver()", () => {
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ rootMargin: "10px" }),
+      expect.objectContaining({ rootMargin: "10px" })
     );
   });
 
   it("disconnects observer on unmount", () => {
     const el = document.createElement("div");
-    const { unmount } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { unmount } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     unmount();
 
@@ -235,7 +224,7 @@ describe("useIntersectionObserver()", () => {
   it("isSupported is false when IntersectionObserver is not available", () => {
     vi.stubGlobal("IntersectionObserver", undefined);
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     expect(result.current.isSupported$.get()).toBe(false);
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
@@ -244,13 +233,11 @@ describe("useIntersectionObserver()", () => {
   it("passes root option to IntersectionObserver", () => {
     const el = document.createElement("div");
     const root = document.createElement("div");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el), vi.fn(), { root: wrapEl(root) }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { root: wrapEl(root) }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root }),
+      expect.objectContaining({ root })
     );
   });
 
@@ -258,13 +245,11 @@ describe("useIntersectionObserver()", () => {
     const el = document.createElement("div");
     const root = document.createElement("div");
     const root$ = wrapEl(root);
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el), vi.fn(), { root: root$ }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { root: root$ }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root }),
+      expect.objectContaining({ root })
     );
   });
 
@@ -274,9 +259,7 @@ describe("useIntersectionObserver()", () => {
     // Start with null — @legendapp/state reliably tracks null→element transitions
     const root$ = observable<OpaqueObject<Element> | null>(null);
 
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el), vi.fn(), { root: root$ }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { root: root$ }));
 
     // root is null — observer must not be created yet
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
@@ -292,7 +275,7 @@ describe("useIntersectionObserver()", () => {
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: rootB }),
+      expect.objectContaining({ root: rootB })
     );
   });
 
@@ -302,7 +285,7 @@ describe("useIntersectionObserver()", () => {
 
     const { result } = renderHook(() => {
       const root$ = useRef$<HTMLElement>();
-      return { root$, io: useIntersectionObserver(wrapEl(el),vi.fn(), { root: root$ }) };
+      return { root$, io: useIntersectionObserver(wrapEl(el), vi.fn(), { root: root$ }) };
     });
 
     // root Ref$ is null — observer must not be created yet
@@ -314,7 +297,7 @@ describe("useIntersectionObserver()", () => {
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: rootDiv }),
+      expect.objectContaining({ root: rootDiv })
     );
   });
 
@@ -325,7 +308,7 @@ describe("useIntersectionObserver()", () => {
 
     const { result } = renderHook(() => {
       const root$ = useRef$<HTMLElement>();
-      return { root$, io: useIntersectionObserver(wrapEl(el),vi.fn(), { root: root$ }) };
+      return { root$, io: useIntersectionObserver(wrapEl(el), vi.fn(), { root: root$ }) };
     });
 
     act(() => result.current.root$(rootA));
@@ -340,25 +323,23 @@ describe("useIntersectionObserver()", () => {
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: rootB }),
+      expect.objectContaining({ root: rootB })
     );
   });
 
   it("passes threshold array [0, 0.5, 1] to IntersectionObserver", () => {
     const el = document.createElement("div");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn(), { threshold: [0, 0.5, 1] }),
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { threshold: [0, 0.5, 1] }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ threshold: [0, 0.5, 1] }),
+      expect.objectContaining({ threshold: [0, 0.5, 1] })
     );
   });
 
   it("pause → resume → stop sequence transitions states correctly", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     expect(result.current.isActive$.get()).toBe(true);
 
@@ -413,7 +394,7 @@ describe("useIntersectionObserver()", () => {
 
   it("multiple resume() calls after stop() are all ignored", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el),vi.fn()));
+    const { result } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     act(() => result.current.stop());
     MockIntersectionObserver.mockClear();
@@ -430,9 +411,7 @@ describe("useIntersectionObserver()", () => {
 
   it("pause() after unmount does not throw", () => {
     const el = document.createElement("div");
-    const { result, unmount } = renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn()),
-    );
+    const { result, unmount } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     unmount();
     mockDisconnect.mockClear();
@@ -444,9 +423,7 @@ describe("useIntersectionObserver()", () => {
 
   it("resume() after unmount does not recreate observer", () => {
     const el = document.createElement("div");
-    const { result, unmount } = renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn()),
-    );
+    const { result, unmount } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     unmount();
     MockIntersectionObserver.mockClear();
@@ -457,9 +434,7 @@ describe("useIntersectionObserver()", () => {
 
   it("stop() after unmount does not throw", () => {
     const el = document.createElement("div");
-    const { result, unmount } = renderHook(() =>
-      useIntersectionObserver(wrapEl(el),vi.fn()),
-    );
+    const { result, unmount } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
     unmount();
 

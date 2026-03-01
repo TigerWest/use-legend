@@ -21,8 +21,7 @@ if (typeof window !== "undefined" && !window.DragEvent) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 function createDiv() {
   return document.createElement("div");
@@ -32,11 +31,7 @@ function createFile(name: string, type: string): File {
   return new File(["content"], name, { type });
 }
 
-function createDragEvent(
-  type: string,
-  files: File[] = [],
-  mimeTypes: string[] = [],
-): DragEvent {
+function createDragEvent(type: string, files: File[] = [], mimeTypes: string[] = []): DragEvent {
   const event = new DragEvent(type, { bubbles: true, cancelable: true });
 
   // Build DataTransferItemList-like object
@@ -117,9 +112,7 @@ describe("useDropZone()", () => {
       createFile("c.png", "image/png"),
     ];
 
-    const { result } = renderHook(() =>
-      useDropZone(wrapEl(div) as any, { multiple: false }),
-    );
+    const { result } = renderHook(() => useDropZone(wrapEl(div) as any, { multiple: false }));
 
     const mimeTypes = files.map((f) => f.type);
     const dropEvent = createDragEvent("drop", files, mimeTypes);
@@ -152,28 +145,30 @@ describe("useDropZone()", () => {
     const { result } = renderHook(() =>
       useDropZone(wrapEl(div) as any, {
         dataTypes: (types) => types.every((t) => t.startsWith("image/")),
-      }),
+      })
     );
 
     // valid: all image/
-    const validFiles = [
-      createFile("a.jpeg", "image/jpeg"),
-      createFile("b.png", "image/png"),
-    ];
+    const validFiles = [createFile("a.jpeg", "image/jpeg"), createFile("b.png", "image/png")];
     fireDragEvent(
       div,
-      createDragEvent("drop", validFiles, validFiles.map((f) => f.type)),
+      createDragEvent(
+        "drop",
+        validFiles,
+        validFiles.map((f) => f.type)
+      )
     );
     expect(result.current.files$.get()).toHaveLength(2);
 
     // invalid: includes text/plain
-    const invalidFiles = [
-      createFile("a.png", "image/png"),
-      createFile("b.txt", "text/plain"),
-    ];
+    const invalidFiles = [createFile("a.png", "image/png"), createFile("b.txt", "text/plain")];
     fireDragEvent(
       div,
-      createDragEvent("drop", invalidFiles, invalidFiles.map((f) => f.type)),
+      createDragEvent(
+        "drop",
+        invalidFiles,
+        invalidFiles.map((f) => f.type)
+      )
     );
     expect(result.current.files$.get()).toBeNull();
   });
@@ -186,7 +181,7 @@ describe("useDropZone()", () => {
       useDropZone(wrapEl(div) as any, {
         dataTypes: ["image/png"],
         checkValidity: () => true, // always allow
-      }),
+      })
     );
 
     const dropEvent = createDragEvent("drop", [file], ["text/plain"]);
@@ -216,9 +211,7 @@ describe("useDropZone()", () => {
     const onLeave = vi.fn();
     const onOver = vi.fn();
 
-    renderHook(() =>
-      useDropZone(wrapEl(div) as any, { onEnter, onLeave, onOver }),
-    );
+    renderHook(() => useDropZone(wrapEl(div) as any, { onEnter, onLeave, onOver }));
 
     fireDragEvent(div, createDragEvent("dragenter", [], []));
     expect(onEnter).toHaveBeenCalledTimes(1);

@@ -23,7 +23,7 @@ describe("useMayObservableOptions() — no transform", () => {
 
   it("plain object → fields readable via .get()", () => {
     const { result } = renderHook(() =>
-      useMayObservableOptions<{ x: number; y: number }>({ x: 10, y: 20 }),
+      useMayObservableOptions<{ x: number; y: number }>({ x: 10, y: 20 })
     );
     expect(result.current.x.get()).toBe(10);
     expect(result.current.y.get()).toBe(20);
@@ -32,21 +32,21 @@ describe("useMayObservableOptions() — no transform", () => {
   it("per-field Observable → auto-deref, reactive", () => {
     const val$ = observable("hello");
     const opts = { val: val$ }; // stable reference
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts),
-    );
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(opts));
     expect(result.current.val.get()).toBe("hello");
-    act(() => { val$.set("world"); });
+    act(() => {
+      val$.set("world");
+    });
     expect(result.current.val.get()).toBe("world");
   });
 
   it("outer Observable → reacts to whole-object replace", () => {
     const options$ = observable<SimpleOpts>({ val: "a" });
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(options$),
-    );
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(options$));
     expect(result.current.val.get()).toBe("a");
-    act(() => { options$.set({ val: "b" }); });
+    act(() => {
+      options$.set({ val: "b" });
+    });
     expect(result.current.val.get()).toBe("b");
   });
 
@@ -55,17 +55,15 @@ describe("useMayObservableOptions() — no transform", () => {
     // Legend-State notifies parent deps when a child field mutates,
     // so opts$ recomputes and returns the updated value.
     const options$ = observable<SimpleOpts>({ val: "a" });
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(options$),
-    );
-    act(() => { options$.val.set("b"); });
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(options$));
+    act(() => {
+      options$.val.set("b");
+    });
     expect(result.current.val.get()).toBe("b");
   });
 
   it("returns an Observable", () => {
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>({ val: "x" }),
-    );
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>({ val: "x" }));
     expect(isObservable(result.current)).toBe(true);
   });
 });
@@ -78,7 +76,7 @@ describe("useMayObservableOptions() — function-form transform", () => {
   it("custom compute fn is called, its return value is what opts$ resolves to", () => {
     const compute = vi.fn((_raw) => ({ val: "computed" }));
     const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>({ val: "ignored" }, compute),
+      useMayObservableOptions<SimpleOpts>({ val: "ignored" }, compute)
     );
     // useObservable is lazy — trigger the compute by reading the value
     expect(result.current.val.get()).toBe("computed");
@@ -92,7 +90,7 @@ describe("useMayObservableOptions() — function-form transform", () => {
       useMayObservableOptions<SimpleOpts>(rawOpts, (raw) => {
         captured = raw;
         return { val: "x" };
-      }),
+      })
     );
     result.current.get(); // trigger lazy compute
     expect(captured).toBe(rawOpts);
@@ -104,10 +102,12 @@ describe("useMayObservableOptions() — function-form transform", () => {
       useMayObservableOptions<SimpleOpts>(options$, (raw) => {
         const v = isObservable(raw) ? (raw as typeof options$).get() : raw;
         return v ? { val: v.val + "!" } : undefined;
-      }),
+      })
     );
     expect(result.current.val.get()).toBe("a!");
-    act(() => { options$.set({ val: "b" }); });
+    act(() => {
+      options$.set({ val: "b" });
+    });
     expect(result.current.val.get()).toBe("b!");
   });
 
@@ -119,7 +119,7 @@ describe("useMayObservableOptions() — function-form transform", () => {
           evalCount++;
           return undefined;
         }),
-      { initialProps: { opts: { val: "a" } } },
+      { initialProps: { opts: { val: "a" } } }
     );
     result.current.get(); // trigger initial lazy compute
     const after1 = evalCount;
@@ -137,17 +137,13 @@ describe("useMayObservableOptions() — object-form: 'peek'", () => {
   it("resolves per-field Observable to its current value at compute time", () => {
     const val$ = observable("initial");
     const opts = { val: val$ }; // stable reference
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts, { val: 'peek' }),
-    );
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(opts, { val: "peek" }));
     expect(result.current.val.get()).toBe("initial");
   });
 
   it("plain field value is resolved as-is", () => {
     const opts = { val: "static" };
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts, { val: 'peek' }),
-    );
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(opts, { val: "peek" }));
     expect(result.current.val.get()).toBe("static");
   });
 
@@ -156,11 +152,11 @@ describe("useMayObservableOptions() — object-form: 'peek'", () => {
     // peek() inside compute does not register a dep on val$ → field stays at compute-time snapshot.
     const val$ = observable("initial");
     const opts = { val: val$ }; // stable: same reference every render
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts, { val: 'peek' }),
-    );
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(opts, { val: "peek" }));
     expect(result.current.val.get()).toBe("initial");
-    act(() => { val$.set("updated"); });
+    act(() => {
+      val$.set("updated");
+    });
     // No dep registered (peek) + stable options ref (no depKey change) → stays "initial"
     expect(result.current.val.get()).toBe("initial");
   });
@@ -174,10 +170,10 @@ describe("useMayObservableOptions() — object-form: 'get' (explicit or omitted)
   it("explicit 'get' → per-field Observable is reactive via Legend-State auto-deref", () => {
     const val$ = observable("initial");
     const opts = { val: val$ };
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts, { val: 'get' }),
-    );
-    act(() => { val$.set("updated"); });
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(opts, { val: "get" }));
+    act(() => {
+      val$.set("updated");
+    });
     expect(result.current.val.get()).toBe("updated");
   });
 
@@ -186,22 +182,27 @@ describe("useMayObservableOptions() — object-form: 'get' (explicit or omitted)
     const opts = { val: val$ };
     const { result } = renderHook(() =>
       // empty FieldTransformMap: val is unspecified → defaults to 'get'
-      useMayObservableOptions<SimpleOpts>(opts, {}),
+      useMayObservableOptions<SimpleOpts>(opts, {})
     );
-    act(() => { val$.set("updated"); });
+    act(() => {
+      val$.set("updated");
+    });
     expect(result.current.val.get()).toBe("updated");
   });
 
   it("mixed: 'peek' freezes one field, default 'get' keeps another reactive (stable options ref)", () => {
-    interface Opts { reactive: string; frozen: string }
+    interface Opts {
+      reactive: string;
+      frozen: string;
+    }
     const reactive$ = observable("r-init");
     const frozen$ = observable("f-init");
     const opts = { reactive: reactive$, frozen: frozen$ }; // stable reference
     const { result } = renderHook(() =>
       useMayObservableOptions<Opts>(
         opts,
-        { frozen: 'peek' }, // reactive: omitted → defaults to 'get'
-      ),
+        { frozen: "peek" } // reactive: omitted → defaults to 'get'
+      )
     );
     expect(result.current.reactive.get()).toBe("r-init");
     expect(result.current.frozen.get()).toBe("f-init");
@@ -210,7 +211,7 @@ describe("useMayObservableOptions() — object-form: 'get' (explicit or omitted)
       frozen$.set("f-updated");
     });
     expect(result.current.reactive.get()).toBe("r-updated"); // reactive ✓
-    expect(result.current.frozen.get()).toBe("f-init");       // frozen (peek) ✓
+    expect(result.current.frozen.get()).toBe("f-init"); // frozen (peek) ✓
   });
 });
 
@@ -220,10 +221,10 @@ describe("useMayObservableOptions() — object-form: 'get' (explicit or omitted)
 
 describe("useMayObservableOptions() — object-form: 'get.opaque'", () => {
   it("calls ObservableHint.opaque with the resolved value", () => {
-    const spy = vi.spyOn(ObservableHint, 'opaque');
+    const spy = vi.spyOn(ObservableHint, "opaque");
     const element = document.createElement("div");
     const { result } = renderHook(() =>
-      useMayObservableOptions<{ element: HTMLElement }>({ element }, { element: 'get.opaque' }),
+      useMayObservableOptions<{ element: HTMLElement }>({ element }, { element: "get.opaque" })
     );
     result.current.get(); // trigger lazy compute
     expect(spy).toHaveBeenCalledWith(element);
@@ -233,18 +234,18 @@ describe("useMayObservableOptions() — object-form: 'get.opaque'", () => {
   it("value is accessible via .get()", () => {
     const element = document.createElement("div");
     const { result } = renderHook(() =>
-      useMayObservableOptions<{ element: HTMLElement }>({ element }, { element: 'get.opaque' }),
+      useMayObservableOptions<{ element: HTMLElement }>({ element }, { element: "get.opaque" })
     );
     expect(result.current.element.get()).toBe(element);
   });
 
   it("null field value (via Observable) → ObservableHint.opaque NOT called (null-safe)", () => {
     // get(el$) resolves to null → v != null is false → opaque NOT applied
-    const spy = vi.spyOn(ObservableHint, 'opaque');
+    const spy = vi.spyOn(ObservableHint, "opaque");
     const el$ = observable<HTMLElement | null>(null);
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions({ element: el$ } as any, { element: 'get.opaque' } as any),
+      useMayObservableOptions({ element: el$ } as any, { element: "get.opaque" } as any)
     );
     result.current.get(); // trigger lazy compute
     expect(spy).not.toHaveBeenCalled();
@@ -252,12 +253,12 @@ describe("useMayObservableOptions() — object-form: 'get.opaque'", () => {
   });
 
   it("undefined field → ObservableHint.opaque NOT called (null-safe)", () => {
-    const spy = vi.spyOn(ObservableHint, 'opaque');
+    const spy = vi.spyOn(ObservableHint, "opaque");
     const { result } = renderHook(() =>
       useMayObservableOptions<{ element?: HTMLElement }>(
         { element: undefined },
-        { element: 'get.opaque' },
-      ),
+        { element: "get.opaque" }
+      )
     );
     result.current.get(); // trigger lazy compute
     expect(spy).not.toHaveBeenCalled();
@@ -271,10 +272,10 @@ describe("useMayObservableOptions() — object-form: 'get.opaque'", () => {
 
 describe("useMayObservableOptions() — object-form: 'get.plain'", () => {
   it("calls ObservableHint.plain with the resolved value", () => {
-    const spy = vi.spyOn(ObservableHint, 'plain');
+    const spy = vi.spyOn(ObservableHint, "plain");
     const nested = { key: "value" };
     const { result } = renderHook(() =>
-      useMayObservableOptions<{ nested: object }>({ nested }, { nested: 'get.plain' }),
+      useMayObservableOptions<{ nested: object }>({ nested }, { nested: "get.plain" })
     );
     result.current.get(); // trigger lazy compute
     expect(spy).toHaveBeenCalledWith(nested);
@@ -282,11 +283,11 @@ describe("useMayObservableOptions() — object-form: 'get.plain'", () => {
   });
 
   it("null field value (via Observable) → ObservableHint.plain NOT called (null-safe)", () => {
-    const spy = vi.spyOn(ObservableHint, 'plain');
+    const spy = vi.spyOn(ObservableHint, "plain");
     const nested$ = observable<object | null>(null);
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions({ nested: nested$ } as any, { nested: 'get.plain' } as any),
+      useMayObservableOptions({ nested: nested$ } as any, { nested: "get.plain" } as any)
     );
     result.current.get(); // trigger lazy compute
     expect(spy).not.toHaveBeenCalled();
@@ -300,10 +301,10 @@ describe("useMayObservableOptions() — object-form: 'get.plain'", () => {
 
 describe("useMayObservableOptions() — object-form: 'get.function'", () => {
   it("calls ObservableHint.function with the resolved value", () => {
-    const spy = vi.spyOn(ObservableHint, 'function');
+    const spy = vi.spyOn(ObservableHint, "function");
     const cb = () => {};
     const { result } = renderHook(() =>
-      useMayObservableOptions<{ cb: () => void }>({ cb }, { cb: 'get.function' }),
+      useMayObservableOptions<{ cb: () => void }>({ cb }, { cb: "get.function" })
     );
     result.current.get(); // trigger lazy compute
     expect(spy).toHaveBeenCalledWith(cb);
@@ -311,11 +312,11 @@ describe("useMayObservableOptions() — object-form: 'get.function'", () => {
   });
 
   it("null field value (via Observable) → ObservableHint.function NOT called (null-safe)", () => {
-    const spy = vi.spyOn(ObservableHint, 'function');
+    const spy = vi.spyOn(ObservableHint, "function");
     const cb$ = observable<(() => void) | null>(null);
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions({ cb: cb$ } as any, { cb: 'get.function' } as any),
+      useMayObservableOptions({ cb: cb$ } as any, { cb: "get.function" } as any)
     );
     result.current.get(); // trigger lazy compute
     expect(spy).not.toHaveBeenCalled();
@@ -333,7 +334,7 @@ describe("useMayObservableOptions() — object-form: 'get.element'", () => {
     const el$ = observable<OpaqueObject<HTMLElement> | null>(ObservableHint.opaque(div));
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions<{ el: any }>({ el: el$ }, { el: 'get.element' }),
+      useMayObservableOptions<{ el: any }>({ el: el$ }, { el: "get.element" })
     );
     result.current.get(); // trigger lazy compute
     const stored = result.current.el.get();
@@ -345,7 +346,7 @@ describe("useMayObservableOptions() — object-form: 'get.element'", () => {
   it("Ref$ not yet mounted (null) → result[key] = null", () => {
     const { result } = renderHook(() => {
       const el$ = useRef$<HTMLDivElement>();
-      return useMayObservableOptions<{ el: any }>({ el: el$ }, { el: 'get.element' });
+      return useMayObservableOptions<{ el: any }>({ el: el$ }, { el: "get.element" });
     });
     result.current.get(); // trigger lazy compute
     expect(result.current.el.get()).toBeNull();
@@ -355,7 +356,10 @@ describe("useMayObservableOptions() — object-form: 'get.element'", () => {
     const div = document.createElement("div");
     const { result } = renderHook(() => {
       const el$ = useRef$<HTMLDivElement>();
-      return { el$, opts$: useMayObservableOptions<{ el: any }>({ el: el$ }, { el: 'get.element' }) };
+      return {
+        el$,
+        opts$: useMayObservableOptions<{ el: any }>({ el: el$ }, { el: "get.element" }),
+      };
     });
     expect(result.current.opts$.el.get()).toBeNull();
 
@@ -369,7 +373,7 @@ describe("useMayObservableOptions() — object-form: 'get.element'", () => {
   it("null field → result[key] = null (null-safe)", () => {
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions<{ el: any }>({ el: null }, { el: 'get.element' }),
+      useMayObservableOptions<{ el: any }>({ el: null }, { el: "get.element" })
     );
     result.current.get();
     expect(result.current.el.get()).toBeNull();
@@ -378,7 +382,7 @@ describe("useMayObservableOptions() — object-form: 'get.element'", () => {
   it("undefined field → result[key] unchanged (undefined-safe)", () => {
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions<{ el?: any }>({ el: undefined }, { el: 'get.element' }),
+      useMayObservableOptions<{ el?: any }>({ el: undefined }, { el: "get.element" })
     );
     result.current.get();
     expect(result.current.el.get()).toBeUndefined();
@@ -395,7 +399,7 @@ describe("useMayObservableOptions() — object-form: 'peek.element'", () => {
     const el$ = observable<OpaqueObject<HTMLElement> | null>(ObservableHint.opaque(div));
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions<{ el: any }>({ el: el$ }, { el: 'peek.element' }),
+      useMayObservableOptions<{ el: any }>({ el: el$ }, { el: "peek.element" })
     );
     result.current.get(); // trigger lazy compute
     const stored = result.current.el.get();
@@ -406,7 +410,7 @@ describe("useMayObservableOptions() — object-form: 'peek.element'", () => {
   it("null field → result[key] = null (null-safe)", () => {
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions<{ el: any }>({ el: null }, { el: 'peek.element' }),
+      useMayObservableOptions<{ el: any }>({ el: null }, { el: "peek.element" })
     );
     result.current.get();
     expect(result.current.el.get()).toBeNull();
@@ -415,7 +419,7 @@ describe("useMayObservableOptions() — object-form: 'peek.element'", () => {
   it("undefined field → result[key] unchanged (undefined-safe)", () => {
     const { result } = renderHook(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useMayObservableOptions<{ el?: any }>({ el: undefined }, { el: 'peek.element' }),
+      useMayObservableOptions<{ el?: any }>({ el: undefined }, { el: "peek.element" })
     );
     result.current.get();
     expect(result.current.el.get()).toBeUndefined();
@@ -430,11 +434,9 @@ describe("useMayObservableOptions() — object-form: custom function hint", () =
   it("calls custom fn with the raw field value (Observable or plain)", () => {
     const val$ = observable("hello");
     const opts = { val: val$ };
-    const customHint = vi.fn((v: unknown) =>
-      isObservable(v) ? (v as typeof val$).get() : v,
-    );
+    const customHint = vi.fn((v: unknown) => (isObservable(v) ? (v as typeof val$).get() : v));
     const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts, { val: customHint }),
+      useMayObservableOptions<SimpleOpts>(opts, { val: customHint })
     );
     result.current.val.get(); // trigger lazy compute
     expect(customHint).toHaveBeenCalledWith(val$);
@@ -445,7 +447,7 @@ describe("useMayObservableOptions() — object-form: custom function hint", () =
     const customHint = (_v: unknown) => "custom-result";
     const opts = { val: "ignored" };
     const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts, { val: customHint }),
+      useMayObservableOptions<SimpleOpts>(opts, { val: customHint })
     );
     expect(result.current.val.get()).toBe("custom-result");
   });
@@ -463,10 +465,12 @@ describe("useMayObservableOptions() — object-form bypassed for outer Observabl
     // opts$ still reactively tracks the outer observable via get(options$) dep.
     const options$ = observable<SimpleOpts>({ val: "initial" });
     const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(options$, { val: 'peek' }),
+      useMayObservableOptions<SimpleOpts>(options$, { val: "peek" })
     );
     expect(result.current.val.get()).toBe("initial");
-    act(() => { options$.set({ val: "replaced" }); });
+    act(() => {
+      options$.set({ val: "replaced" });
+    });
     expect(result.current.val.get()).toBe("replaced");
   });
 });
@@ -478,9 +482,8 @@ describe("useMayObservableOptions() — object-form bypassed for outer Observabl
 describe("useMayObservableOptions() — edge cases", () => {
   it("plain options reference change between renders → opts$ recomputes with new value", () => {
     const { result, rerender } = renderHook(
-      ({ opts }: { opts: SimpleOpts }) =>
-        useMayObservableOptions<SimpleOpts>(opts),
-      { initialProps: { opts: { val: "first" } } },
+      ({ opts }: { opts: SimpleOpts }) => useMayObservableOptions<SimpleOpts>(opts),
+      { initialProps: { opts: { val: "first" } } }
     );
     expect(result.current.val.get()).toBe("first");
     rerender({ opts: { val: "second" } });
@@ -489,32 +492,28 @@ describe("useMayObservableOptions() — edge cases", () => {
 
   it("same-reference options between renders → value is stable", () => {
     const opts = { val: "stable" };
-    const { result, rerender } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(opts),
-    );
+    const { result, rerender } = renderHook(() => useMayObservableOptions<SimpleOpts>(opts));
     rerender();
     expect(result.current.val.get()).toBe("stable");
   });
 
   it("null options with object-form transform → Observable<undefined> (null-safe)", () => {
     const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(null as any, { val: 'peek' }),
+      useMayObservableOptions<SimpleOpts>(null as any, { val: "peek" })
     );
     expect(result.current.get()).toBeUndefined();
   });
 
   it("undefined options with object-form transform → Observable<undefined>", () => {
     const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(undefined, { val: 'peek' }),
+      useMayObservableOptions<SimpleOpts>(undefined, { val: "peek" })
     );
     expect(result.current.get()).toBeUndefined();
   });
 
   it("undefined options with function-form transform → transform receives undefined", () => {
     const compute = vi.fn((_raw) => undefined);
-    const { result } = renderHook(() =>
-      useMayObservableOptions<SimpleOpts>(undefined, compute),
-    );
+    const { result } = renderHook(() => useMayObservableOptions<SimpleOpts>(undefined, compute));
     result.current.get(); // trigger lazy compute
     expect(compute).toHaveBeenCalledWith(undefined);
   });

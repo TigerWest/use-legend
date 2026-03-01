@@ -21,7 +21,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       expect(result.current.isPending.get()).toBe(true);
@@ -40,7 +40,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -61,7 +61,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -83,7 +83,7 @@ describe("useQuery", () => {
             queryFn,
             retry: false, // Explicitly disable retry for faster test
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isError.get()).toBe(true), {
@@ -106,7 +106,7 @@ describe("useQuery", () => {
             queryFn,
             retry: 2,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isError.get()).toBe(true), {
@@ -135,7 +135,7 @@ describe("useQuery", () => {
             queryFn,
             retry: false, // Disable retry for faster test
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initial fetch fails - should be loading error
@@ -180,7 +180,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Should be fetching initially
@@ -203,7 +203,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initial load - isLoading should be true
@@ -232,7 +232,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -244,9 +244,7 @@ describe("useQuery", () => {
       await waitFor(() => expect(result.current.isRefetching.get()).toBe(true));
 
       // Wait for completion
-      await waitFor(() =>
-        expect(result.current.isRefetching.get()).toBe(false),
-      );
+      await waitFor(() => expect(result.current.isRefetching.get()).toBe(false));
     });
 
     it("should track fetchStatus correctly", async () => {
@@ -263,21 +261,17 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Should transition to fetching
-      await waitFor(() =>
-        expect(result.current.fetchStatus.get()).toBe("fetching"),
-      );
+      await waitFor(() => expect(result.current.fetchStatus.get()).toBe("fetching"));
 
       // Resolve the query
       resolveQuery!("data");
 
       // Should transition to idle
-      await waitFor(() =>
-        expect(result.current.fetchStatus.get()).toBe("idle"),
-      );
+      await waitFor(() => expect(result.current.fetchStatus.get()).toBe("idle"));
     });
   });
 
@@ -294,7 +288,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Wait for initial fetch
@@ -317,7 +311,7 @@ describe("useQuery", () => {
             queryKey: ["items", filter$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(queryFn).toHaveBeenCalledTimes(1));
@@ -348,7 +342,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter$, "list"], // Only filter$ is observable
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Wait for initial fetch
@@ -398,7 +392,7 @@ describe("useQuery", () => {
             queryFn,
             enabled: false,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Wait a bit to ensure query doesn't execute
@@ -419,7 +413,7 @@ describe("useQuery", () => {
             queryFn,
             staleTime: 10000, // 10 seconds
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -440,7 +434,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       expect(typeof result.current.refetch).toBe("function");
@@ -460,7 +454,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -485,7 +479,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -509,7 +503,7 @@ describe("useQuery", () => {
             queryFn: async () => "data",
             enabled: false,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       expect(result.current.isEnabled.get()).toBe(false);
@@ -526,13 +520,11 @@ describe("useQuery", () => {
               return "data";
             },
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // isInitialLoading should match isLoading
-      expect(result.current.isInitialLoading.get()).toBe(
-        result.current.isLoading.get(),
-      );
+      expect(result.current.isInitialLoading.get()).toBe(result.current.isLoading.get());
     });
   });
 
@@ -560,7 +552,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter1$, filter2$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -618,7 +610,7 @@ describe("useQuery", () => {
             queryKey: ["products", nested$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -651,7 +643,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -692,7 +684,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
@@ -736,7 +728,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Wait for first fetch to start
@@ -774,7 +766,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(queryFn).toHaveBeenCalledTimes(1));
@@ -785,20 +777,15 @@ describe("useQuery", () => {
       filter$.category.set("toys");
 
       // Should eventually settle on final value
-      await waitFor(
-        () => expect(result.current.data.get()?.category).toBe("toys"),
-        {
-          timeout: 3000,
-        },
-      );
+      await waitFor(() => expect(result.current.data.get()?.category).toBe("toys"), {
+        timeout: 3000,
+      });
       expect(queryFn.mock.calls.length).toBeGreaterThan(1);
     });
 
     it("should not update state after unmount during fetch", async () => {
       let resolveQuery: (value: string) => void;
-      const queryFn = vi.fn(
-        () => new Promise<string>((r) => (resolveQuery = r)),
-      );
+      const queryFn = vi.fn(() => new Promise<string>((r) => (resolveQuery = r)));
       const { wrapper } = createWrapper();
 
       const { unmount } = renderHook(
@@ -807,7 +794,7 @@ describe("useQuery", () => {
             queryKey: ["test"],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(queryFn).toHaveBeenCalled());
@@ -841,7 +828,7 @@ describe("useQuery", () => {
             queryFn,
             enabled: false,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Should not fetch when disabled initially
@@ -865,7 +852,7 @@ describe("useQuery", () => {
             queryFn,
             enabled: true,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(queryFn).toHaveBeenCalled());
@@ -900,16 +887,13 @@ describe("useQuery", () => {
             queryKey: ["products", filter$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(queryFn).toHaveBeenCalledTimes(1));
 
       // Verify cache has the data with serialized key
-      const serializedKey = JSON.stringify([
-        "products",
-        { category: "electronics" },
-      ]);
+      const serializedKey = JSON.stringify(["products", { category: "electronics" }]);
       const cacheData = queryClient.getQueryData([serializedKey]);
       expect(cacheData).toBe("data");
     });
@@ -929,7 +913,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter1$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(queryFn).toHaveBeenCalledTimes(1));
@@ -941,7 +925,7 @@ describe("useQuery", () => {
             queryKey: ["products", filter2$],
             queryFn,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Should call queryFn again for different cache key
@@ -952,16 +936,14 @@ describe("useQuery", () => {
   describe("Context Integration", () => {
     it("should throw error when QueryClient not provided", () => {
       // Render without wrapper (no QueryClientProvider)
-      const consoleError = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
       expect(() => {
         renderHook(() =>
           useQuery({
             queryKey: ["test"],
             queryFn: async () => "data",
-          }),
+          })
         );
       }).toThrow("useQueryClient must be used within a QueryClientProvider");
 
@@ -984,7 +966,7 @@ describe("useQuery", () => {
             retry: false,
             throwOnError: true,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Wait for error state
@@ -993,7 +975,7 @@ describe("useQuery", () => {
           const errorState = (result.current as any).error.get();
           expect(errorState).toBeTruthy();
         },
-        { timeout: 3000 },
+        { timeout: 3000 }
       );
 
       // Error should be in state
@@ -1013,7 +995,7 @@ describe("useQuery", () => {
             retry: false,
             throwOnError: false,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.isError.get()).toBe(true), {
@@ -1039,7 +1021,7 @@ describe("useQuery", () => {
             retry: false,
             throwOnError: (err) => err.message.includes("Critical"),
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(
@@ -1047,7 +1029,7 @@ describe("useQuery", () => {
           const errorState = (result1.current as any).error.get();
           expect(errorState).toBeTruthy();
         },
-        { timeout: 3000 },
+        { timeout: 3000 }
       );
 
       // This should not throw
@@ -1060,7 +1042,7 @@ describe("useQuery", () => {
             retry: false,
             throwOnError: (err) => err.message.includes("Critical"),
           }),
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(result2.current.isError.get()).toBe(true), {
@@ -1086,7 +1068,7 @@ describe("useQuery", () => {
             }
           });
         },
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(onStateChange).toHaveBeenCalledTimes(1), {
@@ -1107,10 +1089,10 @@ describe("useQuery", () => {
             () => query$.isSuccess.get(),
             () => {
               onSuccess(query$.data.get());
-            },
+            }
           );
         },
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1), {
@@ -1136,10 +1118,10 @@ describe("useQuery", () => {
             () => query$.isError.get(),
             () => {
               onError(query$.error.get());
-            },
+            }
           );
         },
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(onError).toHaveBeenCalledTimes(1), {
@@ -1150,9 +1132,7 @@ describe("useQuery", () => {
 
     it("should trigger useObserve on refetch with new data", async () => {
       let count = 0;
-      const queryFn = vi
-        .fn()
-        .mockImplementation(() => Promise.resolve(`data-${++count}`));
+      const queryFn = vi.fn().mockImplementation(() => Promise.resolve(`data-${++count}`));
       const { wrapper } = createWrapper();
       const onData = vi.fn();
 
@@ -1163,11 +1143,11 @@ describe("useQuery", () => {
             () => query$.data.get(),
             () => {
               onData(query$.data.get());
-            },
+            }
           );
           return query$;
         },
-        { wrapper },
+        { wrapper }
       );
 
       await waitFor(() => expect(onData).toHaveBeenCalledTimes(1), {
@@ -1196,7 +1176,7 @@ describe("useQuery", () => {
             queryFn,
             suspense: false,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Should start in pending state without throwing
@@ -1220,7 +1200,7 @@ describe("useQuery", () => {
             queryFn,
             suspense: true,
           }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initially should be pending and fetching

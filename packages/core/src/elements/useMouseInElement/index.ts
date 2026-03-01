@@ -65,7 +65,7 @@ const win = defaultWindow;
  */
 export function useMouseInElement(
   target: MaybeElement,
-  options?: DeepMaybeObservable<UseMouseInElementOptions>,
+  options?: DeepMaybeObservable<UseMouseInElementOptions>
 ): UseMouseInElementReturn {
   // Rule 2: normalize with useMayObservableOptions
   // Rule 3: handleOutside/windowScroll/windowResize are mount-time-only → 'peek'
@@ -103,12 +103,7 @@ export function useMouseInElement(
     let found = false;
 
     for (const rect of rects) {
-      if (
-        mx >= rect.left &&
-        mx <= rect.right &&
-        my >= rect.top &&
-        my <= rect.bottom
-      ) {
+      if (mx >= rect.left && mx <= rect.right && my >= rect.top && my <= rect.bottom) {
         state$.assign({
           elementX: mx - rect.left,
           elementY: my - rect.top,
@@ -146,37 +141,32 @@ export function useMouseInElement(
       mouse$.assign({ x: e.clientX, y: e.clientY });
       update();
     },
-    [update], // eslint-disable-line react-hooks/exhaustive-deps
+    [update] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // Always call hooks unconditionally — Rules of Hooks.
   // null target → useEventListener registers no listener (no-op).
   // peek() — evaluated once at render time, no reactive subscription needed.
-  const stopMouse = useEventListener(
-    isWindow(win) ? win : null,
-    "mousemove",
-    onMouseMove,
-    { passive: true },
-  );
+  const stopMouse = useEventListener(isWindow(win) ? win : null, "mousemove", onMouseMove, {
+    passive: true,
+  });
 
   // document mouseleave → force isOutside = true
-  const stopLeave = useEventListener(
-    defaultDocument,
-    "mouseleave",
-    () => state$.isOutside.set(true),
+  const stopLeave = useEventListener(defaultDocument, "mouseleave", () =>
+    state$.isOutside.set(true)
   );
 
   const stopScroll = useEventListener(
     isWindow(win) && opts$.windowScroll.peek() !== false ? win : null,
     "scroll",
     update,
-    { passive: true },
+    { passive: true }
   );
   const stopResize = useEventListener(
     isWindow(win) && opts$.windowResize.peek() !== false ? win : null,
     "resize",
     update,
-    { passive: true },
+    { passive: true }
   );
 
   // Observe element size changes

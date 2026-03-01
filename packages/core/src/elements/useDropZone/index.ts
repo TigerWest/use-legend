@@ -42,24 +42,22 @@ export interface UseDropZoneReturn {
  */
 export function useDropZone(
   target: MaybeElement,
-  options?: DeepMaybeObservable<UseDropZoneOptions> | UseDropZoneOptions["onDrop"],
+  options?: DeepMaybeObservable<UseDropZoneOptions> | UseDropZoneOptions["onDrop"]
 ): UseDropZoneReturn {
   // If options is a function, treat it as the onDrop shorthand
-  const normalizedOptions = typeof options === "function"
-    ? { onDrop: options }
-    : options;
+  const normalizedOptions = typeof options === "function" ? { onDrop: options } : options;
 
   // Normalize DeepMaybeObservable options with per-field resolution hints.
   // 'get.function': callback fields — Legend-State stores the function directly,
   //                 not as a child observable → access via opts$.peek()?.fieldName
   // 'get.plain':    dataTypes — string[] | fn union, prevents deep-proxy wrapping
   const opts$ = useMayObservableOptions(normalizedOptions, {
-    onDrop:        "get.function",
-    onEnter:       "get.function",
-    onLeave:       "get.function",
-    onOver:        "get.function",
+    onDrop: "get.function",
+    onEnter: "get.function",
+    onLeave: "get.function",
+    onOver: "get.function",
     checkValidity: "get.function",
-    dataTypes:     "get.plain",
+    dataTypes: "get.plain",
   });
 
   const files$ = useObservable<File[] | null>(null);

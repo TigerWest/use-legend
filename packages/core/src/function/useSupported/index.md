@@ -9,9 +9,9 @@ Check whether a browser API or feature is supported, returning a reactive `Obser
 ## Usage
 
 ```typescript
-import { useSupported } from '@usels/core'
+import { useSupported } from "@usels/core";
 
-const isMatchMediaSupported = useSupported(() => 'matchMedia' in window)
+const isMatchMediaSupported = useSupported(() => "matchMedia" in window);
 
 // Use the observable value
 if (isMatchMediaSupported.get()) {

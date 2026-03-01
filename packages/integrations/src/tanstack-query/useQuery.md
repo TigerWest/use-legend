@@ -7,7 +7,6 @@ category: Hooks
 
 React hook for data fetching with automatic refetch when observable query keys change.
 
-
 ## Usage
 
 ```typescript

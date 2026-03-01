@@ -95,9 +95,7 @@ describe("useSupported() — mount re-evaluation", () => {
   });
 
   it("reflects a browser API check after mount", () => {
-    const { result } = renderHook(() =>
-      useSupported(() => "matchMedia" in window),
-    );
+    const { result } = renderHook(() => useSupported(() => "matchMedia" in window));
     expect(result.current.get()).toBe(true);
   });
 
@@ -106,9 +104,7 @@ describe("useSupported() — mount re-evaluation", () => {
     const original = win.matchMedia;
     delete win.matchMedia;
 
-    const { result } = renderHook(() =>
-      useSupported(() => "matchMedia" in window),
-    );
+    const { result } = renderHook(() => useSupported(() => "matchMedia" in window));
     expect(result.current.get()).toBe(false);
 
     win.matchMedia = original;

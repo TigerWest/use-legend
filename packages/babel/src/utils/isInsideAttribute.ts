@@ -1,4 +1,4 @@
-import type { NodePath } from '@babel/core';
+import type { NodePath } from "@babel/core";
 
 /**
  * Returns true if the path is inside a JSXAttribute.
@@ -6,7 +6,5 @@ import type { NodePath } from '@babel/core';
  * (those are handled by the JSXElement visitor instead).
  */
 export function isInsideAttribute(path: NodePath): boolean {
-  return (
-    path.findParent((p) => p.isJSXAttribute()) !== null
-  );
+  return path.findParent((p) => p.isJSXAttribute()) !== null;
 }

@@ -13,13 +13,13 @@ Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useParentElement } from '@usels/core'
+import { useRef$, useParentElement } from "@usels/core";
 
 function Component() {
-  const el$ = useRef$<HTMLDivElement>()
-  const parent$ = useParentElement(el$)
+  const el$ = useRef$<HTMLDivElement>();
+  const parent$ = useParentElement(el$);
 
-  return <div ref={el$} />
+  return <div ref={el$} />;
 }
 ```
 
@@ -29,27 +29,27 @@ Use inside an `observer` component to reactively render based on the parent:
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useParentElement } from '@usels/core'
-import { observer } from '@legendapp/state/react'
+import { useRef$, useParentElement } from "@usels/core";
+import { observer } from "@legendapp/state/react";
 
 const Component = observer(() => {
-  const el$ = useRef$<HTMLDivElement>()
-  const parent$ = useParentElement(el$)
+  const el$ = useRef$<HTMLDivElement>();
+  const parent$ = useParentElement(el$);
 
-  return <div ref={el$}>{parent$.get()?.tagName}</div>
-})
+  return <div ref={el$}>{parent$.get()?.tagName}</div>;
+});
 ```
 
 ### With an Observable target
 
 ```tsx twoslash
 // @noErrors
-import { observable } from '@legendapp/state'
-import { useParentElement } from '@usels/core'
+import { observable } from "@legendapp/state";
+import { useParentElement } from "@usels/core";
 
 function Component() {
-  const target$ = observable<HTMLElement | null>(null)
-  const parent$ = useParentElement(target$)
+  const target$ = observable<HTMLElement | null>(null);
+  const parent$ = useParentElement(target$);
   // ...
 }
 ```
@@ -58,10 +58,10 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useParentElement } from '@usels/core'
+import { useParentElement } from "@usels/core";
 
 function Component({ el }: { el: HTMLElement }) {
-  const parent$ = useParentElement(el)
+  const parent$ = useParentElement(el);
   // ...
 }
 ```

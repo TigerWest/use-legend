@@ -46,7 +46,7 @@ export interface UseElementVisibilityOptions {
 /*@__NO_SIDE_EFFECTS__*/
 export function useElementVisibility(
   element: MaybeElement,
-  options?: DeepMaybeObservable<UseElementVisibilityOptions>,
+  options?: DeepMaybeObservable<UseElementVisibilityOptions>
 ): Observable<boolean> {
   const opts$ = useMayObservableOptions<UseElementVisibilityOptions>(options, {
     initialValue: "peek",
@@ -72,7 +72,7 @@ export function useElementVisibility(
       root: opts$.scrollTarget,
       rootMargin: opts$.rootMargin,
       threshold: opts$.threshold,
-    } as DeepMaybeObservable<UseIntersectionObserverOptions>,
+    } as DeepMaybeObservable<UseIntersectionObserverOptions>
   );
 
   return isVisible$;

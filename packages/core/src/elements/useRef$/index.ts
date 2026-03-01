@@ -60,9 +60,7 @@ export type MaybeElement =
  * return <div ref={el$} />;
  * ```
  */
-export function useRef$<T extends Element = Element>(
-  externalRef?: Ref<T> | null,
-): Ref$<T> {
+export function useRef$<T extends Element = Element>(externalRef?: Ref<T> | null): Ref$<T> {
   const el$ = useObservable<OpaqueObject<T> | null>(null);
 
   // store externalRef — simple assignment each render, no new closure
@@ -87,57 +85,43 @@ export function useRef$<T extends Element = Element>(
         {
           get: () => el$.get(),
           peek: () => el$.peek(),
-        },
+        }
       ) as Ref$<T>,
-    [], // eslint-disable-line react-hooks/exhaustive-deps
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 }
 
 /** Type guard for Ref$ — distinguishes it from Observable and raw values */
 export function isRef$(v: unknown): v is Ref$<Element> {
-  return (
-    typeof v === "function" && !isObservable(v) && "get" in v && "peek" in v
-  );
+  return typeof v === "function" && !isObservable(v) && "get" in v && "peek" in v;
 }
 
 /** Unwraps MaybeElement with tracking (use inside useObserve) */
-export function getElement(
-  v: MaybeElement,
-): HTMLElement | Document | Window | null {
+export function getElement(v: MaybeElement): HTMLElement | Document | Window | null {
   if (v == null) return null;
   if (isRef$(v)) {
     const raw = v.get();
-    return raw
-      ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement)
-      : null;
+    return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
   if (isWindow(v)) return v;
   if (isObservable(v)) {
     const val = (v as Observable<OpaqueObject<Element> | null>).get();
-    return val
-      ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement)
-      : null;
+    return val ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
   return v as Document | null;
 }
 
 /** Unwraps MaybeElement without tracking (use inside setup/peek) */
-export function peekElement(
-  v: MaybeElement,
-): HTMLElement | Document | Window | null {
+export function peekElement(v: MaybeElement): HTMLElement | Document | Window | null {
   if (v == null) return null;
   if (isRef$(v)) {
     const raw = v.peek();
-    return raw
-      ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement)
-      : null;
+    return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
   if (isWindow(v)) return v;
   if (isObservable(v)) {
     const val = (v as Observable<OpaqueObject<Element> | null>).peek();
-    return val
-      ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement)
-      : null;
+    return val ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
   }
   return v as Document | null;
 }

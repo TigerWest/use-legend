@@ -56,13 +56,19 @@ describe("useWindowFocus()", () => {
     vi.spyOn(document, "hasFocus").mockReturnValue(false);
     const { result } = renderHook(() => useWindowFocus());
 
-    act(() => { window.dispatchEvent(new Event("focus")); });
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
     expect(result.current.get()).toBe(true);
 
-    act(() => { window.dispatchEvent(new Event("blur")); });
+    act(() => {
+      window.dispatchEvent(new Event("blur"));
+    });
     expect(result.current.get()).toBe(false);
 
-    act(() => { window.dispatchEvent(new Event("focus")); });
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
     expect(result.current.get()).toBe(true);
   });
 
@@ -95,7 +101,9 @@ describe("useWindowFocus()", () => {
     unmount();
     await flush(); // wait for cleanup
 
-    act(() => { window.dispatchEvent(new Event("focus")); });
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
 
     // Value stays at initial false — no listener active after cleanup
     expect(result.current.get()).toBe(false);

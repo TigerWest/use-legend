@@ -39,11 +39,9 @@ export interface UseResizeObserverReturn {
 export function useResizeObserver(
   target: MaybeElement | MaybeElement[],
   callback: ResizeObserverCallback,
-  options?: UseResizeObserverOptions,
+  options?: UseResizeObserverOptions
 ): UseResizeObserverReturn {
-  const isSupported$ = useObservable<boolean>(
-    typeof ResizeObserver !== "undefined",
-  );
+  const isSupported$ = useObservable<boolean>(typeof ResizeObserver !== "undefined");
   const observerRef = useRef<ResizeObserver | null>(null);
 
   // Always use the latest callback without recreating the observer on every render.
@@ -71,9 +69,7 @@ export function useResizeObserver(
     const targets = normalizeTargets(target);
     if (!targets.length) return;
 
-    observerRef.current = new ResizeObserver((...args) =>
-      callbackRef.current(...args),
-    );
+    observerRef.current = new ResizeObserver((...args) => callbackRef.current(...args));
     targets.forEach((el) => {
       observerRef.current!.observe(el, { box: optionsRef.current?.box });
     });
@@ -90,7 +86,7 @@ export function useResizeObserver(
       mountedRef.current = false;
       cleanup();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- setup/cleanup are stable closures; intentional empty dep array
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setup/cleanup are stable closures; intentional empty dep array
   }, []);
 
   // Re-run setup whenever observable targets (Ref$ or Observable<Element>) change.

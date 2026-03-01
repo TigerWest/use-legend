@@ -1,10 +1,6 @@
 "use client";
 import type { Observable } from "@legendapp/state";
-import {
-  useObservable,
-  useMount,
-  useObserveEffect,
-} from "@legendapp/state/react";
+import { useObservable, useMount, useObserveEffect } from "@legendapp/state/react";
 import { useEventListener } from "../../browser/useEventListener";
 import { useMediaQuery } from "../../browser/useMediaQuery";
 import { useMayObservableOptions } from "../../function/useMayObservableOptions";
@@ -27,7 +23,7 @@ export type UseWindowSizeReturn = Observable<{
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useWindowSize(
-  options?: DeepMaybeObservable<UseWindowSizeOptions>,
+  options?: DeepMaybeObservable<UseWindowSizeOptions>
 ): UseWindowSizeReturn {
   // Standard Pattern: normalize DeepMaybeObservable<Options> into a stable computed Observable.
   const opts$ = useMayObservableOptions<UseWindowSizeOptions>(options, {
@@ -80,7 +76,7 @@ export function useWindowSize(
   useEventListener("resize", update, { passive: true });
 
   const vp$ = useWhenMounted(() =>
-    opts$.type.peek() === "visual" ? (defaultWindow?.visualViewport ?? null) : null,
+    opts$.type.peek() === "visual" ? (defaultWindow?.visualViewport ?? null) : null
   );
 
   useEventListener(vp$, "resize", update);
@@ -102,7 +98,7 @@ export function useWindowSize(
         update();
       }
     },
-    { immediate: false },
+    { immediate: false }
   );
 
   return size$;

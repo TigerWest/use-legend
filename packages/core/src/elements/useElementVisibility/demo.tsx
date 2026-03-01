@@ -27,9 +27,7 @@ export default function UseElementVisibilityDemo() {
               isVisible:{" "}
               <strong
                 style={{
-                  color: isVisible$.get()
-                    ? "var(--sl-color-green, #22c55e)"
-                    : "inherit",
+                  color: isVisible$.get() ? "var(--sl-color-green, #22c55e)" : "inherit",
                 }}
               >
                 {String(isVisible$.get())}
@@ -80,9 +78,7 @@ export default function UseElementVisibilityDemo() {
                     ? "var(--sl-color-green, #22c55e)"
                     : "var(--sl-color-gray-4, #94a3b8)"
                 }`,
-                background: isVisible$.get()
-                  ? "var(--sl-color-green-low, #dcfce7)"
-                  : "transparent",
+                background: isVisible$.get() ? "var(--sl-color-green-low, #dcfce7)" : "transparent",
               }}
             >
               target element

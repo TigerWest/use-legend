@@ -1,7 +1,7 @@
-import type { TSESLint } from '@typescript-eslint/utils';
-import { rules } from './rules';
-import { recommended } from './configs/recommended';
-import { strict } from './configs/strict';
+import type { TSESLint } from "@typescript-eslint/utils";
+import { rules } from "./rules";
+import { recommended } from "./configs/recommended";
+import { strict } from "./configs/strict";
 
 type Plugin = {
   meta: { name: string; version: string };
@@ -14,8 +14,8 @@ type Plugin = {
 
 const plugin: Plugin = {
   meta: {
-    name: '@usels/eslint-plugin',
-    version: '0.0.0',
+    name: "@usels/eslint-plugin",
+    version: "0.0.0",
   },
   rules,
   configs: {
@@ -29,11 +29,11 @@ const plugin: Plugin = {
 // (avoids circular reference at type level by assigning post-creation)
 Object.assign(plugin.configs.recommended, {
   ...recommended,
-  plugins: { 'use-legend': plugin },
+  plugins: { "use-legend": plugin },
 });
 Object.assign(plugin.configs.strict, {
   ...strict,
-  plugins: { 'use-legend': plugin },
+  plugins: { "use-legend": plugin },
 });
 
 export default plugin;

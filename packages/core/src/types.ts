@@ -32,28 +32,30 @@ export type MaybeObservable<T = any> = T | Observable<T>;
  * const c: Options = observable({ count: 1, label: 'hi' })               // whole object observable
  * ```
  */
-export type DeepMaybeObservable<T> = Observable<T> | {
-  [K in keyof T]?: MaybeObservable<NonNullable<T[K]>>;
-};
+export type DeepMaybeObservable<T> =
+  | Observable<T>
+  | {
+      [K in keyof T]?: MaybeObservable<NonNullable<T[K]>>;
+    };
 
 // --- TIER 0-A: Base utility types (VueUse equivalents) ---
 
-export type Fn = () => void
+export type Fn = () => void;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional "any function" type matching VueUse's AnyFn pattern
-export type AnyFn = (...args: any[]) => any
-export type Arrayable<T> = T[] | T
-export type Awaitable<T> = Promise<T> | T
-export type TimerHandle = ReturnType<typeof setTimeout> | undefined
+export type AnyFn = (...args: any[]) => any;
+export type Arrayable<T> = T[] | T;
+export type Awaitable<T> = Promise<T> | T;
+export type TimerHandle = ReturnType<typeof setTimeout> | undefined;
 
 export interface Pausable {
-  readonly isActive: Observable<boolean>
-  pause: Fn
-  resume: Fn
+  readonly isActive: Observable<boolean>;
+  pause: Fn;
+  resume: Fn;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional open-ended generic default matching VueUse's Stoppable pattern
 export interface Stoppable<StartFnArgs extends any[] = any[]> {
-  readonly isPending: Observable<boolean>
-  stop: Fn
-  start: (...args: StartFnArgs) => void
+  readonly isPending: Observable<boolean>;
+  stop: Fn;
+  start: (...args: StartFnArgs) => void;
 }

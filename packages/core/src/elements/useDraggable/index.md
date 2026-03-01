@@ -13,20 +13,17 @@ Makes any element draggable using Pointer Events. Returns Observable values for 
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useDraggable } from '@usels/core'
+import { useRef$, useDraggable } from "@usels/core";
 
 function DraggableBox() {
-  const el$ = useRef$<HTMLDivElement>()
-  const { x$, y$ } = useDraggable(el$)
+  const el$ = useRef$<HTMLDivElement>();
+  const { x$, y$ } = useDraggable(el$);
 
   return (
-    <div
-      ref={el$}
-      style={{ position: 'fixed', left: `${x$.get()}px`, top: `${y$.get()}px` }}
-    >
+    <div ref={el$} style={{ position: "fixed", left: `${x$.get()}px`, top: `${y$.get()}px` }}>
       Drag me
     </div>
-  )
+  );
 }
 ```
 
@@ -35,8 +32,8 @@ function DraggableBox() {
 Restrict movement to a single axis.
 
 ```typescript
-const { x$ } = useDraggable(el$, { axis: 'x' }) // horizontal only
-const { y$ } = useDraggable(el$, { axis: 'y' }) // vertical only
+const { x$ } = useDraggable(el$, { axis: "x" }); // horizontal only
+const { y$ } = useDraggable(el$, { axis: "y" }); // vertical only
 ```
 
 ### With handle
@@ -45,12 +42,12 @@ Attach drag to a specific handle element instead of the whole target.
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useDraggable } from '@usels/core'
+import { useRef$, useDraggable } from "@usels/core";
 
 function WithHandle() {
-  const el$     = useRef$<HTMLDivElement>()
-  const handle$ = useRef$<HTMLDivElement>()
-  const { style$ } = useDraggable(el$, { handle: handle$ })
+  const el$ = useRef$<HTMLDivElement>();
+  const handle$ = useRef$<HTMLDivElement>();
+  const { style$ } = useDraggable(el$, { handle: handle$ });
   // ...
 }
 ```
@@ -62,7 +59,7 @@ Clamp drag position inside a container element.
 ```typescript
 const { style$ } = useDraggable(el$, {
   containerElement: container$,
-})
+});
 ```
 
 ### Restrict to viewport
@@ -70,7 +67,7 @@ const { style$ } = useDraggable(el$, {
 ```typescript
 const { style$ } = useDraggable(el$, {
   restrictInView: true,
-})
+});
 ```
 
 ### Callbacks
@@ -78,11 +75,11 @@ const { style$ } = useDraggable(el$, {
 ```typescript
 const { isDragging$ } = useDraggable(el$, {
   onStart: (pos, e) => {
-    if (someCondition) return false // cancel drag
+    if (someCondition) return false; // cancel drag
   },
-  onMove:  (pos, e) => console.log(pos),
-  onEnd:   (pos, e) => savePosition(pos),
-})
+  onMove: (pos, e) => console.log(pos),
+  onEnd: (pos, e) => savePosition(pos),
+});
 ```
 
 ### Reactive position update
@@ -90,8 +87,8 @@ const { isDragging$ } = useDraggable(el$, {
 `x$` and `y$` are writable Observables — setting them directly updates `style$` and `position$`.
 
 ```typescript
-const { x$, y$, style$, position$ } = useDraggable(el$)
-x$.set(100)
-y$.set(200)
+const { x$, y$, style$, position$ } = useDraggable(el$);
+x$.set(100);
+y$.set(200);
 // style$.get() === 'left: 100px; top: 200px;'
 ```

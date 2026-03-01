@@ -19,7 +19,7 @@ describe("useMutationObserver()", () => {
   it("isSupported is true when MutationObserver is available", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() =>
-      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true }),
+      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true })
     );
     expect(result.current.isSupported$.get()).toBe(true);
   });
@@ -29,9 +29,7 @@ describe("useMutationObserver()", () => {
     const el = document.createElement("div");
     document.body.appendChild(el);
 
-    renderHook(() =>
-      useMutationObserver(wrapEl(el), callback, { attributes: true }),
-    );
+    renderHook(() => useMutationObserver(wrapEl(el), callback, { attributes: true }));
 
     await act(async () => {
       el.setAttribute("data-test", "value");
@@ -48,9 +46,7 @@ describe("useMutationObserver()", () => {
     const parent = document.createElement("div");
     document.body.appendChild(parent);
 
-    renderHook(() =>
-      useMutationObserver(wrapEl(parent), callback, { childList: true }),
-    );
+    renderHook(() => useMutationObserver(wrapEl(parent), callback, { childList: true }));
 
     await act(async () => {
       parent.appendChild(document.createElement("span"));
@@ -69,9 +65,7 @@ describe("useMutationObserver()", () => {
     parent.appendChild(child);
     document.body.appendChild(parent);
 
-    renderHook(() =>
-      useMutationObserver(wrapEl(parent), callback, { childList: true }),
-    );
+    renderHook(() => useMutationObserver(wrapEl(parent), callback, { childList: true }));
 
     await act(async () => {
       parent.removeChild(child);
@@ -91,7 +85,7 @@ describe("useMutationObserver()", () => {
     renderHook(() =>
       useMutationObserver(wrapEl(text as unknown as Element), callback, {
         characterData: true,
-      }),
+      })
     );
 
     await act(async () => {
@@ -111,7 +105,7 @@ describe("useMutationObserver()", () => {
     document.body.append(el1, el2);
 
     renderHook(() =>
-      useMutationObserver([wrapEl(el1), wrapEl(el2)], callback, { attributes: true }),
+      useMutationObserver([wrapEl(el1), wrapEl(el2)], callback, { attributes: true })
     );
 
     await act(async () => {
@@ -132,9 +126,7 @@ describe("useMutationObserver()", () => {
     const el = document.createElement("div");
     document.body.appendChild(el);
 
-    renderHook(() =>
-      useMutationObserver([wrapEl(el), wrapEl(el)], callback, { attributes: true }),
-    );
+    renderHook(() => useMutationObserver([wrapEl(el), wrapEl(el)], callback, { attributes: true }));
 
     await act(async () => {
       el.setAttribute("data-test", "value");
@@ -151,7 +143,7 @@ describe("useMutationObserver()", () => {
     document.body.appendChild(el);
 
     const { result } = renderHook(() =>
-      useMutationObserver(wrapEl(el), callback, { attributes: true }),
+      useMutationObserver(wrapEl(el), callback, { attributes: true })
     );
 
     act(() => {
@@ -169,7 +161,7 @@ describe("useMutationObserver()", () => {
   it("stop() can be called multiple times without error", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() =>
-      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true }),
+      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true })
     );
 
     expect(() => {
@@ -181,7 +173,7 @@ describe("useMutationObserver()", () => {
   it("takeRecords() returns an array", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() =>
-      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true }),
+      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true })
     );
     expect(Array.isArray(result.current.takeRecords())).toBe(true);
   });
@@ -189,16 +181,14 @@ describe("useMutationObserver()", () => {
   it("takeRecords() returns empty array when no pending records", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() =>
-      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true }),
+      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true })
     );
     expect(result.current.takeRecords()).toHaveLength(0);
   });
 
   it("handles null target gracefully without throwing", () => {
     expect(() => {
-      renderHook(() =>
-        useMutationObserver(null, vi.fn(), { attributes: true }),
-      );
+      renderHook(() => useMutationObserver(null, vi.fn(), { attributes: true }));
     }).not.toThrow();
   });
 
@@ -208,7 +198,7 @@ describe("useMutationObserver()", () => {
     document.body.appendChild(el);
 
     const { unmount } = renderHook(() =>
-      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true }),
+      useMutationObserver(wrapEl(el), vi.fn(), { attributes: true })
     );
 
     unmount();
@@ -228,7 +218,7 @@ describe("useMutationObserver()", () => {
     const callback = vi.fn();
 
     const { result } = renderHook(() =>
-      useMutationObserver(wrapEl(el), callback, { attributes: true }),
+      useMutationObserver(wrapEl(el), callback, { attributes: true })
     );
 
     expect(result.current.isSupported$.get()).toBe(false);
@@ -242,9 +232,7 @@ describe("useMutationObserver()", () => {
     const callback = vi.fn();
     const target$ = observable<Element | null>(null);
 
-    renderHook(() =>
-      useMutationObserver(target$ as any, callback, { attributes: true }),
-    );
+    renderHook(() => useMutationObserver(target$ as any, callback, { attributes: true }));
 
     const el = document.createElement("div");
     document.body.appendChild(el);
@@ -297,7 +285,7 @@ describe("useMutationObserver()", () => {
     document.body.appendChild(parent);
 
     renderHook(() =>
-      useMutationObserver(wrapEl(parent), callback, { attributes: true, subtree: true }),
+      useMutationObserver(wrapEl(parent), callback, { attributes: true, subtree: true })
     );
 
     await act(async () => {
@@ -322,7 +310,7 @@ describe("useMutationObserver()", () => {
       useMutationObserver(wrapEl(el), callback, {
         attributes: true,
         attributeFilter: ["data-allowed"],
-      }),
+      })
     );
 
     await act(async () => {
@@ -350,7 +338,7 @@ describe("useMutationObserver()", () => {
       useMutationObserver(wrapEl(el), callback, {
         attributes: true,
         attributeOldValue: true,
-      }),
+      })
     );
 
     await act(async () => {
@@ -371,7 +359,7 @@ describe("useMutationObserver()", () => {
     document.body.appendChild(el);
 
     const { result } = renderHook(() =>
-      useMutationObserver(wrapEl(el), callback, { attributes: true }),
+      useMutationObserver(wrapEl(el), callback, { attributes: true })
     );
 
     act(() => result.current.stop());
@@ -403,7 +391,7 @@ describe("useMutationObserver()", () => {
 
     const { rerender } = renderHook(
       ({ cb }) => useMutationObserver(wrapEl(el), cb, { attributes: true }),
-      { initialProps: { cb: cb1 } },
+      { initialProps: { cb: cb1 } }
     );
 
     rerender({ cb: cb2 });

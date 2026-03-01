@@ -16,8 +16,7 @@ import { useDropZone } from ".";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 let el: HTMLDivElement;
 
@@ -66,9 +65,7 @@ function fireDragEvent(target: EventTarget, event: DragEvent) {
 
 describe("useDropZone() — real browser", () => {
   it("valid file drop is detected — files$ updated and isOverDropZone$ reset", async () => {
-    const { result } = renderHook(() =>
-      useDropZone(wrapEl(el), { dataTypes: ["image/png"] }),
-    );
+    const { result } = renderHook(() => useDropZone(wrapEl(el), { dataTypes: ["image/png"] }));
 
     const file = new File(["content"], "image.png", { type: "image/png" });
     fireDragEvent(el, createDragEvent("drop", [file]));
@@ -81,7 +78,7 @@ describe("useDropZone() — real browser", () => {
   it("invalid file type is filtered — files$ stays null and onDrop called with null", async () => {
     const onDrop = vi.fn();
     const { result } = renderHook(() =>
-      useDropZone(wrapEl(el), { dataTypes: ["image/png"], onDrop }),
+      useDropZone(wrapEl(el), { dataTypes: ["image/png"], onDrop })
     );
 
     const file = new File(["content"], "doc.txt", { type: "text/plain" });

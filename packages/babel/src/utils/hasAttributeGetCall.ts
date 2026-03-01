@@ -1,16 +1,12 @@
-import type { NodePath } from '@babel/core';
-import type {
-  JSXElement,
-  JSXOpeningElement,
-  JSXAttribute,
-} from '@babel/types';
-import type { PluginOptions } from '../types';
-import { hasGetCall } from './hasGetCall';
+import type { NodePath } from "@babel/core";
+import type { JSXElement, JSXOpeningElement, JSXAttribute } from "@babel/types";
+import type { PluginOptions } from "../types";
+import { hasGetCall } from "./hasGetCall";
 
 // React runtime special props — exclude from wrapping detection
 // key: list reconciliation would break if Auto has no key
 // ref: DOM reference, not reactive tracking
-const SPECIAL_PROPS = new Set(['key', 'ref']);
+const SPECIAL_PROPS = new Set(["key", "ref"]);
 
 /**
  * Returns true if any non-special JSXAttribute in the JSXElement's opening element
@@ -19,17 +15,15 @@ const SPECIAL_PROPS = new Set(['key', 'ref']);
  */
 export function hasAttributeGetCall(
   jsxElementPath: NodePath<JSXElement>,
-  opts: PluginOptions,
+  opts: PluginOptions
 ): boolean {
-  const openingEl = jsxElementPath.get(
-    'openingElement',
-  ) as NodePath<JSXOpeningElement>;
-  const attributes = openingEl.get('attributes') as NodePath[];
+  const openingEl = jsxElementPath.get("openingElement") as NodePath<JSXOpeningElement>;
+  const attributes = openingEl.get("attributes") as NodePath[];
 
   for (const attrPath of attributes) {
     // Handle spread attributes: {...obs$.get()} or {...{ value: obs$.get() }}
     if (attrPath.isJSXSpreadAttribute()) {
-      const argPath = attrPath.get('argument') as NodePath;
+      const argPath = attrPath.get("argument") as NodePath;
       if (hasGetCall(argPath, opts)) return true;
       continue;
     }
@@ -38,17 +32,14 @@ export function hasAttributeGetCall(
 
     // Skip special React props: key, ref
     const attrName = (attrPath.node as JSXAttribute).name;
-    if (
-      attrName.type === 'JSXIdentifier' &&
-      SPECIAL_PROPS.has(attrName.name)
-    ) {
+    if (attrName.type === "JSXIdentifier" && SPECIAL_PROPS.has(attrName.name)) {
       continue;
     }
 
-    const valuePath = attrPath.get('value') as NodePath;
+    const valuePath = attrPath.get("value") as NodePath;
     if (!valuePath.isJSXExpressionContainer()) continue;
 
-    const exprPath = valuePath.get('expression') as NodePath;
+    const exprPath = valuePath.get("expression") as NodePath;
     // Skip JSXEmptyExpression ({})
     if (exprPath.isJSXEmptyExpression()) continue;
 

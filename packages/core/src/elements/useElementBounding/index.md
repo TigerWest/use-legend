@@ -13,17 +13,17 @@ Uses [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObs
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useElementBounding } from '@usels/core'
+import { useRef$, useElementBounding } from "@usels/core";
 
 function Component() {
-  const el$ = useRef$<HTMLDivElement>()
-  const { top$, left$, width$, height$ } = useElementBounding(el$)
+  const el$ = useRef$<HTMLDivElement>();
+  const { top$, left$, width$, height$ } = useElementBounding(el$);
 
   return (
     <div ref={el$}>
       {width$.get()} × {height$.get()} at ({left$.get()}, {top$.get()})
     </div>
-  )
+  );
 }
 ```
 
@@ -31,29 +31,29 @@ function Component() {
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, Ref$, useElementBounding } from '@usels/core'
-declare const el$: Ref$<HTMLDivElement>
+import { useRef$, Ref$, useElementBounding } from "@usels/core";
+declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
-const { top$, left$, update } = useElementBounding(el$)
+const { top$, left$, update } = useElementBounding(el$);
 
 // Force-recalculate bounding rect imperatively
-update()
+update();
 ```
 
 ### Disable window scroll tracking
 
 ```typescript
-const { top$, left$ } = useElementBounding(el$, { windowScroll: false })
+const { top$, left$ } = useElementBounding(el$, { windowScroll: false });
 ```
 
 ### Skip requestAnimationFrame (synchronous reads)
 
 ```typescript
-const { width$, height$ } = useElementBounding(el$, { useCssTransforms: false })
+const { width$, height$ } = useElementBounding(el$, { useCssTransforms: false });
 ```
 
 ### Keep values on unmount (no reset)
 
 ```typescript
-const { top$ } = useElementBounding(el$, { reset: false })
+const { top$ } = useElementBounding(el$, { reset: false });
 ```

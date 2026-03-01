@@ -5,11 +5,9 @@ import { getElement } from "../useRef$";
 import type { MaybeElement } from "../useRef$";
 
 export function useParentElement(
-  element?: MaybeElement,
+  element?: MaybeElement
 ): Observable<OpaqueObject<HTMLElement | SVGElement> | null> {
-  const parent$ = useObservable<OpaqueObject<HTMLElement | SVGElement> | null>(
-    null,
-  );
+  const parent$ = useObservable<OpaqueObject<HTMLElement | SVGElement> | null>(null);
 
   /**
    * NOTE: plain element (non-Observable, non-Ref$)을 전달한 경우,
@@ -22,9 +20,7 @@ export function useParentElement(
     // Document / Window 는 parentElement 프로퍼티가 없으므로 null → SSR-safe
     const parent = (el as HTMLElement | null)?.parentElement ?? null;
     parent$.set(
-      parent
-        ? ObservableHint.opaque(parent as unknown as HTMLElement | SVGElement)
-        : null,
+      parent ? ObservableHint.opaque(parent as unknown as HTMLElement | SVGElement) : null
     );
   };
 

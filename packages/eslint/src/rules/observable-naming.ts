@@ -1,14 +1,13 @@
-import { ESLintUtils } from '@typescript-eslint/utils';
-import type { TSESTree } from '@typescript-eslint/utils';
-import { ImportTracker } from '../utils/import-tracker';
-import type { TrackFunctionsConfig } from '../utils/import-tracker';
+import { ESLintUtils } from "@typescript-eslint/utils";
+import type { TSESTree } from "@typescript-eslint/utils";
+import { ImportTracker } from "../utils/import-tracker";
+import type { TrackFunctionsConfig } from "../utils/import-tracker";
 
 const createRule = ESLintUtils.RuleCreator(
-  (name) =>
-    `https://github.com/your-org/usels/blob/main/packages/eslint/docs/rules/${name}.md`,
+  (name) => `https://github.com/your-org/usels/blob/main/packages/eslint/docs/rules/${name}.md`
 );
 
-type MessageIds = 'missingDollarSuffix';
+type MessageIds = "missingDollarSuffix";
 
 interface Options {
   trackFunctions: TrackFunctionsConfig;
@@ -16,18 +15,17 @@ interface Options {
 }
 
 const defaultTrackFunctions: TrackFunctionsConfig = {
-  '@legendapp/state': ['observable', 'computed'],
-  '@legendapp/state/react': ['useObservable', 'useObservableState'],
-  '@usels/core': [],
+  "@legendapp/state": ["observable", "computed"],
+  "@legendapp/state/react": ["useObservable", "useObservableState"],
+  "@usels/core": [],
 };
 
 export const observableNaming = createRule<[Options], MessageIds>({
-  name: 'observable-naming',
+  name: "observable-naming",
   meta: {
-    type: 'suggestion',
+    type: "suggestion",
     docs: {
-      description:
-        'Require variables holding observables to end with `$`.',
+      description: "Require variables holding observables to end with `$`.",
     },
     messages: {
       missingDollarSuffix:
@@ -35,17 +33,17 @@ export const observableNaming = createRule<[Options], MessageIds>({
     },
     schema: [
       {
-        type: 'object',
+        type: "object",
         properties: {
           trackFunctions: {
-            type: 'object',
+            type: "object",
             additionalProperties: {
-              type: 'array',
-              items: { type: 'string' },
+              type: "array",
+              items: { type: "string" },
             },
           },
           allowPattern: {
-            oneOf: [{ type: 'string' }, { type: 'null' }],
+            oneOf: [{ type: "string" }, { type: "null" }],
           },
         },
         additionalProperties: false,
@@ -69,15 +67,15 @@ export const observableNaming = createRule<[Options], MessageIds>({
 
       VariableDeclarator(node: TSESTree.VariableDeclarator) {
         // Only check Identifier patterns (skip destructuring)
-        if (node.id.type !== 'Identifier') return;
+        if (node.id.type !== "Identifier") return;
 
         // Must have an initializer that is a CallExpression
-        if (!node.init || node.init.type !== 'CallExpression') return;
+        if (!node.init || node.init.type !== "CallExpression") return;
 
         const call = node.init;
 
         // The callee must be a simple Identifier (direct function call)
-        if (call.callee.type !== 'Identifier') return;
+        if (call.callee.type !== "Identifier") return;
 
         const calleeName = call.callee.name;
 
@@ -90,7 +88,7 @@ export const observableNaming = createRule<[Options], MessageIds>({
         const forOfCandidate = varDecl?.parent;
         if (
           forOfCandidate &&
-          forOfCandidate.type === 'ForOfStatement' &&
+          forOfCandidate.type === "ForOfStatement" &&
           forOfCandidate.left === varDecl
         ) {
           return;
@@ -102,10 +100,10 @@ export const observableNaming = createRule<[Options], MessageIds>({
         if (allowRegex && allowRegex.test(varName)) return;
 
         // Check for $ suffix
-        if (!varName.endsWith('$')) {
+        if (!varName.endsWith("$")) {
           context.report({
             node: node.id,
-            messageId: 'missingDollarSuffix',
+            messageId: "missingDollarSuffix",
             data: { name: varName },
           });
         }

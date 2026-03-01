@@ -12,28 +12,26 @@ SSR-safe: accepts an optional `ssrWidth` to statically evaluate `min-width`/`max
 ## Usage
 
 ```tsx
-import { useMediaQuery } from '@usels/core'
+import { useMediaQuery } from "@usels/core";
 
 function Component() {
-  const isLarge$ = useMediaQuery('(min-width: 1024px)')
+  const isLarge$ = useMediaQuery("(min-width: 1024px)");
 
-  return (
-    <p>{isLarge$.get() ? 'Large screen' : 'Small screen'}</p>
-  )
+  return <p>{isLarge$.get() ? "Large screen" : "Small screen"}</p>;
 }
 ```
 
 ### Multiple queries
 
 ```tsx
-const isLarge$ = useMediaQuery('(min-width: 1024px)')
-const prefersDark$ = useMediaQuery('(prefers-color-scheme: dark)')
+const isLarge$ = useMediaQuery("(min-width: 1024px)");
+const prefersDark$ = useMediaQuery("(prefers-color-scheme: dark)");
 ```
 
 ### SSR with ssrWidth
 
 ```tsx
-const isLarge$ = useMediaQuery('(min-width: 1024px)', { ssrWidth: 1280 })
+const isLarge$ = useMediaQuery("(min-width: 1024px)", { ssrWidth: 1280 });
 ```
 
 `ssrWidth` is used to statically evaluate the query when `window` is unavailable,

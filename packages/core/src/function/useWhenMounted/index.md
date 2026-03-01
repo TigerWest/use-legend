@@ -8,18 +8,18 @@ Execute a callback and expose its return value as a reactive `Observable<T | und
 ## Usage
 
 ```typescript
-import { useWhenMounted } from '@usels/core'
+import { useWhenMounted } from "@usels/core";
 
-const windowWidth = useWhenMounted(() => window.innerWidth)
+const windowWidth = useWhenMounted(() => window.innerWidth);
 
 // undefined on the server, actual width after mount
-console.log(windowWidth.get())
+console.log(windowWidth.get());
 ```
 
 ### Deferred browser API access
 
 ```typescript
-import { useWhenMounted } from '@usels/core'
+import { useWhenMounted } from "@usels/core";
 
-const scrollY = useWhenMounted(() => window.scrollY)
+const scrollY = useWhenMounted(() => window.scrollY);
 ```

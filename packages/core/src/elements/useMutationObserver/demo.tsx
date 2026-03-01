@@ -39,9 +39,7 @@ export default function UseMutationObserverDemo() {
     (records) => {
       const lines = records.map((r): string => {
         if (r.type === "attributes") {
-          return `[attributes]  ${r.attributeName}  ← was: ${
-            r.oldValue ?? "—"
-          }`;
+          return `[attributes]  ${r.attributeName}  ← was: ${r.oldValue ?? "—"}`;
         }
         const a = r.addedNodes.length;
         const rm = r.removedNodes.length;
@@ -56,7 +54,7 @@ export default function UseMutationObserverDemo() {
         }
       });
     },
-    { attributes: true, attributeOldValue: true, childList: true },
+    { attributes: true, attributeOldValue: true, childList: true }
   );
 
   const toggleAttr = () => {
@@ -212,13 +210,9 @@ export default function UseMutationObserverDemo() {
               padding: "8px 12px",
               borderRadius: "6px",
               border: `1px dashed ${
-                active$.get()
-                  ? "var(--sl-color-green, #22c55e)"
-                  : "var(--sl-color-gray-4, #94a3b8)"
+                active$.get() ? "var(--sl-color-green, #22c55e)" : "var(--sl-color-gray-4, #94a3b8)"
               }`,
-              background: active$.get()
-                ? "var(--sl-color-green-low, #f0fdf4)"
-                : "transparent",
+              background: active$.get() ? "var(--sl-color-green-low, #f0fdf4)" : "transparent",
               transition: "border-color 0.2s, background 0.2s",
             }}
           />
@@ -241,11 +235,7 @@ export default function UseMutationObserverDemo() {
           {() => {
             const entries = log$.get();
             if (!entries.length) {
-              return (
-                <span style={{ opacity: 0.4 }}>
-                  — no mutations recorded yet
-                </span>
-              );
+              return <span style={{ opacity: 0.4 }}>— no mutations recorded yet</span>;
             }
             return (
               <>

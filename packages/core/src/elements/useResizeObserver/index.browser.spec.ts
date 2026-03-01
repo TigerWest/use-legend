@@ -15,8 +15,7 @@ import { useResizeObserver } from ".";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 let el: HTMLDivElement;
 
@@ -51,7 +50,7 @@ describe("useResizeObserver() — real browser", () => {
     renderHook(() =>
       useResizeObserver(wrapEl(el), () => {
         callCount++;
-      }),
+      })
     );
 
     // Wait for initial observation to complete
@@ -80,7 +79,7 @@ describe("useResizeObserver() — real browser", () => {
             height: entry.contentRect.height,
           });
         }
-      }),
+      })
     );
 
     // Wait for initial observation (100×100)
@@ -99,7 +98,7 @@ describe("useResizeObserver() — real browser", () => {
         expect(last.width).toBe(150);
         expect(last.height).toBe(80);
       },
-      { timeout: 2000 },
+      { timeout: 2000 }
     );
   });
 
@@ -109,7 +108,7 @@ describe("useResizeObserver() — real browser", () => {
     const { unmount } = renderHook(() =>
       useResizeObserver(wrapEl(el), () => {
         callCount++;
-      }),
+      })
     );
 
     // Wait for initial observation to confirm observer is active
@@ -127,7 +126,7 @@ describe("useResizeObserver() — real browser", () => {
 
     // Yield 2 animation frames to give ResizeObserver a chance to fire (if broken)
     await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
     );
 
     expect(callCount).toBe(1);

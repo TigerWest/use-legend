@@ -52,20 +52,15 @@ export interface UseIntersectionObserverReturn {
 export function useIntersectionObserver(
   target: MaybeElement | MaybeElement[],
   callback: IntersectionObserverCallback,
-  options?: DeepMaybeObservable<UseIntersectionObserverOptions>,
+  options?: DeepMaybeObservable<UseIntersectionObserverOptions>
 ): UseIntersectionObserverReturn {
-  const opts$ = useMayObservableOptions<UseIntersectionObserverOptions>(
-    options,
-    {
-      immediate: "peek",
-      threshold: "peek",
-      root: "get.element",
-      rootMargin: (value) => get(value as MaybeObservable<string | undefined>),
-    },
-  );
-  const isSupported$ = useObservable<boolean>(
-    typeof IntersectionObserver !== "undefined",
-  );
+  const opts$ = useMayObservableOptions<UseIntersectionObserverOptions>(options, {
+    immediate: "peek",
+    threshold: "peek",
+    root: "get.element",
+    rootMargin: (value) => get(value as MaybeObservable<string | undefined>),
+  });
+  const isSupported$ = useObservable<boolean>(typeof IntersectionObserver !== "undefined");
   const isActive$ = useObservable<boolean>(opts$.immediate.peek() !== false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const stoppedRef = useRef(false);
@@ -85,9 +80,7 @@ export function useIntersectionObserver(
       rawRoot == null
         ? (rawRoot as null | undefined)
         : (() => {
-            const el = (
-              rawRoot as unknown as { valueOf(): HTMLElement | Document }
-            ).valueOf();
+            const el = (rawRoot as unknown as { valueOf(): HTMLElement | Document }).valueOf();
             return isWindow(el as unknown) ? null : el;
           })();
 

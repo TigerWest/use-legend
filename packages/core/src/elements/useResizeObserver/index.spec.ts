@@ -101,9 +101,7 @@ describe("useResizeObserver()", () => {
     const div = document.createElement("div");
     const observeSpy = vi.spyOn(ResizeObserverMock.prototype, "observe");
 
-    renderHook(() =>
-      useResizeObserver(wrapEl(div), vi.fn(), { box: "border-box" })
-    );
+    renderHook(() => useResizeObserver(wrapEl(div), vi.fn(), { box: "border-box" }));
 
     expect(observeSpy).toHaveBeenCalledWith(div, { box: "border-box" });
   });
@@ -138,9 +136,7 @@ describe("useResizeObserver()", () => {
     act(() => result.current.el$(div));
 
     // After element assigned — observer should be active
-    const activeInstance = ResizeObserverMock.instances.find(
-      (i) => i.observed.includes(div)
-    );
+    const activeInstance = ResizeObserverMock.instances.find((i) => i.observed.includes(div));
     expect(activeInstance).toBeDefined();
   });
 
@@ -151,9 +147,7 @@ describe("useResizeObserver()", () => {
     renderHook(() => useResizeObserver(target$ as any, cb));
 
     // Initially null — no active observer with observed elements
-    const instancesWithObserved = ResizeObserverMock.instances.filter(
-      (i) => i.observed.length > 0
-    );
+    const instancesWithObserved = ResizeObserverMock.instances.filter((i) => i.observed.length > 0);
     expect(instancesWithObserved).toHaveLength(0);
 
     const div = document.createElement("div");
@@ -162,9 +156,7 @@ describe("useResizeObserver()", () => {
     });
 
     // After setting element, observer should be active
-    const activeInstance = ResizeObserverMock.instances.find(
-      (i) => i.observed.includes(div)
-    );
+    const activeInstance = ResizeObserverMock.instances.find((i) => i.observed.includes(div));
     expect(activeInstance).toBeDefined();
   });
 
@@ -199,18 +191,14 @@ describe("useResizeObserver()", () => {
   it("does not create an observer when target is an empty array", () => {
     renderHook(() => useResizeObserver([], vi.fn()));
 
-    const activeInstances = ResizeObserverMock.instances.filter(
-      (i) => i.observed.length > 0,
-    );
+    const activeInstances = ResizeObserverMock.instances.filter((i) => i.observed.length > 0);
     expect(activeInstances).toHaveLength(0);
   });
 
   it("does not create an observer when target is null", () => {
     renderHook(() => useResizeObserver(null as any, vi.fn()));
 
-    const activeInstances = ResizeObserverMock.instances.filter(
-      (i) => i.observed.length > 0,
-    );
+    const activeInstances = ResizeObserverMock.instances.filter((i) => i.observed.length > 0);
     expect(activeInstances).toHaveLength(0);
   });
 
@@ -228,7 +216,7 @@ describe("useResizeObserver()", () => {
     act(() => result.current.el$(elA));
 
     expect(
-      ResizeObserverMock.instances.find((i) => !i.disconnected && i.observed.includes(elA)),
+      ResizeObserverMock.instances.find((i) => !i.disconnected && i.observed.includes(elA))
     ).toBeDefined();
 
     // Switch to elB
@@ -236,12 +224,12 @@ describe("useResizeObserver()", () => {
 
     // elB should now be observed
     expect(
-      ResizeObserverMock.instances.find((i) => !i.disconnected && i.observed.includes(elB)),
+      ResizeObserverMock.instances.find((i) => !i.disconnected && i.observed.includes(elB))
     ).toBeDefined();
 
     // elA should no longer be observed by any active instance
     expect(
-      ResizeObserverMock.instances.find((i) => !i.disconnected && i.observed.includes(elA)),
+      ResizeObserverMock.instances.find((i) => !i.disconnected && i.observed.includes(elA))
     ).toBeUndefined();
   });
 
@@ -250,10 +238,9 @@ describe("useResizeObserver()", () => {
     const cb1 = vi.fn();
     const cb2 = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ cb }) => useResizeObserver(wrapEl(div), cb),
-      { initialProps: { cb: cb1 } },
-    );
+    const { rerender } = renderHook(({ cb }) => useResizeObserver(wrapEl(div), cb), {
+      initialProps: { cb: cb1 },
+    });
 
     const instance = ResizeObserverMock.instances.at(-1)!;
 
@@ -272,9 +259,7 @@ describe("useResizeObserver()", () => {
     const div = document.createElement("div");
     const observeSpy = vi.spyOn(ResizeObserverMock.prototype, "observe");
 
-    renderHook(() =>
-      useResizeObserver(wrapEl(div), vi.fn(), { box: "device-pixel-content-box" }),
-    );
+    renderHook(() => useResizeObserver(wrapEl(div), vi.fn(), { box: "device-pixel-content-box" }));
 
     expect(observeSpy).toHaveBeenCalledWith(div, {
       box: "device-pixel-content-box",

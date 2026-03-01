@@ -1,21 +1,18 @@
-import type { NodePath, types as BabelTypes } from '@babel/core';
-import type { JSXElement } from '@babel/types';
-import type { PluginState } from '../types';
-import { hasAttributeGetCall } from '../utils/hasAttributeGetCall';
-import { isInsideReactiveContext } from '../utils/isInsideReactiveContext';
-import { isInsideObserverHOC } from '../utils/isInsideObserverHOC';
-import { createAutoElement } from '../utils/createAutoElement';
-import { wrapChildrenAsFunction } from '../utils/wrapChildrenAsFunction';
+import type { NodePath, types as BabelTypes } from "@babel/core";
+import type { JSXElement } from "@babel/types";
+import type { PluginState } from "../types";
+import { hasAttributeGetCall } from "../utils/hasAttributeGetCall";
+import { isInsideReactiveContext } from "../utils/isInsideReactiveContext";
+import { isInsideObserverHOC } from "../utils/isInsideObserverHOC";
+import { createAutoElement } from "../utils/createAutoElement";
+import { wrapChildrenAsFunction } from "../utils/wrapChildrenAsFunction";
 
 export function createJSXElementVisitor(t: typeof BabelTypes) {
-  return function JSXElement(
-    path: NodePath<JSXElement>,
-    state: PluginState,
-  ): void {
+  return function JSXElement(path: NodePath<JSXElement>, state: PluginState): void {
     // STEP 1 (NEW): If this element is Memo/Show/Computed (or configured),
     // auto-wrap non-function children in () => — equivalent to @legendapp/state/babel
     const elementName =
-      path.node.openingElement.name.type === 'JSXIdentifier'
+      path.node.openingElement.name.type === "JSXIdentifier"
         ? path.node.openingElement.name.name
         : null;
 
@@ -37,11 +34,7 @@ export function createJSXElementVisitor(t: typeof BabelTypes) {
     if (!hasAttributeGetCall(path, state.opts)) return;
 
     // 4. Wrap the entire JSXElement in <Auto>{() => element}</Auto>
-    const autoElement = createAutoElement(
-      t,
-      path.node,
-      state.autoComponentName,
-    );
+    const autoElement = createAutoElement(t, path.node, state.autoComponentName);
     path.replaceWith(autoElement);
 
     state.autoImportNeeded = true;

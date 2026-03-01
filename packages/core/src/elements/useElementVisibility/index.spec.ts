@@ -11,13 +11,14 @@ const mockObserve = vi.fn();
 const mockDisconnect = vi.fn();
 let capturedCallback: IntersectionObserverCallback;
 
-const MockIntersectionObserver = vi.fn(
-  function(cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
-    capturedCallback = cb;
-    void init;
-    return { observe: mockObserve, disconnect: mockDisconnect };
-  },
-);
+const MockIntersectionObserver = vi.fn(function (
+  cb: IntersectionObserverCallback,
+  init?: IntersectionObserverInit
+) {
+  capturedCallback = cb;
+  void init;
+  return { observe: mockObserve, disconnect: mockDisconnect };
+});
 
 beforeEach(() => {
   vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
@@ -30,10 +31,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function makeEntry(
-  isIntersecting: boolean,
-  time = 0,
-): IntersectionObserverEntry {
+function makeEntry(isIntersecting: boolean, time = 0): IntersectionObserverEntry {
   return { isIntersecting, time } as IntersectionObserverEntry;
 }
 
@@ -46,9 +44,7 @@ describe("useElementVisibility()", () => {
 
   it("returns initialValue when provided", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() =>
-      useElementVisibility(wrapEl(el), { initialValue: true }),
-    );
+    const { result } = renderHook(() => useElementVisibility(wrapEl(el), { initialValue: true }));
     expect(result.current.get()).toBe(true);
   });
 
@@ -72,10 +68,7 @@ describe("useElementVisibility()", () => {
     const { result } = renderHook(() => useElementVisibility(wrapEl(el)));
 
     act(() => {
-      capturedCallback(
-        [makeEntry(true, 100), makeEntry(false, 200)],
-        {} as IntersectionObserver,
-      );
+      capturedCallback([makeEntry(true, 100), makeEntry(false, 200)], {} as IntersectionObserver);
     });
 
     // Entry with time=200 (isIntersecting: false) should win
@@ -97,13 +90,11 @@ describe("useElementVisibility()", () => {
   it("passes scrollTarget as root to IntersectionObserver", () => {
     const el = document.createElement("div");
     const scrollContainer = document.createElement("div");
-    renderHook(() =>
-      useElementVisibility(wrapEl(el), { scrollTarget: wrapEl(scrollContainer) }),
-    );
+    renderHook(() => useElementVisibility(wrapEl(el), { scrollTarget: wrapEl(scrollContainer) }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: scrollContainer }),
+      expect.objectContaining({ root: scrollContainer })
     );
   });
 
@@ -113,7 +104,7 @@ describe("useElementVisibility()", () => {
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ rootMargin: "10px" }),
+      expect.objectContaining({ rootMargin: "10px" })
     );
   });
 
@@ -123,7 +114,7 @@ describe("useElementVisibility()", () => {
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ threshold: 0.5 }),
+      expect.objectContaining({ threshold: 0.5 })
     );
   });
 
@@ -158,7 +149,7 @@ describe("useElementVisibility()", () => {
     const el = document.createElement("div");
     const initialValue$ = observable(true);
     const { result } = renderHook(() =>
-      useElementVisibility(wrapEl(el), { initialValue: initialValue$ }),
+      useElementVisibility(wrapEl(el), { initialValue: initialValue$ })
     );
     expect(result.current.get()).toBe(true);
   });
@@ -182,7 +173,7 @@ describe("useElementVisibility()", () => {
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ threshold: 0.5 }),
+      expect.objectContaining({ threshold: 0.5 })
     );
   });
 

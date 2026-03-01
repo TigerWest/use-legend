@@ -162,9 +162,7 @@ describe("useMediaQuery() — SSR (evaluateSSRQuery)", () => {
   });
 
   it("comma-separated queries match when one condition is met", () => {
-    expect(
-      evaluateSSRQuery("(max-width: 500px), (min-width: 768px)", 1024),
-    ).toBe(true);
+    expect(evaluateSSRQuery("(max-width: 500px), (min-width: 768px)", 1024)).toBe(true);
   });
 
   it("defaults to false when no ssrWidth is provided", () => {
@@ -199,7 +197,7 @@ describe("useMediaQuery() — cleanup", () => {
     expect(mql.removeEventListener).toHaveBeenCalledWith(
       "change",
       expect.any(Function),
-      expect.objectContaining({ passive: true }),
+      expect.objectContaining({ passive: true })
     );
   });
 
@@ -207,9 +205,7 @@ describe("useMediaQuery() — cleanup", () => {
     const { mockFn, triggerChange } = createMockMatchMedia(false);
     vi.stubGlobal("matchMedia", mockFn);
 
-    const { result, unmount } = renderHook(() =>
-      useMediaQuery("(min-width: 768px)"),
-    );
+    const { result, unmount } = renderHook(() => useMediaQuery("(min-width: 768px)"));
     unmount();
     await flush();
 
@@ -234,8 +230,7 @@ describe("useMediaQuery() — reactive query (MaybeObservable<string>)", () => {
   it("updates matches when query Observable changes", () => {
     const mqlMap = new Map<string, ReturnType<typeof createMockMatchMedia>>();
     vi.stubGlobal("matchMedia", (q: string) => {
-      if (!mqlMap.has(q))
-        mqlMap.set(q, createMockMatchMedia(q === "(max-width: 480px)"));
+      if (!mqlMap.has(q)) mqlMap.set(q, createMockMatchMedia(q === "(max-width: 480px)"));
       return mqlMap.get(q)!.mql;
     });
 
@@ -259,9 +254,15 @@ describe("useMediaQuery() — reactive query (MaybeObservable<string>)", () => {
 
     act(() => query$.set("(max-width: 480px)"));
 
-    expect(mqlMap.get("(min-width: 1024px)")!.mql.removeEventListener)
-      .toHaveBeenCalledWith("change", expect.any(Function), expect.objectContaining({ passive: true }));
-    expect(mqlMap.get("(max-width: 480px)")!.mql.addEventListener)
-      .toHaveBeenCalledWith("change", expect.any(Function), { passive: true });
+    expect(mqlMap.get("(min-width: 1024px)")!.mql.removeEventListener).toHaveBeenCalledWith(
+      "change",
+      expect.any(Function),
+      expect.objectContaining({ passive: true })
+    );
+    expect(mqlMap.get("(max-width: 480px)")!.mql.addEventListener).toHaveBeenCalledWith(
+      "change",
+      expect.any(Function),
+      { passive: true }
+    );
   });
 });

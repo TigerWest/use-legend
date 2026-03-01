@@ -15,8 +15,7 @@ import { useMouseInElement } from ".";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 let el: HTMLDivElement;
 
@@ -42,9 +41,7 @@ afterEach(() => {
 
 function fireMouseMove(x: number, y: number) {
   act(() => {
-    window.dispatchEvent(
-      new MouseEvent("mousemove", { clientX: x, clientY: y, bubbles: true }),
-    );
+    window.dispatchEvent(new MouseEvent("mousemove", { clientX: x, clientY: y, bubbles: true }));
   });
 }
 

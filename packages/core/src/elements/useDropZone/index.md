@@ -13,22 +13,19 @@ Turns any element into a file drop zone. Tracks drag-over state and validates fi
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useDropZone } from '@usels/core'
+import { useRef$, useDropZone } from "@usels/core";
 
 function MyDropZone() {
-  const el$ = useRef$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>();
   const { files$, isOverDropZone$ } = useDropZone(el$, {
     onDrop: (files) => console.log(files),
-  })
+  });
 
   return (
-    <div
-      ref={el$}
-      style={{ background: isOverDropZone$.get() ? '#e0e7ff' : '#f9fafb' }}
-    >
+    <div ref={el$} style={{ background: isOverDropZone$.get() ? "#e0e7ff" : "#f9fafb" }}>
       Drop files here
     </div>
-  )
+  );
 }
 ```
 
@@ -36,13 +33,13 @@ function MyDropZone() {
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useDropZone } from '@usels/core'
+import { useRef$, useDropZone } from "@usels/core";
 
 function ImageDropZone() {
-  const el$ = useRef$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>();
   const { files$ } = useDropZone(el$, {
-    dataTypes: ['image/png', 'image/jpeg', 'image/webp'],
-  })
+    dataTypes: ["image/png", "image/jpeg", "image/webp"],
+  });
   // ...
 }
 ```
@@ -51,9 +48,8 @@ function ImageDropZone() {
 
 ```typescript
 const { files$ } = useDropZone(el$, {
-  checkValidity: (items) =>
-    Array.from(items).every(item => item.type.startsWith('image/')),
-})
+  checkValidity: (items) => Array.from(items).every((item) => item.type.startsWith("image/")),
+});
 ```
 
 ### Single file only
@@ -62,13 +58,13 @@ const { files$ } = useDropZone(el$, {
 const { files$ } = useDropZone(el$, {
   multiple: false,
   onDrop: (files) => files && uploadFile(files[0]),
-})
+});
 ```
 
 ### Shorthand (onDrop only)
 
 ```typescript
 const { files$ } = useDropZone(el$, (files, event) => {
-  if (files) processFiles(files)
-})
+  if (files) processFiles(files);
+});
 ```

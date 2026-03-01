@@ -1,7 +1,7 @@
-"use client"
-import { useContext } from 'react'
-import { QueryClient } from '@tanstack/react-query'
-import { QueryClientContext } from './QueryClientProvider'
+"use client";
+import { useContext } from "react";
+import { QueryClient } from "@tanstack/react-query";
+import { QueryClientContext } from "./QueryClientProvider";
 
 /**
  * Hook to retrieve the QueryClient from context
@@ -19,14 +19,14 @@ import { QueryClientContext } from './QueryClientProvider'
  * ```
  */
 export function useQueryClient(): QueryClient {
-  const client = useContext(QueryClientContext)
+  const client = useContext(QueryClientContext);
 
   if (!client) {
     throw new Error(
-      'useQueryClient must be used within a QueryClientProvider. ' +
-      'Make sure your component tree is wrapped with <QueryClientProvider client={queryClient}>.'
-    )
+      "useQueryClient must be used within a QueryClientProvider. " +
+        "Make sure your component tree is wrapped with <QueryClientProvider client={queryClient}>."
+    );
   }
 
-  return client
+  return client;
 }

@@ -75,7 +75,7 @@ export interface UseDraggableReturn {
  */
 export function useDraggable(
   target: MaybeElement,
-  options?: DeepMaybeObservable<UseDraggableOptions>,
+  options?: DeepMaybeObservable<UseDraggableOptions>
 ): UseDraggableReturn {
   // Normalize options — per-field resolution hints
   const opts$ = useMayObservableOptions<UseDraggableOptions>(options, {
@@ -106,7 +106,7 @@ export function useDraggable(
   }));
 
   const style$ = useObservable<string>(
-    () => `left: ${state$.x.get()}px; top: ${state$.y.get()}px;`,
+    () => `left: ${state$.x.get()}px; top: ${state$.y.get()}px;`
   );
 
   // pressedDelta: offset from element top-left at drag start (plain React ref)
@@ -195,26 +195,16 @@ export function useDraggable(
   // for Ref$ targets. Wrapping Ref$ inside an Observable causes useEventListener to
   // call .get() and receive the Ref$ function, which has no addEventListener.
   const pointerdownTarget: MaybeElement =
-    opts$.handle.peek() != null
-      ? (opts$.handle as unknown as MaybeElement)
-      : target;
+    opts$.handle.peek() != null ? (opts$.handle as unknown as MaybeElement) : target;
 
   // Register pointerdown on handle (or target), pointermove/up on window
   useEventListener(pointerdownTarget, "pointerdown", onPointerDown, {
     capture: opts$.capture.peek() ?? false,
   });
 
-  useEventListener(
-    defaultWindow,
-    "pointermove",
-    onPointerMove,
-  );
+  useEventListener(defaultWindow, "pointermove", onPointerMove);
 
-  useEventListener(
-    defaultWindow,
-    "pointerup",
-    onPointerUp,
-  );
+  useEventListener(defaultWindow, "pointerup", onPointerUp);
 
   return {
     x$: state$.x,

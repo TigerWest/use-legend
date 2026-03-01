@@ -5,8 +5,5 @@ import { defaultWindow } from "../../shared/configurable";
 export type { UseScrollOptions, UseScrollReturn };
 
 export function useWindowScroll(options?: UseScrollOptions): UseScrollReturn {
-  return useScroll(
-    defaultWindow ?? null,
-    options,
-  );
+  return useScroll(defaultWindow ?? null, options);
 }

@@ -106,7 +106,7 @@ describe("useRef$() + useImperativeHandle compatibility", () => {
           focus: () => {},
           getValue: () => value,
         }),
-        [value],
+        [value]
       );
 
       useObserve(() => {
@@ -118,9 +118,7 @@ describe("useRef$() + useImperativeHandle compatibility", () => {
     });
 
     const parentRef = createRef<TestHandle>();
-    const { rerender } = render(
-      createElement(Component, { ref: parentRef, value: "initial" }),
-    );
+    const { rerender } = render(createElement(Component, { ref: parentRef, value: "initial" }));
 
     // After initial render: observer fires once (null) + once (DOM assigned)
     const callsAfterMount = observeSpy.mock.calls.length;
@@ -268,9 +266,7 @@ describe("useRef$() as parent ref passed to child with useImperativeHandle", () 
     expect(observeSpy).toHaveBeenCalledTimes(1);
 
     // Mount child → useImperativeHandle assigns handle to Ref$
-    const { unmount } = render(
-      createElement(Child, { ref: result.current as any }),
-    );
+    const { unmount } = render(createElement(Child, { ref: result.current as any }));
 
     // Observer must fire again (handle assigned)
     expect(observeSpy).toHaveBeenCalledTimes(2);
@@ -290,9 +286,7 @@ describe("useRef$() as parent ref passed to child with useImperativeHandle", () 
     const { result } = renderHook(() => useRef$<any>());
     const handle$ = result.current;
 
-    const { rerender } = render(
-      createElement(Child, { ref: handle$ as any, value: "v1" }),
-    );
+    const { rerender } = render(createElement(Child, { ref: handle$ as any, value: "v1" }));
 
     expect((handle$.peek() as any).valueOf().getValue()).toBe("v1");
 
@@ -320,18 +314,14 @@ describe("useRef$() as parent ref passed to child with useImperativeHandle", () 
     const handle$ = result.current;
 
     // Mount ChildA
-    const { unmount: unmountA } = render(
-      createElement(ChildA, { ref: handle$ as any }),
-    );
+    const { unmount: unmountA } = render(createElement(ChildA, { ref: handle$ as any }));
     expect((handle$.peek() as any).valueOf().id).toBe("A");
 
     act(() => unmountA());
     expect(handle$.peek()).toBeNull();
 
     // Mount ChildB
-    const { unmount: unmountB } = render(
-      createElement(ChildB, { ref: handle$ as any }),
-    );
+    const { unmount: unmountB } = render(createElement(ChildB, { ref: handle$ as any }));
     expect((handle$.peek() as any).valueOf().id).toBe("B");
 
     act(() => unmountB());

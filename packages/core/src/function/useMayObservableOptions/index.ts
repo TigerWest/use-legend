@@ -1,8 +1,4 @@
-import {
-  isObservable,
-  ObservableHint,
-  type Observable,
-} from "@legendapp/state";
+import { isObservable, ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useMemo, useRef } from "react";
 import { get } from "../get";
@@ -57,10 +53,7 @@ export type Transform<T> =
   | FieldTransformMap<T>
   | ((current: DeepMaybeObservable<T> | undefined) => T | undefined);
 
-function applyObjectTransform<T>(
-  raw: T | undefined,
-  map: FieldTransformMap<T>,
-): T | undefined {
+function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>): T | undefined {
   if (raw == null) return undefined;
   const result = { ...raw } as Record<string, unknown>;
   for (const key of Object.keys(result)) {
@@ -82,10 +75,7 @@ function applyObjectTransform<T>(
       }
       case "get.function": {
         const v = get(fieldValue);
-        if (v != null)
-          result[key] = ObservableHint.function(
-            v as (...args: unknown[]) => unknown,
-          );
+        if (v != null) result[key] = ObservableHint.function(v as (...args: unknown[]) => unknown);
         break;
       }
       case "get.element": {
@@ -103,7 +93,10 @@ function applyObjectTransform<T>(
       case "peek.element": {
         if (fieldValue !== undefined) {
           // Observable resolving to undefined means "not set" — propagate undefined
-          if (isObservable(fieldValue) && (fieldValue as Observable<unknown>).peek() === undefined) {
+          if (
+            isObservable(fieldValue) &&
+            (fieldValue as Observable<unknown>).peek() === undefined
+          ) {
             result[key] = undefined;
             break;
           }
@@ -116,7 +109,7 @@ function applyObjectTransform<T>(
         if (typeof hint === "function") {
           result[key] = hint(fieldValue);
         }
-        // 'get' or undefined → no action; Legend-State auto-derefs per-field Observables
+      // 'get' or undefined → no action; Legend-State auto-derefs per-field Observables
     }
   }
   return result as T;
@@ -146,7 +139,7 @@ function applyObjectTransform<T>(
  */
 export function useMayObservableOptions<T>(
   options: DeepMaybeObservable<T> | undefined,
-  transform?: Transform<T>,
+  transform?: Transform<T>
 ): Observable<T | undefined> {
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -168,7 +161,5 @@ export function useMayObservableOptions<T>(
     }
     return resolved;
   };
-  return useObservable(compute, [depKey]) as unknown as Observable<
-    T | undefined
-  >;
+  return useObservable(compute, [depKey]) as unknown as Observable<T | undefined>;
 }

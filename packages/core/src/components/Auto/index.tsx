@@ -1,10 +1,5 @@
 "use client";
-import React, {
-  createElement,
-  type FC,
-  type ReactNode,
-  type ReactElement,
-} from "react";
+import React, { createElement, type FC, type ReactNode, type ReactElement } from "react";
 import { Computed, Show } from "@legendapp/state/react";
 import type { Selector } from "@legendapp/state";
 
@@ -33,10 +28,7 @@ type AutoPropsReactive = {
   children: () => ReactNode;
 };
 
-export type AutoProps<T = unknown> =
-  | AutoPropsIf<T>
-  | AutoPropsIfReady<T>
-  | AutoPropsReactive;
+export type AutoProps<T = unknown> = AutoPropsIf<T> | AutoPropsIfReady<T> | AutoPropsReactive;
 
 export function Auto<T>({
   if: ifProp,
@@ -58,8 +50,5 @@ export function Auto<T>({
     const { else: elseProp, wrap } = rest as AutoPropsIfReady<T>;
     return createElement(Show<T>, { ifReady, else: elseProp, wrap, children });
   }
-  return createElement(
-    withState ? Computed : React.memo(Computed, () => true),
-    { children },
-  );
+  return createElement(withState ? Computed : React.memo(Computed, () => true), { children });
 }

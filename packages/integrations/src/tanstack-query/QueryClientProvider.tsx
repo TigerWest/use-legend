@@ -5,9 +5,7 @@ import { QueryClient } from "@tanstack/query-core";
 /**
  * React Context for QueryClient
  */
-export const QueryClientContext = createContext<QueryClient | undefined>(
-  undefined,
-);
+export const QueryClientContext = createContext<QueryClient | undefined>(undefined);
 
 export interface QueryClientProviderProps {
   client: QueryClient;
@@ -33,15 +31,8 @@ export interface QueryClientProviderProps {
  * }
  * ```
  */
-export function QueryClientProvider({
-  client,
-  children,
-}: QueryClientProviderProps) {
-  return (
-    <QueryClientContext.Provider value={client}>
-      {children}
-    </QueryClientContext.Provider>
-  );
+export function QueryClientProvider({ client, children }: QueryClientProviderProps) {
+  return <QueryClientContext.Provider value={client}>{children}</QueryClientContext.Provider>;
 }
 
 export { QueryClient };

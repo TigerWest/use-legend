@@ -1,4 +1,4 @@
-import type { NodePath } from '@babel/core';
+import type { NodePath } from "@babel/core";
 
 /**
  * Returns true if the path is inside an observer() HOC call expression.
@@ -10,15 +10,12 @@ import type { NodePath } from '@babel/core';
  * Default observerNames: ["observer"]
  * Configurable via opts.observerNames: ["observer", "reactive", ...]
  */
-export function isInsideObserverHOC(
-  path: NodePath,
-  observerNames: Set<string>,
-): boolean {
+export function isInsideObserverHOC(path: NodePath, observerNames: Set<string>): boolean {
   return (
     path.findParent((p) => {
       if (!p.isCallExpression()) return false;
       const callee = p.node.callee;
-      return callee.type === 'Identifier' && observerNames.has(callee.name);
+      return callee.type === "Identifier" && observerNames.has(callee.name);
     }) !== null
   );
 }

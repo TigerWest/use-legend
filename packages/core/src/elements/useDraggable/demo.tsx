@@ -7,9 +7,7 @@ export default function Demo() {
   const { isDragging$, x$, y$ } = useDraggable(el$);
 
   return (
-    <div
-      style={{ position: "relative", height: 300, border: "1px solid #ccc" }}
-    >
+    <div style={{ position: "relative", height: 300, border: "1px solid #ccc" }}>
       <div
         ref={el$}
         style={{

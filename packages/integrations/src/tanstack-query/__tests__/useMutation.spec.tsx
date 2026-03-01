@@ -1,68 +1,68 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
-import { useMutation } from '../useMutation'
-import { createWrapper } from '../../__tests__/test-utils'
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { useMutation } from "../useMutation";
+import { createWrapper } from "../../__tests__/test-utils";
 
-describe('useMutation', () => {
+describe("useMutation", () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
-  describe('Basic Mutation Functionality', () => {
-    it('should initialize with idle state', () => {
-      const { wrapper } = createWrapper()
+  describe("Basic Mutation Functionality", () => {
+    it("should initialize with idle state", () => {
+      const { wrapper } = createWrapper();
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async (data: string) => data,
           }),
         { wrapper }
-      )
+      );
 
-      expect(result.current.status.get()).toBe('idle')
-      expect(result.current.isIdle.get()).toBe(true)
-      expect(result.current.isPending.get()).toBe(false)
-      expect(result.current.isSuccess.get()).toBe(false)
-      expect(result.current.isError.get()).toBe(false)
-      expect(result.current.data.get()).toBeUndefined()
-      expect(result.current.error.get()).toBeNull()
-    })
+      expect(result.current.status.get()).toBe("idle");
+      expect(result.current.isIdle.get()).toBe(true);
+      expect(result.current.isPending.get()).toBe(false);
+      expect(result.current.isSuccess.get()).toBe(false);
+      expect(result.current.isError.get()).toBe(false);
+      expect(result.current.data.get()).toBeUndefined();
+      expect(result.current.error.get()).toBeNull();
+    });
 
-    it('should transition to pending then success', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1, name: 'Test' }
+    it("should transition to pending then success", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1, name: "Test" };
 
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              await new Promise((resolve) => setTimeout(resolve, 50))
-              return mockData
+              await new Promise((resolve) => setTimeout(resolve, 50));
+              return mockData;
             },
           }),
         { wrapper }
-      )
+      );
 
-      result.current.mutate()
-
-      await waitFor(() => {
-        expect(result.current.isPending.get()).toBe(true)
-      })
-
-      expect(result.current.status.get()).toBe('pending')
-      expect(result.current.isIdle.get()).toBe(false)
+      result.current.mutate();
 
       await waitFor(() => {
-        expect(result.current.isSuccess.get()).toBe(true)
-      })
+        expect(result.current.isPending.get()).toBe(true);
+      });
 
-      expect(result.current.status.get()).toBe('success')
-      expect(result.current.isPending.get()).toBe(false)
-    })
+      expect(result.current.status.get()).toBe("pending");
+      expect(result.current.isIdle.get()).toBe(false);
 
-    it('should set data on successful mutation', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1, name: 'Test Product' }
+      await waitFor(() => {
+        expect(result.current.isSuccess.get()).toBe(true);
+      });
+
+      expect(result.current.status.get()).toBe("success");
+      expect(result.current.isPending.get()).toBe(false);
+    });
+
+    it("should set data on successful mutation", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1, name: "Test Product" };
 
       const { result } = renderHook(
         () =>
@@ -70,86 +70,86 @@ describe('useMutation', () => {
             mutationFn: async () => mockData,
           }),
         { wrapper }
-      )
+      );
 
-      result.current.mutate()
+      result.current.mutate();
 
       await waitFor(() => {
-        expect(result.current.isSuccess.get()).toBe(true)
-      })
+        expect(result.current.isSuccess.get()).toBe(true);
+      });
 
-      expect(result.current.data.get()).toEqual(mockData)
-    })
-  })
+      expect(result.current.data.get()).toEqual(mockData);
+    });
+  });
 
-  describe('Error Handling', () => {
-    it('should handle mutation errors', async () => {
-      const { wrapper } = createWrapper()
-      const mockError = new Error('Mutation failed')
+  describe("Error Handling", () => {
+    it("should handle mutation errors", async () => {
+      const { wrapper } = createWrapper();
+      const mockError = new Error("Mutation failed");
 
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              throw mockError
+              throw mockError;
             },
           }),
         { wrapper }
-      )
+      );
 
       // Use mutateAsync with try-catch to handle the rejection
       try {
-        await result.current.mutateAsync()
+        await result.current.mutateAsync();
       } catch {
         // Expected error, handled
       }
 
       await waitFor(() => {
-        expect(result.current.isError.get()).toBe(true)
-      })
+        expect(result.current.isError.get()).toBe(true);
+      });
 
-      expect(result.current.status.get()).toBe('error')
-      expect(result.current.error.get()).toBeInstanceOf(Error)
-      expect(result.current.error.get()?.message).toBe('Mutation failed')
-    })
+      expect(result.current.status.get()).toBe("error");
+      expect(result.current.error.get()).toBeInstanceOf(Error);
+      expect(result.current.error.get()?.message).toBe("Mutation failed");
+    });
 
-    it('should track failureCount and failureReason on error', async () => {
-      const { wrapper } = createWrapper()
-      const mockError = new Error('Test error')
+    it("should track failureCount and failureReason on error", async () => {
+      const { wrapper } = createWrapper();
+      const mockError = new Error("Test error");
 
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              throw mockError
+              throw mockError;
             },
           }),
         { wrapper }
-      )
+      );
 
       // Use mutateAsync with try-catch to handle the rejection
       try {
-        await result.current.mutateAsync()
+        await result.current.mutateAsync();
       } catch {
         // Expected error, handled
       }
 
       await waitFor(() => {
-        expect(result.current.isError.get()).toBe(true)
-      })
+        expect(result.current.isError.get()).toBe(true);
+      });
 
-      expect(result.current.failureCount.get()).toBe(1)
-      expect(result.current.failureReason.get()).toBeInstanceOf(Error)
-      expect(result.current.failureReason.get()?.message).toBe('Test error')
-    })
-  })
+      expect(result.current.failureCount.get()).toBe(1);
+      expect(result.current.failureReason.get()).toBeInstanceOf(Error);
+      expect(result.current.failureReason.get()?.message).toBe("Test error");
+    });
+  });
 
-  describe('Callback Functions', () => {
-    it('should call onSuccess callback', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1 }
-      const mockVariables = { name: 'Test' }
-      const onSuccess = vi.fn()
+  describe("Callback Functions", () => {
+    it("should call onSuccess callback", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1 };
+      const mockVariables = { name: "Test" };
+      const onSuccess = vi.fn();
 
       const { result } = renderHook(
         () =>
@@ -158,59 +158,59 @@ describe('useMutation', () => {
             onSuccess,
           }),
         { wrapper }
-      )
+      );
 
-      result.current.mutate(mockVariables)
+      result.current.mutate(mockVariables);
 
       await waitFor(() => {
-        expect(result.current.isSuccess.get()).toBe(true)
-      })
+        expect(result.current.isSuccess.get()).toBe(true);
+      });
 
-      expect(onSuccess).toHaveBeenCalledTimes(1)
+      expect(onSuccess).toHaveBeenCalledTimes(1);
       // Use positional argument checks (TanStack Query passes extra context argument)
-      expect(onSuccess.mock.calls[0][0]).toEqual(mockData) // data
-      expect(onSuccess.mock.calls[0][1]).toEqual(mockVariables) // variables
-    })
+      expect(onSuccess.mock.calls[0][0]).toEqual(mockData); // data
+      expect(onSuccess.mock.calls[0][1]).toEqual(mockVariables); // variables
+    });
 
-    it('should call onError callback', async () => {
-      const { wrapper } = createWrapper()
-      const mockError = new Error('Failed')
-      const mockVariables = { name: 'Test' }
-      const onError = vi.fn()
+    it("should call onError callback", async () => {
+      const { wrapper } = createWrapper();
+      const mockError = new Error("Failed");
+      const mockVariables = { name: "Test" };
+      const onError = vi.fn();
 
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              throw mockError
+              throw mockError;
             },
             onError,
           }),
         { wrapper }
-      )
+      );
 
       // Use mutateAsync with try-catch to handle the rejection
       try {
-        await result.current.mutateAsync(mockVariables)
+        await result.current.mutateAsync(mockVariables);
       } catch {
         // Expected error, handled
       }
 
       await waitFor(() => {
-        expect(result.current.isError.get()).toBe(true)
-      })
+        expect(result.current.isError.get()).toBe(true);
+      });
 
-      expect(onError).toHaveBeenCalledTimes(1)
+      expect(onError).toHaveBeenCalledTimes(1);
       // Use positional argument checks (TanStack Query passes extra context argument)
-      expect(onError.mock.calls[0][0]).toEqual(mockError) // error
-      expect(onError.mock.calls[0][1]).toEqual(mockVariables) // variables
-    })
+      expect(onError.mock.calls[0][0]).toEqual(mockError); // error
+      expect(onError.mock.calls[0][1]).toEqual(mockVariables); // variables
+    });
 
-    it('should call onSettled callback on success', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1 }
-      const mockVariables = { name: 'Test' }
-      const onSettled = vi.fn()
+    it("should call onSettled callback on success", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1 };
+      const mockVariables = { name: "Test" };
+      const onSettled = vi.fn();
 
       const { result } = renderHook(
         () =>
@@ -219,104 +219,104 @@ describe('useMutation', () => {
             onSettled,
           }),
         { wrapper }
-      )
+      );
 
-      result.current.mutate(mockVariables)
+      result.current.mutate(mockVariables);
 
       await waitFor(() => {
-        expect(result.current.isSuccess.get()).toBe(true)
-      })
+        expect(result.current.isSuccess.get()).toBe(true);
+      });
 
-      expect(onSettled).toHaveBeenCalledTimes(1)
+      expect(onSettled).toHaveBeenCalledTimes(1);
       // Use positional argument checks (NOT toHaveBeenCalledWith)
-      expect(onSettled.mock.calls[0][0]).toEqual(mockData) // data
-      expect(onSettled.mock.calls[0][1]).toBeNull() // error
-      expect(onSettled.mock.calls[0][2]).toEqual(mockVariables) // variables
+      expect(onSettled.mock.calls[0][0]).toEqual(mockData); // data
+      expect(onSettled.mock.calls[0][1]).toBeNull(); // error
+      expect(onSettled.mock.calls[0][2]).toEqual(mockVariables); // variables
       // Do NOT assert on index [3] (context) - not in hook's interface
-    })
+    });
 
-    it('should call onSettled callback on error', async () => {
-      const { wrapper } = createWrapper()
-      const mockError = new Error('Failed')
-      const mockVariables = { name: 'Test' }
-      const onSettled = vi.fn()
+    it("should call onSettled callback on error", async () => {
+      const { wrapper } = createWrapper();
+      const mockError = new Error("Failed");
+      const mockVariables = { name: "Test" };
+      const onSettled = vi.fn();
 
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              throw mockError
+              throw mockError;
             },
             onSettled,
           }),
         { wrapper }
-      )
+      );
 
       // Use mutateAsync with try-catch to handle the rejection
       try {
-        await result.current.mutateAsync(mockVariables)
+        await result.current.mutateAsync(mockVariables);
       } catch {
         // Expected error, handled
       }
 
       await waitFor(() => {
-        expect(result.current.isError.get()).toBe(true)
-      })
+        expect(result.current.isError.get()).toBe(true);
+      });
 
-      expect(onSettled).toHaveBeenCalledTimes(1)
+      expect(onSettled).toHaveBeenCalledTimes(1);
       // Use positional argument checks (NOT toHaveBeenCalledWith)
-      expect(onSettled.mock.calls[0][0]).toBeUndefined() // data
-      expect(onSettled.mock.calls[0][1]).toBeInstanceOf(Error) // error
-      expect(onSettled.mock.calls[0][2]).toEqual(mockVariables) // variables
+      expect(onSettled.mock.calls[0][0]).toBeUndefined(); // data
+      expect(onSettled.mock.calls[0][1]).toBeInstanceOf(Error); // error
+      expect(onSettled.mock.calls[0][2]).toEqual(mockVariables); // variables
       // Do NOT assert on index [3] (context) - not in hook's interface
-    })
-  })
+    });
+  });
 
-  describe('Observable State Updates', () => {
-    it('should update observable state reactively', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1 }
+  describe("Observable State Updates", () => {
+    it("should update observable state reactively", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1 };
 
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              await new Promise((resolve) => setTimeout(resolve, 50))
-              return mockData
+              await new Promise((resolve) => setTimeout(resolve, 50));
+              return mockData;
             },
           }),
         { wrapper }
-      )
+      );
 
       // Initial state
-      expect(result.current.status.get()).toBe('idle')
-      expect(result.current.data.get()).toBeUndefined()
-      expect(result.current.error.get()).toBeNull()
+      expect(result.current.status.get()).toBe("idle");
+      expect(result.current.data.get()).toBeUndefined();
+      expect(result.current.error.get()).toBeNull();
 
-      result.current.mutate()
+      result.current.mutate();
 
       // Pending state
       await waitFor(() => {
-        expect(result.current.isPending.get()).toBe(true)
-      })
+        expect(result.current.isPending.get()).toBe(true);
+      });
 
-      expect(result.current.status.get()).toBe('pending')
-      expect(result.current.isIdle.get()).toBe(false)
+      expect(result.current.status.get()).toBe("pending");
+      expect(result.current.isIdle.get()).toBe(false);
 
       // Success state
       await waitFor(() => {
-        expect(result.current.isSuccess.get()).toBe(true)
-      })
+        expect(result.current.isSuccess.get()).toBe(true);
+      });
 
-      expect(result.current.status.get()).toBe('success')
-      expect(result.current.data.get()).toEqual(mockData)
-      expect(result.current.isPending.get()).toBe(false)
-      expect(result.current.error.get()).toBeNull()
-    })
+      expect(result.current.status.get()).toBe("success");
+      expect(result.current.data.get()).toEqual(mockData);
+      expect(result.current.isPending.get()).toBe(false);
+      expect(result.current.error.get()).toBeNull();
+    });
 
-    it('should track variables', async () => {
-      const { wrapper } = createWrapper()
-      const mockVariables = { name: 'Test Product', price: 100 }
+    it("should track variables", async () => {
+      const { wrapper } = createWrapper();
+      const mockVariables = { name: "Test Product", price: 100 };
 
       const { result } = renderHook(
         () =>
@@ -324,19 +324,19 @@ describe('useMutation', () => {
             mutationFn: async (data: typeof mockVariables) => data,
           }),
         { wrapper }
-      )
+      );
 
-      expect(result.current.variables.get()).toBeUndefined()
+      expect(result.current.variables.get()).toBeUndefined();
 
-      result.current.mutate(mockVariables)
+      result.current.mutate(mockVariables);
 
       await waitFor(() => {
-        expect(result.current.variables.get()).toEqual(mockVariables)
-      })
-    })
+        expect(result.current.variables.get()).toEqual(mockVariables);
+      });
+    });
 
-    it('should track submittedAt', async () => {
-      const { wrapper } = createWrapper()
+    it("should track submittedAt", async () => {
+      const { wrapper } = createWrapper();
 
       const { result } = renderHook(
         () =>
@@ -344,49 +344,50 @@ describe('useMutation', () => {
             mutationFn: async () => ({ id: 1 }),
           }),
         { wrapper }
-      )
+      );
 
-      expect(result.current.submittedAt.get()).toBe(0)
+      expect(result.current.submittedAt.get()).toBe(0);
 
-      result.current.mutate()
+      result.current.mutate();
 
       await waitFor(() => {
-        expect(result.current.submittedAt.get()).toBeGreaterThan(0)
-      })
+        expect(result.current.submittedAt.get()).toBeGreaterThan(0);
+      });
 
-      const submittedAt = result.current.submittedAt.get()
-      expect(submittedAt).toBeGreaterThan(Date.now() - 1000) // Within last second
-    })
-  })
+      const submittedAt = result.current.submittedAt.get();
+      expect(submittedAt).toBeGreaterThan(Date.now() - 1000); // Within last second
+    });
+  });
 
-  describe('State Completeness', () => {
-    it('should include context field from onMutate', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1 }
-      const mockContext = { previousData: 'old' }
+  describe("State Completeness", () => {
+    it("should include context field from onMutate", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1 };
+      const mockContext = { previousData: "old" };
 
       const { result } = renderHook(
-        () => useMutation({
-          mutationFn: async () => mockData,
-          onMutate: () => mockContext,
-        }),
+        () =>
+          useMutation({
+            mutationFn: async () => mockData,
+            onMutate: () => mockContext,
+          }),
         { wrapper }
-      )
+      );
 
-      result.current.mutate()
+      result.current.mutate();
 
       await waitFor(() => {
-        expect(result.current.isSuccess.get()).toBe(true)
-      })
+        expect(result.current.isSuccess.get()).toBe(true);
+      });
 
-      expect(result.current.context.get()).toEqual(mockContext)
-    })
-  })
+      expect(result.current.context.get()).toEqual(mockContext);
+    });
+  });
 
-  describe('mutateAsync', () => {
-    it('should return a promise that resolves with data', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1, name: 'Test' }
+  describe("mutateAsync", () => {
+    it("should return a promise that resolves with data", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1, name: "Test" };
 
       const { result } = renderHook(
         () =>
@@ -394,36 +395,36 @@ describe('useMutation', () => {
             mutationFn: async () => mockData,
           }),
         { wrapper }
-      )
+      );
 
-      const promise = result.current.mutateAsync()
-      const data = await promise
+      const promise = result.current.mutateAsync();
+      const data = await promise;
 
-      expect(data).toEqual(mockData)
-    })
+      expect(data).toEqual(mockData);
+    });
 
-    it('should return a promise that rejects on error', async () => {
-      const { wrapper } = createWrapper()
-      const mockError = new Error('Mutation failed')
+    it("should return a promise that rejects on error", async () => {
+      const { wrapper } = createWrapper();
+      const mockError = new Error("Mutation failed");
 
       const { result } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              throw mockError
+              throw mockError;
             },
           }),
         { wrapper }
-      )
+      );
 
-      await expect(result.current.mutateAsync()).rejects.toThrow('Mutation failed')
-    })
-  })
+      await expect(result.current.mutateAsync()).rejects.toThrow("Mutation failed");
+    });
+  });
 
-  describe('Reset Functionality', () => {
-    it('should reset state to idle and clear data and error', async () => {
-      const { wrapper } = createWrapper()
-      const mockData = { id: 1 }
+  describe("Reset Functionality", () => {
+    it("should reset state to idle and clear data and error", async () => {
+      const { wrapper } = createWrapper();
+      const mockData = { id: 1 };
 
       const { result } = renderHook(
         () =>
@@ -431,167 +432,164 @@ describe('useMutation', () => {
             mutationFn: async () => mockData,
           }),
         { wrapper }
-      )
+      );
 
       // Perform mutation
-      result.current.mutate()
+      result.current.mutate();
 
       await waitFor(() => {
-        expect(result.current.isSuccess.get()).toBe(true)
-      })
+        expect(result.current.isSuccess.get()).toBe(true);
+      });
 
-      expect(result.current.data.get()).toEqual(mockData)
-      expect(result.current.status.get()).toBe('success')
+      expect(result.current.data.get()).toEqual(mockData);
+      expect(result.current.status.get()).toBe("success");
 
       // Reset
-      result.current.reset()
+      result.current.reset();
 
       await waitFor(() => {
-        expect(result.current.status.get()).toBe('idle')
-      })
+        expect(result.current.status.get()).toBe("idle");
+      });
 
-      expect(result.current.isIdle.get()).toBe(true)
-      expect(result.current.data.get()).toBeUndefined()
-      expect(result.current.error.get()).toBeNull()
-      expect(result.current.isSuccess.get()).toBe(false)
-      expect(result.current.isPending.get()).toBe(false)
-      expect(result.current.isError.get()).toBe(false)
-    })
-  })
+      expect(result.current.isIdle.get()).toBe(true);
+      expect(result.current.data.get()).toBeUndefined();
+      expect(result.current.error.get()).toBeNull();
+      expect(result.current.isSuccess.get()).toBe(false);
+      expect(result.current.isPending.get()).toBe(false);
+      expect(result.current.isError.get()).toBe(false);
+    });
+  });
 
-  describe('Cleanup', () => {
-    it('should unsubscribe on unmount', async () => {
-      const { wrapper } = createWrapper()
-      let externalState = 'idle'
+  describe("Cleanup", () => {
+    it("should unsubscribe on unmount", async () => {
+      const { wrapper } = createWrapper();
+      let externalState = "idle";
 
       const { result, unmount } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              await new Promise((resolve) => setTimeout(resolve, 100))
-              return { id: 1 }
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              return { id: 1 };
             },
           }),
         { wrapper }
-      )
+      );
 
       // Track state changes
-      const statusBefore = result.current.status.get()
-      expect(statusBefore).toBe('idle')
+      const statusBefore = result.current.status.get();
+      expect(statusBefore).toBe("idle");
 
       // Start mutation
-      result.current.mutate()
+      result.current.mutate();
 
       // Verify pending state
       await waitFor(() => {
-        expect(result.current.isPending.get()).toBe(true)
-      })
+        expect(result.current.isPending.get()).toBe(true);
+      });
 
-      externalState = 'pending'
+      externalState = "pending";
 
       // Unmount while mutation is in progress
-      unmount()
+      unmount();
 
       // Wait for mutation to complete (if it were still subscribed)
-      await new Promise((resolve) => setTimeout(resolve, 150))
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       // Since we unmounted, we can't check the observable state
       // But we verified that the hook was pending before unmount
       // and no errors were thrown during unmount
-      expect(externalState).toBe('pending')
-    })
-  })
+      expect(externalState).toBe("pending");
+    });
+  });
 
-  describe('mutateAsync + Unmount', () => {
-    it('mutate() + unmount: should not throw and mutation completes silently', async () => {
-      const { wrapper } = createWrapper()
+  describe("mutateAsync + Unmount", () => {
+    it("mutate() + unmount: should not throw and mutation completes silently", async () => {
+      const { wrapper } = createWrapper();
 
       const { result, unmount } = renderHook(
         () =>
           useMutation({
             mutationFn: async () => {
-              await new Promise((resolve) => setTimeout(resolve, 100))
-              return { id: 1 }
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              return { id: 1 };
             },
           }),
         { wrapper }
-      )
+      );
 
-      result.current.mutate()
+      result.current.mutate();
 
       await waitFor(() => {
-        expect(result.current.isPending.get()).toBe(true)
-      })
+        expect(result.current.isPending.get()).toBe(true);
+      });
 
       // Unmount while fire-and-forget mutate() is in progress
       // mutate() does not return a Promise to the caller, so there is nothing to hang
-      unmount()
+      unmount();
 
       // Wait longer than the mutationFn delay — no errors should be thrown
-      await new Promise((resolve) => setTimeout(resolve, 150))
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       // No assertion needed beyond "no unhandled rejection / no throw"
-      expect(true).toBe(true)
-    })
+      expect(true).toBe(true);
+    });
 
-    it(
-      // KNOWN LIMITATION: mutateAsync() + unmount causes a permanently pending Promise
-      //
-      // TanStack Query's MutationObserver#notify() guards per-mutation callbacks
-      // (the onSuccess/onError that resolve/reject the mutateAsync Promise) behind
-      // `this.#mutateOptions && this.hasListeners()`.
-      //
-      // When the component unmounts, the observer loses all subscribers
-      // (hasListeners() === false), so neither the resolve nor the reject callback
-      // is ever called, leaving the Promise in a permanently pending state.
-      //
-      // Workaround: prefer mutate() (fire-and-forget) when the component may
-      // unmount before the mutation settles, or manage the Promise lifecycle
-      // externally with AbortController / cleanup flags.
-      'mutateAsync() + unmount: Promise remains pending (known limitation — per-mutation callbacks skipped when hasListeners() is false)',
-      async () => {
-        const { wrapper } = createWrapper()
+    it(// KNOWN LIMITATION: mutateAsync() + unmount causes a permanently pending Promise
+    //
+    // TanStack Query's MutationObserver#notify() guards per-mutation callbacks
+    // (the onSuccess/onError that resolve/reject the mutateAsync Promise) behind
+    // `this.#mutateOptions && this.hasListeners()`.
+    //
+    // When the component unmounts, the observer loses all subscribers
+    // (hasListeners() === false), so neither the resolve nor the reject callback
+    // is ever called, leaving the Promise in a permanently pending state.
+    //
+    // Workaround: prefer mutate() (fire-and-forget) when the component may
+    // unmount before the mutation settles, or manage the Promise lifecycle
+    // externally with AbortController / cleanup flags.
+    "mutateAsync() + unmount: Promise remains pending (known limitation — per-mutation callbacks skipped when hasListeners() is false)", async () => {
+      const { wrapper } = createWrapper();
 
-        const { result, unmount } = renderHook(
-          () =>
-            useMutation({
-              mutationFn: async () => {
-                await new Promise((resolve) => setTimeout(resolve, 100))
-                return { id: 1 }
-              },
-            }),
-          { wrapper }
-        )
+      const { result, unmount } = renderHook(
+        () =>
+          useMutation({
+            mutationFn: async () => {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              return { id: 1 };
+            },
+          }),
+        { wrapper }
+      );
 
-        const mutateAsyncPromise = result.current.mutateAsync()
+      const mutateAsyncPromise = result.current.mutateAsync();
 
-        await waitFor(() => {
-          expect(result.current.isPending.get()).toBe(true)
-        })
+      await waitFor(() => {
+        expect(result.current.isPending.get()).toBe(true);
+      });
 
-        // Unmount while mutateAsync() is still in-flight
-        unmount()
+      // Unmount while mutateAsync() is still in-flight
+      unmount();
 
-        // Sentinel value to detect whether the Promise settled within the race window
-        const TIMEOUT_SENTINEL = '__timeout__' as const
+      // Sentinel value to detect whether the Promise settled within the race window
+      const TIMEOUT_SENTINEL = "__timeout__" as const;
 
-        const timeout = (ms: number) =>
-          new Promise<typeof TIMEOUT_SENTINEL>((resolve) =>
-            setTimeout(() => resolve(TIMEOUT_SENTINEL), ms)
-          )
+      const timeout = (ms: number) =>
+        new Promise<typeof TIMEOUT_SENTINEL>((resolve) =>
+          setTimeout(() => resolve(TIMEOUT_SENTINEL), ms)
+        );
 
-        // Race the mutateAsync Promise against a 300 ms timeout.
-        // The mutationFn itself resolves after 100 ms, but because the component
-        // has already unmounted (hasListeners() === false) TanStack Query's
-        // MutationObserver will NOT invoke the per-mutation resolve callback,
-        // so the Promise never settles — the timeout wins the race.
-        const winner = await Promise.race([
-          mutateAsyncPromise.then(() => 'resolved' as const).catch(() => 'rejected' as const),
-          timeout(300),
-        ])
+      // Race the mutateAsync Promise against a 300 ms timeout.
+      // The mutationFn itself resolves after 100 ms, but because the component
+      // has already unmounted (hasListeners() === false) TanStack Query's
+      // MutationObserver will NOT invoke the per-mutation resolve callback,
+      // so the Promise never settles — the timeout wins the race.
+      const winner = await Promise.race([
+        mutateAsyncPromise.then(() => "resolved" as const).catch(() => "rejected" as const),
+        timeout(300),
+      ]);
 
-        expect(winner).toBe(TIMEOUT_SENTINEL)
-      }
-    )
-  })
-})
+      expect(winner).toBe(TIMEOUT_SENTINEL);
+    });
+  });
+});

@@ -32,9 +32,7 @@ export interface UseInfiniteQueryOptions<
   TPageParam = unknown,
 > {
   queryKey: TQueryKey;
-  queryFn: (
-    context: QueryFunctionContext<TQueryKey, TPageParam>,
-  ) => Promise<TQueryFnData>;
+  queryFn: (context: QueryFunctionContext<TQueryKey, TPageParam>) => Promise<TQueryFnData>;
 
   // REQUIRED in v5
   initialPageParam: TPageParam;
@@ -42,7 +40,7 @@ export interface UseInfiniteQueryOptions<
     lastPage: TQueryFnData,
     allPages: Array<TQueryFnData>,
     lastPageParam: TPageParam,
-    allPageParams: Array<TPageParam>,
+    allPageParams: Array<TPageParam>
   ) => TPageParam | undefined | null;
 
   // Optional
@@ -50,7 +48,7 @@ export interface UseInfiniteQueryOptions<
     firstPage: TQueryFnData,
     allPages: Array<TQueryFnData>,
     firstPageParam: TPageParam,
-    allPageParams: Array<TPageParam>,
+    allPageParams: Array<TPageParam>
   ) => TPageParam | undefined | null;
 
   enabled?: MaybeObservable<boolean>;
@@ -137,7 +135,7 @@ export function useInfiniteQuery<
   TQueryKey extends QueryKey = QueryKey,
   TPageParam = unknown,
 >(
-  options: MaybeObservable<UseInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>>,
+  options: MaybeObservable<UseInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>>
 ): Observable<InfiniteQueryState<InfiniteData<TQueryFnData>>> {
   const queryClient = useQueryClient();
 

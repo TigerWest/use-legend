@@ -9,8 +9,7 @@ import { useMouseInElement } from ".";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 /**
  * Create a div whose getClientRects() returns a single rect at the given position.
@@ -30,17 +29,13 @@ function createDiv(rect: Partial<DOMRect> = {}) {
     toJSON: () => ({}),
     ...rect,
   };
-  vi.spyOn(div, "getClientRects").mockReturnValue(
-    [full] as unknown as DOMRectList,
-  );
+  vi.spyOn(div, "getClientRects").mockReturnValue([full] as unknown as DOMRectList);
   return div;
 }
 
 function fireMouseMove(x: number, y: number) {
   act(() => {
-    window.dispatchEvent(
-      new MouseEvent("mousemove", { clientX: x, clientY: y, bubbles: true }),
-    );
+    window.dispatchEvent(new MouseEvent("mousemove", { clientX: x, clientY: y, bubbles: true }));
   });
 }
 
@@ -180,7 +175,7 @@ describe("useMouseInElement()", () => {
       height: 100,
     });
     const { result } = renderHook(() =>
-      useMouseInElement(wrapEl(div) as any, { handleOutside: true }),
+      useMouseInElement(wrapEl(div) as any, { handleOutside: true })
     );
 
     fireMouseMove(300, 400); // outside: elementX = 300-0, elementY = 400-0
@@ -200,7 +195,7 @@ describe("useMouseInElement()", () => {
       height: 100,
     });
     const { result } = renderHook(() =>
-      useMouseInElement(wrapEl(div) as any, { handleOutside: false }),
+      useMouseInElement(wrapEl(div) as any, { handleOutside: false })
     );
 
     fireMouseMove(80, 60); // inside
@@ -237,9 +232,7 @@ describe("useMouseInElement()", () => {
   it("windowScroll: false — scroll event does not trigger recalculation", () => {
     const div = createDiv();
     const spy = vi.spyOn(div, "getClientRects");
-    renderHook(() =>
-      useMouseInElement(wrapEl(div) as any, { windowScroll: false }),
-    );
+    renderHook(() => useMouseInElement(wrapEl(div) as any, { windowScroll: false }));
 
     const before = spy.mock.calls.length;
 
@@ -267,9 +260,7 @@ describe("useMouseInElement()", () => {
   it("windowResize: false — resize event does not trigger recalculation", () => {
     const div = createDiv();
     const spy = vi.spyOn(div, "getClientRects");
-    renderHook(() =>
-      useMouseInElement(wrapEl(div) as any, { windowResize: false }),
-    );
+    renderHook(() => useMouseInElement(wrapEl(div) as any, { windowResize: false }));
 
     const before = spy.mock.calls.length;
 
@@ -287,9 +278,7 @@ describe("useMouseInElement()", () => {
     act(() => result.current.stop());
 
     expect(ResizeObserverMock.instances.some((i) => i.disconnected)).toBe(true);
-    expect(MutationObserverMock.instances.some((i) => i.disconnected)).toBe(
-      true,
-    );
+    expect(MutationObserverMock.instances.some((i) => i.disconnected)).toBe(true);
   });
 
   it("stop() removes mousemove listener — state does not update afterwards", () => {
@@ -315,7 +304,7 @@ describe("useMouseInElement()", () => {
           clientX: 10,
           clientY: 10,
           bubbles: true,
-        }),
+        })
       );
     });
 
@@ -332,9 +321,7 @@ describe("useMouseInElement()", () => {
 
   it("skips update when getClientRects returns empty (no layout)", () => {
     const div = document.createElement("div");
-    vi.spyOn(div, "getClientRects").mockReturnValue(
-      [] as unknown as DOMRectList,
-    );
+    vi.spyOn(div, "getClientRects").mockReturnValue([] as unknown as DOMRectList);
     const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
 
     fireMouseMove(50, 50);

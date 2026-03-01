@@ -2,13 +2,11 @@
 // TIER 0-B: Shared pure utility functions (VueUse equivalents, no dependencies)
 // ---------------------------------------------------------------------------
 
-export const isClient =
-  typeof window !== "undefined" && typeof document !== "undefined";
+export const isClient = typeof window !== "undefined" && typeof document !== "undefined";
 
 export const noop = () => {};
 
-export const clamp = (n: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, n));
+export const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
 export const isDef = <T>(val?: T): val is T => typeof val !== "undefined";
 
@@ -27,33 +25,28 @@ export function toArray<T>(v: T | T[]): T[] {
   return Array.isArray(v) ? v : [v];
 }
 
-export function objectPick<O extends object, T extends keyof O>(
-  obj: O,
-  keys: T[],
-): Pick<O, T> {
+export function objectPick<O extends object, T extends keyof O>(obj: O, keys: T[]): Pick<O, T> {
   return keys.reduce(
     (n, k) => {
       if (k in obj) n[k] = obj[k];
       return n;
     },
-    {} as Pick<O, T>,
+    {} as Pick<O, T>
   );
 }
 
-export function objectOmit<O extends object, T extends keyof O>(
-  obj: O,
-  keys: T[],
-): Omit<O, T> {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([k]) => !keys.includes(k as T)),
-  ) as Omit<O, T>;
+export function objectOmit<O extends object, T extends keyof O>(obj: O, keys: T[]): Omit<O, T> {
+  return Object.fromEntries(Object.entries(obj).filter(([k]) => !keys.includes(k as T))) as Omit<
+    O,
+    T
+  >;
 }
 
 export function promiseTimeout(ms: number, throwOnTimeout = false): Promise<void> {
   return new Promise((resolve, reject) =>
     throwOnTimeout
       ? setTimeout(() => reject(new Error(`Timeout ${ms}ms`)), ms)
-      : setTimeout(resolve, ms),
+      : setTimeout(resolve, ms)
   );
 }
 

@@ -1,4 +1,4 @@
-import type { TSESLint } from '@typescript-eslint/utils';
+import type { TSESLint } from "@typescript-eslint/utils";
 
 // Recommended config — populated as rules are implemented (Phase 1+)
 // Usage in eslint.config.js:
@@ -6,7 +6,7 @@ import type { TSESLint } from '@typescript-eslint/utils';
 //   export default [legendPlugin.configs.recommended];
 export const recommended: TSESLint.FlatConfig.Config = {
   rules: {
-    'use-legend/observable-naming': 'error',
-    'use-legend/no-observable-in-jsx': 'error',
+    "use-legend/observable-naming": "error",
+    "use-legend/no-observable-in-jsx": "error",
   },
 };

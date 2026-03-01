@@ -151,10 +151,14 @@ describe("useParentElement()", () => {
 
     expect(result.current.get()).toBeNull();
 
-    act(() => { target$.set(child); });
+    act(() => {
+      target$.set(child);
+    });
     expect(result.current.get()).toBe(parent);
 
-    act(() => { target$.set(null); });
+    act(() => {
+      target$.set(null);
+    });
     expect(result.current.get()).toBeNull();
   });
 
@@ -170,7 +174,9 @@ describe("useParentElement()", () => {
       return el$;
     });
 
-    act(() => { elResult.current(child); });
+    act(() => {
+      elResult.current(child);
+    });
 
     // Phase 2: pass the pre-assigned el$ to useParentElement
     // useMount should pick up the existing element value immediately

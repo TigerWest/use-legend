@@ -25,8 +25,7 @@ if (typeof window !== "undefined" && !window.PointerEvent) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 /**
  * Create a div whose getBoundingClientRect() returns the given rect.
@@ -54,7 +53,7 @@ function firePointerDown(
   target: EventTarget,
   clientX: number,
   clientY: number,
-  pointerType = "mouse",
+  pointerType = "mouse"
 ) {
   act(() => {
     target.dispatchEvent(
@@ -64,7 +63,7 @@ function firePointerDown(
         pointerType,
         bubbles: true,
         cancelable: true,
-      }),
+      })
     );
   });
 }
@@ -77,7 +76,7 @@ function firePointerMove(clientX: number, clientY: number) {
         clientY,
         bubbles: true,
         cancelable: true,
-      }),
+      })
     );
   });
 }
@@ -89,7 +88,7 @@ function firePointerUp(clientX = 0, clientY = 0) {
         clientX,
         clientY,
         bubbles: true,
-      }),
+      })
     );
   });
 }
@@ -106,7 +105,7 @@ describe("useDraggable()", () => {
   it("initialValue sets initial x$, y$, style$", () => {
     const div = createDiv();
     const { result } = renderHook(() =>
-      useDraggable(wrapEl(div), { initialValue: { x: 200, y: 150 } }),
+      useDraggable(wrapEl(div), { initialValue: { x: 200, y: 150 } })
     );
 
     expect(result.current.x$.get()).toBe(200);
@@ -117,34 +116,32 @@ describe("useDraggable()", () => {
   it("axis 'x' — y stays at initialValue", () => {
     const div = createDiv({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100 });
     const { result } = renderHook(() =>
-      useDraggable(wrapEl(div), { axis: "x", initialValue: { x: 0, y: 0 } }),
+      useDraggable(wrapEl(div), { axis: "x", initialValue: { x: 0, y: 0 } })
     );
 
     firePointerDown(div, 10, 10);
     firePointerMove(60, 80);
 
     expect(result.current.x$.get()).toBe(50); // moved
-    expect(result.current.y$.get()).toBe(0);  // frozen
+    expect(result.current.y$.get()).toBe(0); // frozen
   });
 
   it("axis 'y' — x stays at initialValue", () => {
     const div = createDiv({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100 });
     const { result } = renderHook(() =>
-      useDraggable(wrapEl(div), { axis: "y", initialValue: { x: 0, y: 0 } }),
+      useDraggable(wrapEl(div), { axis: "y", initialValue: { x: 0, y: 0 } })
     );
 
     firePointerDown(div, 10, 10);
     firePointerMove(60, 80);
 
-    expect(result.current.x$.get()).toBe(0);  // frozen
+    expect(result.current.x$.get()).toBe(0); // frozen
     expect(result.current.y$.get()).toBe(70); // moved
   });
 
   it("disabled: true — pointerdown is ignored", () => {
     const div = createDiv();
-    const { result } = renderHook(() =>
-      useDraggable(wrapEl(div), { disabled: true }),
-    );
+    const { result } = renderHook(() => useDraggable(wrapEl(div), { disabled: true }));
 
     firePointerDown(div, 10, 10);
     firePointerMove(60, 80);
@@ -157,9 +154,7 @@ describe("useDraggable()", () => {
   it("disabled Observable — second drag is blocked after set(true)", () => {
     const div = createDiv();
     const disabled$ = observable(false);
-    const { result } = renderHook(() =>
-      useDraggable(wrapEl(div), { disabled: disabled$ }),
-    );
+    const { result } = renderHook(() => useDraggable(wrapEl(div), { disabled: disabled$ }));
 
     // First drag — should work
     firePointerDown(div, 10, 10);

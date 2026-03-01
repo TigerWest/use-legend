@@ -3,8 +3,15 @@ import { useMouseInElement } from ".";
 
 export default function UseMouseInElementDemo() {
   const el$ = useRef$<HTMLDivElement>();
-  const { elementX$, elementY$, isOutside$, elementWidth$, elementHeight$, x$, y$: _y$ } =
-    useMouseInElement(el$);
+  const {
+    elementX$,
+    elementY$,
+    isOutside$,
+    elementWidth$,
+    elementHeight$,
+    x$,
+    y$: _y$,
+  } = useMouseInElement(el$);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>

@@ -1,4 +1,4 @@
-import type { TSESLint } from '@typescript-eslint/utils';
+import type { TSESLint } from "@typescript-eslint/utils";
 
 // Strict config — superset of recommended; populated after Phase 2+ rules
 // Usage in eslint.config.js:

@@ -12,24 +12,22 @@ SSR-safe: returns `false` when `document` is not available.
 ## Usage
 
 ```tsx
-import { useWindowFocus } from '@usels/core'
+import { useWindowFocus } from "@usels/core";
 
 function Component() {
-  const focused$ = useWindowFocus()
+  const focused$ = useWindowFocus();
 
-  return (
-    <p>Window is {focused$.get() ? 'focused' : 'blurred'}</p>
-  )
+  return <p>Window is {focused$.get() ? "focused" : "blurred"}</p>;
 }
 ```
 
 ### Pausing work when the window loses focus
 
 ```tsx
-const focused$ = useWindowFocus()
+const focused$ = useWindowFocus();
 
 useObserve(() => {
-  if (!focused$.get()) pausePolling()
-  else resumePolling()
-})
+  if (!focused$.get()) pausePolling();
+  else resumePolling();
+});
 ```

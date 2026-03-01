@@ -1,6 +1,6 @@
-import React from 'react'
-import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query'
-import { QueryClientProvider } from '../tanstack-query/QueryClientProvider'
+import React from "react";
+import { QueryClient, MutationCache, QueryCache } from "@tanstack/react-query";
+import { QueryClientProvider } from "../tanstack-query/QueryClientProvider";
 
 export function createTestQueryClient(): QueryClient {
   return new QueryClient({
@@ -35,17 +35,15 @@ export function createTestQueryClient(): QueryClient {
         },
       },
     },
-  })
+  });
 }
 
 export function createWrapper() {
-  const queryClient = createTestQueryClient()
+  const queryClient = createTestQueryClient();
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  )
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 
-  return { wrapper: Wrapper, queryClient }
+  return { wrapper: Wrapper, queryClient };
 }

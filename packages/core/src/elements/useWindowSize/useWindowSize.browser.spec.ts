@@ -32,7 +32,7 @@ describe("useWindowSize() — real browser", () => {
     if (window.visualViewport) {
       expect(result.current.width.get()).toBeCloseTo(
         window.visualViewport.width * window.visualViewport.scale,
-        0,
+        0
       );
     } else {
       expect(result.current.width.get()).toBe(window.innerWidth);

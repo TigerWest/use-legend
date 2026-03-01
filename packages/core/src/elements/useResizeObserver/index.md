@@ -11,41 +11,41 @@ Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
 ## Usage
 
 ```tsx
-import { useCallback } from 'react'
-import { useRef$, useResizeObserver } from '@usels/core'
+import { useCallback } from "react";
+import { useRef$, useResizeObserver } from "@usels/core";
 
 function Component() {
-  const el$ = useRef$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>();
 
   const handleResize = useCallback<ResizeObserverCallback>((entries) => {
-    const { width, height } = entries[0].contentRect
-    console.log(width, height)
-  }, [])
+    const { width, height } = entries[0].contentRect;
+    console.log(width, height);
+  }, []);
 
-  useResizeObserver(el$, handleResize)
+  useResizeObserver(el$, handleResize);
 
-  return <div ref={el$} />
+  return <div ref={el$} />;
 }
 ```
 
 ### With `border-box`
 
 ```tsx
-useResizeObserver(el$, handleResize, { box: 'border-box' })
+useResizeObserver(el$, handleResize, { box: "border-box" });
 ```
 
 ### Stopping observation manually
 
 ```tsx
-const { stop } = useResizeObserver(el$, handleResize)
+const { stop } = useResizeObserver(el$, handleResize);
 
-stop()
+stop();
 ```
 
 ### Checking browser support
 
 ```tsx
-const { isSupported$ } = useResizeObserver(el$, handleResize)
+const { isSupported$ } = useResizeObserver(el$, handleResize);
 
-console.log(isSupported$.get()) // Observable<boolean>
+console.log(isSupported$.get()); // Observable<boolean>
 ```

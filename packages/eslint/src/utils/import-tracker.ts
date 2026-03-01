@@ -1,4 +1,4 @@
-import type { TSESTree } from '@typescript-eslint/utils';
+import type { TSESTree } from "@typescript-eslint/utils";
 
 /**
  * Maps import source → list of exported names to track.
@@ -53,10 +53,10 @@ export class ImportTracker {
     if (trackedNames === undefined) return;
 
     for (const specifier of node.specifiers) {
-      if (specifier.type !== 'ImportSpecifier') continue;
+      if (specifier.type !== "ImportSpecifier") continue;
 
       const importedName =
-        specifier.imported.type === 'Identifier'
+        specifier.imported.type === "Identifier"
           ? specifier.imported.name
           : specifier.imported.value;
 

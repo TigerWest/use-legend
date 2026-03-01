@@ -8,12 +8,8 @@ const badge = (active: boolean): React.CSSProperties => ({
   borderRadius: "4px",
   fontSize: "12px",
   fontFamily: "monospace",
-  background: active
-    ? "var(--sl-color-green-low, #f0fdf4)"
-    : "var(--sl-color-gray-5, #f1f5f9)",
-  color: active
-    ? "var(--sl-color-green, #16a34a)"
-    : "var(--sl-color-gray-3, #64748b)",
+  background: active ? "var(--sl-color-green-low, #f0fdf4)" : "var(--sl-color-gray-5, #f1f5f9)",
+  color: active ? "var(--sl-color-green, #16a34a)" : "var(--sl-color-gray-3, #64748b)",
   border: `1px solid ${active ? "var(--sl-color-green, #22c55e)" : "var(--sl-color-gray-4, #e2e8f0)"}`,
   transition: "all 0.15s",
 });
@@ -44,9 +40,7 @@ export default function UseScrollDemo() {
         <span>
           y: <strong>{y$.get()}</strong>
         </span>
-        <span style={badge(isScrolling$.get())}>
-          {isScrolling$.get() ? "scrolling" : "idle"}
-        </span>
+        <span style={badge(isScrolling$.get())}>{isScrolling$.get() ? "scrolling" : "idle"}</span>
         <span style={badge(arrivedState$.top.get())}>top</span>
         <span style={badge(arrivedState$.bottom.get())}>bottom</span>
         <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>

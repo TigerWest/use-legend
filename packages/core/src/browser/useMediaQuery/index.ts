@@ -27,12 +27,8 @@ export function evaluateSSRQuery(query: string, ssrWidth: number): boolean {
   const queryStrings = query.split(",");
   return queryStrings.some((queryString) => {
     const not = queryString.includes("not all");
-    const minWidth = queryString.match(
-      /\(\s*min-width:\s*(-?\d+(?:\.\d*)?[a-z]+\s*)\)/,
-    );
-    const maxWidth = queryString.match(
-      /\(\s*max-width:\s*(-?\d+(?:\.\d*)?[a-z]+\s*)\)/,
-    );
+    const minWidth = queryString.match(/\(\s*min-width:\s*(-?\d+(?:\.\d*)?[a-z]+\s*)\)/);
+    const maxWidth = queryString.match(/\(\s*max-width:\s*(-?\d+(?:\.\d*)?[a-z]+\s*)\)/);
     let res = Boolean(minWidth || maxWidth);
     if (minWidth && res) res = ssrWidth >= pxValue(minWidth[1]);
     if (maxWidth && res) res = ssrWidth <= pxValue(maxWidth[1]);
@@ -57,7 +53,7 @@ export type UseMediaQueryReturn = Observable<boolean>;
 /*@__NO_SIDE_EFFECTS__*/
 export function useMediaQuery(
   query: MaybeObservable<string>,
-  options: UseMediaQueryOptions = {},
+  options: UseMediaQueryOptions = {}
 ): UseMediaQueryReturn {
   const { ssrWidth } = options;
 
@@ -65,19 +61,15 @@ export function useMediaQuery(
     () =>
       !!defaultWindow &&
       "matchMedia" in defaultWindow &&
-      typeof defaultWindow.matchMedia === "function",
+      typeof defaultWindow.matchMedia === "function"
   );
 
   const matches$ = useObservable(() =>
-    typeof ssrWidth === "number"
-      ? evaluateSSRQuery(get(query), ssrWidth)
-      : false,
+    typeof ssrWidth === "number" ? evaluateSSRQuery(get(query), ssrWidth) : false
   );
 
   const mql$ = useWhenMounted(() =>
-    isSupported.get()
-      ? ObservableHint.opaque(defaultWindow!.matchMedia(get(query)))
-      : null,
+    isSupported.get() ? ObservableHint.opaque(defaultWindow!.matchMedia(get(query))) : null
   );
   useObserve(() => {
     const mql = mql$.get();
@@ -93,7 +85,7 @@ export function useMediaQuery(
     (e: Event) => {
       matches$.set((e as MediaQueryListEvent).matches);
     },
-    { passive: true },
+    { passive: true }
   );
 
   return matches$;

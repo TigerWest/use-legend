@@ -71,10 +71,9 @@ describe("useRef$()", () => {
   it("uses latest externalRef after re-render", () => {
     let currentRef = vi.fn();
 
-    const { result, rerender } = renderHook(
-      ({ ref }) => useRef$<HTMLDivElement>(ref),
-      { initialProps: { ref: currentRef } }
-    );
+    const { result, rerender } = renderHook(({ ref }) => useRef$<HTMLDivElement>(ref), {
+      initialProps: { ref: currentRef },
+    });
 
     const newRef = vi.fn();
     rerender({ ref: newRef });
@@ -132,10 +131,9 @@ describe("useRef$()", () => {
   });
 
   it("updates latest RefObject when externalRef changes between renders", () => {
-    const { result, rerender } = renderHook(
-      ({ ref }) => useRef$<HTMLDivElement>(ref),
-      { initialProps: { ref: createRef<HTMLDivElement>() } }
-    );
+    const { result, rerender } = renderHook(({ ref }) => useRef$<HTMLDivElement>(ref), {
+      initialProps: { ref: createRef<HTMLDivElement>() },
+    });
 
     const newRef = createRef<HTMLDivElement>();
     rerender({ ref: newRef });

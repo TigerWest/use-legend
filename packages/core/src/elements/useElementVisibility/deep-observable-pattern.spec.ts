@@ -37,12 +37,13 @@ const mockObserve = vi.fn();
 const mockDisconnect = vi.fn();
 let capturedInit: IntersectionObserverInit | undefined;
 
-const MockIntersectionObserver = vi.fn(
-  function(_cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
-    capturedInit = init;
-    return { observe: mockObserve, disconnect: mockDisconnect };
-  },
-);
+const MockIntersectionObserver = vi.fn(function (
+  _cb: IntersectionObserverCallback,
+  init?: IntersectionObserverInit
+) {
+  capturedInit = init;
+  return { observe: mockObserve, disconnect: mockDisconnect };
+});
 
 beforeEach(() => {
   vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
@@ -111,7 +112,7 @@ describe("Case 2 — per-field { field: obs$ }: Legend-State auto-dereferences i
       // useObservable wraps it, but Legend-State auto-dereferences inner Observables
       // → computed$.rootMargin.get() returns "0px" (string), NOT Observable<string>
       const computed$ = useObservable(() =>
-        get<{ rootMargin: typeof rootMargin$ }>({ rootMargin: rootMargin$ }),
+        get<{ rootMargin: typeof rootMargin$ }>({ rootMargin: rootMargin$ })
       );
       return { computed$ };
     });
@@ -180,9 +181,7 @@ describe("useElementVisibility — reactivity comparison", () => {
     const el = document.createElement("div");
     const rootMargin$ = observable("0px");
 
-    renderHook(() =>
-      useElementVisibility(wrapEl(el), { rootMargin: rootMargin$ }),
-    );
+    renderHook(() => useElementVisibility(wrapEl(el), { rootMargin: rootMargin$ }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(capturedInit?.rootMargin).toBe("0px");
@@ -235,13 +234,11 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
     const el = document.createElement("div");
     const scrollContainer = document.createElement("div");
 
-    renderHook(() =>
-      useElementVisibility(wrapEl(el), { scrollTarget: wrapEl(scrollContainer) }),
-    );
+    renderHook(() => useElementVisibility(wrapEl(el), { scrollTarget: wrapEl(scrollContainer) }));
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: scrollContainer }),
+      expect.objectContaining({ root: scrollContainer })
     );
   });
 
@@ -256,7 +253,7 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: scrollContainer }),
+      expect.objectContaining({ root: scrollContainer })
     );
   });
 
@@ -282,7 +279,7 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
     // Ref$ mounted → useIntersectionObserver's useObserve re-runs → setup() with root
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: scrollContainer }),
+      expect.objectContaining({ root: scrollContainer })
     );
   });
 
@@ -305,7 +302,7 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
 
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: containerA }),
+      expect.objectContaining({ root: containerA })
     );
 
     mockDisconnect.mockClear();
@@ -318,7 +315,7 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
     expect(mockDisconnect).toHaveBeenCalledTimes(1);
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: containerB }),
+      expect.objectContaining({ root: containerB })
     );
   });
 
@@ -329,9 +326,7 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
     // Use OpaqueObject to prevent Legend-State from deeply proxying the element.
     const scrollTarget$ = observable<OpaqueObject<Element> | null>(null);
 
-    renderHook(() =>
-      useElementVisibility(wrapEl(el), { scrollTarget: scrollTarget$ }),
-    );
+    renderHook(() => useElementVisibility(wrapEl(el), { scrollTarget: scrollTarget$ }));
 
     MockIntersectionObserver.mockClear();
     mockDisconnect.mockClear();
@@ -345,7 +340,7 @@ describe("Case 3 — scrollTarget (Element) in useElementVisibility", () => {
     expect(mockDisconnect).not.toHaveBeenCalled();
     expect(MockIntersectionObserver).toHaveBeenCalledWith(
       expect.any(Function),
-      expect.objectContaining({ root: container }),
+      expect.objectContaining({ root: container })
     );
   });
 });
@@ -428,7 +423,7 @@ describe("Standard Pattern — useObservable(() => get(options), [options])", ()
       // Legend-State auto-dereferences inner Observables → opts$.rootMargin은 Observable<string>
       const opts$ = useObservable(
         () => get<{ rootMargin: typeof rootMargin$ }>({ rootMargin: rootMargin$ }),
-        [rootMargin$],
+        [rootMargin$]
       );
       useIntersectionObserver(wrapEl(el), () => {}, {
         rootMargin: opts$.rootMargin,

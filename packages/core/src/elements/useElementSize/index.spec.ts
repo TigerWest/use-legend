@@ -6,8 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useRef$ } from "../useRef$";
 import { useElementSize } from ".";
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock (extended with box size support)
@@ -51,7 +50,7 @@ class ResizeObserverMock {
       contentBoxSize?: BoxSize[];
       borderBoxSize?: BoxSize[];
       devicePixelContentBoxSize?: BoxSize[];
-    } = {},
+    } = {}
   ) {
     if (this.disconnected) return;
     const entry = {
@@ -89,9 +88,7 @@ describe("useElementSize()", () => {
     const { result } = renderHook(() => useElementSize(wrapEl(div) as any));
 
     const instance = ResizeObserverMock.instances.at(-1)!;
-    act(() =>
-      instance.trigger(div, { contentRect: { width: 320, height: 240 } }),
-    );
+    act(() => instance.trigger(div, { contentRect: { width: 320, height: 240 } }));
 
     expect(result.current.width$.get()).toBe(320);
     expect(result.current.height$.get()).toBe(240);
@@ -125,14 +122,14 @@ describe("useElementSize()", () => {
     const div = document.createElement("div");
 
     const { result } = renderHook(() =>
-      useElementSize(wrapEl(div) as any, undefined, { box: "border-box" }),
+      useElementSize(wrapEl(div) as any, undefined, { box: "border-box" })
     );
 
     const instance = ResizeObserverMock.instances.at(-1)!;
     act(() =>
       instance.trigger(div, {
         borderBoxSize: [{ inlineSize: 400, blockSize: 300 }],
-      }),
+      })
     );
 
     expect(result.current.width$.get()).toBe(400);
@@ -145,14 +142,14 @@ describe("useElementSize()", () => {
     const { result } = renderHook(() =>
       useElementSize(wrapEl(div) as any, undefined, {
         box: "device-pixel-content-box",
-      }),
+      })
     );
 
     const instance = ResizeObserverMock.instances.at(-1)!;
     act(() =>
       instance.trigger(div, {
         devicePixelContentBoxSize: [{ inlineSize: 800, blockSize: 600 }],
-      }),
+      })
     );
 
     expect(result.current.width$.get()).toBe(800);
@@ -169,7 +166,7 @@ describe("useElementSize()", () => {
     act(() =>
       instance.trigger(div, {
         contentBoxSize: [{ inlineSize: 500, blockSize: 250 }],
-      }),
+      })
     );
 
     expect(result.current.width$.get()).toBe(500);
@@ -182,18 +179,14 @@ describe("useElementSize()", () => {
     const { result } = renderHook(() => useElementSize(wrapEl(div) as any));
 
     const instance = ResizeObserverMock.instances.at(-1)!;
-    act(() =>
-      instance.trigger(div, { contentRect: { width: 123, height: 456 } }),
-    );
+    act(() => instance.trigger(div, { contentRect: { width: 123, height: 456 } }));
 
     expect(result.current.width$.get()).toBe(123);
     expect(result.current.height$.get()).toBe(456);
   });
 
   it("returns initialSize when target is null", () => {
-    const { result } = renderHook(() =>
-      useElementSize(null as any, { width: 10, height: 20 }),
-    );
+    const { result } = renderHook(() => useElementSize(null as any, { width: 10, height: 20 }));
 
     expect(result.current.width$.get()).toBe(10);
     expect(result.current.height$.get()).toBe(20);
@@ -214,18 +207,14 @@ describe("useElementSize()", () => {
     const instance = ResizeObserverMock.instances.at(-1)!;
 
     // Trigger first resize — should update
-    act(() =>
-      instance.trigger(div, { contentRect: { width: 100, height: 100 } }),
-    );
+    act(() => instance.trigger(div, { contentRect: { width: 100, height: 100 } }));
     expect(result.current.width$.get()).toBe(100);
 
     // Stop observing
     act(() => result.current.stop());
 
     // Trigger again — instance is disconnected, trigger() is a no-op
-    act(() =>
-      instance.trigger(div, { contentRect: { width: 999, height: 999 } }),
-    );
+    act(() => instance.trigger(div, { contentRect: { width: 999, height: 999 } }));
     expect(result.current.width$.get()).toBe(100);
     expect(result.current.height$.get()).toBe(100);
   });
@@ -275,7 +264,7 @@ describe("useElementSize()", () => {
     const div = document.createElement("div");
 
     const { result } = renderHook(() =>
-      useElementSize(wrapEl(div) as any, undefined, { box: "border-box" }),
+      useElementSize(wrapEl(div) as any, undefined, { box: "border-box" })
     );
 
     const instance = ResizeObserverMock.instances.at(-1)!;
@@ -285,7 +274,7 @@ describe("useElementSize()", () => {
           { inlineSize: 100, blockSize: 50 },
           { inlineSize: 200, blockSize: 100 },
         ],
-      }),
+      })
     );
 
     // Accumulated: 100+200=300, 50+100=150

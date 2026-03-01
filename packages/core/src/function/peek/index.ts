@@ -44,18 +44,16 @@ export function peek<T>(maybeObservable: MaybeObservable<T> | undefined): T | un
  */
 export function peek<T, K extends keyof T>(
   maybeObservable: MaybeObservable<T>,
-  key: K,
+  key: K
 ): T[K] | undefined;
 
 // Implementation
 export function peek<T>(
   maybeObservable: MaybeObservable<T>,
-  key?: keyof T,
+  key?: keyof T
 ): T | T[keyof T] | undefined {
   // Extract the base value without registering a tracking dependency
-  const value = isObservable(maybeObservable)
-    ? maybeObservable.peek()
-    : maybeObservable;
+  const value = isObservable(maybeObservable) ? maybeObservable.peek() : maybeObservable;
 
   if (key === undefined) {
     return value;

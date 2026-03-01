@@ -13,26 +13,28 @@ Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
 
 ```tsx twoslash
 // @noErrors
-import { useRef$, useMutationObserver } from '@usels/core'
+import { useRef$, useMutationObserver } from "@usels/core";
 function Component() {
-  const el$ = useRef$<HTMLDivElement>()
+  const el$ = useRef$<HTMLDivElement>();
 
   useMutationObserver(
     el$,
     (records) => {
-      records.forEach((r) => { /* handle r.type, r.target */ })
+      records.forEach((r) => {
+        /* handle r.type, r.target */
+      });
     },
-    { attributes: true, childList: true },
-  )
+    { attributes: true, childList: true }
+  );
 
-  return <div ref={el$} />
+  return <div ref={el$} />;
 }
 ```
 
 ### Watching attributes only
 
 ```tsx
-useMutationObserver(el$, callback, { attributes: true })
+useMutationObserver(el$, callback, { attributes: true });
 ```
 
 ### Filtering specific attributes
@@ -42,8 +44,8 @@ Only fire when `aria-expanded` or `data-active` change:
 ```tsx
 useMutationObserver(el$, callback, {
   attributes: true,
-  attributeFilter: ['aria-expanded', 'data-active'],
-})
+  attributeFilter: ["aria-expanded", "data-active"],
+});
 ```
 
 ### Recording the previous attribute value
@@ -53,47 +55,47 @@ useMutationObserver(
   el$,
   (records) => {
     records.forEach((r) => {
-      const next = (r.target as Element).getAttribute(r.attributeName!)
-      console.log('old:', r.oldValue, '→ new:', next)
-    })
+      const next = (r.target as Element).getAttribute(r.attributeName!);
+      console.log("old:", r.oldValue, "→ new:", next);
+    });
   },
-  { attributes: true, attributeOldValue: true },
-)
+  { attributes: true, attributeOldValue: true }
+);
 ```
 
 ### Watching descendant nodes with `subtree`
 
 ```tsx
-useMutationObserver(el$, callback, { childList: true, subtree: true })
+useMutationObserver(el$, callback, { childList: true, subtree: true });
 ```
 
 ### Multiple targets
 
 ```tsx
-useMutationObserver([el$, anotherEl], callback, { attributes: true })
+useMutationObserver([el$, anotherEl], callback, { attributes: true });
 ```
 
 ### Stop and resume
 
 ```tsx
-const { stop, resume } = useMutationObserver(el$, callback, { childList: true })
+const { stop, resume } = useMutationObserver(el$, callback, { childList: true });
 
-stop()   // disconnects the observer
-resume() // reconnects with the same target and options
+stop(); // disconnects the observer
+resume(); // reconnects with the same target and options
 ```
 
 ### Flushing pending records
 
 ```tsx
-const { takeRecords } = useMutationObserver(el$, callback, { attributes: true })
+const { takeRecords } = useMutationObserver(el$, callback, { attributes: true });
 
-const pending = takeRecords()
+const pending = takeRecords();
 ```
 
 ### Checking browser support
 
 ```tsx
-const { isSupported$ } = useMutationObserver(el$, callback, { attributes: true })
+const { isSupported$ } = useMutationObserver(el$, callback, { attributes: true });
 
-console.log(isSupported$.get()) // Observable<boolean>
+console.log(isSupported$.get()); // Observable<boolean>
 ```

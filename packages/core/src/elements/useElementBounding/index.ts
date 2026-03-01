@@ -66,7 +66,7 @@ const win = defaultWindow;
  */
 export function useElementBounding(
   target: MaybeElement,
-  options?: DeepMaybeObservable<UseElementBoundingOptions>,
+  options?: DeepMaybeObservable<UseElementBoundingOptions>
 ): UseElementBoundingReturn {
   const opts$ = useMayObservableOptions<UseElementBoundingOptions>(options, {
     immediate: "peek",
@@ -123,13 +123,13 @@ export function useElementBounding(
     isWindow(win) && opts$.windowScroll.peek() !== false ? win : null,
     "scroll",
     update,
-    { passive: true },
+    { passive: true }
   );
   useEventListener(
     isWindow(win) && opts$.windowResize.peek() !== false ? win : null,
     "resize",
     update,
-    { passive: true },
+    { passive: true }
   );
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export function useElementBounding(
       }
       if (opts$.reset.peek() !== false) bounding$.assign({ ...ZERO });
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- Legend-State: .peek()/.assign() does not create reactive subscription, empty deps [] is intentional
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Legend-State: .peek()/.assign() does not create reactive subscription, empty deps [] is intentional
   }, []);
 
   return {
