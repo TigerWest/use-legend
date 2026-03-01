@@ -170,15 +170,18 @@ export function useScroll(
   };
 
   const measureRef = useRef(measure);
+  // eslint-disable-next-line react-hooks/refs -- intentional: storing latest function in ref during render (stable-ref pattern)
   measureRef.current = measure;
 
   const handler = useMemo(() => {
     const ms = options?.throttle ?? 0;
     return ms > 0
+      // eslint-disable-next-line react-hooks/refs -- ref read inside useMemo callback, not directly during render
       ? throttle(() => measureRef.current(), ms)
       : () => measureRef.current();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeElement matches Overload 4 but TypeScript cannot resolve it through the union without a cast
   useEventListener(element as any, "scroll", handler,
     options?.eventListenerOptions ?? { capture: false, passive: true },
   );

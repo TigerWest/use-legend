@@ -68,6 +68,7 @@ export function useDropZone(
   // Plain React ref for counter — access via .current
   const counter = useRef(0);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek() does not create reactive subscription, empty deps [] is intentional
   const isValidDrop = useCallback((event: DragEvent): boolean => {
     const items = event.dataTransfer?.items;
     if (!items) return false;
@@ -91,6 +92,7 @@ export function useDropZone(
     return true;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.get() does not create reactive subscription, empty deps [] is intentional
   const getFiles = useCallback((event: DragEvent): File[] | null => {
     const fileList = Array.from(event.dataTransfer?.files ?? []);
     if (!fileList.length) return null;
@@ -98,6 +100,7 @@ export function useDropZone(
     return multiple === false ? [fileList[0]] : fileList;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDragEnter = useCallback((e: DragEvent) => {
     e.preventDefault();
     counter.current++;
@@ -111,6 +114,7 @@ export function useDropZone(
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDragLeave = useCallback((e: DragEvent) => {
     counter.current = Math.max(0, counter.current - 1);
     if (counter.current === 0) {
@@ -119,6 +123,7 @@ export function useDropZone(
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDragOver = useCallback((e: DragEvent) => {
     e.preventDefault();
     if (isValidDrop(e)) {
@@ -129,6 +134,7 @@ export function useDropZone(
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDrop = useCallback((e: DragEvent) => {
     e.preventDefault();
     counter.current = 0;

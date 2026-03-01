@@ -20,6 +20,7 @@ export const isObject = (val: unknown): val is object =>
 export const isIOS =
   /* #__PURE__ */ isClient &&
   /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- IE11 MSStream property is not in Window typings
   !(window as any).MSStream;
 
 export function toArray<T>(v: T | T[]): T[] {

@@ -70,6 +70,7 @@ describe("useRef$() + useImperativeHandle compatibility", () => {
 
     const Component = forwardRef<TestHandle, object>((_, ref) => {
       const el$ = useRef$<HTMLDivElement>();
+      // eslint-disable-next-line react-hooks/globals -- test: intentional capture of component ref for assertion
       capturedRef$ = el$;
 
       useImperativeHandle(ref, () => ({

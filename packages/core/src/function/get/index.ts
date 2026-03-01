@@ -50,7 +50,7 @@ export function get<T, K extends keyof T>(
 export function get<T>(
   maybeObservable: MaybeObservable<T>,
   key?: keyof T,
-): any {
+): T | T[keyof T] | undefined {
   // Extract the base value
   const value = isObservable(maybeObservable)
     ? maybeObservable.get()
@@ -63,7 +63,7 @@ export function get<T>(
 
   // If key provided, extract property (two-arg overload)
   if (value !== null && value !== undefined && typeof value === "object") {
-    return (value as any)[key];
+    return (value as T)[key];
   }
 
   return undefined;

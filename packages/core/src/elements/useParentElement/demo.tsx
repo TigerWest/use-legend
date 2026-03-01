@@ -28,6 +28,7 @@ function overlayStyle(
 
 export default function UseParentElementDemo() {
   const element$ = useObservable<OpaqueObject<Element> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- demo: type cast needed for observable wrapping
   const parent$ = useParentElement(element$ as any);
 
   useEventListener(

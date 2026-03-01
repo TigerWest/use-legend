@@ -14,6 +14,7 @@ import type { Observable } from "@legendapp/state";
  * const obs: MaybeObservable<string> = observable('hello')
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional permissive default matching VueUse's MaybeRef<any> pattern
 export type MaybeObservable<T = any> = T | Observable<T>;
 
 /**
@@ -38,6 +39,7 @@ export type DeepMaybeObservable<T> = Observable<T> | {
 // --- TIER 0-A: Base utility types (VueUse equivalents) ---
 
 export type Fn = () => void
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional "any function" type matching VueUse's AnyFn pattern
 export type AnyFn = (...args: any[]) => any
 export type Arrayable<T> = T[] | T
 export type Awaitable<T> = Promise<T> | T
@@ -49,6 +51,7 @@ export interface Pausable {
   resume: Fn
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional open-ended generic default matching VueUse's Stoppable pattern
 export interface Stoppable<StartFnArgs extends any[] = any[]> {
   readonly isPending: Observable<boolean>
   stop: Fn

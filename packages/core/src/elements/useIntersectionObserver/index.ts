@@ -101,7 +101,6 @@ export function useIntersectionObserver(
     targets.forEach((el) => observerRef.current?.observe(el));
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     mountedRef.current = true;
     return () => {

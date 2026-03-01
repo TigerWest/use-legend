@@ -21,6 +21,7 @@ export function normalizeTargets(
   const arr = Array.isArray(target) ? target : [target];
   return arr
     .map((t) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return getElement(t) as any;
     })
     .filter((el): el is Element => el != null);

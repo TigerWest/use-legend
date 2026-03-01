@@ -28,6 +28,7 @@ import type { MaybeElement } from "../../elements/useRef$";
  * Escape hatch:
  * - `(value) => R`   — custom transform function.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic type parameter defaults require any for maximum flexibility
 export type FieldHint<V = any, R = any> =
   | "get"
   | "peek"
@@ -43,6 +44,7 @@ export type FieldHint<V = any, R = any> =
  * Fields not specified default to `'get'` (reactive resolution via Legend-State auto-deref).
  */
 export type FieldTransformMap<T> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- transform return type is intentionally any (arbitrary transform output)
   [K in keyof T]?: FieldHint<T[K], any>;
 };
 
@@ -166,7 +168,6 @@ export function useMayObservableOptions<T>(
     }
     return resolved;
   };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useObservable(compute, [depKey]) as unknown as Observable<
     T | undefined
   >;

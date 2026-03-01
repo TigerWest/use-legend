@@ -38,6 +38,7 @@ export function useElementSize(
   const initial = initialSize ?? { width: 0, height: 0 };
   const size$ = useObservable({ width: initial.width, height: initial.height });
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     for (const entry of entries) {
       const el = entry.target;

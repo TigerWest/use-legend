@@ -132,7 +132,6 @@ export function useElementBounding(
     { passive: true },
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     unmountedRef.current = false;
     if (opts$.immediate.peek() !== false) update();
@@ -144,6 +143,7 @@ export function useElementBounding(
       }
       if (opts$.reset.peek() !== false) bounding$.assign({ ...ZERO });
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Legend-State: .peek()/.assign() does not create reactive subscription, empty deps [] is intentional
   }, []);
 
   return {

@@ -23,7 +23,7 @@ export type Ref$<T> = ((node: T | null) => void) & {
  * don't exist at hook call time, making raw element references inherently stale.
  */
 export type MaybeElement =
-  | Ref$<any>
+  | Ref$<Element>
   | Document
   | Window
   | null
@@ -67,11 +67,13 @@ export function useRef$<T extends Element = Element>(
 
   // store externalRef — simple assignment each render, no new closure
   const extRef = useRef(externalRef);
+  // eslint-disable-next-line react-hooks/refs -- intentional: storing latest prop in ref during render (stable-ref pattern)
   extRef.current = externalRef;
 
   return useMemo(
     () =>
       Object.assign(
+        // eslint-disable-next-line react-hooks/refs -- callback ref captures extRef; read happens at call time, not during render
         (node: T | null) => {
           const ext = extRef.current;
           if (typeof ext === "function") {
@@ -79,6 +81,7 @@ export function useRef$<T extends Element = Element>(
           } else if (ext != null && "current" in ext) {
             (ext as RefObject<T | null>).current = node;
           }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- useObservable return type is overly complex; .set() exists at runtime
           (el$ as any).set(node ? ObservableHint.opaque(node) : null);
         },
         {

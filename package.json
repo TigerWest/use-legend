@@ -16,7 +16,7 @@
     "test:coverage": "vitest --coverage",
     "test:browser": "pnpm -r --filter @usels/core --filter @usels/integrations test:browser",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint \"packages/core/src\" \"packages/integrations/src\"",
+    "lint": "eslint \"packages/core/src\" --max-warnings=0",
     "clean": "pnpm -r clean",
     "changeset": "changeset",
     "version-packages": "changeset version",

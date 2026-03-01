@@ -64,6 +64,7 @@ export function useElementVisibility(
       isVisible$.set(latest.isIntersecting);
 
       if (opts$.once.peek() && latest.isIntersecting) {
+        // eslint-disable-next-line react-hooks/immutability -- React Compiler false positive: stop() is initialized at runtime before this callback can fire
         stop();
       }
     },

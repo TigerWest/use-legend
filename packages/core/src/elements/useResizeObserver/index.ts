@@ -83,7 +83,6 @@ export function useResizeObserver(
   // useEffect is used directly (instead of useMount/useUnmount) because
   // Legend-State's useEffectOnce delays cleanup via queueMicrotask in test
   // environments, making synchronous post-unmount assertions unreliable.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     mountedRef.current = true;
     setup();
@@ -91,6 +90,7 @@ export function useResizeObserver(
       mountedRef.current = false;
       cleanup();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- setup/cleanup are stable closures; intentional empty dep array
   }, []);
 
   // Re-run setup whenever observable targets (Ref$ or Observable<Element>) change.

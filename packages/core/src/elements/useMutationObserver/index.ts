@@ -4,6 +4,7 @@ import { useRef } from "react";
 import type { MaybeElement } from "../useRef$";
 import { normalizeTargets } from "../useResizeObserver";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentional alias to allow future extension without breaking API
 export interface UseMutationObserverOptions extends MutationObserverInit {}
 
 export interface UseMutationObserverReturn {

@@ -44,7 +44,7 @@ export interface GeneralEventListener<E = Event> {
  */
 export function useEventListener<E extends keyof WindowEventMap>(
   event: Arrayable<E>,
-  listener: Arrayable<(ev: WindowEventMap[E]) => any>,
+  listener: Arrayable<(ev: WindowEventMap[E]) => void>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
@@ -57,7 +57,7 @@ export function useEventListener<E extends keyof WindowEventMap>(
 export function useEventListener<E extends keyof WindowEventMap>(
   target: Window,
   event: Arrayable<E>,
-  listener: Arrayable<(ev: WindowEventMap[E]) => any>,
+  listener: Arrayable<(ev: WindowEventMap[E]) => void>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
@@ -70,7 +70,7 @@ export function useEventListener<E extends keyof WindowEventMap>(
 export function useEventListener<E extends keyof DocumentEventMap>(
   target: Document,
   event: Arrayable<E>,
-  listener: Arrayable<(ev: DocumentEventMap[E]) => any>,
+  listener: Arrayable<(ev: DocumentEventMap[E]) => void>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
@@ -85,7 +85,7 @@ export function useEventListener<E extends keyof DocumentEventMap>(
 export function useEventListener<E extends keyof HTMLElementEventMap>(
   target: MaybeElement | MaybeElement[] | null | undefined,
   event: Arrayable<E>,
-  listener: Arrayable<(ev: HTMLElementEventMap[E]) => any>,
+  listener: Arrayable<(ev: HTMLElementEventMap[E]) => void>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>,
 ): () => void;
 
@@ -98,7 +98,7 @@ export function useEventListener<E extends keyof HTMLElementEventMap>(
  * The observer re-fires whenever the observable value changes.
  */
 export function useEventListener<EventType = Event>(
-  target: Observable<any>,
+  target: Observable<unknown>,
   event: Arrayable<string>,
   listener: Arrayable<GeneralEventListener<EventType>>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>,
@@ -121,6 +121,7 @@ export function useEventListener<EventType = Event>(
 // Implementation
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- implementation overload signature requires rest args
 export function useEventListener(...args: any[]): () => void {
   // Detect whether first arg is an event name (no target) or a target.
   // Mirrors VueUse's firstParamTargets check.
@@ -128,6 +129,7 @@ export function useEventListener(...args: any[]): () => void {
 
   const rawTarget: unknown = hasTarget ? args[0] : undefined;
   const rawEvent: Arrayable<string> = hasTarget ? args[1] : args[0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unified listener type for overload dispatch
   const rawListener: Arrayable<(...a: any[]) => any> = hasTarget
     ? args[2]
     : args[1];
@@ -189,12 +191,14 @@ export function useEventListener(...args: any[]): () => void {
           const val = (item as { get: () => unknown }).get();
           if (val == null) return [];
           // Unwrap OpaqueObject created by ObservableHint.opaque (has custom valueOf).
+          /* eslint-disable @typescript-eslint/no-explicit-any -- OpaqueObject valueOf unwrapping and duck-type check require any casts */
           const target =
             typeof (val as any).valueOf === "function"
               ? ((val as any).valueOf() as unknown) ?? val
               : val;
           // Duck-type check: works with real EventTargets and test mocks alike.
           if (typeof (target as any).addEventListener === "function") {
+          /* eslint-enable @typescript-eslint/no-explicit-any */
             return [target as EventTarget];
           }
           return [];
@@ -225,7 +229,6 @@ export function useEventListener(...args: any[]): () => void {
   });
 
   // useEffect manages mount state only — no setup logic here.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     mounted$.set(true);
     return () => {
@@ -233,6 +236,7 @@ export function useEventListener(...args: any[]): () => void {
       cleanupsRef.current.forEach((fn) => fn());
       cleanupsRef.current = [];
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Legend-State: mounted$ observable reference is stable, no re-subscription needed
   }, []);
 
   // Return a manual cleanup function for imperative removal.

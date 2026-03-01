@@ -90,6 +90,7 @@ export function useMouseInElement(
   });
 
   // Recalculate element-relative position from current mouse coords
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const update = useCallback(() => {
     const el = peekElement(target) as HTMLElement | null;
     if (!el || !(el instanceof Element)) return;
@@ -140,6 +141,7 @@ export function useMouseInElement(
 
   // Update global mouse coords then recalculate
   const onMouseMove = useCallback(
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .assign()/.set() does not create reactive subscription, memoization is intentional
     (e: MouseEvent) => {
       mouse$.assign({ x: e.clientX, y: e.clientY });
       update();
@@ -186,6 +188,7 @@ export function useMouseInElement(
     attributeFilter: ["style", "class"],
   });
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- stable stop functions, empty deps [] is intentional
   const stop = useCallback(() => {
     stopMouse();
     stopLeave();

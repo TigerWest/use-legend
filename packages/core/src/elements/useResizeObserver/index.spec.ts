@@ -12,6 +12,7 @@ const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(Observa
 // ResizeObserver mock
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used as structural type reference in mock implementation
 type ResizeObserverMockEntry = {
   target: Element;
   contentRect: DOMRectReadOnly;
