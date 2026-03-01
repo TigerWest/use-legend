@@ -28,6 +28,7 @@ export default function Demo() {
         {isOverDropZone$.get() ? "Drop to upload" : "Drag image files here"}
       </div>
 
+      {/* eslint-disable-next-line use-legend/prefer-show-for-conditional -- demo file: intentionally shows raw conditional API usage */}
       {files$.get() && (
         <ul style={{ fontSize: 13, color: "#374151", listStyle: "none", padding: 0 }}>
           {files$.get()!.map((f, i) => (

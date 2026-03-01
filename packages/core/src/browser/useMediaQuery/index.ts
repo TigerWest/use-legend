@@ -80,7 +80,8 @@ export function useMediaQuery(
   });
 
   useEventListener(
-    mql$,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MediaQueryList is EventTarget but not Element; cast required for MaybeElement compatibility
+    mql$ as any,
     "change",
     (e: Event) => {
       matches$.set((e as MediaQueryListEvent).matches);

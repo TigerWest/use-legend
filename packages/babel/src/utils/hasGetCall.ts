@@ -1,8 +1,9 @@
 import type { NodePath } from "@babel/core";
+import type { Node } from "@babel/types";
 import type { PluginOptions } from "../types";
 import { getRootObject } from "./getRootObject";
 
-function isGetCallNode(node: any, opts: PluginOptions): boolean {
+function isGetCallNode(node: Node, opts: PluginOptions): boolean {
   if (node.type === "CallExpression") {
     const { callee, arguments: args } = node;
     if (callee.type !== "MemberExpression") return false;

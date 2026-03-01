@@ -47,6 +47,7 @@ function buildArrowBody(t: typeof BabelTypes, children: JSXChild[]): Expression 
       if (expr.type !== "JSXEmptyExpression") return expr as Expression;
     }
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Babel's jsxFragment children type is a non-exported union; JSXChild[] is structurally identical but not assignable without cast
   return t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), children as any[]);
 }
 

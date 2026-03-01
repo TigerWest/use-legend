@@ -25,7 +25,7 @@ beforeAll(() => {
       process.setMaxListeners(100);
     }
 
-    process.on("unhandledRejection", (reason: any) => {
+    process.on("unhandledRejection", (_reason: unknown) => {
       // Silently swallow unhandled rejections
       // These come from mutations that throw errors but are properly handled
       // by the QueryClient's mutationCache onError handler

@@ -19,7 +19,7 @@ export function getRootObject(node: Node): Identifier | null {
   }
   // Traverse through OptionalMemberExpression (obs$?.nested.get())
   if (node.type === "OptionalMemberExpression") {
-    return getRootObject((node as any).object);
+    return getRootObject((node as Node & { object: Node }).object);
   }
   return null;
 }

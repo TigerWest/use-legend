@@ -402,6 +402,7 @@ describe("useEventListener() — stale closure safety", () => {
     const calls: string[] = [];
 
     const { result } = renderHook(() => {
+      // eslint-disable-next-line use-legend/prefer-use-observable -- intentional: testing behavior with non-observable state
       const [value, setValue] = useState("initial");
       useEventListener(div, "click", () => {
         calls.push(value);

@@ -23,7 +23,7 @@ export type Ref$<T> = ((node: T | null) => void) & {
  * don't exist at hook call time, making raw element references inherently stale.
  */
 export type MaybeElement =
-  | Ref$<Element>
+  | Ref$<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- Ref$<T> callback param: contravariance prevents Ref$<Element> from accepting Ref$<HTMLDivElement>
   | Document
   | Window
   | null
