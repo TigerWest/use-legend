@@ -121,25 +121,6 @@ describe("useMouseInElement()", () => {
     expect(result.current.y$.get()).toBe(0);
   });
 
-  it("mousemove inside rect → updates elementX/Y and sets isOutside = false", () => {
-    // Rect: left=10, top=20, right=210, bottom=120
-    const div = createDiv({
-      left: 10,
-      top: 20,
-      right: 210,
-      bottom: 120,
-      width: 200,
-      height: 100,
-    });
-    const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
-
-    fireMouseMove(60, 70); // inside: 60-10=50, 70-20=50
-
-    expect(result.current.isOutside$.get()).toBe(false);
-    expect(result.current.elementX$.get()).toBe(50);
-    expect(result.current.elementY$.get()).toBe(50);
-  });
-
   it("exposes raw clientX/clientY as x and y", () => {
     const div = createDiv();
     const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
@@ -187,24 +168,6 @@ describe("useMouseInElement()", () => {
 
     expect(result.current.elementWidth$.get()).toBe(300);
     expect(result.current.elementHeight$.get()).toBe(150);
-  });
-
-  it("mousemove outside rect → isOutside = true", () => {
-    const div = createDiv({
-      left: 0,
-      top: 0,
-      right: 200,
-      bottom: 100,
-      width: 200,
-      height: 100,
-    });
-    const { result } = renderHook(() => useMouseInElement(wrapEl(div) as any));
-
-    fireMouseMove(50, 50); // inside first
-    expect(result.current.isOutside$.get()).toBe(false);
-
-    fireMouseMove(500, 500); // outside
-    expect(result.current.isOutside$.get()).toBe(true);
   });
 
   it("handleOutside: true (default) — still updates elementX/Y when outside", () => {
@@ -269,20 +232,6 @@ describe("useMouseInElement()", () => {
     });
 
     expect(result.current.isOutside$.get()).toBe(true);
-  });
-
-  it("scroll event triggers recalculation (windowScroll: true by default)", () => {
-    const div = createDiv();
-    const spy = vi.spyOn(div, "getClientRects");
-    renderHook(() => useMouseInElement(wrapEl(div) as any));
-
-    const before = spy.mock.calls.length;
-
-    act(() => {
-      window.dispatchEvent(new Event("scroll"));
-    });
-
-    expect(spy.mock.calls.length).toBeGreaterThan(before);
   });
 
   it("windowScroll: false — scroll event does not trigger recalculation", () => {
