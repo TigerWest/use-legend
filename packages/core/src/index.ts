@@ -28,3 +28,7 @@ export * from "./browser/useMediaQuery";
 export * from "./function/useMaybeObservable";
 
 export * from "./shared/filters";
+
+export * from "./animation/useTimeoutFn";
+export * from "./animation/useIntervalFn";
+export * from "./animation/useRafFn";
