@@ -26,9 +26,16 @@ export * from "./sensors/useWindowScroll";
 export * from "./browser/useEventListener";
 export * from "./browser/useMediaQuery";
 export * from "./function/useMaybeObservable";
+export * from "./function/usePeekInitial";
 
 export * from "./shared/filters";
 
 export * from "./animation/useTimeoutFn";
 export * from "./animation/useIntervalFn";
 export * from "./animation/useRafFn";
+export * from "./animation/useNow";
+export * from "./animation/useTimestamp";
+export * from "./animation/useFps";
+export * from "./animation/useTimeout";
+export * from "./animation/useInterval";
+export * from "./animation/useTimeAgo";

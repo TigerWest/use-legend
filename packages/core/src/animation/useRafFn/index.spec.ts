@@ -128,7 +128,7 @@ describe("pause / resume", () => {
 describe("isActive state", () => {
   it("isActive=true after mount (immediate=true)", () => {
     const { result } = renderHook(() => useRafFn(vi.fn()));
-    expect(result.current.isActive.get()).toBe(true);
+    expect(result.current.isActive$.get()).toBe(true);
   });
 
   it("isActive=false after pause()", () => {
@@ -138,7 +138,7 @@ describe("isActive state", () => {
       result.current.pause();
     });
 
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
   });
 
   it("isActive=true after resume()", () => {
@@ -149,7 +149,7 @@ describe("isActive state", () => {
       result.current.resume();
     });
 
-    expect(result.current.isActive.get()).toBe(true);
+    expect(result.current.isActive$.get()).toBe(true);
   });
 });
 
@@ -167,7 +167,7 @@ describe("once option", () => {
     });
 
     expect(fn).toHaveBeenCalledOnce();
-    expect(result.current.isActive.get()).toBe(false);
+    expect(result.current.isActive$.get()).toBe(false);
   });
 
   it("once=true → fn not called on second flush after it ran", () => {

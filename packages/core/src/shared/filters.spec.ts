@@ -260,8 +260,8 @@ describe("throttleFilter", () => {
 
 describe("pausableFilter", () => {
   it("returns isActive observable, pause, resume, and eventFilter", () => {
-    const { isActive, pause, resume, eventFilter } = pausableFilter();
-    expect(isActive.get()).toBe(true);
+    const { isActive$, pause, resume, eventFilter } = pausableFilter();
+    expect(isActive$.get()).toBe(true);
     expect(typeof pause).toBe("function");
     expect(typeof resume).toBe("function");
     expect(typeof eventFilter).toBe("function");
@@ -301,13 +301,13 @@ describe("pausableFilter", () => {
   });
 
   it("isActive observable reflects pause/resume state", () => {
-    const { isActive, pause, resume } = pausableFilter();
+    const { isActive$, pause, resume } = pausableFilter();
 
-    expect(isActive.get()).toBe(true);
+    expect(isActive$.get()).toBe(true);
     pause();
-    expect(isActive.get()).toBe(false);
+    expect(isActive$.get()).toBe(false);
     resume();
-    expect(isActive.get()).toBe(true);
+    expect(isActive$.get()).toBe(true);
   });
 
   it("composes with an inner filter (e.g. debounceFilter)", async () => {
@@ -333,7 +333,7 @@ describe("pausableFilter", () => {
   });
 
   it("pause() is idempotent — calling multiple times stays paused", async () => {
-    const { isActive, pause, eventFilter } = pausableFilter();
+    const { isActive$, pause, eventFilter } = pausableFilter();
     const fn = vi.fn();
     const wrapped = createFilterWrapper(eventFilter, fn);
 
@@ -341,13 +341,13 @@ describe("pausableFilter", () => {
     pause();
     pause();
 
-    expect(isActive.get()).toBe(false);
+    expect(isActive$.get()).toBe(false);
     await wrapped();
     expect(fn).not.toHaveBeenCalled();
   });
 
   it("resume() is idempotent — calling multiple times stays active", async () => {
-    const { isActive, pause, resume, eventFilter } = pausableFilter();
+    const { isActive$, pause, resume, eventFilter } = pausableFilter();
     const fn = vi.fn();
     const wrapped = createFilterWrapper(eventFilter, fn);
 
@@ -356,19 +356,19 @@ describe("pausableFilter", () => {
     resume();
     resume();
 
-    expect(isActive.get()).toBe(true);
+    expect(isActive$.get()).toBe(true);
     await wrapped();
     expect(fn).toHaveBeenCalledOnce();
   });
 
   it("initialState: 'paused' — starts paused, no calls go through until resumed", async () => {
-    const { isActive, resume, eventFilter } = pausableFilter(bypassFilter, {
+    const { isActive$, resume, eventFilter } = pausableFilter(bypassFilter, {
       initialState: "paused",
     });
     const fn = vi.fn();
     const wrapped = createFilterWrapper(eventFilter, fn);
 
-    expect(isActive.get()).toBe(false);
+    expect(isActive$.get()).toBe(false);
 
     await wrapped();
     expect(fn).not.toHaveBeenCalled();

@@ -54,14 +54,14 @@ export type Awaitable<T> = Promise<T> | T;
 export type TimerHandle = ReturnType<typeof setTimeout> | undefined;
 
 export interface Pausable {
-  readonly isActive: ReadonlyObservable<boolean>;
+  readonly isActive$: ReadonlyObservable<boolean>;
   pause: Fn;
   resume: Fn;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional open-ended generic default matching VueUse's Stoppable pattern
 export interface Stoppable<StartFnArgs extends any[] = any[]> {
-  readonly isPending: Observable<boolean>;
+  readonly isPending$: Observable<boolean>;
   stop: Fn;
   start: (...args: StartFnArgs) => void;
 }

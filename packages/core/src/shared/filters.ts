@@ -278,7 +278,7 @@ export function pausableFilter(
   };
 
   return {
-    isActive: isActive$,
+    isActive$,
     pause() {
       isActive$.set(false);
     },

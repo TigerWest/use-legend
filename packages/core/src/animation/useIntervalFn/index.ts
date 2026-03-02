@@ -61,5 +61,5 @@ export function useIntervalFn(
     return () => pause();
   });
 
-  return { isActive: isActive$, pause, resume };
+  return { isActive$, pause, resume };
 }

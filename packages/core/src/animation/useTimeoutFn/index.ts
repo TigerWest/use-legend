@@ -47,5 +47,5 @@ export function useTimeoutFn<CallbackFn extends AnyFn>(
     return () => stop();
   });
 
-  return { isPending: isPending$, stop, start };
+  return { isPending$, stop, start };
 }

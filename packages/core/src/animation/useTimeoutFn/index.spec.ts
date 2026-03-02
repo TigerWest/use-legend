@@ -58,7 +58,7 @@ describe("stop()", () => {
       result.current.stop();
     });
 
-    expect(result.current.isPending.get()).toBe(false);
+    expect(result.current.isPending$.get()).toBe(false);
 
     act(() => {
       vi.advanceTimersByTime(1000);
@@ -116,13 +116,13 @@ describe("isPending state", () => {
       result.current.start();
     });
 
-    expect(result.current.isPending.get()).toBe(true);
+    expect(result.current.isPending$.get()).toBe(true);
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(result.current.isPending.get()).toBe(false);
+    expect(result.current.isPending$.get()).toBe(false);
   });
 
   it("isPending=false after stop()", () => {
@@ -132,7 +132,7 @@ describe("isPending state", () => {
       result.current.stop();
     });
 
-    expect(result.current.isPending.get()).toBe(false);
+    expect(result.current.isPending$.get()).toBe(false);
   });
 });
 
