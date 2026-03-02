@@ -2,7 +2,13 @@
  * @usels/core - Utility functions for Legend-State
  */
 
-import type { Observable } from "@legendapp/state";
+import type { Observable, ImmutableObservableBase } from "@legendapp/state";
+
+/**
+ * Observable where write methods (set, assign, delete, toggle) are removed at the type level.
+ * Allows reactive reads (.get(), .peek(), .onChange()) while blocking accidental external writes.
+ */
+export type ReadonlyObservable<T> = ImmutableObservableBase<T>;
 
 /**
  * A value that can be either a raw value or an Observable
@@ -48,7 +54,7 @@ export type Awaitable<T> = Promise<T> | T;
 export type TimerHandle = ReturnType<typeof setTimeout> | undefined;
 
 export interface Pausable {
-  readonly isActive: Observable<boolean>;
+  readonly isActive: ReadonlyObservable<boolean>;
   pause: Fn;
   resume: Fn;
 }

@@ -26,3 +26,5 @@ export * from "./sensors/useWindowScroll";
 export * from "./browser/useEventListener";
 export * from "./browser/useMediaQuery";
 export * from "./function/useMaybeObservable";
+
+export * from "./shared/filters";

@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { isObservable, observable, ObservableHint } from "@legendapp/state";
+import { isObservable, observable, observe, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
+import { useState } from "react";
 import { useMaybeObservable } from ".";
 import { useRef$ } from "../../elements/useRef$";
 
@@ -418,5 +419,36 @@ describe("useMaybeObservable() — edge cases", () => {
     const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(undefined, compute));
     result.current.get();
     expect(compute).toHaveBeenCalledWith(undefined);
+  });
+});
+
+// =============================================================================
+// Trigger count: plain useState options
+// =============================================================================
+
+describe("useMaybeObservable() — trigger count with plain useState options", () => {
+  it("useState value change → opts$ notified exactly once", () => {
+    let callCount = 0;
+
+    const { result } = renderHook(() => {
+      // eslint-disable-next-line use-legend/prefer-use-observable
+      const [opts, setOpts] = useState<SimpleOpts>({ val: "a" });
+      const opts$ = useMaybeObservable<SimpleOpts>(opts);
+      return { setOpts, opts$ };
+    });
+
+    // observe runs synchronously once on setup to track deps, then on each change
+    const dispose = observe(() => {
+      result.current.opts$.get();
+      callCount++;
+    });
+    const baseline = callCount; // 1 — initial synchronous run
+
+    act(() => {
+      result.current.setOpts({ val: "b" });
+    });
+
+    expect(callCount - baseline).toBe(1);
+    dispose();
   });
 });
