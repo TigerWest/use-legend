@@ -237,19 +237,46 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 
 ---
 
-## Rule 3 — Mount-time-only Properties: Use `.peek()` at call site
+## Rule 3 — Mount-time-only Properties: Use `usePeekInitial`
 
 Some options are intentionally captured **once at mount** and never updated reactively:
 
 - `initialValue` — seeds the initial state of an Observable; later changes have no meaning
 - `once` — lifecycle behavior determined at mount; dynamic changes do not apply retroactively
+- `interval` / `controls` — determines scheduler type or hook selection; changing after mount has no effect
 
-For these fields, omit the hint (use `'default'`) and read them with `.peek()` at the call site.
+For these fields, omit the hint (use `'default'`) and read them with `usePeekInitial(obs$, fallback)`.
 This is **intentional** and explicitly signals "read once, fixed at mount" — distinct from
 the Anti-pattern in Rule 2 where `.get()` is accidentally used for fields that *should* be reactive.
 
+### `usePeekInitial(obs$, fallback?)` — mount-time Observable read
+
+`usePeekInitial` reads an Observable **once at first render** via `.peek()` and returns a
+`useRef`-backed stable value. Re-renders always return the same captured value.
+
+```ts
+import { usePeekInitial } from "../function/usePeekInitial";
+
+// With fallback — return type is NonNullable<T>
+const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
+
+// Without fallback — return type is T (may be undefined)
+const once = usePeekInitial(opts$.once);
+```
+
+**Why `usePeekInitial` over raw `.peek()`:**
+
+| | `opts$.field.peek()` | `usePeekInitial(opts$.field, fallback)` |
+|---|---|---|
+| Re-render stability | Re-evaluates every render (may see stale computed) | `useRef`-backed — always returns first-render value |
+| Fallback handling | Manual `?? fallback` at every call site | Built-in — `fallback` param with `NonNullable<T>` return type |
+| Intent clarity | Requires comment to distinguish from accidental `.peek()` | Function name itself declares "mount-time-only" intent |
+
+### Standard Pattern
+
 ```ts
 import { useMaybeObservable } from "../function/useMaybeObservable";
+import { usePeekInitial } from "../function/usePeekInitial";
 
 interface UseMyHookOptions {
   initialValue?: boolean;  // mount-time-only — fixed at mount
@@ -260,13 +287,15 @@ interface UseMyHookOptions {
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   const opts$ = useMaybeObservable(options, {
     scrollTarget: 'element',
-    // initialValue, once: omitted → 'default' → use .peek() at call site for mount-time read
+    // initialValue, once: omitted → 'default' → use usePeekInitial for mount-time read
     // rootMargin: omitted → 'default' → Legend-State auto-deref → reactive
   });
 
-  // opts$.initialValue.peek() / opts$.once.peek() — no dep, intentional one-time read
-  const state$ = useObservable<boolean>(opts$.initialValue.peek() ?? false);
-  const once = opts$.once.peek() ?? false;
+  // ✅ mount-time-only: usePeekInitial — stable across re-renders
+  const initialValue = usePeekInitial(opts$.initialValue, false);
+  const once = usePeekInitial(opts$.once, false);
+
+  const state$ = useObservable<boolean>(initialValue);
 
   const { stop } = useIntersectionObserver(element, (entries) => {
     const latest = entries.at(-1);
@@ -281,10 +310,292 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 }
 ```
 
+### Scheduler Selection Pattern (conditional hook call)
+
+`usePeekInitial` is safe for conditional hook selection because the value is fixed at mount,
+so the branch never changes across re-renders (satisfying React's rules-of-hooks).
+
+```ts
+const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
+const exposeControls = usePeekInitial(opts$.controls, false);
+
+// Safe — interval never changes after mount
+const isRaf = interval === "requestAnimationFrame";
+const rafControls = useRafFn(update, { immediate: isRaf });
+const intervalControls = useIntervalFn(update, intervalMs, { immediate: !isRaf });
+const controls: Pausable = isRaf ? rafControls : intervalControls;
+```
+
 > **Mount-time-only field decision rule**
 >
 > | Field characteristic | Access pattern | Reason |
 > |----------------------|----------------|--------|
 > | Changes should re-trigger setup | `opts$.field.get()` inside `useObserve` | Legend-State auto-deref registers dep at call site |
-> | Fixed at mount by design | `opts$.field.peek()` at render time | mount-time snapshot, no dep — explicit and intentional |
-> | Mount-time seed for an Observable | `opts$.field.peek()` at render time | Observable ignores later changes anyway; `peek` makes intent clear |
+> | Fixed at mount by design | `usePeekInitial(opts$.field, fallback)` | `useRef`-backed mount-time snapshot — stable and intentional |
+> | Mount-time seed for an Observable | `usePeekInitial(opts$.field, fallback)` | Observable ignores later changes; `usePeekInitial` makes intent clear |
+> | Conditional hook selection | `usePeekInitial(opts$.field, fallback)` | Value fixed at mount — React rules-of-hooks safe |
+
+---
+
+## Rule 4 — Observable Return Fields: `$` Suffix
+
+When a hook returns an **object**, append `$` to any field that is an `Observable` type.
+This lets callers immediately recognize reactive values without checking `.get()` / `.peek()`.
+
+```ts
+// ❌ Bad — caller cannot distinguish whether isActive is Observable
+return { isActive: isActive$, pause, resume };
+
+// ✅ Good — $ suffix explicitly marks Observable fields
+return { isActive$: isActive$, pause, resume };
+```
+
+### Internal variable name matches return field name
+
+Observables declared with `$` internally should keep the same name when returned.
+
+```ts
+function useMyHook() {
+  const count$ = useObservable(0); // internal: Observable<number>
+
+  return {
+    count$,           // ✅ field name is also count$ — internal/external names match
+    increment: () => count$.set((v) => v + 1),
+  };
+}
+
+// call site
+const { count$, increment } = useMyHook();
+count$.get(); // ✅ $ suffix makes it immediately clear this is an Observable
+```
+
+### Non-Observable fields have no `$`
+
+```ts
+return {
+  count$,   // Observable — has $
+  pause,    // plain function — no $
+  resume,   // plain function — no $
+};
+```
+
+---
+
+## Rule 5 — Internal-only Observable State: `ReadonlyObservable<T>`
+
+When a hook **exclusively manages** an Observable internally and callers should not `.set()` it directly,
+narrow the return type to `ReadonlyObservable<T>`.
+Reactive reads (`.get()`, `.peek()`, `.onChange()`) are allowed, but write methods are blocked at the type level.
+
+```ts
+import type { ReadonlyObservable } from "../../types";
+
+// ❌ Bad — caller can arbitrarily modify hook-internal state via .set()
+function useMyHook(): { count$: Observable<number> } {
+  const count$ = useObservable(0);
+  return { count$ };
+  // call site: count$.set(-999) — can break hook invariants
+}
+
+// ✅ Good — exposed as read-only; only the hook has write access
+function useMyHook(): { count$: ReadonlyObservable<number> } {
+  const count$ = useObservable(0); // internal: Observable<number> (writable)
+  return { count$ };               // external: ReadonlyObservable<number> (read-only)
+  // call site: count$.get() ✅  count$.set() ← type error
+}
+```
+
+### Return type decision criteria
+
+| Scenario | Return type |
+|---|---|
+| Hook exclusively manages state (timer, loop, event, etc.) | `ReadonlyObservable<T>` |
+| Simple Observable return (the hook itself is that Observable) | `Observable<T>` |
+| Caller is intended to write directly | `Observable<T>` |
+
+### Real-world examples
+
+```ts
+// useNow — only calls now$.set(new Date()) internally; caller is read-only
+export function useNow(options?: UseNowOptions<false>): ReadonlyObservable<Date>;
+export function useNow(options: UseNowOptions<true>): { now: ReadonlyObservable<Date> } & Pausable;
+
+// useElementVisibility — isVisible$ is only modified by IntersectionObserver callback
+export function useElementVisibility(...): Observable<boolean>; // simple return allows Observable<T> too
+```
+
+> **Simple Observable return vs. object fields**
+>
+> - When a hook returns only a **single** Observable (`useElementVisibility`, `useMediaQuery`, etc.),
+>   both `Observable<T>` and `ReadonlyObservable<T>` are acceptable — choose based on internal management.
+> - When a hook returns an **object** containing Observable fields, prefer `ReadonlyObservable<T>`.
+
+---
+
+## Rule 6 — `Pausable` / `Stoppable` / `Awaitable` Utilities
+
+These three types are shared interfaces defined in `../../types`. Hooks matching these patterns must return the corresponding type so callers get a consistent API.
+
+### `Pausable` — Pause/Resume Loops
+
+Used for hooks that run repeatedly and are controlled via `pause()` / `resume()`.
+
+```ts
+export interface Pausable {
+  readonly isActive$: ReadonlyObservable<boolean>;
+  pause: Fn;
+  resume: Fn;
+}
+```
+
+| Criteria | Example hooks |
+|---|---|
+| setInterval / rAF-based repeating loop | `useIntervalFn`, `useRafFn` |
+| Subscription where pause/resume is meaningful | `useNow` |
+
+```ts
+function useMyPoller(fn: AnyFn, interval: number): Pausable {
+  const isActive$ = useObservable(false);
+  const pause = () => { ... };
+  const resume = () => { ... };
+  return { isActive$, pause, resume };
+}
+
+// call site
+const { isActive$, pause, resume } = useMyPoller(fetchData, 5000);
+isActive$.get(); // boolean — check if currently running
+```
+
+### `Stoppable<StartFnArgs>` — One-shot Timers
+
+Used for hooks that execute once and are controlled via `stop()` / `start()`.
+`StartFnArgs` is a generic specifying the argument types passed to `start()`.
+
+```ts
+export interface Stoppable<StartFnArgs extends any[] = any[]> {
+  readonly isPending$: Observable<boolean>;
+  stop: Fn;
+  start: (...args: StartFnArgs) => void;
+}
+```
+
+| Criteria | Example hooks |
+|---|---|
+| setTimeout-based delayed execution | `useTimeoutFn` |
+| Async operation pending state tracking | custom async hooks |
+
+```ts
+function useDelayed<T extends AnyFn>(
+  cb: T,
+  delay: MaybeObservable<number>
+): Stoppable<Parameters<T>> {
+  const isPending$ = useObservable(false);
+  const stop = () => { ... };
+  const start = (...args: Parameters<T>) => { ... };
+  return { isPending$, stop, start };
+}
+```
+
+### `Awaitable<T>` — Sync/Async Parameters
+
+Used when a parameter can be either a plain value or a `Promise`. Same pattern as VueUse.
+
+```ts
+export type Awaitable<T> = Promise<T> | T;
+```
+
+```ts
+// ❌ Bad — accepts only async or only sync
+function useMyHook(value: Promise<string>) { ... }
+
+// ✅ Good — accepts both
+function useMyHook(value: Awaitable<string>) { ... }
+
+// handle internally
+const resolved = value instanceof Promise ? await value : value;
+```
+
+---
+
+## Rule 7 — Global Object Dependencies: Use `configurable.ts`
+
+Directly accessing `window`, `document`, `navigator`, or `location` causes crashes in SSR environments.
+Always use the constants and interfaces from `shared/configurable.ts`.
+
+### Basic Pattern — Use `defaultWindow` / `defaultDocument` directly
+
+```ts
+import { defaultWindow, defaultDocument } from "../../shared/configurable";
+
+// ❌ Bad — ReferenceError in SSR
+const width = window.innerWidth;
+
+// ✅ Good — SSR safe; defaultWindow is window on client, undefined in SSR
+if (!defaultWindow) return; // SSR guard — always null-check before use
+const width = defaultWindow.innerWidth;
+```
+
+`defaultWindow` / `defaultDocument` etc. only reference the real global objects in client environments,
+so **use them directly** at the point of need — do not assign to intermediate variables.
+
+```ts
+// ❌ Bad — unnecessary intermediate variable
+const win = defaultWindow;
+win?.innerWidth;
+
+// ✅ Good — direct reference
+defaultWindow?.innerWidth;
+if (!defaultWindow) return;
+defaultWindow.innerWidth;
+```
+
+### Available Constants and Interfaces
+
+| Constant | Interface | Corresponding global |
+|---|---|---|
+| `defaultWindow` | `ConfigurableWindow` | `window` |
+| `defaultDocument` | `ConfigurableDocument` | `document` |
+| — | `ConfigurableDocumentOrShadowRoot` | `document \| ShadowRoot` |
+| `defaultNavigator` | `ConfigurableNavigator` | `navigator` |
+| `defaultLocation` | `ConfigurableLocation` | `location` |
+
+### Test/Custom Environment Support — `Configurable*` Interfaces
+
+Hooks that need to inject a different `window`/`document` (e.g., iframe, Shadow DOM, test environments)
+should mixin a `Configurable*` interface into their options.
+
+```ts
+import {
+  ConfigurableWindow,
+  defaultWindow,
+} from "../../shared/configurable";
+
+interface UseMyHookOptions extends ConfigurableWindow {
+  passive?: boolean;
+}
+
+function useMyHook(options: UseMyHookOptions = {}) {
+  // falls back to defaultWindow if options.window is not injected
+  const { window: _window = defaultWindow, passive } = options;
+
+  if (!_window) return; // SSR guard
+
+  _window.addEventListener("resize", handler, { passive });
+}
+```
+
+### SSR Guard Placement
+
+Place SSR guards (`if (!defaultWindow) return`) **immediately before actual usage**.
+Put them inside functions like `resume()`, `update()` where DOM access actually occurs —
+not at hook top level — to avoid violating React's rules-of-hooks (no conditional hook calls).
+
+```ts
+// ✅ Good — guard inside resume() (useRafFn pattern)
+const resume = () => {
+  if (!defaultWindow) return; // SSR guard
+  if (isActive$.peek()) return;
+  isActive$.set(true);
+  rafHandle.current = requestAnimationFrame(loop);
+};
+```
