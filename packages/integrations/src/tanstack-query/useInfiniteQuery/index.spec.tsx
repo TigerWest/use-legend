@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { observable } from "@legendapp/state";
-import { useInfiniteQuery } from "../useInfiniteQuery";
+import { useInfiniteQuery } from ".";
 import { createWrapper } from "../../__tests__/test-utils";
 
 describe("useInfiniteQuery", () => {
@@ -449,7 +449,7 @@ describe("useInfiniteQuery", () => {
       expect(result.current.data.get()?.pages[0].items).toEqual(["sports"]);
     });
 
-    it("should use serialized queryKey for cache", async () => {
+    it("should use resolved queryKey for cache", async () => {
       const queryFn = vi.fn().mockResolvedValue({ items: ["item1"], nextCursor: undefined });
       const { wrapper, queryClient } = createWrapper();
 
@@ -468,9 +468,7 @@ describe("useInfiniteQuery", () => {
 
       await waitFor(() => expect(queryFn).toHaveBeenCalledTimes(1));
 
-      // The actual cache key should be the serialized version
-      const serializedKey = JSON.stringify(["items", { status: "active" }]);
-      const cacheData = queryClient.getQueryData([serializedKey]);
+      const cacheData = queryClient.getQueryData(["items", { status: "active" }]);
 
       expect(cacheData).toBeTruthy();
     });

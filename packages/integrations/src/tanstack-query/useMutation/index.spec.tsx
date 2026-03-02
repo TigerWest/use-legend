@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useMutation } from "../useMutation";
+import { useMutation } from ".";
 import { createWrapper } from "../../__tests__/test-utils";
 
 describe("useMutation", () => {

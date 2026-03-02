@@ -1,6 +1,5 @@
 "use client";
 import { useMount, useObservable, useObserve } from "@legendapp/state/react";
-import { isObservable } from "@legendapp/state";
 import {
   QueryKey,
   InfiniteQueryObserver,
@@ -9,22 +8,15 @@ import {
 } from "@tanstack/query-core";
 import { useRef } from "react";
 import type { Observable } from "@legendapp/state";
-import { get, type MaybeObservable } from "@usels/core";
-import { useQueryClient } from "./useQueryClient";
-
-/**
- * QueryKey를 직렬화하면서 Observable 값을 추출합니다.
- * JSON.stringify는 Observable을 자동으로 .get()하지 않으므로
- * 커스텀 replacer를 사용하여 Observable 값을 추출합니다.
- */
-function serializeQueryKey(queryKey: QueryKey): string {
-  return JSON.stringify(queryKey, (_key, value) => {
-    if (isObservable(value)) {
-      return value.get();
-    }
-    return value;
-  });
-}
+import {
+  get,
+  peek,
+  type MaybeObservable,
+  type DeepMaybeObservable,
+  useMaybeObservable,
+} from "@usels/core";
+import { useQueryClient } from "../useQueryClient";
+import { resolveQueryKey } from "../keyResolvers";
 
 export interface UseInfiniteQueryOptions<
   TQueryFnData = unknown,
@@ -58,6 +50,8 @@ export interface UseInfiniteQueryOptions<
   refetchOnWindowFocus?: MaybeObservable<boolean>;
   refetchOnMount?: MaybeObservable<boolean>;
   refetchOnReconnect?: MaybeObservable<boolean>;
+  throwOnError?: boolean | ((error: Error) => boolean);
+  suspense?: MaybeObservable<boolean>;
   maxPages?: number;
 }
 
@@ -135,11 +129,10 @@ export function useInfiniteQuery<
   TQueryKey extends QueryKey = QueryKey,
   TPageParam = unknown,
 >(
-  options: MaybeObservable<UseInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>>
+  options: DeepMaybeObservable<UseInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>>
 ): Observable<InfiniteQueryState<InfiniteData<TQueryFnData>>> {
+  type InfiniteOpts = UseInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>;
   const queryClient = useQueryClient();
-
-  // Observer는 한 번만 생성
   const observerRef = useRef<InfiniteQueryObserver<
     TQueryFnData,
     Error,
@@ -147,11 +140,13 @@ export function useInfiniteQuery<
     TQueryKey,
     TPageParam
   > | null>(null);
-  const previousQueryKeyRef = useRef<string | null>(null);
 
-  // options 자체가 Observable인 경우 초기 스냅샷 추출 (최초 1회용)
-  // eslint-disable-next-line use-legend/observable-naming -- get() resolves to raw value, not an observable
-  const initialOptions = get(options);
+  const opts$ = useMaybeObservable<InfiniteOpts>(options as DeepMaybeObservable<InfiniteOpts>, {
+    queryFn: "function",
+    getNextPageParam: "function",
+    getPreviousPageParam: "function",
+  });
+  const initialOptions = opts$.peek() as InfiniteOpts | undefined;
 
   // Observable 상태 초기화 (refetch/fetchNextPage/fetchPreviousPage는 별도 함수로 분리 - observable 안에 넣으면 Observable<Function>이 됨)
   const state$ = useObservable({
@@ -177,7 +172,7 @@ export function useInfiniteQuery<
     failureCount: 0,
     failureReason: null as Error | null,
     errorUpdateCount: 0,
-    isEnabled: get(initialOptions.enabled) ?? true,
+    isEnabled: peek(initialOptions?.enabled) ?? true,
     isInitialLoading: true,
     hasNextPage: false,
     hasPreviousPage: false,
@@ -196,12 +191,8 @@ export function useInfiniteQuery<
     },
   });
 
-  // eslint-disable-next-line react-hooks/refs -- lazy initialization: observer created once on first render
-  if (!observerRef.current) {
-    const initialQueryKeyString = serializeQueryKey(initialOptions.queryKey);
-    // eslint-disable-next-line react-hooks/refs -- initial setup during first render only
-    previousQueryKeyRef.current = initialQueryKeyString;
-
+  if (observerRef.current === null) {
+    const initialQueryKey = resolveQueryKey(initialOptions?.queryKey ?? []);
     observerRef.current = new InfiniteQueryObserver<
       TQueryFnData,
       Error,
@@ -209,38 +200,32 @@ export function useInfiniteQuery<
       TQueryKey,
       TPageParam
     >(queryClient, {
-      queryKey: [initialQueryKeyString] as unknown as TQueryKey,
-      queryFn: initialOptions.queryFn,
-      enabled: get(initialOptions.enabled) ?? true,
-      staleTime: get(initialOptions.staleTime),
-      gcTime: get(initialOptions.gcTime),
-      retry: get(initialOptions.retry),
-      refetchOnWindowFocus: get(initialOptions.refetchOnWindowFocus),
-      refetchOnMount: get(initialOptions.refetchOnMount),
-      refetchOnReconnect: get(initialOptions.refetchOnReconnect),
-      initialPageParam: initialOptions.initialPageParam,
-      getNextPageParam: initialOptions.getNextPageParam,
-      getPreviousPageParam: initialOptions.getPreviousPageParam,
-      maxPages: initialOptions.maxPages,
+      queryKey: initialQueryKey as TQueryKey,
+      queryFn: initialOptions?.queryFn ?? (() => Promise.resolve(undefined as TQueryFnData)),
+      enabled: peek(initialOptions?.enabled) ?? true,
+      staleTime: peek(initialOptions?.staleTime),
+      gcTime: peek(initialOptions?.gcTime),
+      retry: peek(initialOptions?.retry),
+      refetchOnWindowFocus: peek(initialOptions?.refetchOnWindowFocus),
+      refetchOnMount: peek(initialOptions?.refetchOnMount),
+      refetchOnReconnect: peek(initialOptions?.refetchOnReconnect),
+      throwOnError: initialOptions?.throwOnError as never,
+      suspense: peek(initialOptions?.suspense) ?? false,
+      initialPageParam: initialOptions?.initialPageParam as TPageParam,
+      getNextPageParam:
+        initialOptions?.getNextPageParam ?? (() => undefined as TPageParam | undefined | null),
+      getPreviousPageParam: initialOptions?.getPreviousPageParam,
+      maxPages: initialOptions?.maxPages,
     });
   }
 
-  // useObserve로 options 변화 추적 (렌더링 중 동기 실행)
-  // options 자체가 Observable이면 get(options)로 추적,
-  // 각 필드가 Observable이면 get(field)로 추적
   useObserve(() => {
-    // eslint-disable-next-line use-legend/observable-naming -- get() resolves to raw value, not an observable
-    const resolved = get(options);
-
-    // options 객체를 직렬화하면서 Observable 값을 추출
-    // serializeQueryKey의 replacer에서 .get()을 호출하므로 useObserve가 추적
-    const queryKeyString = serializeQueryKey(resolved.queryKey);
-
-    // queryKey가 변경되었는지 확인
-    const hasQueryKeyChanged = previousQueryKeyRef.current !== queryKeyString;
+    const resolved = opts$.get() as InfiniteOpts | undefined;
+    if (!resolved) return;
+    const resolvedKey = resolveQueryKey(resolved.queryKey ?? []);
 
     observerRef.current?.setOptions({
-      queryKey: [queryKeyString] as unknown as TQueryKey,
+      queryKey: resolvedKey as TQueryKey,
       queryFn: resolved.queryFn,
       enabled: get(resolved.enabled) ?? true,
       staleTime: get(resolved.staleTime),
@@ -249,18 +234,13 @@ export function useInfiniteQuery<
       refetchOnWindowFocus: get(resolved.refetchOnWindowFocus),
       refetchOnMount: get(resolved.refetchOnMount),
       refetchOnReconnect: get(resolved.refetchOnReconnect),
+      throwOnError: resolved.throwOnError as never,
+      suspense: get(resolved.suspense) ?? false,
       initialPageParam: resolved.initialPageParam,
       getNextPageParam: resolved.getNextPageParam,
       getPreviousPageParam: resolved.getPreviousPageParam,
       maxPages: resolved.maxPages,
     });
-
-    // queryKey가 변경되면 refetch 트리거
-    if (hasQueryKeyChanged && previousQueryKeyRef.current !== null) {
-      observerRef.current?.refetch();
-    }
-
-    previousQueryKeyRef.current = queryKeyString;
   });
 
   // 구독은 한 번만 설정 (React lifecycle)
@@ -268,7 +248,7 @@ export function useInfiniteQuery<
     const observer = observerRef.current;
     if (!observer) return;
 
-    const unsubscribe = observer.subscribe((result) => {
+    const assignResult = (result: ReturnType<typeof observer.getCurrentResult>) => {
       state$.assign({
         data: result.data,
         error: result.error ?? null,
@@ -302,13 +282,30 @@ export function useInfiniteQuery<
         isFetchPreviousPageError: result.isFetchPreviousPageError ?? false,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
-    });
+    };
+    assignResult(observer.getCurrentResult());
+    const unsubscribe = observer.subscribe(assignResult);
 
     return () => {
       unsubscribe();
     };
     // state$는 stable하므로 의존성에 불필요
   });
+
+  const renderOpts = opts$.peek() as InfiniteOpts | undefined;
+  /* eslint-disable react-hooks/refs -- suspense requires render-time observer snapshot access */
+  const observer = observerRef.current;
+  if (observer) {
+    const result = observer.getCurrentResult();
+    const suspense = get(renderOpts?.suspense) ?? false;
+
+    if (suspense && result.isPending) {
+      throw observer
+        .fetchOptimistic(observer.options)
+        .then((optimisticResult) => optimisticResult.data);
+    }
+  }
+  /* eslint-enable react-hooks/refs */
 
   return state$;
 }

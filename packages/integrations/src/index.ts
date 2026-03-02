@@ -1,4 +1,12 @@
 export { QueryClientProvider, QueryClient } from "./tanstack-query/QueryClientProvider";
+export {
+  HydrationBoundary,
+  dehydrate,
+  hydrate,
+  type DehydratedState,
+  type DehydrateOptions,
+  type HydrateOptions,
+} from "./tanstack-query/HydrationBoundary";
 export { useQueryClient } from "./tanstack-query/useQueryClient";
 export { useQuery } from "./tanstack-query/useQuery";
 export { useMutation } from "./tanstack-query/useMutation";

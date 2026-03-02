@@ -3,7 +3,9 @@ import { useMount, useObservable, useObserve } from "@legendapp/state/react";
 import { MutationKey, MutationObserver } from "@tanstack/query-core";
 import { useRef } from "react";
 import type { Observable } from "@legendapp/state";
-import { useQueryClient } from "./useQueryClient";
+import { type DeepMaybeObservable, useMaybeObservable } from "@usels/core";
+import { useQueryClient } from "../useQueryClient";
+import { resolveMutationKey } from "../keyResolvers";
 
 export interface UseMutationOptions<TData = unknown, TVariables = void, TContext = unknown> {
   mutationKey?: MutationKey;
@@ -87,12 +89,21 @@ export interface MutationState<TData = unknown, TVariables = void, TContext = un
  * ```
  */
 export function useMutation<TData = unknown, TVariables = void, TContext = unknown>(
-  options: UseMutationOptions<TData, TVariables, TContext>
+  options: DeepMaybeObservable<UseMutationOptions<TData, TVariables, TContext>>
 ): Observable<MutationState<TData, TVariables, TContext>> {
   const queryClient = useQueryClient();
-
-  // Observer는 한 번만 생성
   const observerRef = useRef<MutationObserver<TData, Error, TVariables, TContext> | null>(null);
+  const opts$ = useMaybeObservable<UseMutationOptions<TData, TVariables, TContext>>(
+    options as DeepMaybeObservable<UseMutationOptions<TData, TVariables, TContext>>,
+    {
+      mutationFn: "function",
+      onMutate: "function",
+      onSuccess: "function",
+      onError: "function",
+      onSettled: "function",
+    }
+  );
+  const initialOptions = opts$.peek();
 
   // Observable 상태 초기화 (mutate/mutateAsync/reset는 별도 함수로 분리 - observable 안에 넣으면 Observable<Function>이 됨)
   const state$ = useObservable({
@@ -133,27 +144,28 @@ export function useMutation<TData = unknown, TVariables = void, TContext = unkno
     },
   });
 
-  // eslint-disable-next-line react-hooks/refs -- lazy initialization: observer created once on first render
-  if (!observerRef.current) {
+  if (observerRef.current === null) {
     observerRef.current = new MutationObserver<TData, Error, TVariables, TContext>(queryClient, {
-      mutationKey: options.mutationKey,
-      mutationFn: options.mutationFn,
-      onMutate: options.onMutate,
-      onSuccess: options.onSuccess,
-      onError: options.onError,
-      onSettled: options.onSettled,
+      mutationKey: resolveMutationKey(initialOptions?.mutationKey),
+      mutationFn: initialOptions?.mutationFn ?? (() => Promise.resolve(undefined as TData)),
+      onMutate: initialOptions?.onMutate,
+      onSuccess: initialOptions?.onSuccess,
+      onError: initialOptions?.onError,
+      onSettled: initialOptions?.onSettled,
     });
   }
 
-  // useObserve로 options 변화 추적
   useObserve(() => {
+    const resolved = opts$.get();
+    if (!resolved) return;
+
     observerRef.current?.setOptions({
-      mutationKey: options.mutationKey,
-      mutationFn: options.mutationFn,
-      onMutate: options.onMutate,
-      onSuccess: options.onSuccess,
-      onError: options.onError,
-      onSettled: options.onSettled,
+      mutationKey: resolveMutationKey(resolved.mutationKey),
+      mutationFn: resolved.mutationFn,
+      onMutate: resolved.onMutate,
+      onSuccess: resolved.onSuccess,
+      onError: resolved.onError,
+      onSettled: resolved.onSettled,
     });
   });
 

@@ -1,7 +1,6 @@
 "use client";
 import { useMount, useObservable, useObserve } from "@legendapp/state/react";
-import { isObservable } from "@legendapp/state";
-import { QueryKey, QueryObserver } from "@tanstack/query-core";
+import { QueryObserver } from "@tanstack/query-core";
 import { useRef } from "react";
 import type { Observable } from "@legendapp/state";
 import {
@@ -12,43 +11,7 @@ import {
   useMaybeObservable,
 } from "@usels/core";
 import { useQueryClient } from "../useQueryClient";
-
-/**
- * Recursively resolves Observable values within a value.
- * - Observable → .get() (registers dep in observer context)
- * - Array → recursively map
- * - Plain object (not class instance) → recursively map entries
- * - Date, Map, class instances, etc. → as-is
- */
-function deepResolveValue(value: unknown): unknown {
-  if (isObservable(value)) return (value as Observable<unknown>).get();
-  if (Array.isArray(value)) return value.map(deepResolveValue);
-  if (
-    value !== null &&
-    typeof value === "object" &&
-    Object.getPrototypeOf(value) === Object.prototype
-  ) {
-    return Object.fromEntries(
-      Object.entries(value as object).map(([k, v]) => [k, deepResolveValue(v)])
-    );
-  }
-  return value;
-}
-
-/**
- * Resolves a MaybeObservableQueryKey into a plain TanStack QueryKey array.
- * Handles:
- * - queryKey itself being an Observable (e.g. key$)
- * - Array elements being Observables (e.g. ['users', id$])
- * - Nested plain objects with Observable values (e.g. ['users', { id: id$ }])
- *
- * All Observable `.get()` calls register deps in the calling observer context.
- */
-function resolveQueryKey(queryKey: unknown): QueryKey {
-  const arr = isObservable(queryKey) ? (queryKey as Observable<unknown>).get() : queryKey;
-  if (!Array.isArray(arr)) return [];
-  return arr.map(deepResolveValue) as QueryKey;
-}
+import { resolveQueryKey } from "../keyResolvers";
 
 export interface UseQueryOptions<TData = unknown> {
   /**
@@ -77,7 +40,7 @@ export interface UseQueryOptions<TData = unknown> {
    * Note: Requires a React Suspense boundary in the component tree.
    * The query state is still available as an observable when not suspended.
    */
-  suspense?: boolean;
+  suspense?: MaybeObservable<boolean>;
 }
 
 export interface QueryState<TData = unknown> {
@@ -163,7 +126,7 @@ export function useQuery<TData = unknown>(
   // - 'function' for queryFn: prevents Legend-State from treating it as a child observable
   // - 'default' (omitted) for other fields: Observables are kept as-is in the result,
   //   so that get(opts.enabled) inside useObserve explicitly registers the dep
-  // - queryKey is NOT listed here: deepResolveValue handles Observable elements directly
+  // - queryKey is NOT listed here: resolveQueryKey (shared in keyResolvers) handles Observable elements directly
   const opts$ = useMaybeObservable<UseQueryOptions<TData>>(
     options as DeepMaybeObservable<UseQueryOptions<TData>>,
     {
@@ -220,13 +183,14 @@ export function useQuery<TData = unknown>(
       refetchOnMount: peek(initialOpts?.refetchOnMount),
       refetchOnReconnect: peek(initialOpts?.refetchOnReconnect),
       throwOnError: initialOpts?.throwOnError as never,
+      suspense: peek(initialOpts?.suspense) ?? false,
     });
   }
 
   // React to option changes (including queryKey Observable elements).
   // Dependencies registered here:
   //   - opts$.get() → tracks opts$ (outer observable or per-render plain object changes)
-  //   - resolveQueryKey(opts.queryKey) → deepResolveValue calls .get() on each Observable
+  //   - resolveQueryKey(opts.queryKey) → shared key resolver calls .get() on each Observable
   //     element inside queryKey, registering individual deps
   //   - get(opts.enabled) etc. → explicitly registers deps on per-field Observables
   //
@@ -251,6 +215,7 @@ export function useQuery<TData = unknown>(
       refetchOnMount: get(opts.refetchOnMount),
       refetchOnReconnect: get(opts.refetchOnReconnect),
       throwOnError: opts.throwOnError as never,
+      suspense: get(opts.suspense) ?? false,
     });
   });
 
@@ -259,7 +224,7 @@ export function useQuery<TData = unknown>(
     const observer = observerRef.current;
     if (!observer) return;
 
-    const unsubscribe = observer.subscribe((result) => {
+    const assignResult = (result: ReturnType<typeof observer.getCurrentResult>) => {
       state$.assign({
         data: result.data,
         error: result.error ?? null,
@@ -287,12 +252,29 @@ export function useQuery<TData = unknown>(
         errorUpdateCount: result.errorUpdateCount,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
-    });
+    };
+    assignResult(observer.getCurrentResult());
+    const unsubscribe = observer.subscribe(assignResult);
 
     return () => {
       unsubscribe();
     };
   });
+
+  const renderOpts = opts$.peek();
+  /* eslint-disable react-hooks/refs -- suspense requires render-time observer snapshot access */
+  const observer = observerRef.current;
+  if (observer) {
+    const result = observer.getCurrentResult();
+    const suspense = get(renderOpts?.suspense) ?? false;
+
+    if (suspense && result.isPending) {
+      throw observer
+        .fetchOptimistic(observer.options)
+        .then((optimisticResult) => optimisticResult.data);
+    }
+  }
+  /* eslint-enable react-hooks/refs */
 
   return state$;
 }

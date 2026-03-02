@@ -1,7 +1,7 @@
 "use client";
 import { useContext } from "react";
-import { QueryClient } from "@tanstack/react-query";
-import { QueryClientContext } from "./QueryClientProvider";
+import { QueryClient } from "@tanstack/query-core";
+import { QueryClientContext } from "../QueryClientProvider";
 
 /**
  * Hook to retrieve the QueryClient from context

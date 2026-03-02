@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { useObserve } from "@legendapp/state/react";
+import { Suspense, type ReactNode } from "react";
 import { useQuery } from ".";
 import { createWrapper } from "../../__tests__/test-utils";
 
@@ -1186,12 +1187,19 @@ describe("useQuery", () => {
       expect(result.current.data.get()).toBe("data");
     });
 
-    // Note: Testing actual suspense throwing is complex in vitest
-    // as it requires React Suspense boundaries. The logic is tested
-    // by verifying the conditions under which it would throw.
-    it("should have correct state for suspense conditions", async () => {
-      const queryFn = vi.fn().mockResolvedValue("data");
-      const { wrapper } = createWrapper();
+    it("should resolve with Suspense boundary when suspense is true", async () => {
+      const queryFn = vi.fn().mockImplementation(
+        async () =>
+          await new Promise<string>((resolve) => {
+            setTimeout(() => resolve("data"), 20);
+          })
+      );
+      const { wrapper: QueryWrapper } = createWrapper();
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryWrapper>
+          <Suspense fallback={null}>{children}</Suspense>
+        </QueryWrapper>
+      );
 
       const { result } = renderHook(
         () =>
@@ -1203,17 +1211,6 @@ describe("useQuery", () => {
         { wrapper }
       );
 
-      // Initially should be pending and fetching
-      const initialStatus = (result.current as any).status.get();
-      const initialFetchStatus = (result.current as any).fetchStatus.get();
-
-      // These are the conditions that would trigger suspense throw
-      if (initialStatus === "pending" && initialFetchStatus === "fetching") {
-        // Suspense would throw here in a real app with Suspense boundary
-        expect(true).toBe(true);
-      }
-
-      // Wait for success
       await waitFor(() => expect(result.current.isSuccess.get()).toBe(true));
       expect(result.current.data.get()).toBe("data");
     });
