@@ -163,6 +163,28 @@ describe("useMaybeObservable() — object-form: 'default' (explicit or omitted)"
     const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(opts, { val: "default" }));
     expect(result.current.val.get()).toBe("static");
   });
+
+  it("omitted hint + function field → auto wraps with ObservableHint.function", () => {
+    const spy = vi.spyOn(ObservableHint, "function");
+    const cb = () => {};
+    const { result } = renderHook(() =>
+      useMaybeObservable<{ cb: () => void }>({ cb }, {})
+    );
+    result.current.get();
+    expect(spy).toHaveBeenCalledWith(cb);
+    spy.mockRestore();
+  });
+
+  it("explicit 'default' + function field → auto wraps with ObservableHint.function", () => {
+    const spy = vi.spyOn(ObservableHint, "function");
+    const cb = () => {};
+    const { result } = renderHook(() =>
+      useMaybeObservable<{ cb: () => void }>({ cb }, { cb: "default" })
+    );
+    result.current.get();
+    expect(spy).toHaveBeenCalledWith(cb);
+    spy.mockRestore();
+  });
 });
 
 // =============================================================================

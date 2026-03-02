@@ -9,7 +9,7 @@ import type { MaybeElement } from "../../elements/useRef$";
 /**
  * Per-field resolution hint for the object-form transform.
  *
- * - `'default'`  — no-op; Legend-State auto-derefs the field Observable. **Default.**
+ * - `'default'`  — Legend-State auto-derefs + if resolved value is `function`, wraps with `ObservableHint.function()`. **Default.**
  * - `'opaque'`   — `get()` then `ObservableHint.opaque()`. Null-safe.
  * - `'plain'`    — `get()` then `ObservableHint.plain()`. Prevents nested auto-deref. Null-safe.
  * - `'function'` — `get()` then `ObservableHint.function()`. For callbacks. Null-safe.
@@ -79,11 +79,20 @@ function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>):
         }
         break;
       }
-      default:
+      default: {
         if (typeof hint === "function") {
           result[key] = hint(fieldValue);
+          break;
         }
-      // 'default' or undefined → no action; Legend-State auto-derefs per-field Observables
+        // Default behavior: preserve Legend-State auto-deref and auto-hint callbacks.
+        // This allows omitted hints to still treat function fields as stable callback values.
+        const v = get(fieldValue);
+        if (typeof v === "function") {
+          result[key] = ObservableHint.function(v as (...args: unknown[]) => unknown);
+        }
+        // 'default' or undefined → auto-deref; function values are auto-wrapped with ObservableHint.function
+        break;
+      }
     }
   }
   return result as T;
