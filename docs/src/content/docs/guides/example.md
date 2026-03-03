@@ -1,7 +1,9 @@
 ---
 title: Getting Started
-description: Install use-ls and explore observable-native React hooks built on Legend-State.
+description: Install use-legend and explore observable-native React hooks built on Legend-State.
 ---
+
+`use-legend` is a collection of observable-native React utility hooks inspired by [VueUse](https://vueuse.org/) and [react-use](https://github.com/streamich/react-use). While those libraries target Vue's reactivity system and React's `useState`/`useEffect` respectively, `use-legend` is built from the ground up for [Legend-State](https://legendapp.com/open-source/state/) observables — delivering fine-grained reactivity without whole-component re-renders.
 
 ## Installation
 
