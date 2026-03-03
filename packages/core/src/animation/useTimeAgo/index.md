@@ -84,6 +84,8 @@ const timeAgo = useTimeAgo(new Date("2020-01-01"), {
 
 ### i18n with date-fns locale
 
+Pass any [date-fns locale](https://date-fns.org/docs/Locale) to the `locale` option.
+
 ```tsx twoslash
 // @noErrors
 import { useTimeAgo } from "@usels/core";
@@ -91,6 +93,26 @@ import { ko } from "date-fns/locale";
 
 const timeAgo = useTimeAgo(new Date(), { locale: ko });
 // → "방금 전"
+```
+
+```tsx twoslash
+// @noErrors
+import { useTimeAgo } from "@usels/core";
+import { ja } from "date-fns/locale";
+
+const timeAgo = useTimeAgo(new Date("2024-01-01"), { locale: ja });
+// → "約1年前"
+```
+
+You can also use `formatTimeAgo` with a locale:
+
+```tsx twoslash
+// @noErrors
+import { formatTimeAgo } from "@usels/core";
+import { fr } from "date-fns/locale";
+
+const str = formatTimeAgo(new Date("2024-01-01"), { locale: fr }, new Date("2024-06-01"));
+// → "il y a environ 5 mois"
 ```
 
 ## `formatTimeAgo` — pure function
@@ -102,29 +124,3 @@ import { formatTimeAgo } from "@usels/core";
 const str = formatTimeAgo(new Date("2024-01-01"), {}, new Date("2024-06-01"));
 // → "about 5 months ago"
 ```
-
-## Options
-
-| Option              | Type                  | Default  | Reactive   | Description                                                   |
-| ------------------- | --------------------- | -------- | ---------- | ------------------------------------------------------------- |
-| `controls`          | `boolean`             | `false`  | mount-only | Expose `{ timeAgo, isActive$, pause, resume }`                |
-| `updateInterval`    | `number`              | `30_000` | mount-only | Auto-update interval in ms                                    |
-| `locale`            | `Locale` (date-fns)   | —        | mount-only | date-fns locale for i18n                                      |
-| `max`               | `string \| number`    | —        | ✅         | Max diff (unit name or ms) before `fullDateFormatter` is used |
-| `fullDateFormatter` | `(d: Date) => string` | ISO date | ✅         | Formatter when `max` is exceeded                              |
-| `showSecond`        | `boolean`             | `false`  | ✅         | Show second-level detail; `false` shows "just now" for < 45 s |
-
-## Notes
-
-### Update strategy
-
-`useTimeAgo` delegates to `useNow({ interval: updateInterval })` internally.
-The default `updateInterval` is `30_000` ms (30 seconds).
-
-### Mount-time-only options
-
-`updateInterval` and `locale` are captured once at mount. To change them, remount the hook.
-
-### Reactive options
-
-`max`, `showSecond`, and `fullDateFormatter` are reactive — changing them via Observable takes effect immediately on the next tick.
