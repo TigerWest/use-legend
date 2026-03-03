@@ -1,6 +1,6 @@
 {
   "name": "@usels/integrations",
-  "version": "0.0.1-beta.3",
+  "version": "0.0.3-beta.1",
   "description": "Observable-native third-party integrations for Legend-State, inspired by VueUse and react-use",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -54,7 +54,6 @@
     "@testing-library/react": "^16.1.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "vitest": "^4.0.18",
     "@vitest/browser": "^4.0.18",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-istanbul": "^4.0.18",
@@ -63,7 +62,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tsup": "^8.0.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
   },
   "files": [
     "dist"
