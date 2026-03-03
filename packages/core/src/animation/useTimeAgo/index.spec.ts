@@ -131,9 +131,9 @@ describe("useTimeAgo", () => {
     expect(result.current.get()).toBe("2 minutes ago");
   });
 
-  it("controls=true returns { timeAgo, isActive$, pause, resume }", () => {
+  it("controls=true returns { timeAgo$, isActive$, pause, resume }", () => {
     const { result } = renderHook(() => useTimeAgo(new Date(), { controls: true }));
-    expect(result.current).toHaveProperty("timeAgo");
+    expect(result.current).toHaveProperty("timeAgo$");
     expect(result.current).toHaveProperty("isActive$");
     expect(result.current).toHaveProperty("pause");
     expect(result.current).toHaveProperty("resume");
@@ -142,7 +142,7 @@ describe("useTimeAgo", () => {
   it("pause() stops auto-update", () => {
     const from = new Date(Date.now() - 5 * 60_000);
     const { result } = renderHook(() => useTimeAgo(from, { controls: true, updateInterval: 1000 }));
-    const initial = result.current.timeAgo.get();
+    const initial = result.current.timeAgo$.get();
 
     act(() => {
       result.current.pause();
@@ -150,7 +150,7 @@ describe("useTimeAgo", () => {
     });
 
     // value should stay the same after pause
-    expect(result.current.timeAgo.get()).toBe(initial);
+    expect(result.current.timeAgo$.get()).toBe(initial);
     expect(result.current.isActive$.get()).toBe(false);
   });
 

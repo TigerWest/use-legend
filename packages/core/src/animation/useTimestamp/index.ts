@@ -22,10 +22,10 @@ export interface UseTimestampOptions<Controls extends boolean = false> {
 export function useTimestamp(options?: UseTimestampOptions<false>): ReadonlyObservable<number>;
 export function useTimestamp(
   options: UseTimestampOptions<true>
-): { timestamp: ReadonlyObservable<number> } & Pausable;
+): { timestamp$: ReadonlyObservable<number> } & Pausable;
 export function useTimestamp(
   options?: DeepMaybeObservable<UseTimestampOptions<boolean>>
-): ReadonlyObservable<number> | ({ timestamp: ReadonlyObservable<number> } & Pausable) {
+): ReadonlyObservable<number> | ({ timestamp$: ReadonlyObservable<number> } & Pausable) {
   // ✅ 'function' hint: prevent Legend-State from wrapping callback as child Observable
   const opts$ = useMaybeObservable(options, {
     callback: "function",
@@ -54,7 +54,7 @@ export function useTimestamp(
   const controls: Pausable = isRaf ? rafControls : intervalControls;
 
   if (exposeControls) {
-    return { timestamp: ts$ as ReadonlyObservable<number>, ...controls };
+    return { timestamp$: ts$ as ReadonlyObservable<number>, ...controls };
   }
   return ts$ as ReadonlyObservable<number>;
 }

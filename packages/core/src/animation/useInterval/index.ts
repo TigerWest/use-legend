@@ -22,7 +22,7 @@ export interface UseIntervalOptions<Controls extends boolean = false> {
 }
 
 export interface UseIntervalReturn {
-  counter: ReadonlyObservable<number>;
+  counter$: ReadonlyObservable<number>;
   reset: Fn;
 }
 
@@ -61,7 +61,7 @@ export function useInterval(
 
   if (exposeControls) {
     return Object.freeze({
-      counter: counter$ as ReadonlyObservable<number>,
+      counter$: counter$ as ReadonlyObservable<number>,
       reset,
       ...controls,
     });

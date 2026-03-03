@@ -35,7 +35,7 @@ useInterval(1000, {
 // @noErrors
 import { useInterval } from "@usels/core";
 
-const { counter, reset, isActive, pause, resume } = useInterval(1000, {
+const { counter$, reset, isActive$, pause, resume } = useInterval(1000, {
   controls: true,
 });
 
@@ -50,7 +50,7 @@ reset(); // counter → 0
 // @noErrors
 import { useInterval } from "@usels/core";
 
-const { counter, resume } = useInterval(1000, {
+const { counter$, resume } = useInterval(1000, {
   controls: true,
   immediate: false,
 });

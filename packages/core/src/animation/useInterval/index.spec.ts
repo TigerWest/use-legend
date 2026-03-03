@@ -73,9 +73,9 @@ describe("callback", () => {
 // ---------------------------------------------------------------------------
 
 describe("controls=true", () => {
-  it("returns { counter, reset, isActive$, pause, resume }", () => {
+  it("returns { counter$, reset, isActive$, pause, resume }", () => {
     const { result } = renderHook(() => useInterval(1000, { controls: true }));
-    expect(result.current).toHaveProperty("counter");
+    expect(result.current).toHaveProperty("counter$");
     expect(result.current).toHaveProperty("reset");
     expect(result.current).toHaveProperty("isActive$");
     expect(result.current).toHaveProperty("pause");
@@ -88,12 +88,12 @@ describe("controls=true", () => {
     act(() => {
       vi.advanceTimersByTime(3000);
     });
-    expect(result.current.counter.get()).toBe(3);
+    expect(result.current.counter$.get()).toBe(3);
 
     act(() => {
       result.current.reset();
     });
-    expect(result.current.counter.get()).toBe(0);
+    expect(result.current.counter$.get()).toBe(0);
   });
 
   it("pause() stops counter from incrementing", () => {
@@ -107,7 +107,7 @@ describe("controls=true", () => {
       vi.advanceTimersByTime(3000);
     });
 
-    expect(result.current.counter.get()).toBe(0);
+    expect(result.current.counter$.get()).toBe(0);
   });
 
   it("resume() restarts the interval", () => {
@@ -122,7 +122,7 @@ describe("controls=true", () => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(result.current.counter.get()).toBe(1);
+    expect(result.current.counter$.get()).toBe(1);
   });
 });
 
@@ -153,7 +153,7 @@ describe("unmount cleanup", () => {
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(result.current.counter.get()).toBe(1);
+    expect(result.current.counter$.get()).toBe(1);
 
     unmount();
     await flush();
@@ -163,6 +163,6 @@ describe("unmount cleanup", () => {
     });
 
     // counter stays at 1 — interval was cleared
-    expect(result.current.counter.get()).toBe(1);
+    expect(result.current.counter$.get()).toBe(1);
   });
 });

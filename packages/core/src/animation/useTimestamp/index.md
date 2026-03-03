@@ -49,7 +49,7 @@ const ts = useTimestamp({
 // @noErrors
 import { useTimestamp } from "@usels/core";
 
-const { timestamp, isActive, pause, resume } = useTimestamp({ controls: true });
+const { timestamp$, isActive$, pause, resume } = useTimestamp({ controls: true });
 ```
 
 ## Notes

@@ -73,9 +73,9 @@ describe("basic", () => {
 // ---------------------------------------------------------------------------
 
 describe("controls=true", () => {
-  it("returns { now, isActive$, pause, resume }", () => {
+  it("returns { now$, isActive$, pause, resume }", () => {
     const { result } = renderHook(() => useNow({ controls: true }));
-    expect(result.current).toHaveProperty("now");
+    expect(result.current).toHaveProperty("now$");
     expect(result.current).toHaveProperty("isActive$");
     expect(result.current).toHaveProperty("pause");
     expect(result.current).toHaveProperty("resume");

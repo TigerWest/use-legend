@@ -105,7 +105,7 @@ export function useTimeAgo(
 export function useTimeAgo(
   time: MaybeObservable<Date | number | string>,
   options: UseTimeAgoOptions<true>
-): { timeAgo: ReadonlyObservable<string> } & Pausable;
+): { timeAgo$: ReadonlyObservable<string> } & Pausable;
 export function useTimeAgo(
   time: MaybeObservable<Date | number | string>,
   options?: DeepMaybeObservable<UseTimeAgoOptions<boolean>>
@@ -120,7 +120,7 @@ export function useTimeAgo(
   const updateInterval = opts$.updateInterval.peek() ?? 30_000;
   const locale = opts$.locale.peek() as Locale | undefined;
 
-  const { now: now$, ...controls } = useNow({ controls: true, interval: updateInterval });
+  const { now$, ...controls } = useNow({ controls: true, interval: updateInterval });
 
   const timeAgo$ = useObservable<string>("");
 
@@ -143,7 +143,7 @@ export function useTimeAgo(
   });
 
   if (exposeControls) {
-    return { timeAgo: timeAgo$ as ReadonlyObservable<string>, ...controls };
+    return { timeAgo$: timeAgo$ as ReadonlyObservable<string>, ...controls };
   }
   return timeAgo$ as ReadonlyObservable<string>;
 }

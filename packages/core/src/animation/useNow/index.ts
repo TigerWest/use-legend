@@ -22,10 +22,10 @@ export interface UseNowOptions<Controls extends boolean = false> {
 }
 
 export function useNow(options?: UseNowOptions<false>): ReadonlyObservable<Date>;
-export function useNow(options: UseNowOptions<true>): { now: ReadonlyObservable<Date> } & Pausable;
+export function useNow(options: UseNowOptions<true>): { now$: ReadonlyObservable<Date> } & Pausable;
 export function useNow(
   options?: DeepMaybeObservable<UseNowOptions<boolean>>
-): ReadonlyObservable<Date> | ({ now: ReadonlyObservable<Date> } & Pausable) {
+): ReadonlyObservable<Date> | ({ now$: ReadonlyObservable<Date> } & Pausable) {
   // ✅ DeepMaybeObservable → normalize
   const opts$ = useMaybeObservable(options);
 
@@ -45,7 +45,7 @@ export function useNow(
   const controls: Pausable = isRaf ? rafControls : intervalControls;
 
   if (exposeControls) {
-    return { now: now$ as ReadonlyObservable<Date>, ...controls };
+    return { now$: now$ as ReadonlyObservable<Date>, ...controls };
   }
   return now$ as ReadonlyObservable<Date>;
 }

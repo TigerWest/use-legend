@@ -33,7 +33,7 @@ const now = useNow({ interval: 1000 }); // updates every second
 // @noErrors
 import { useNow } from "@usels/core";
 
-const { now, isActive, pause, resume } = useNow({ controls: true });
+const { now$, isActive$, pause, resume } = useNow({ controls: true });
 
 pause(); // stops auto-update
 resume(); // restarts

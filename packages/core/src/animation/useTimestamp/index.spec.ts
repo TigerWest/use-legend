@@ -106,9 +106,9 @@ describe("callback", () => {
 // ---------------------------------------------------------------------------
 
 describe("controls=true", () => {
-  it("returns { timestamp, isActive$, pause, resume }", () => {
+  it("returns { timestamp$, isActive$, pause, resume }", () => {
     const { result } = renderHook(() => useTimestamp({ controls: true }));
-    expect(result.current).toHaveProperty("timestamp");
+    expect(result.current).toHaveProperty("timestamp$");
     expect(result.current).toHaveProperty("isActive$");
     expect(result.current).toHaveProperty("pause");
     expect(result.current).toHaveProperty("resume");

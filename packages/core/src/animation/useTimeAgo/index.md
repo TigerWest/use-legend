@@ -41,7 +41,7 @@ time$.set(new Date("2020-01-01")); // → "about 4 years ago"
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 
-const { timeAgo, isActive$, pause, resume } = useTimeAgo(new Date(), {
+const { timeAgo$, isActive$, pause, resume } = useTimeAgo(new Date(), {
   controls: true,
 });
 ```
