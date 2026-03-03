@@ -1,0 +1,50 @@
+name: Publish to npm
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build packages
+        run: pnpm build:packages
+
+      - name: Test
+        run: pnpm test
+
+      - name: Determine npm dist-tag
+        id: dist-tag
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'beta') }}; then
+            echo "TAG=--tag beta" >> "$GITHUB_OUTPUT"
+          else
+            echo "TAG=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        run: pnpm publish -r --no-git-checks ${{ steps.dist-tag.outputs.TAG }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

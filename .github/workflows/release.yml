@@ -1,0 +1,89 @@
+name: Create Version PR
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  version-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump package versions
+        run: pnpm --filter './packages/**' -r exec -- npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
+
+      - name: Update CHANGELOG
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
+          VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const version = process.env.VERSION;
+            const body = process.env.RELEASE_BODY || '';
+            const date = new Date().toISOString().split('T')[0];
+            const entry = '## v' + version + ' (' + date + ')\n\n' + body + '\n';
+
+            let content = '';
+            if (fs.existsSync('CHANGELOG.md')) {
+              content = fs.readFileSync('CHANGELOG.md', 'utf8');
+              const firstHeading = content.indexOf('## ');
+              if (firstHeading !== -1) {
+                content = content.slice(0, firstHeading) + entry + '\n' + content.slice(firstHeading);
+              } else {
+                content += '\n' + entry;
+              }
+            } else {
+              content = '# Changelog\n\n' + entry;
+            }
+
+            fs.writeFileSync('CHANGELOG.md', content);
+          "
+
+      - name: Determine labels
+        id: labels
+        run: |
+          if [[ "$GITHUB_REF_NAME" == *"beta"* ]]; then
+            echo "LABELS=release,beta" >> "$GITHUB_OUTPUT"
+          else
+            echo "LABELS=release" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          branch: release/v${{ steps.version.outputs.VERSION }}
+          title: "chore: release v${{ steps.version.outputs.VERSION }}"
+          commit-message: "chore: release v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## Release v${{ steps.version.outputs.VERSION }}
+
+            This PR was automatically created by the release workflow.
+
+            ### Changes
+            ${{ github.event.release.body }}
+
+            ---
+            Merging this PR will trigger npm publish.
+          labels: ${{ steps.labels.outputs.LABELS }}
