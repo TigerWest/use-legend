@@ -167,9 +167,7 @@ describe("useMaybeObservable() — object-form: 'default' (explicit or omitted)"
   it("omitted hint + function field → auto wraps with ObservableHint.function", () => {
     const spy = vi.spyOn(ObservableHint, "function");
     const cb = () => {};
-    const { result } = renderHook(() =>
-      useMaybeObservable<{ cb: () => void }>({ cb }, {})
-    );
+    const { result } = renderHook(() => useMaybeObservable<{ cb: () => void }>({ cb }, {}));
     result.current.get();
     expect(spy).toHaveBeenCalledWith(cb);
     spy.mockRestore();
