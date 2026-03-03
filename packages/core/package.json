@@ -1,6 +1,6 @@
 {
   "name": "@usels/core",
-  "version": "0.0.1-beta.3",
+  "version": "0.0.3-beta.1",
   "description": "Observable-native React utility hooks for Legend-State, inspired by VueUse and react-use",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
