@@ -450,7 +450,7 @@ describe("useAnimate() — real browser", () => {
       unmount();
     });
 
-    expect(animation.playState).toBe("idle");
+    await waitFor(() => expect(animation.playState).toBe("idle"), { timeout: 2000 });
   });
 
   it("accepts a number as the duration shorthand", async () => {

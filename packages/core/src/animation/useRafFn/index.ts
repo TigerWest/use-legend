@@ -2,7 +2,7 @@
 import { useMount, useObservable } from "@legendapp/state/react";
 import { useRef } from "react";
 import type { MaybeObservable, Pausable } from "../../types";
-import { get } from "../../function/get";
+import { peek } from "../../function/peek";
 import { defaultWindow } from "../../shared/configurable";
 
 export interface UseRafFnCallbackArguments {
@@ -35,46 +35,67 @@ export function useRafFn(
   // mount-time-only options
   const once = options?.once ?? false;
   const fpsLimit = options?.fpsLimit ?? null;
+  const requestFrame = (cb: FrameRequestCallback) =>
+    (defaultWindow?.requestAnimationFrame ?? requestAnimationFrame)(cb);
+  const cancelFrame = (id: number) =>
+    (defaultWindow?.cancelAnimationFrame ?? cancelAnimationFrame)(id);
 
   const pause = () => {
-    if (!isActive$.peek()) return; // idempotent
-    isActive$.set(false);
+    if (isActive$.peek()) isActive$.set(false); // idempotent
     if (rafHandle.current !== undefined) {
-      cancelAnimationFrame(rafHandle.current);
+      cancelFrame(rafHandle.current);
       rafHandle.current = undefined;
     }
   };
 
   const loop: FrameRequestCallback = (timestamp) => {
-    if (!isActive$.peek()) return;
+    if (!isActive$.peek()) {
+      rafHandle.current = undefined;
+      return;
+    }
 
     // First frame after resume: set base timestamp so delta = 0 (not the full DOMHighResTimeStamp).
     if (!lastTimestamp.current) lastTimestamp.current = timestamp;
     const delta = timestamp - lastTimestamp.current;
-    const fps = get(fpsLimit); // read every frame — reactive to fpsLimit changes
+    // Poll latest fpsLimit value without registering tracking deps.
+    const fps = peek(fpsLimit);
 
     if (fps !== null && fps > 0 && delta < 1000 / fps) {
-      rafHandle.current = requestAnimationFrame(loop);
+      if (isActive$.peek()) {
+        rafHandle.current = requestFrame(loop);
+      } else {
+        rafHandle.current = undefined;
+      }
       return;
     }
 
     lastTimestamp.current = timestamp;
     fnRef.current({ delta, timestamp });
 
+    // fn may call pause(), so re-check before scheduling next frame
+    if (!isActive$.peek()) {
+      rafHandle.current = undefined;
+      return;
+    }
+
     if (once) {
       pause();
       return;
     }
 
-    rafHandle.current = requestAnimationFrame(loop);
+    rafHandle.current = requestFrame(loop);
   };
 
   const resume = () => {
     if (!defaultWindow) return; // SSR guard
     if (isActive$.peek()) return; // idempotent
+    if (rafHandle.current !== undefined) {
+      cancelFrame(rafHandle.current);
+      rafHandle.current = undefined;
+    }
     isActive$.set(true);
     lastTimestamp.current = 0; // reset on resume; first-frame guard sets it to actual timestamp
-    rafHandle.current = requestAnimationFrame(loop);
+    rafHandle.current = requestFrame(loop);
   };
 
   useMount(() => {
