@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.0.3-beta.5 (2026-03-03)
+
+## What's Changed
+* chore: release v0.0.3-beta.4 by @TigerWest in https://github.com/TigerWest/use-legend/pull/4
+
+
+**Full Changelog**: https://github.com/TigerWest/use-legend/compare/v0.0.3-beta.4...v0.0.3-beta.5
+
 ## v0.0.3-beta.4 (2026-03-03)
 
 ## What's Changed
