@@ -6,6 +6,8 @@ category: Animation
 
 Returns a `ReadonlyObservable<Date>` that reflects the current time, updated continuously via `requestAnimationFrame` (default) or a fixed interval.
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash

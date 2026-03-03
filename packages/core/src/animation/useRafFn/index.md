@@ -7,6 +7,8 @@ category: Animation
 Execute a function on every animation frame (`requestAnimationFrame`) with reactive `isActive` state and pause/resume control.
 The callback receives `delta` (ms since last frame) and `timestamp` (ms since page load).
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash

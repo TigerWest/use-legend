@@ -94,7 +94,7 @@ describe("controls=true", () => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(result.current.ready.get()).toBe(false);
+    expect(result.current.ready$.get()).toBe(false);
   });
 
   it("isPending=true while timeout is running", () => {

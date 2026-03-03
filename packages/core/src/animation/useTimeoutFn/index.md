@@ -7,6 +7,8 @@ category: Animation
 Execute a function after a given delay with reactive `isPending$` state and manual start/stop control.
 Returns a `Stoppable` — `isPending$` is an `Observable<boolean>` you can subscribe to.
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash

@@ -10,6 +10,8 @@ Formatting is delegated to [`date-fns/formatDistance`](https://date-fns.org/docs
 
 Also exports `formatTimeAgo` as a standalone pure function for one-off formatting.
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash

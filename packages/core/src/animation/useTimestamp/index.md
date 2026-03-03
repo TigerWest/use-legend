@@ -6,6 +6,8 @@ category: Animation
 
 Returns a `ReadonlyObservable<number>` containing the current Unix timestamp in milliseconds, updated continuously via `requestAnimationFrame` (default) or a fixed interval.
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash

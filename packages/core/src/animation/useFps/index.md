@@ -6,6 +6,8 @@ category: Animation
 
 Returns a `ReadonlyObservable<number>` that tracks the current frames-per-second, sampled every N frames to reduce noise.
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash

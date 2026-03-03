@@ -7,6 +7,8 @@ category: Animation
 Execute a function repeatedly at a given interval with reactive `isActive` state and pause/resume control.
 Returns a `Pausable` — `isActive` is a `ReadonlyObservable<boolean>`.
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash

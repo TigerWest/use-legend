@@ -28,11 +28,11 @@ export function useTimeout(
 export function useTimeout(
   interval: MaybeObservable<number>,
   options: UseTimeoutOptions<true>
-): { ready: ReadonlyObservable<boolean> } & Stoppable;
+): { ready$: ReadonlyObservable<boolean> } & Stoppable;
 export function useTimeout(
   interval: MaybeObservable<number> = 1000,
   options?: DeepMaybeObservable<UseTimeoutOptions<boolean>>
-): ReadonlyObservable<boolean> | ({ ready: ReadonlyObservable<boolean> } & Stoppable) {
+): ReadonlyObservable<boolean> | ({ ready$: ReadonlyObservable<boolean> } & Stoppable) {
   // ✅ 'function' hint: callback field
   const opts$ = useMaybeObservable(options, {
     callback: "function",
@@ -62,7 +62,7 @@ export function useTimeout(
   });
 
   if (exposeControls) {
-    return { ready: ready$ as ReadonlyObservable<boolean>, ...controls };
+    return { ready$: ready$ as ReadonlyObservable<boolean>, ...controls };
   }
   return ready$ as ReadonlyObservable<boolean>;
 }

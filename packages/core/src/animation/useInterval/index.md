@@ -6,6 +6,8 @@ category: Animation
 
 A thin wrapper around `useIntervalFn` that exposes a `ReadonlyObservable<number>` counter that increments on each tick.
 
+## Demo
+
 ## Usage
 
 ```tsx twoslash
