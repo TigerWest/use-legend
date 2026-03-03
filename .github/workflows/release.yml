@@ -3,7 +3,7 @@ name: Create Version PR
 on:
   release:
     types: [published]
-
+  workflow_dispatch: 
 jobs:
   version-pr:
     runs-on: ubuntu-latest
