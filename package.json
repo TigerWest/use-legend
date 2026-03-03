@@ -2,7 +2,7 @@
   "name": "use-legend",
   "version": "0.0.0",
   "private": true,
-  "description": "utility library for Legend-State",
+  "description": "Observable-native React utility hooks inspired by VueUse and react-use, built on Legend-State",
   "workspaces": [
     "packages/*"
   ],

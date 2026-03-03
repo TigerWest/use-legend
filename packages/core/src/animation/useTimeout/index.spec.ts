@@ -80,7 +80,7 @@ describe("callback", () => {
 describe("controls=true", () => {
   it("returns { ready, isPending$, start, stop }", () => {
     const { result } = renderHook(() => useTimeout(1000, { controls: true }));
-    expect(result.current).toHaveProperty("ready");
+    expect(result.current).toHaveProperty("ready$");
     expect(result.current).toHaveProperty("isPending$");
     expect(result.current).toHaveProperty("start");
     expect(result.current).toHaveProperty("stop");

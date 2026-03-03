@@ -1,6 +1,8 @@
 # use-legend
 
-Utility and integration packages for [Legend-State](https://legendapp.com/open-source/state/).
+Observable-native React utility hooks built on [Legend-State](https://legendapp.com/open-source/state/).
+
+Inspired by [VueUse](https://vueuse.org/) and [react-use](https://github.com/streamich/react-use), `use-legend` brings the same composable utility philosophy — but built from the ground up for **observable-first reactivity**. Instead of `useState` and re-renders, every hook returns Legend-State observables for fine-grained updates without re-rendering the entire component tree.
 
 ## Packages
 

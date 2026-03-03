@@ -5,7 +5,7 @@ export default function UseRafFnDemo() {
   const count$ = useObservable(0);
   const delta$ = useObservable(0);
 
-  const { pause, resume } = useRafFn(({ delta }) => {
+  const { isActive$, pause, resume } = useRafFn(({ delta }) => {
     delta$.set(delta);
     count$.set(count$.peek() + 1);
   });
@@ -42,38 +42,25 @@ export default function UseRafFnDemo() {
           </span>
         </div>
       </div>
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button
-          type="button"
-          onClick={pause}
-          style={{
-            padding: "6px 16px",
-            borderRadius: "6px",
-            border: "1px solid var(--sl-color-orange, #f97316)",
-            background: "var(--sl-color-orange-low, #fff7ed)",
-            color: "var(--sl-color-orange, #f97316)",
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
-        >
-          Pause
-        </button>
-        <button
-          type="button"
-          onClick={resume}
-          style={{
-            padding: "6px 16px",
-            borderRadius: "6px",
-            border: "1px solid var(--sl-color-green, #22c55e)",
-            background: "var(--sl-color-green-low, #f0fdf4)",
-            color: "var(--sl-color-green, #22c55e)",
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
-        >
-          Resume
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={isActive$.get() ? pause : resume}
+        style={{
+          padding: "6px 16px",
+          borderRadius: "6px",
+          border: `1px solid ${isActive$.get() ? "var(--sl-color-orange, #f97316)" : "var(--sl-color-green, #22c55e)"}`,
+          background: isActive$.get()
+            ? "var(--sl-color-orange-low, #fff7ed)"
+            : "var(--sl-color-green-low, #f0fdf4)",
+          color: isActive$.get()
+            ? "var(--sl-color-orange, #f97316)"
+            : "var(--sl-color-green, #22c55e)",
+          cursor: "pointer",
+          fontFamily: "monospace",
+        }}
+      >
+        {isActive$.get() ? "Pause" : "Resume"}
+      </button>
     </div>
   );
 }

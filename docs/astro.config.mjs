@@ -7,19 +7,40 @@ import ecTwoSlash from "expressive-code-twoslash";
 import { fileURLToPath } from "node:url";
 import { autoWrap } from "@usels/vite-plugin-legend-memo";
 
+const DOCS_WARMUP_MODE = process.env.DOCS_WARMUP_MODE ?? "off";
+const DOCS_FAST_DEV = process.env.DOCS_FAST_DEV === "1";
+const DOCS_ENABLE_TWOSLASH = process.env.DOCS_ENABLE_TWOSLASH !== "0";
+
+const WARMUP_SSR_FILES_BY_MODE = {
+  off: [],
+  // Warm all MDX pages. Slow startup, but no first-hit cold transforms.
+  full: ["./src/content/docs/**/*.mdx"],
+};
+
+const warmupSsrFiles = DOCS_ENABLE_TWOSLASH
+  ? WARMUP_SSR_FILES_BY_MODE[DOCS_WARMUP_MODE] ?? WARMUP_SSR_FILES_BY_MODE.off
+  : [];
+
+const expressiveCodeThemes = DOCS_FAST_DEV
+  ? ["github-light"]
+  : ["github-dark", "github-light"];
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://tigerwest.github.io/use-legend",
   base: "/use-legend",
   vite: {
     server: {
-      warmup: {
-        // Pre-transform MDX files at server startup so TwoSlash's TypeScript
-        // Language Service is initialized before any browser request comes in.
-        // Without this, the first request triggers a cold-start that exceeds
-        // Vite's 60s transport timeout.
-        ssrFiles: ["./src/content/docs/**/*.mdx"],
-      },
+      warmup:
+        warmupSsrFiles.length > 0
+          ? {
+              // Pre-transform selected MDX files so TwoSlash's TypeScript
+              // Language Service initializes before browser requests.
+              // Use DOCS_WARMUP_MODE=full when first-hit cold transforms
+              // still exceed Vite's 60s transport timeout.
+              ssrFiles: warmupSsrFiles,
+            }
+          : undefined,
     },
     plugins: [autoWrap({ allGet: true })],
     resolve: {
@@ -60,26 +81,29 @@ export default defineConfig({
         },
       ],
       expressiveCode: {
-        themes: ["github-dark", "github-light"],
-        useStarlightDarkModeSwitch: true,
-        useStarlightUiThemeColors: true,
-        plugins: [
-          ecTwoSlash({
-            twoslashOptions: {
-              compilerOptions: {
-                lib: ["dom", "dom.iterable", "esnext"],
-                jsx: 4, // react-jsx
-                jsxImportSource: "react",
+        themes: expressiveCodeThemes,
+        useStarlightDarkModeSwitch: !DOCS_FAST_DEV,
+        useStarlightUiThemeColors: !DOCS_FAST_DEV,
+        plugins: DOCS_ENABLE_TWOSLASH
+          ? [
+              ecTwoSlash({
+                includeJsDoc: !DOCS_FAST_DEV,
+                twoslashOptions: {
+                  compilerOptions: {
+                    lib: ["dom", "dom.iterable", "esnext"],
+                    jsx: 4, // react-jsx
+                    jsxImportSource: "react",
 
-                moduleResolution: 100, // bundler
-                module: 99, // esnext
-                target: 99, // esnext
-                strictNullChecks: true,
-                noImplicitAny: false,
-              },
-            },
-          }),
-        ],
+                    moduleResolution: 100, // bundler
+                    module: 99, // esnext
+                    target: 99, // esnext
+                    strictNullChecks: true,
+                    noImplicitAny: false,
+                  },
+                },
+              }),
+            ]
+          : [],
       },
       components: {
         PageTitle: "./src/components/overrides/PageTitle.astro",

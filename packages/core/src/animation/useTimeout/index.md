@@ -4,7 +4,7 @@ description: Reactive boolean that becomes true after a given delay
 category: Animation
 ---
 
-A thin wrapper around `useTimeoutFn` that exposes a `ReadonlyObservable<boolean>` (`ready`) that flips to `true` when the timeout completes.
+A thin wrapper around `useTimeoutFn` that exposes a `ReadonlyObservable<boolean>` (`ready$`) that flips to `true` when the timeout completes.
 
 ## Demo
 
@@ -14,9 +14,9 @@ A thin wrapper around `useTimeoutFn` that exposes a `ReadonlyObservable<boolean>
 // @noErrors
 import { useTimeout } from "@usels/core";
 
-const ready = useTimeout(1000);
-// ready.get() === false while waiting
-// ready.get() === true after 1000ms
+const ready$ = useTimeout(1000);
+// ready$.get() === false while waiting
+// ready$.get() === true after 1000ms
 ```
 
 ### With callback
@@ -36,7 +36,7 @@ useTimeout(500, {
 // @noErrors
 import { useTimeout } from "@usels/core";
 
-const { ready, isPending, stop, start } = useTimeout(1000, { controls: true });
+const { ready$, isPending$, stop, start } = useTimeout(1000, { controls: true });
 
 stop(); // cancel the pending timeout
 start(); // restart the timer
@@ -48,7 +48,7 @@ start(); // restart the timer
 // @noErrors
 import { useTimeout } from "@usels/core";
 
-const { ready, start } = useTimeout(1000, {
+const { ready$, start } = useTimeout(1000, {
   controls: true,
   immediate: false,
 });
@@ -59,14 +59,14 @@ start();
 
 ## Notes
 
-### `ready` vs `isPending`
+### `ready$` vs `isPending$`
 
-| Observable                  | Meaning                               |
-| --------------------------- | ------------------------------------- |
-| `ready`                     | `true` when timeout has fired         |
-| `isPending` (controls only) | `true` while timeout is still waiting |
+| Observable                   | Meaning                               |
+| ---------------------------- | ------------------------------------- |
+| `ready$`                     | `true` when timeout has fired         |
+| `isPending$` (controls only) | `true` while timeout is still waiting |
 
-They are inverses: `ready = !isPending`.
+They are inverses: `ready$ = !isPending$`.
 
 ### Reactive `interval`
 
