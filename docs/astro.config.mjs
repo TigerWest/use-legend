@@ -18,12 +18,10 @@ const WARMUP_SSR_FILES_BY_MODE = {
 };
 
 const warmupSsrFiles = DOCS_ENABLE_TWOSLASH
-  ? WARMUP_SSR_FILES_BY_MODE[DOCS_WARMUP_MODE] ?? WARMUP_SSR_FILES_BY_MODE.off
+  ? (WARMUP_SSR_FILES_BY_MODE[DOCS_WARMUP_MODE] ?? WARMUP_SSR_FILES_BY_MODE.off)
   : [];
 
-const expressiveCodeThemes = DOCS_FAST_DEV
-  ? ["github-light"]
-  : ["github-dark", "github-light"];
+const expressiveCodeThemes = DOCS_FAST_DEV ? ["github-light"] : ["github-dark", "github-light"];
 
 // https://astro.build/config
 export default defineConfig({
@@ -47,7 +45,7 @@ export default defineConfig({
       alias: {
         "@demos/core": fileURLToPath(new URL("../packages/core/src", import.meta.url)),
         "@demos/integrations": fileURLToPath(
-          new URL("../packages/integrations/src", import.meta.url),
+          new URL("../packages/integrations/src", import.meta.url)
         ),
       },
     },
@@ -111,12 +109,16 @@ export default defineConfig({
       sidebar: [
         {
           label: "Guides",
-          items: [{ label: "Getting Started", slug: "guides/example" }],
+          items: [
+            { label: "Getting Started", slug: "guides/getting-started" },
+            { label: "Best Practices", slug: "guides/best-practices" },
+            { label: "ESLint Plugin", slug: "guides/eslint" },
+          ],
         },
-        {
-          label: "Reference",
-          autogenerate: { directory: "reference" },
-        },
+        // {
+        //   label: "Reference",
+        //   autogenerate: { directory: "reference" },
+        // },
         {
           label: "Core",
           autogenerate: { directory: "core" },

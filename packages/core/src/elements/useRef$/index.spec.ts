@@ -3,7 +3,7 @@ import { render, renderHook, act } from "@testing-library/react";
 import { useObserve } from "@legendapp/state/react";
 import { createElement, createRef, forwardRef, useRef } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { useRef$ } from ".";
+import { getElement, useRef$ } from ".";
 
 const noop = () => {};
 
@@ -199,5 +199,32 @@ describe("useRef$()", () => {
 
     // called again when element changes
     expect(observeSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("tracks unmount when element is bound with ref={el$}", () => {
+    const observeSpy = vi.fn();
+
+    const { result } = renderHook(() => {
+      const el$ = useRef$<HTMLDivElement>();
+      useObserve(() => {
+        getElement(el$);
+        observeSpy();
+      });
+      return el$;
+    });
+
+    expect(observeSpy).toHaveBeenCalledTimes(1);
+    expect(result.current.get()).toBeNull();
+
+    const { unmount } = render(createElement("div", { ref: result.current }));
+    expect(observeSpy).toHaveBeenCalledTimes(2);
+    expect(result.current.get()).not.toBeNull();
+
+    act(() => {
+      unmount();
+    });
+
+    expect(observeSpy).toHaveBeenCalledTimes(3);
+    expect(result.current.get()).toBeNull();
   });
 });
