@@ -13,6 +13,7 @@
     }
   },
   "dependencies": {
+    "date-fns": "^4.1.0",
     "es-toolkit": "^1.0.0"
   },
   "scripts": {
