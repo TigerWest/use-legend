@@ -1,7 +1,7 @@
 ---
 title: useTimeAgo
 description: Reactive human-readable time-ago string that auto-updates (powered by date-fns)
-category: Animation
+category: Timer
 ---
 
 Returns a `ReadonlyObservable<string>` with a human-readable relative time string (e.g. "5 minutes ago", "in 2 days") that auto-updates at a configurable interval.

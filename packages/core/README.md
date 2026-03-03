@@ -52,7 +52,7 @@ function SizeDisplay() {
 | `useWindowFocus` | Track window focus state |
 | `useWindowSize` | Track window dimensions |
 
-### Animation
+### Timer
 
 | Hook | Description |
 |------|-------------|

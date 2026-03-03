@@ -1,7 +1,7 @@
 ---
 title: useNow
 description: Reactive current Date that auto-updates on every animation frame or interval
-category: Animation
+category: Timer
 ---
 
 Returns a `ReadonlyObservable<Date>` that reflects the current time, updated continuously via `requestAnimationFrame` (default) or a fixed interval.

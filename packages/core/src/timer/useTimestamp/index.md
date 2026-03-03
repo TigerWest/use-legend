@@ -1,7 +1,7 @@
 ---
 title: useTimestamp
 description: Reactive Unix timestamp (ms) that auto-updates on every animation frame or interval
-category: Animation
+category: Timer
 ---
 
 Returns a `ReadonlyObservable<number>` containing the current Unix timestamp in milliseconds, updated continuously via `requestAnimationFrame` (default) or a fixed interval.

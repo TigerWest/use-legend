@@ -1,7 +1,7 @@
 ---
 title: useIntervalFn
 description: Reactive setInterval wrapper with pause/resume control
-category: Animation
+category: Timer
 ---
 
 Execute a function repeatedly at a given interval with reactive `isActive` state and pause/resume control.

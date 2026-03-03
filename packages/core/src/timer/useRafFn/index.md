@@ -1,7 +1,7 @@
 ---
 title: useRafFn
 description: Call a function on every requestAnimationFrame with pause/resume control
-category: Animation
+category: Timer
 ---
 
 Execute a function on every animation frame (`requestAnimationFrame`) with reactive `isActive` state and pause/resume control.

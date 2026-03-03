@@ -1,7 +1,7 @@
 ---
 title: useTimeout
 description: Reactive boolean that becomes true after a given delay
-category: Animation
+category: Timer
 ---
 
 A thin wrapper around `useTimeoutFn` that exposes a `ReadonlyObservable<boolean>` (`ready$`) that flips to `true` when the timeout completes.

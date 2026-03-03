@@ -30,13 +30,13 @@ export * from "./function/usePeekInitial";
 
 export * from "./shared/filters";
 
-export * from "./animation/useTimeoutFn";
-export * from "./animation/useIntervalFn";
-export * from "./animation/useRafFn";
-export * from "./animation/useNow";
-export * from "./animation/useTimestamp";
-export * from "./animation/useFps";
-export * from "./animation/useTimeout";
-export * from "./animation/useInterval";
-export * from "./animation/useTimeAgo";
-export * from "./animation/useAnimate";
+export * from "./timer/useTimeoutFn";
+export * from "./timer/useIntervalFn";
+export * from "./timer/useRafFn";
+export * from "./timer/useNow";
+export * from "./timer/useTimestamp";
+export * from "./timer/useFps";
+export * from "./timer/useTimeout";
+export * from "./timer/useInterval";
+export * from "./timer/useTimeAgo";
+export * from "./timer/useAnimate";

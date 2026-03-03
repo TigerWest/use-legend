@@ -1,7 +1,7 @@
 ---
 title: useFps
 description: Reactive frames-per-second counter using requestAnimationFrame
-category: Animation
+category: Timer
 ---
 
 Returns a `ReadonlyObservable<number>` that tracks the current frames-per-second, sampled every N frames to reduce noise.

@@ -1,7 +1,7 @@
 ---
 title: useInterval
 description: Reactive counter that increments on every interval tick
-category: Animation
+category: Timer
 ---
 
 A thin wrapper around `useIntervalFn` that exposes a `ReadonlyObservable<number>` counter that increments on each tick.

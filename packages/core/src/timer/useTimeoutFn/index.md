@@ -1,7 +1,7 @@
 ---
 title: useTimeoutFn
 description: Reactive wrapper for setTimeout with start/stop control
-category: Animation
+category: Timer
 ---
 
 Execute a function after a given delay with reactive `isPending$` state and manual start/stop control.
