@@ -1,6 +1,6 @@
 {
   "name": "@usels/eslint-plugin",
-  "version": "0.0.3-beta.3",
+  "version": "0.0.3-beta.4",
   "description": "ESLint plugin for Legend-State and use-legend utilities",
   "keywords": [
     "eslint",
