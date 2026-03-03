@@ -119,6 +119,30 @@ describe("pause / resume", () => {
       });
     }).not.toThrow();
   });
+
+  it("pause() called inside frame callback does not queue another frame", () => {
+    let pauseRef: (() => void) | undefined;
+    const fn = vi.fn(() => pauseRef?.());
+    const { result } = renderHook(() => {
+      const controls = useRafFn(fn);
+      pauseRef = controls.pause;
+      return controls;
+    });
+
+    act(() => {
+      flushRaf(16);
+    });
+
+    expect(fn).toHaveBeenCalledOnce();
+    expect(result.current.isActive$.get()).toBe(false);
+    expect(rafCallbacks.size).toBe(0);
+
+    act(() => {
+      flushRaf(32);
+    });
+
+    expect(fn).toHaveBeenCalledOnce();
+  });
 });
 
 // ---------------------------------------------------------------------------

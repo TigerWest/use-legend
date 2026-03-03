@@ -94,6 +94,23 @@ packages/
   integrations/src/{libraryName}/{hookName}/demo.tsx
 ```
 
+### Demo Code Rules
+
+- Since the babel plugin (`@usels/vite-plugin-legend-memo`) is applied, do not use wrappers like `Computed` or `useSelector`.
+- When reading Observable values in JSX, call `variable$.get()` directly.
+
+```tsx
+// ❌ Bad — using Computed wrapper
+<Computed>{() => <span>{count$.get()}</span>}</Computed>;
+
+// ❌ Bad — using useSelector
+const count = useSelector(count$);
+return <span>{count}</span>;
+
+// ✅ Good — call .get() directly in JSX (babel plugin auto-tracks reactivity)
+return <span>{count$.get()}</span>;
+```
+
 ````
 
 If a demo file exists, `collect-docs.ts` automatically generates it as `.mdx` and imports the Demo component.

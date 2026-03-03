@@ -39,3 +39,4 @@ export * from "./animation/useFps";
 export * from "./animation/useTimeout";
 export * from "./animation/useInterval";
 export * from "./animation/useTimeAgo";
+export * from "./animation/useAnimate";
