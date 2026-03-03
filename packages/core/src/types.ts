@@ -65,3 +65,18 @@ export interface Stoppable<StartFnArgs extends any[] = any[]> {
   stop: Fn;
   start: (...args: StartFnArgs) => void;
 }
+
+// ---------------------------------------------------------------------------
+// Module augmentation: allow ReadonlyObservable in Legend-State React components
+// ---------------------------------------------------------------------------
+// Legend-State's Selector<T> requires ObservableParam<T> (= ImmutableObservableSimple & MutableObservableSimple),
+// but ReadonlyObservable (= ImmutableObservableBase) intentionally omits MutableObservableSimple.
+// This overload lets <Show if={readonlyObs$}> work without weakening ReadonlyObservable's type safety.
+declare module "@legendapp/state/react" {
+  function Show<T>(props: {
+    if: ImmutableObservableBase<T>;
+    else?: import("react").ReactNode | (() => import("react").ReactNode);
+    wrap?: (children: import("react").ReactNode) => import("react").ReactNode;
+    children: import("react").ReactNode | ((value?: T) => import("react").ReactNode);
+  }): import("react").ReactElement;
+}
