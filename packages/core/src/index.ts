@@ -29,6 +29,7 @@ export * from "@browser/useEventListener";
 export * from "@browser/useMediaQuery";
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/usePeekInitial";
+export * from "@reactivity/useAutoReset";
 export * from "@reactivity/useDebounced";
 export * from "@reactivity/useThrottled";
 

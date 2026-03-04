@@ -1,7 +1,9 @@
+import { useObservable } from "@legendapp/state/react";
 import { useNow } from ".";
 
 export default function UseNowDemo() {
   const now$ = useNow();
+  const nowLocale$ = useObservable(() => now$.get().toLocaleString());
 
   return (
     <div
@@ -22,9 +24,7 @@ export default function UseNowDemo() {
         }}
       >
         <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>Now: </span>
-        <span style={{ color: "var(--sl-color-white, #1e293b)" }}>
-          {now$.get().toLocaleString()}
-        </span>
+        <span style={{ color: "var(--sl-color-white, #1e293b)" }}>{nowLocale$.get()}</span>
       </div>
       <p
         style={{
