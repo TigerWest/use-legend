@@ -2,18 +2,9 @@
 import type { Observable } from "@legendapp/state";
 import { useMount, useObservable, useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
-import type { MaybeObservable, TimerHandle } from "../../types";
+import type { MaybeObservable, TimerHandle, WidenPrimitive } from "../../types";
 import { get } from "@utilities/get";
 import { peek } from "@utilities/peek";
-
-/** Widens literal types to their base primitive (e.g. `""` → `string`, `0` → `number`). */
-type Widen<T> = T extends string
-  ? string
-  : T extends number
-    ? number
-    : T extends boolean
-      ? boolean
-      : T;
 
 /**
  * Observable that automatically resets to a default value after a specified delay.
@@ -32,7 +23,7 @@ type Widen<T> = T extends string
 export function useAutoReset<T>(
   defaultValue: MaybeObservable<T>,
   afterMs: MaybeObservable<number> = 1000
-): Observable<Widen<T>> {
+): Observable<WidenPrimitive<T>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see useDebounced for rationale
   const value$ = useObservable<any>(peek(defaultValue));
   const timer = useRef<TimerHandle>(undefined);
@@ -53,5 +44,5 @@ export function useAutoReset<T>(
 
   useMount(() => () => clearTimeout(timer.current));
 
-  return value$ as unknown as Observable<Widen<T>>;
+  return value$ as unknown as Observable<WidenPrimitive<T>>;
 }

@@ -30,6 +30,7 @@ export * from "@browser/useMediaQuery";
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/usePeekInitial";
 export * from "@reactivity/useAutoReset";
+export * from "@reactivity/useManualReset";
 export * from "@reactivity/useDebounced";
 export * from "@reactivity/useThrottled";
 

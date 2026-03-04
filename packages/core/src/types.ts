@@ -54,6 +54,15 @@ export type Awaitable<T> = Promise<T> | T;
 export type PromisifyFn<T extends AnyFn> = (...args: Parameters<T>) => Promise<ReturnType<T>>;
 export type TimerHandle = ReturnType<typeof setTimeout> | undefined;
 
+/** Widens literal types to their base primitive (e.g. `""` → `string`, `0` → `number`). */
+export type WidenPrimitive<T> = T extends string
+  ? string
+  : T extends number
+    ? number
+    : T extends boolean
+      ? boolean
+      : T;
+
 export interface Pausable {
   readonly isActive$: ReadonlyObservable<boolean>;
   pause: Fn;
