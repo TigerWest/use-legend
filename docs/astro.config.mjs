@@ -47,6 +47,15 @@ export default defineConfig({
         "@demos/integrations": fileURLToPath(
           new URL("../packages/integrations/src", import.meta.url)
         ),
+        // core package path aliases (used by demo.tsx files)
+        "@browser": fileURLToPath(new URL("../packages/core/src/browser", import.meta.url)),
+        "@elements": fileURLToPath(new URL("../packages/core/src/elements", import.meta.url)),
+        "@reactivity": fileURLToPath(new URL("../packages/core/src/reactivity", import.meta.url)),
+        "@sensors": fileURLToPath(new URL("../packages/core/src/sensors", import.meta.url)),
+        "@shared": fileURLToPath(new URL("../packages/core/src/shared", import.meta.url)),
+        "@timer": fileURLToPath(new URL("../packages/core/src/timer", import.meta.url)),
+        "@utilities": fileURLToPath(new URL("../packages/core/src/utilities", import.meta.url)),
+        "@components": fileURLToPath(new URL("../packages/core/src/components", import.meta.url)),
       },
     },
   },

@@ -1,8 +1,8 @@
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { ObservableHint } from "@legendapp/state";
 import { useMount, useObservable, useObserve } from "@legendapp/state/react";
-import { getElement } from "../useRef$";
-import type { MaybeElement } from "../useRef$";
+import { getElement } from "@elements/useRef$";
+import type { MaybeElement } from "@elements/useRef$";
 
 export function useParentElement(
   element?: MaybeElement

@@ -1,4 +1,4 @@
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useElementSize } from ".";
 
 export default function UseElementSizeDemo() {

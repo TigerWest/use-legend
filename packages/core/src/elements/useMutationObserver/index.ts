@@ -1,8 +1,8 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useMount, useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
-import type { MaybeElement } from "../useRef$";
-import { normalizeTargets } from "../useResizeObserver";
+import type { MaybeElement } from "@elements/useRef$";
+import { normalizeTargets } from "@elements/useResizeObserver";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentional alias to allow future extension without breaking API
 export interface UseMutationObserverOptions extends MutationObserverInit {}

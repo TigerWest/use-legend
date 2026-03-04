@@ -1,4 +1,4 @@
-import { useRef$ } from "../../elements/useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useScroll } from ".";
 
 const badge = (active: boolean): React.CSSProperties => ({

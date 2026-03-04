@@ -1,11 +1,11 @@
 "use client";
 import { ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable, useMount, useObserveEffect } from "@legendapp/state/react";
-import { useEventListener } from "../../browser/useEventListener";
-import { useMediaQuery } from "../../browser/useMediaQuery";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { useWhenMounted } from "../../utilities/useWhenMounted";
-import { defaultWindow, defaultDocument } from "../../shared/configurable";
+import { useEventListener } from "@browser/useEventListener";
+import { useMediaQuery } from "@browser/useMediaQuery";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { useWhenMounted } from "@utilities/useWhenMounted";
+import { defaultWindow, defaultDocument } from "@shared/configurable";
 import type { DeepMaybeObservable } from "../../types";
 
 export interface UseWindowSizeOptions {

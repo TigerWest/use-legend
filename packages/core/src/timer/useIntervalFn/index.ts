@@ -2,7 +2,7 @@
 import { useMount, useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useRef } from "react";
 import type { AnyFn, MaybeObservable, Pausable } from "../../types";
-import { get } from "../../utilities/get";
+import { get } from "@utilities/get";
 
 export interface UseIntervalFnOptions {
   /** If true, calls resume() immediately on mount. @default true */

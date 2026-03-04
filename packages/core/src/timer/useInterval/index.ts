@@ -7,8 +7,8 @@ import type {
   Pausable,
   ReadonlyObservable,
 } from "../../types";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { useIntervalFn } from "../useIntervalFn";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { useIntervalFn } from "@timer/useIntervalFn";
 
 export interface UseIntervalOptions<Controls extends boolean = false> {
   controls?: Controls;

@@ -2,10 +2,10 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import type { DeepMaybeObservable } from "../../types";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import type { MaybeElement } from "../useRef$";
-import { useIntersectionObserver } from "../useIntersectionObserver";
-import type { UseIntersectionObserverOptions } from "../useIntersectionObserver";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import type { MaybeElement } from "@elements/useRef$";
+import { useIntersectionObserver } from "@elements/useIntersectionObserver";
+import type { UseIntersectionObserverOptions } from "@elements/useIntersectionObserver";
 
 export interface UseElementVisibilityOptions {
   /** Initial visibility value. Default: false */

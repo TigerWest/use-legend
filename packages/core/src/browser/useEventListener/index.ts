@@ -2,12 +2,12 @@
 import { isObservable, type Observable } from "@legendapp/state";
 import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/state/react";
 import { useLayoutEffect, useRef } from "react";
-import { isRef$, type MaybeElement } from "../../elements/useRef$";
-import { normalizeTargets } from "../../shared/normalizeTargets";
-import { get } from "../../utilities/get";
+import { isRef$, type MaybeElement } from "@elements/useRef$";
+import { normalizeTargets } from "@shared/normalizeTargets";
+import { get } from "@utilities/get";
 import type { Arrayable, MaybeObservable } from "../../types";
-import { toArray } from "../../shared/utils";
-import { defaultWindow } from "../../shared/configurable";
+import { toArray } from "@shared/utils";
+import { defaultWindow } from "@shared/configurable";
 
 /**
  * Returns true if the value looks like an event name argument (string or

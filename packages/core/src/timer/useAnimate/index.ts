@@ -3,16 +3,16 @@ import { batch, ObservableHint } from "@legendapp/state";
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
-import type { MaybeElement } from "../../elements/useRef$";
-import { getElement, peekElement } from "../../elements/useRef$";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { usePeekInitial } from "../../reactivity/usePeekInitial";
-import { useSupported } from "../../utilities/useSupported";
-import { useRafFn } from "../useRafFn";
-import { useEventListener } from "../../browser/useEventListener";
-import { get } from "../../utilities/get";
-import { defaultWindow } from "../../shared/configurable";
-import type { ConfigurableWindow } from "../../shared/configurable";
+import type { MaybeElement } from "@elements/useRef$";
+import { getElement, peekElement } from "@elements/useRef$";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { usePeekInitial } from "@reactivity/usePeekInitial";
+import { useSupported } from "@utilities/useSupported";
+import { useRafFn } from "@timer/useRafFn";
+import { useEventListener } from "@browser/useEventListener";
+import { get } from "@utilities/get";
+import { defaultWindow } from "@shared/configurable";
+import type { ConfigurableWindow } from "@shared/configurable";
 import type { ReadonlyObservable, Fn, MaybeObservable, DeepMaybeObservable } from "../../types";
 
 // ---------------------------------------------------------------------------

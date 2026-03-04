@@ -1,5 +1,5 @@
 import { useObservable } from "@legendapp/state/react";
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useDraggable } from ".";
 
 export default function Demo() {

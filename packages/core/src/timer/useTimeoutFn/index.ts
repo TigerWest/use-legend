@@ -2,7 +2,7 @@
 import { useMount, useObservable } from "@legendapp/state/react";
 import { useRef } from "react";
 import type { AnyFn, MaybeObservable, Stoppable, TimerHandle } from "../../types";
-import { get } from "../../utilities/get";
+import { get } from "@utilities/get";
 
 export interface UseTimeoutFnOptions {
   /** If true, calls start() immediately on mount. @default true */

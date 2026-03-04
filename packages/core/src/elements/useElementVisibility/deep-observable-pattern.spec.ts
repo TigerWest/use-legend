@@ -26,10 +26,10 @@ import { useObservable } from "@legendapp/state/react";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { get } from "../../utilities/get";
-import { useRef$ } from "../useRef$";
+import { get } from "@utilities/get";
+import { useRef$ } from "@elements/useRef$";
 import { useElementVisibility } from ".";
-import { useIntersectionObserver } from "../useIntersectionObserver";
+import { useIntersectionObserver } from "@elements/useIntersectionObserver";
 
 // --- IntersectionObserver mock ---
 

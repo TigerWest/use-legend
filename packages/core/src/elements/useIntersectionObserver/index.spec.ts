@@ -4,7 +4,7 @@ import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useIntersectionObserver } from ".";
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 

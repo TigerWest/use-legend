@@ -1,5 +1,5 @@
 import { Computed } from "@legendapp/state/react";
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useElementVisibility } from ".";
 
 export default function UseElementVisibilityDemo() {

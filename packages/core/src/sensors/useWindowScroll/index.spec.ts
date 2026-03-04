@@ -2,7 +2,7 @@
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useWindowScroll } from ".";
-import * as useScrollModule from "../useScroll";
+import * as useScrollModule from "@sensors/useScroll";
 
 describe("useWindowScroll()", () => {
   beforeEach(() => {

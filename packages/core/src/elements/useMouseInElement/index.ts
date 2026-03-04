@@ -1,14 +1,14 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { isWindow } from "../../shared";
-import { defaultWindow, defaultDocument } from "../../shared/configurable";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
+import { isWindow } from "@shared";
+import { defaultWindow, defaultDocument } from "@shared/configurable";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import type { DeepMaybeObservable } from "../../types";
-import { type MaybeElement, peekElement } from "../useRef$";
-import { useResizeObserver } from "../useResizeObserver";
-import { useMutationObserver } from "../useMutationObserver";
-import { useEventListener } from "../../browser/useEventListener";
+import { type MaybeElement, peekElement } from "@elements/useRef$";
+import { useResizeObserver } from "@elements/useResizeObserver";
+import { useMutationObserver } from "@elements/useMutationObserver";
+import { useEventListener } from "@browser/useEventListener";
 
 export interface UseMouseInElementOptions {
   /** Also update elementX/Y when mouse is outside the element. Default: true */

@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useResizeObserver } from ".";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));

@@ -1,4 +1,4 @@
-import { getElement, type MaybeElement } from "../../elements/useRef$";
+import { getElement, type MaybeElement } from "@elements/useRef$";
 
 /**
  * Normalizes one or more observable-element targets into a plain Element[].

@@ -8,11 +8,11 @@ import type {
   Pausable,
   ReadonlyObservable,
 } from "../../types";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { usePeekInitial } from "../../reactivity/usePeekInitial";
-import { useIntervalFn } from "../useIntervalFn";
-import { get } from "../../utilities/get";
-import { peek } from "../../utilities/peek";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { usePeekInitial } from "@reactivity/usePeekInitial";
+import { useIntervalFn } from "@timer/useIntervalFn";
+import { get } from "@utilities/get";
+import { peek } from "@utilities/peek";
 
 export interface UseCountdownOptions {
   /** Interval between ticks in ms — mount-time-only @default 1000 */

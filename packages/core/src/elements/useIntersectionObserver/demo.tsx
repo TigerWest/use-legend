@@ -1,4 +1,4 @@
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useIntersectionObserver } from ".";
 import { Computed, useObservable } from "@legendapp/state/react";
 

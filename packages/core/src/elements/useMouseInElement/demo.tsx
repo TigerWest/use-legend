@@ -1,4 +1,4 @@
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useMouseInElement } from ".";
 
 export default function UseMouseInElementDemo() {

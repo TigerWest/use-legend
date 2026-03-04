@@ -1,4 +1,4 @@
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useDropZone } from "./";
 
 export default function Demo() {

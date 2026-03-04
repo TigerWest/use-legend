@@ -1,8 +1,8 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { getElement, MaybeElement } from "../useRef$";
-import { useResizeObserver } from "../useResizeObserver";
+import { getElement, MaybeElement } from "@elements/useRef$";
+import { useResizeObserver } from "@elements/useResizeObserver";
 
 export interface UseElementSizeOptions {
   box?: "content-box" | "border-box" | "device-pixel-content-box";

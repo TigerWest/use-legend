@@ -1,13 +1,13 @@
 import type { Observable } from "@legendapp/state";
 import { useMount, useObservable, useUnmount } from "@legendapp/state/react";
 import { useCallback, useRef } from "react";
-import { type MaybeElement, peekElement } from "../useRef$";
-import { useResizeObserver } from "../useResizeObserver";
-import { useMutationObserver } from "../useMutationObserver";
-import { useEventListener } from "../../browser/useEventListener";
-import { isWindow } from "../../shared";
-import { defaultWindow } from "../../shared/configurable";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
+import { type MaybeElement, peekElement } from "@elements/useRef$";
+import { useResizeObserver } from "@elements/useResizeObserver";
+import { useMutationObserver } from "@elements/useMutationObserver";
+import { useEventListener } from "@browser/useEventListener";
+import { isWindow } from "@shared";
+import { defaultWindow } from "@shared/configurable";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import type { DeepMaybeObservable } from "../../types";
 
 export interface UseElementBoundingOptions {

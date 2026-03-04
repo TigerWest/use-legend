@@ -4,8 +4,8 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "pnpm dev:off",
-    "dev:full": "DOCS_FAST_DEV=1 DOCS_ENABLE_TWOSLASH=0 DOCS_WARMUP_MODE=full tsx scripts/collect-docs.ts && concurrently \"tsx scripts/watch-docs.ts\" \"astro dev\"",
-    "dev:off": "DOCS_FAST_DEV=1 DOCS_ENABLE_TWOSLASH=0 DOCS_WARMUP_MODE=off tsx scripts/collect-docs.ts && concurrently \"tsx scripts/watch-docs.ts\" \"astro dev\"",
+    "dev:full": "DOCS_FAST_DEV=1 DOCS_ENABLE_TWOSLASH=0 DOCS_WARMUP_MODE=full tsx scripts/collect-docs.ts && concurrently \"tsx scripts/watch-docs.ts\" \"astro dev --host\"",
+    "dev:off": "DOCS_FAST_DEV=1 DOCS_ENABLE_TWOSLASH=0 DOCS_WARMUP_MODE=off tsx scripts/collect-docs.ts && concurrently \"tsx scripts/watch-docs.ts\" \"astro dev --host\"",
     "start": "astro dev",
     "build": "tsx scripts/collect-docs.ts && astro build",
     "preview": "astro preview",

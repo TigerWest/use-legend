@@ -8,9 +8,9 @@ import type {
   Pausable,
   ReadonlyObservable,
 } from "../../types";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { get } from "../../utilities/get";
-import { useNow } from "../useNow";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { get } from "@utilities/get";
+import { useNow } from "@timer/useNow";
 
 export type UseTimeAgoUnitNamesDefault =
   | "second"

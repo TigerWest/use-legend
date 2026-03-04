@@ -1,7 +1,7 @@
 "use client";
 import type { Observable } from "@legendapp/state";
 import { useObservable, useMount } from "@legendapp/state/react";
-import { defaultDocument } from "../../shared/configurable";
+import { defaultDocument } from "@shared/configurable";
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useDocumentVisibility(): Observable<DocumentVisibilityState> {

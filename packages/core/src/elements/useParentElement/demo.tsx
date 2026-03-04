@@ -1,7 +1,7 @@
 import { ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { Computed, useObservable } from "@legendapp/state/react";
-import { useEventListener } from "../../browser/useEventListener";
+import { useEventListener } from "@browser/useEventListener";
 import { useParentElement } from ".";
 
 // HARD CODE OFFSET

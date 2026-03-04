@@ -6,7 +6,7 @@ import { useState } from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-import { useRef$ } from "../../elements/useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useEventListener } from ".";
 
 afterEach(() => {

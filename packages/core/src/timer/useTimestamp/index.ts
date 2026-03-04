@@ -1,10 +1,10 @@
 "use client";
 import { useObservable } from "@legendapp/state/react";
 import type { DeepMaybeObservable, Pausable, ReadonlyObservable } from "../../types";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { usePeekInitial } from "../../reactivity/usePeekInitial";
-import { useRafFn } from "../useRafFn";
-import { useIntervalFn } from "../useIntervalFn";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { usePeekInitial } from "@reactivity/usePeekInitial";
+import { useRafFn } from "@timer/useRafFn";
+import { useIntervalFn } from "@timer/useIntervalFn";
 
 export interface UseTimestampOptions<Controls extends boolean = false> {
   controls?: Controls;

@@ -1,4 +1,4 @@
-import { useRef$ } from "../../elements/useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useAnimate } from ".";
 
 export default function UseAnimateDemo() {

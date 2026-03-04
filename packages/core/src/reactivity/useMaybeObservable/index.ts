@@ -1,10 +1,10 @@
 import { isObservable, ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useMemo, useRef } from "react";
-import { get } from "../../utilities/get";
+import { get } from "@utilities/get";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
-import { getElement } from "../../elements/useRef$";
-import type { MaybeElement } from "../../elements/useRef$";
+import { getElement } from "@elements/useRef$";
+import type { MaybeElement } from "@elements/useRef$";
 
 /**
  * Per-field resolution hint for the object-form transform.

@@ -1,10 +1,10 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useLayoutEffect, useRef } from "react";
-import { normalizeTargets } from "../../shared/normalizeTargets";
-import { MaybeElement } from "../useRef$";
+import { normalizeTargets } from "@shared/normalizeTargets";
+import { MaybeElement } from "@elements/useRef$";
 
-export { normalizeTargets } from "../../shared/normalizeTargets";
+export { normalizeTargets } from "@shared/normalizeTargets";
 
 export interface UseResizeObserverOptions {
   box?: "content-box" | "border-box" | "device-pixel-content-box";

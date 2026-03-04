@@ -5,7 +5,7 @@ import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-import { useRef$ } from "../useRef$";
+import { useRef$ } from "@elements/useRef$";
 import { useMutationObserver } from ".";
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));

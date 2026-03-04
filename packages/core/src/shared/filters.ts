@@ -8,7 +8,7 @@
 import { debounce, throttle } from "es-toolkit";
 import { observable } from "@legendapp/state";
 import type { AnyFn, Awaitable, MaybeObservable, Pausable } from "../types";
-import { get } from "../utilities/get";
+import { get } from "@utilities/get";
 import { noop } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic event filter, matches VueUse pattern

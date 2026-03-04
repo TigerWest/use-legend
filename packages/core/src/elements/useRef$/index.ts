@@ -2,7 +2,7 @@ import { isObservable, ObservableHint } from "@legendapp/state";
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { type Ref, type RefObject, useMemo, useRef } from "react";
-import { isWindow } from "../../shared";
+import { isWindow } from "@shared";
 
 export type Ref$<T> = ((node: T | null) => void) & {
   /** returns element, registers tracking when called inside useObserve */
