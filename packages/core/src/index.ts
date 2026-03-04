@@ -33,6 +33,7 @@ export * from "@reactivity/useAutoReset";
 export * from "@reactivity/useManualReset";
 export * from "@reactivity/useDebounced";
 export * from "@reactivity/useThrottled";
+export * from "@reactivity/useComputedWithControl";
 
 export * from "@shared/filters";
 
