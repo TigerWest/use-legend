@@ -19,11 +19,16 @@ packages/core/src/{category}/{hookName}/
   lifecycle.spec.ts      # Element lifecycle resource management tests
   observable.spec.ts     # Observable / reactive option tests
   edgeCases.spec.ts      # Edge case tests
-  index.browser.spec.ts  # Real browser environment tests
   types.spec.ts          # TypeScript type-level tests
+  # Browser variants (when a category needs real browser APIs)
+  # {category}.browser.spec.ts
+  # e.g. lifecycle.browser.spec.ts, rerender.browser.spec.ts
 ```
 
 Not every file is required. Only create files relevant to the hook's characteristics.
+Any category file can have a `.browser.spec.ts` variant when its scenarios require a real browser
+(e.g. `lifecycle.browser.spec.ts`, `rerender.browser.spec.ts`).
+The browser variant follows the same structure and naming conventions as its JSDOM counterpart.
 
 ---
 
@@ -213,10 +218,15 @@ Boundary conditions, error handling, and special scenarios not covered by core f
 
 ---
 
-## index.browser.spec.ts — Real Browser Environment Tests
+## \*.browser.spec.ts — Real Browser Environment Tests
 
 Tests that run in a real browser (e.g. Playwright), not JSDOM.
 Use when browser APIs cannot be adequately mocked.
+
+`index.browser.spec.ts` covers core functionality in a real browser.
+Other categories can also have browser variants when needed:
+`lifecycle.browser.spec.ts`, `rerender.browser.spec.ts`, `observable.browser.spec.ts`, etc.
+Each browser variant follows the same structure as its JSDOM counterpart.
 
 ### What to Include
 
