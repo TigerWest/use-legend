@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.0 (2026-03-04)
+
+
+
 ## v0.0.3-beta.5 (2026-03-03)
 
 ## What's Changed
