@@ -12,6 +12,11 @@ export default defineConfig({
     // Global test APIs
     globals: true,
 
+    // Type checking (runs alongside runtime tests)
+    typecheck: {
+      enabled: true,
+    },
+
     // Coverage configuration specific to utils package
     coverage: {
       provider: 'v8',

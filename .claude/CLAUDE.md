@@ -1,8 +1,15 @@
 # Project Rules
 
+## Required Reading Before Writing Code
 
-* 라이브러리 함수별 문서작성가이드 
-@.claude/rules/docs-style.md
-## 코드 작성 전 필수 확인
-packages/core/src, packages/core/integrations 파일 수정 시 반드시 먼저 읽을 것:
+Before modifying files in `packages/core/src` or `packages/integrations/src`, read these first:
 - @.claude/rules/library-implementation-guide.md
+
+## Documentation Guide
+
+- @.claude/rules/docs-style.md
+
+## Testing Guide
+
+Before writing or modifying test files (`*.spec.ts`, `*.spec.tsx`), read:
+- @.claude/rules/testing-guide.md
