@@ -1,12 +1,12 @@
 import type { Observable } from "@legendapp/state";
 import { useMount, useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 import { isWindow } from "../../shared";
 import type { MaybeElement } from "../useRef$";
 import { normalizeTargets } from "../useResizeObserver";
-import { get } from "../../function/get";
+import { get } from "../../utilities/get";
 
 export interface UseIntersectionObserverOptions {
   /** Whether to start observing immediately on mount. Default: true */

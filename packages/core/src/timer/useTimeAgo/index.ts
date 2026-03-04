@@ -8,8 +8,8 @@ import type {
   Pausable,
   ReadonlyObservable,
 } from "../../types";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
-import { get } from "../../function/get";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
+import { get } from "../../utilities/get";
 import { useNow } from "../useNow";
 
 export type UseTimeAgoUnitNamesDefault =

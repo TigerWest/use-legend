@@ -26,7 +26,7 @@ import { useObservable } from "@legendapp/state/react";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { get } from "../../function/get";
+import { get } from "../../utilities/get";
 import { useRef$ } from "../useRef$";
 import { useElementVisibility } from ".";
 import { useIntersectionObserver } from "../useIntersectionObserver";

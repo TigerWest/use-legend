@@ -1,8 +1,8 @@
 "use client";
 import { useObservable } from "@legendapp/state/react";
 import type { DeepMaybeObservable, Pausable, ReadonlyObservable } from "../../types";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
-import { usePeekInitial } from "../../function/usePeekInitial";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
+import { usePeekInitial } from "../../reactivity/usePeekInitial";
 import { useRafFn } from "../useRafFn";
 import { useIntervalFn } from "../useIntervalFn";
 

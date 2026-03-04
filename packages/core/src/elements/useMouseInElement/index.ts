@@ -3,7 +3,7 @@ import { useObservable } from "@legendapp/state/react";
 import { useCallback } from "react";
 import { isWindow } from "../../shared";
 import { defaultWindow, defaultDocument } from "../../shared/configurable";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import type { DeepMaybeObservable } from "../../types";
 import { type MaybeElement, peekElement } from "../useRef$";
 import { useResizeObserver } from "../useResizeObserver";

@@ -2,7 +2,7 @@
 import { useObservable } from "@legendapp/state/react";
 import { useRef } from "react";
 import type { DeepMaybeObservable, ReadonlyObservable } from "../../types";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useRafFn } from "../useRafFn";
 
 export interface UseFpsOptions {

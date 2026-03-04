@@ -1,9 +1,9 @@
 export * from "./types";
 
-export * from "./function/get";
-export * from "./function/peek";
-export * from "./function/useSupported";
-export * from "./function/useWhenMounted";
+export * from "./utilities/get";
+export * from "./utilities/peek";
+export * from "./utilities/useSupported";
+export * from "./utilities/useWhenMounted";
 
 export * from "./elements/useRef$";
 export * from "./elements/useResizeObserver";
@@ -25,8 +25,8 @@ export * from "./sensors/useWindowScroll";
 
 export * from "./browser/useEventListener";
 export * from "./browser/useMediaQuery";
-export * from "./function/useMaybeObservable";
-export * from "./function/usePeekInitial";
+export * from "./reactivity/useMaybeObservable";
+export * from "./reactivity/usePeekInitial";
 
 export * from "./shared/filters";
 

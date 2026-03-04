@@ -5,12 +5,12 @@ import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/stat
 import { useRef } from "react";
 import type { MaybeElement } from "../../elements/useRef$";
 import { getElement, peekElement } from "../../elements/useRef$";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
-import { usePeekInitial } from "../../function/usePeekInitial";
-import { useSupported } from "../../function/useSupported";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
+import { usePeekInitial } from "../../reactivity/usePeekInitial";
+import { useSupported } from "../../utilities/useSupported";
 import { useRafFn } from "../useRafFn";
 import { useEventListener } from "../../browser/useEventListener";
-import { get } from "../../function/get";
+import { get } from "../../utilities/get";
 import { defaultWindow } from "../../shared/configurable";
 import type { ConfigurableWindow } from "../../shared/configurable";
 import type { ReadonlyObservable, Fn, MaybeObservable, DeepMaybeObservable } from "../../types";

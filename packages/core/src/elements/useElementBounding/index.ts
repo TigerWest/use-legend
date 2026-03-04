@@ -7,7 +7,7 @@ import { useMutationObserver } from "../useMutationObserver";
 import { useEventListener } from "../../browser/useEventListener";
 import { isWindow } from "../../shared";
 import { defaultWindow } from "../../shared/configurable";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import type { DeepMaybeObservable } from "../../types";
 
 export interface UseElementBoundingOptions {

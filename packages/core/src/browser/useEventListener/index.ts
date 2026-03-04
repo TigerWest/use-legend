@@ -4,7 +4,7 @@ import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/stat
 import { useLayoutEffect, useRef } from "react";
 import { isRef$, type MaybeElement } from "../../elements/useRef$";
 import { normalizeTargets } from "../../shared/normalizeTargets";
-import { get } from "../../function/get";
+import { get } from "../../utilities/get";
 import type { Arrayable, MaybeObservable } from "../../types";
 import { toArray } from "../../shared/utils";
 import { defaultWindow } from "../../shared/configurable";

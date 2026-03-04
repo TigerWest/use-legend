@@ -1,6 +1,6 @@
 ---
 title: useWhenMounted
-category: Browser Utilities
+category: utilities
 ---
 
 Execute a callback and expose its return value as a reactive `Observable<T | undefined>` — only after the component has mounted. Returns `undefined` during SSR and before hydration, then re-evaluates with the actual callback value once mounted. Unlike `useSupported`, the return value is not coerced to boolean — the full type `T` is preserved.

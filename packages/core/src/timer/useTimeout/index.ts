@@ -7,7 +7,7 @@ import type {
   ReadonlyObservable,
   Stoppable,
 } from "../../types";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useTimeoutFn } from "../useTimeoutFn";
 
 export interface UseTimeoutOptions<Controls extends boolean = false> {

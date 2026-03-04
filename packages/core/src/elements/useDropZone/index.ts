@@ -2,7 +2,7 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback, useRef } from "react";
-import { useMaybeObservable } from "../../function/useMaybeObservable";
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import type { DeepMaybeObservable } from "../../types";
 import { type MaybeElement } from "../useRef$";
 import { useEventListener } from "../../browser/useEventListener";

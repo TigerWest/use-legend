@@ -1,7 +1,7 @@
 ---
 title: useSupported
 description: SSR-safe browser feature detection as a reactive Observable
-category: Browser Utilities
+category: utilities
 ---
 
 Check whether a browser API or feature is supported, returning a reactive `Observable<boolean>` that re-evaluates after the component mounts. Safe to use during SSR — the value is always `false` on the server and updates on the client after hydration.

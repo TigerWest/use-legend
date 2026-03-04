@@ -1,10 +1,10 @@
 "use client";
 import { ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
-import { get } from "../../function/get";
-import { useSupported } from "../../function/useSupported";
+import { get } from "../../utilities/get";
+import { useSupported } from "../../utilities/useSupported";
 import type { MaybeObservable } from "../../types";
-import { useWhenMounted } from "../../function/useWhenMounted";
+import { useWhenMounted } from "../../utilities/useWhenMounted";
 import { useEventListener } from "../useEventListener";
 import { defaultWindow } from "../../shared/configurable";
 

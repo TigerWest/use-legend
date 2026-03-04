@@ -2,7 +2,7 @@
 import { useMount, useObservable } from "@legendapp/state/react";
 import { useRef } from "react";
 import type { MaybeObservable, Pausable } from "../../types";
-import { peek } from "../../function/peek";
+import { peek } from "../../utilities/peek";
 import { defaultWindow } from "../../shared/configurable";
 
 export interface UseRafFnCallbackArguments {

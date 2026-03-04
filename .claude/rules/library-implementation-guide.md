@@ -119,7 +119,7 @@ produce a **one-time snapshot**. Observable changes after mount are silently ign
 `Observable<T | undefined>`. Use it at the top of every hook that accepts `DeepMaybeObservable` options.
 
 ```ts
-import { useMaybeObservable } from "../function/useMaybeObservable";
+import { useMaybeObservable } from "../reactivity/useMaybeObservable";
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   const opts$ = useMaybeObservable(options);
@@ -255,7 +255,7 @@ the Anti-pattern in Rule 2 where `.get()` is accidentally used for fields that *
 `useRef`-backed stable value. Re-renders always return the same captured value.
 
 ```ts
-import { usePeekInitial } from "../function/usePeekInitial";
+import { usePeekInitial } from "../reactivity/usePeekInitial";
 
 // With fallback — return type is NonNullable<T>
 const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
@@ -275,8 +275,8 @@ const once = usePeekInitial(opts$.once);
 ### Standard Pattern
 
 ```ts
-import { useMaybeObservable } from "../function/useMaybeObservable";
-import { usePeekInitial } from "../function/usePeekInitial";
+import { useMaybeObservable } from "../reactivity/useMaybeObservable";
+import { usePeekInitial } from "../reactivity/usePeekInitial";
 
 interface UseMyHookOptions {
   initialValue?: boolean;  // mount-time-only — fixed at mount
