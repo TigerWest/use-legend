@@ -4,6 +4,8 @@ export * from "@utilities/get";
 export * from "@utilities/peek";
 export * from "@utilities/useSupported";
 export * from "@utilities/useWhenMounted";
+export * from "@utilities/useDebounceFn";
+export * from "@utilities/useThrottleFn";
 
 export * from "@elements/useRef$";
 export * from "@elements/useResizeObserver";
@@ -27,6 +29,8 @@ export * from "@browser/useEventListener";
 export * from "@browser/useMediaQuery";
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/usePeekInitial";
+export * from "@reactivity/useDebounced";
+export * from "@reactivity/useThrottled";
 
 export * from "@shared/filters";
 
