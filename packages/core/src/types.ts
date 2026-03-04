@@ -51,6 +51,7 @@ export type Fn = () => void;
 export type AnyFn = (...args: any[]) => any;
 export type Arrayable<T> = T[] | T;
 export type Awaitable<T> = Promise<T> | T;
+export type PromisifyFn<T extends AnyFn> = (...args: Parameters<T>) => Promise<ReturnType<T>>;
 export type TimerHandle = ReturnType<typeof setTimeout> | undefined;
 
 export interface Pausable {

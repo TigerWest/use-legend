@@ -1,0 +1,65 @@
+---
+title: useDebounceFn
+category: Utilities
+---
+
+Debounce execution of a function.
+
+## Demo
+
+## Usage
+
+```tsx twoslash
+// @noErrors
+import { useDebounceFn } from "@usels/core";
+
+const debouncedFn = useDebounceFn((value: string) => {
+  console.log(value);
+}, 250);
+```
+
+With reactive delay:
+
+```tsx twoslash
+// @noErrors
+import { useObservable } from "@legendapp/state/react";
+import { useDebounceFn } from "@usels/core";
+
+const delay$ = useObservable(300);
+const debouncedFn = useDebounceFn(() => {
+  // ...
+}, delay$);
+// Changing delay$ applies the new delay from the next call
+```
+
+With `maxWait`:
+
+```tsx twoslash
+// @noErrors
+import { useDebounceFn } from "@usels/core";
+
+// Forces execution every 1000ms even with continuous calls
+const debouncedFn = useDebounceFn(
+  () => {
+    // ...
+  },
+  300,
+  { maxWait: 1000 }
+);
+```
+
+With leading edge:
+
+```tsx twoslash
+// @noErrors
+import { useDebounceFn } from "@usels/core";
+
+// Fires immediately on first call, ignores subsequent calls within delay
+const debouncedFn = useDebounceFn(
+  () => {
+    // ...
+  },
+  300,
+  { edges: ["leading"] }
+);
+```
