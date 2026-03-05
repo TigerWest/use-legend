@@ -1,6 +1,6 @@
 ---
 title: useAnimate
-category: Timer
+category: browser
 ---
 
 Reactive [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) wrapper. Drives `element.animate()` with Observable-based reactive state for `playState`, `currentTime`, `playbackRate`, and `pending`.

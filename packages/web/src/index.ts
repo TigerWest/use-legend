@@ -4,6 +4,7 @@ export * from "@usels/core";
 // Browser
 export * from "./browser/useEventListener";
 export * from "./browser/useMediaQuery";
+export * from "./browser/useAnimate";
 
 // Elements
 export * from "./elements/useResizeObserver";
@@ -23,6 +24,3 @@ export * from "./elements/useDropZone";
 // Sensors
 export * from "./sensors/useScroll";
 export * from "./sensors/useWindowScroll";
-
-// Timer
-export * from "./timer/useAnimate";
