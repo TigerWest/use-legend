@@ -107,7 +107,7 @@ describe("useIntersectionObserver() — real browser", () => {
 
     // Yield two animation frames — callback must NOT fire again
     await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(resolve))
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
     );
 
     expect(callCount).toBe(countAfterInitial);

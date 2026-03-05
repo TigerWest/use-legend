@@ -9,7 +9,7 @@ import { useDropZone } from ".";
 // jsdom DragEvent polyfill
 // ---------------------------------------------------------------------------
 if (typeof window !== "undefined" && !window.DragEvent) {
-  (global as any).DragEvent = class DragEvent extends MouseEvent {
+  (globalThis as any).DragEvent = class DragEvent extends MouseEvent {
     dataTransfer: DataTransfer | null = null;
     constructor(type: string, init: DragEventInit = {}) {
       super(type, init);

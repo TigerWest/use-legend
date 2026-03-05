@@ -75,7 +75,7 @@ describe("useMediaQuery() — rerender stability", () => {
       const { rerender } = renderHook(() => useMediaQuery("(min-width: 768px)"));
 
       const countAfterMount = (mql.addEventListener as ReturnType<typeof vi.fn>).mock.calls.filter(
-        ([type]: [string]) => type === "change"
+        ([type]) => type === "change"
       ).length;
 
       rerender();
@@ -84,7 +84,7 @@ describe("useMediaQuery() — rerender stability", () => {
 
       const countAfterRerender = (
         mql.addEventListener as ReturnType<typeof vi.fn>
-      ).mock.calls.filter(([type]: [string]) => type === "change").length;
+      ).mock.calls.filter(([type]) => type === "change").length;
 
       expect(countAfterRerender).toBe(countAfterMount);
     });

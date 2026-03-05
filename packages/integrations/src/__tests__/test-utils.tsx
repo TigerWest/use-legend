@@ -4,11 +4,6 @@ import { QueryClientProvider } from "../tanstack-query/QueryClientProvider";
 
 export function createTestQueryClient(): QueryClient {
   return new QueryClient({
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
     queryCache: new QueryCache({
       onError: () => {
         // Suppress unhandled promise rejections in tests

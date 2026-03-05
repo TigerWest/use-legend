@@ -118,7 +118,7 @@ describe("useDraggable() — edge cases", () => {
       renderHook(() => useDraggable(target$ as any));
     }).not.toThrow();
 
-    let result: ReturnType<typeof renderHook<ReturnType<typeof useDraggable>>>;
+    let result: { result: { current: ReturnType<typeof useDraggable> } };
 
     act(() => {
       result = renderHook(() => useDraggable(target$ as any));

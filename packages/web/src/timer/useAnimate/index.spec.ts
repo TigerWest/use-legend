@@ -78,7 +78,7 @@ beforeEach(() => {
   mockRemoveEventListener.mockClear();
 
   mockAnimate = vi.fn(() => new MockAnimation());
-  Element.prototype.animate = mockAnimate;
+  Element.prototype.animate = mockAnimate as any;
 
   rafCallbacks = new Map();
   rafId = 0;

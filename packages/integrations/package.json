@@ -17,7 +17,8 @@
     "dev": "tsup --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:browser": "vitest --config vitest.browser.config.ts"
+    "test:browser": "vitest --config vitest.browser.config.ts",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "legendapp",
@@ -52,6 +53,7 @@
     "@tanstack/react-query": "^5.60.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitest/browser": "^4.0.18",

@@ -5,7 +5,7 @@ import { addAutoImport } from "../utils/addAutoImport";
 
 export function createProgramVisitor(t: typeof BabelTypes) {
   return {
-    enter(path: NodePath<Program>, state: PluginState) {
+    enter(_path: NodePath<Program>, state: PluginState) {
       const opts = state.opts ?? {};
       state.autoImportNeeded = false;
       state.autoImportSource = opts.importSource ?? "@legendapp/state/react";

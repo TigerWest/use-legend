@@ -1,5 +1,14 @@
 import type { types as BabelTypes } from "@babel/core";
-import type { Expression, JSXChild, JSXElement, JSXExpressionContainer } from "@babel/types";
+import type {
+  Expression,
+  JSXElement,
+  JSXExpressionContainer,
+  JSXFragment,
+  JSXSpreadChild,
+  JSXText,
+} from "@babel/types";
+
+type JSXChild = JSXText | JSXExpressionContainer | JSXSpreadChild | JSXElement | JSXFragment;
 
 /**
  * Expression types that indicate children are already function-like.

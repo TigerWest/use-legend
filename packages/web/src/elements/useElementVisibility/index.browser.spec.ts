@@ -65,7 +65,7 @@ describe("useElementVisibility() — real browser", () => {
 
     // Yield two animation frames to give IO a chance to fire (if broken)
     await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(resolve))
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
     );
 
     // isVisible$ must remain true because the observer was disconnected after first visibility

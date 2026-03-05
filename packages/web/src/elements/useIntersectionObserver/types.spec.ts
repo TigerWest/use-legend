@@ -1,6 +1,6 @@
 import { describe, it, expectTypeOf } from "vitest";
 import { observable } from "@legendapp/state";
-import type { Observable } from "@legendapp/state";
+import type { ReadonlyObservable } from "@usels/core";
 import {
   useIntersectionObserver,
   type UseIntersectionObserverOptions,
@@ -64,15 +64,15 @@ describe("useIntersectionObserver() — types", () => {
       expectTypeOf<UseIntersectionObserverReturn>().toHaveProperty("stop");
     });
 
-    it("isSupported$ is Observable<boolean>", () => {
+    it("isSupported$ is ReadonlyObservable<boolean>", () => {
       expectTypeOf<UseIntersectionObserverReturn["isSupported$"]>().toEqualTypeOf<
-        Observable<boolean>
+        ReadonlyObservable<boolean>
       >();
     });
 
-    it("isActive$ is Observable<boolean>", () => {
+    it("isActive$ is ReadonlyObservable<boolean>", () => {
       expectTypeOf<UseIntersectionObserverReturn["isActive$"]>().toEqualTypeOf<
-        Observable<boolean>
+        ReadonlyObservable<boolean>
       >();
     });
 

@@ -181,7 +181,7 @@ describe("useMutation", () => {
       const { result } = renderHook(
         () =>
           useMutation({
-            mutationFn: async () => {
+            mutationFn: async (_vars: { name: string }) => {
               throw mockError;
             },
             onError,

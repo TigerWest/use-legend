@@ -74,9 +74,9 @@ describe("peek() - two arguments (property access)", () => {
   });
 
   it("handles null and undefined gracefully", () => {
-    expect(peek(null, "key" as any)).toBe(undefined);
-    expect(peek(undefined, "key" as any)).toBe(undefined);
-    expect(peek(observable(null), "key" as any)).toBe(undefined);
+    expect(peek(null as any, "key")).toBe(undefined);
+    expect(peek(undefined as any, "key")).toBe(undefined);
+    expect(peek(observable(null) as any, "key")).toBe(undefined);
   });
 
   it("preserves property value types", () => {

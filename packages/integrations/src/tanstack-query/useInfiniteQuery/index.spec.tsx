@@ -446,7 +446,9 @@ describe("useInfiniteQuery", () => {
       filter$.category.set("sports");
 
       await waitFor(() => expect(queryFn).toHaveBeenCalledTimes(2), { timeout: 3000 });
-      expect(result.current.data.get()?.pages[0].items).toEqual(["sports"]);
+      expect(
+        (result.current.data.get() as { pages: { items: string[] }[] })?.pages[0].items
+      ).toEqual(["sports"]);
     });
 
     it("should use resolved queryKey for cache", async () => {

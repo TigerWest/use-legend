@@ -126,7 +126,7 @@ describe("useResizeObserver() — real browser", () => {
 
     // Yield 2 animation frames to give ResizeObserver a chance to fire (if broken)
     await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(resolve))
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
     );
 
     expect(callCount).toBe(1);

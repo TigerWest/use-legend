@@ -64,9 +64,9 @@ describe("get() - two arguments (property access)", () => {
   });
 
   it("handles null and undefined gracefully", () => {
-    expect(get(null, "key" as any)).toBe(undefined);
-    expect(get(undefined, "key" as any)).toBe(undefined);
-    expect(get(observable(null), "key" as any)).toBe(undefined);
+    expect(get(null as any, "key")).toBe(undefined);
+    expect(get(undefined as any, "key")).toBe(undefined);
+    expect(get(observable(null) as any, "key")).toBe(undefined);
   });
 
   it("preserves property value types", () => {
