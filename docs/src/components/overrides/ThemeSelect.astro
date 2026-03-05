@@ -1,0 +1,9 @@
+---
+// Override: disable theme selector, force dark mode only
+---
+
+<script is:inline>
+	// Force dark theme on load
+	document.documentElement.dataset.theme = 'dark';
+	localStorage.setItem('starlight-theme', 'dark');
+</script>

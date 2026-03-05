@@ -22,8 +22,6 @@ const warmupSsrFiles = DOCS_ENABLE_TWOSLASH
   ? (WARMUP_SSR_FILES_BY_MODE[DOCS_WARMUP_MODE] ?? WARMUP_SSR_FILES_BY_MODE.off)
   : [];
 
-const expressiveCodeThemes = DOCS_FAST_DEV ? ["github-light"] : ["github-dark", "github-light"];
-
 // https://astro.build/config
 export default defineConfig({
   site: "https://tigerwest.github.io/use-legend",
@@ -90,7 +88,7 @@ export default defineConfig({
         },
       ],
       expressiveCode: {
-        themes: expressiveCodeThemes,
+        themes: ["github-dark"],
         useStarlightDarkModeSwitch: !DOCS_FAST_DEV,
         useStarlightUiThemeColors: !DOCS_FAST_DEV,
         plugins: DOCS_ENABLE_TWOSLASH
@@ -116,6 +114,7 @@ export default defineConfig({
       },
       components: {
         PageTitle: "./src/components/overrides/PageTitle.astro",
+        ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       },
       sidebar: [
         {
