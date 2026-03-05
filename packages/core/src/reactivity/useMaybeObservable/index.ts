@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { get } from "@utilities/get";
 import { useLatest } from "@shared/useLatest";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
-import { getElement } from "@elements/useRef$";
-import type { MaybeElement } from "@elements/useRef$";
+import { getElement } from "@reactivity/useRef$";
+import type { MaybeElement } from "@reactivity/useRef$";
 
 /**
  * Per-field resolution hint for the object-form transform.

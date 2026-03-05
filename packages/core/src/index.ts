@@ -7,7 +7,7 @@ export * from "@utilities/useWhenMounted";
 export * from "@utilities/useDebounceFn";
 export * from "@utilities/useThrottleFn";
 
-export * from "@elements/useRef$";
+export * from "@reactivity/useRef$";
 
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/usePeekInitial";
