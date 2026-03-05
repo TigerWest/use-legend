@@ -2,6 +2,7 @@
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
+import tailwindcss from "@tailwindcss/vite";
 import starlightCatppuccin from "@catppuccin/starlight";
 import { defineConfig } from "astro/config";
 import ecTwoSlash from "expressive-code-twoslash";
@@ -23,7 +24,6 @@ const warmupSsrFiles = DOCS_ENABLE_TWOSLASH
   ? (WARMUP_SSR_FILES_BY_MODE[DOCS_WARMUP_MODE] ?? WARMUP_SSR_FILES_BY_MODE.off)
   : [];
 
-const expressiveCodeThemes = DOCS_FAST_DEV ? ["github-light"] : ["github-dark", "github-light"];
 const CORE_SRC = fileURLToPath(new URL("../packages/core/src", import.meta.url));
 const WEB_SRC = fileURLToPath(new URL("../packages/web/src", import.meta.url));
 const NATIVE_SRC = fileURLToPath(new URL("../packages/native/src", import.meta.url));
@@ -79,7 +79,7 @@ export default defineConfig({
             }
           : undefined,
     },
-    plugins: [rewriteWebAliasImports(), autoWrap({ allGet: true })],
+    plugins: [tailwindcss(), rewriteWebAliasImports(), autoWrap({ allGet: true })],
     resolve: {
       alias: [
         { find: "@demos/core", replacement: CORE_SRC },
@@ -115,6 +115,7 @@ export default defineConfig({
     starlight({
       title: "use-legend",
       plugins: [starlightCatppuccin()],
+      customCss: ["./src/styles/global.css"],
       head: [
         {
           tag: "script",
