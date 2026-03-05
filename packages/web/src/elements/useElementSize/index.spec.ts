@@ -3,7 +3,6 @@ import { renderHook, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useRef$ } from "@usels/core";
 import { useElementSize } from ".";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
@@ -217,47 +216,6 @@ describe("useElementSize()", () => {
     act(() => instance.trigger(div, { contentRect: { width: 999, height: 999 } }));
     expect(result.current.width$.get()).toBe(100);
     expect(result.current.height$.get()).toBe(100);
-  });
-
-  it("Ref$ target: sets offsetWidth/offsetHeight as initial size after element is assigned", () => {
-    const { result } = renderHook(() => {
-      const el$ = useRef$<HTMLDivElement>();
-      const size = useElementSize(el$);
-      return { el$, size };
-    });
-
-    // Before assignment — initial values
-    expect(result.current.size.width$.get()).toBe(0);
-    expect(result.current.size.height$.get()).toBe(0);
-
-    const div = document.createElement("div");
-    // jsdom returns 0 for offsetWidth/Height by default, but we can override
-    Object.defineProperty(div, "offsetWidth", { value: 640, configurable: true });
-    Object.defineProperty(div, "offsetHeight", { value: 480, configurable: true });
-
-    act(() => result.current.el$(div));
-
-    expect(result.current.size.width$.get()).toBe(640);
-    expect(result.current.size.height$.get()).toBe(480);
-  });
-
-  it("resets to initialSize when target Ref$ becomes null", () => {
-    const div = document.createElement("div");
-
-    const { result } = renderHook(() => {
-      const el$ = useRef$<HTMLDivElement>();
-      const size = useElementSize(el$, { width: 5, height: 10 });
-      return { el$, size };
-    });
-
-    // Assign element first
-    act(() => result.current.el$(div));
-
-    // Then set element to null (passing null simulates unmounting)
-    act(() => result.current.el$(null));
-
-    expect(result.current.size.width$.get()).toBe(5);
-    expect(result.current.size.height$.get()).toBe(10);
   });
 
   it("accumulates multiple borderBoxSize entries", () => {

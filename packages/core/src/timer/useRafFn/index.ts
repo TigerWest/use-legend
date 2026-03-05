@@ -1,6 +1,7 @@
 "use client";
 import { useMount, useObservable } from "@legendapp/state/react";
 import { useRef } from "react";
+import { useLatest } from "@shared/useLatest";
 import type { MaybeObservable, Pausable } from "../../types";
 import { peek } from "@utilities/peek";
 import { defaultWindow } from "@shared/configurable";
@@ -28,9 +29,7 @@ export function useRafFn(
   const isActive$ = useObservable(false);
   const rafHandle = useRef<number | undefined>(undefined);
   const lastTimestamp = useRef<DOMHighResTimeStamp>(0);
-  const fnRef = useRef(fn);
-  // eslint-disable-next-line react-hooks/refs -- intentional: storing latest function in ref during render (stable-ref pattern)
-  fnRef.current = fn;
+  const fnRef = useLatest(fn);
 
   // mount-time-only options
   const once = options?.once ?? false;

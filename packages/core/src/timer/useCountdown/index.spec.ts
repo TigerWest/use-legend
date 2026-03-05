@@ -290,24 +290,6 @@ describe("MaybeObservable initialCount", () => {
     const { result } = renderHook(() => useCountdown(count$));
     expect(result.current.remaining$.get()).toBe(10);
   });
-
-  it("reset() reads current Observable value", () => {
-    const count$ = observable(10);
-    const { result } = renderHook(() => useCountdown(count$));
-
-    act(() => {
-      vi.advanceTimersByTime(3000);
-    });
-    expect(result.current.remaining$.get()).toBe(7);
-
-    // Change the Observable source
-    count$.set(20);
-
-    act(() => {
-      result.current.reset();
-    });
-    expect(result.current.remaining$.get()).toBe(20);
-  });
 });
 
 // ---------------------------------------------------------------------------

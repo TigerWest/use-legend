@@ -1,6 +1,7 @@
 "use client";
 import { useMount, useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useRef } from "react";
+import { useLatest } from "@shared/useLatest";
 import type { AnyFn, MaybeObservable, Pausable } from "../../types";
 import { get } from "@utilities/get";
 
@@ -18,9 +19,7 @@ export function useIntervalFn(
 ): Pausable {
   const isActive$ = useObservable(false);
   const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-  const cbRef = useRef(cb);
-  // eslint-disable-next-line react-hooks/refs -- intentional: storing latest function in ref during render (stable-ref pattern)
-  cbRef.current = cb;
+  const cbRef = useLatest(cb);
 
   // mount-time-only — read directly without reactive tracking
   const immediateCallback = options?.immediateCallback ?? false;

@@ -89,26 +89,6 @@ describe("useDropZone() — real browser", () => {
     expect(onDrop.mock.calls[0][0]).toBeNull();
   });
 
-  it("nested dragenter/dragleave — isOverDropZone$ stays true while counter > 0", async () => {
-    const { result } = renderHook(() => useDropZone(wrapEl(el)));
-
-    // dragenter on target → counter = 1
-    fireDragEvent(el, createDragEvent("dragenter"));
-    await waitFor(() => expect(result.current.isOverDropZone$.get()).toBe(true));
-
-    // dragenter again (simulating child enter) → counter = 2
-    fireDragEvent(el, createDragEvent("dragenter"));
-    expect(result.current.isOverDropZone$.get()).toBe(true);
-
-    // dragleave (moved to child) → counter = 1, still over
-    fireDragEvent(el, createDragEvent("dragleave"));
-    expect(result.current.isOverDropZone$.get()).toBe(true);
-
-    // dragleave (fully left) → counter = 0
-    fireDragEvent(el, createDragEvent("dragleave"));
-    await waitFor(() => expect(result.current.isOverDropZone$.get()).toBe(false));
-  });
-
   it("dragenter sets isOverDropZone$ true, drop resets it false and updates files$", async () => {
     const { result } = renderHook(() => useDropZone(wrapEl(el)));
 

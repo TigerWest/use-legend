@@ -1,9 +1,11 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import { useMount, useObservable } from "@legendapp/state/react";
-import { useMemo, useRef } from "react";
+import { batch, type Observable } from "@legendapp/state";
+import { useMount, useObservable, useObserve } from "@legendapp/state/react";
+import { useRef } from "react";
+import { useLatest } from "@usels/core/shared/useLatest";
+import { useConstant } from "@usels/core/shared/useConstant";
 import { throttle } from "es-toolkit";
-import { type MaybeElement, peekElement } from "@usels/core";
+import { type MaybeElement, getElement, peekElement } from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
 import type { MaybeObservable } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
@@ -15,6 +17,7 @@ import { useEventListener } from "@browser/useEventListener";
 export interface UseScrollOptions {
   throttle?: number;
   idle?: number;
+  onScroll?: (e: Event) => void;
   onStop?: () => void;
   onError?: (error: unknown) => void;
   offset?: {
@@ -166,17 +169,17 @@ export function useScroll(element: MaybeElement, options?: UseScrollOptions): Us
     resetIdle();
   };
 
-  const measureRef = useRef(measure);
-  // eslint-disable-next-line react-hooks/refs -- intentional: storing latest function in ref during render (stable-ref pattern)
-  measureRef.current = measure;
+  const measureRef = useLatest(measure);
+  const onScrollRef = useLatest(options?.onScroll);
 
-  const handler = useMemo(() => {
+  const handler = useConstant(() => {
     const ms = options?.throttle ?? 0;
-    return ms > 0
-      ? // eslint-disable-next-line react-hooks/refs -- ref read inside useMemo callback, not directly during render
-        throttle(() => measureRef.current(), ms)
-      : () => measureRef.current();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const invoke = (e: Event) => {
+      measureRef.current();
+      onScrollRef.current?.(e);
+    };
+    return ms > 0 ? throttle(invoke, ms) : invoke;
+  });
 
   useEventListener(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeElement matches Overload 4 but TypeScript cannot resolve it through the union without a cast
@@ -185,6 +188,24 @@ export function useScroll(element: MaybeElement, options?: UseScrollOptions): Us
     handler,
     options?.eventListenerOptions ?? { capture: false, passive: true }
   );
+
+  useObserve(() => {
+    const el = getElement(element);
+    if (!el) {
+      // Element removed — reset scroll state and clear idle timer
+      if (idleTimer.current) {
+        clearTimeout(idleTimer.current);
+        idleTimer.current = null;
+      }
+      batch(() => {
+        isScrolling$.set(false);
+        x$.set(0);
+        y$.set(0);
+        arrivedState$.assign({ left: true, right: false, top: true, bottom: false });
+        directions$.assign({ left: false, right: false, top: false, bottom: false });
+      });
+    }
+  });
 
   useMount(() => {
     measure();

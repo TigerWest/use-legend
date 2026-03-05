@@ -95,6 +95,55 @@ describe("useDropZone()", () => {
   // - valid file drop detected, invalid file type filtered,
   // - nested dragenter/dragleave sequence, dragenter→drop isOverDropZone$ transitions
 
+  describe("initial values", () => {
+    it("initial isOverDropZone$ is false", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDropZone(wrapEl(div) as any));
+
+      expect(result.current.isOverDropZone$.get()).toBe(false);
+    });
+
+    it("initial files$ is null", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDropZone(wrapEl(div) as any));
+
+      expect(result.current.files$.get()).toBeNull();
+    });
+  });
+
+  describe("core behavior", () => {
+    it("dragenter sets isOverDropZone$ to true", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDropZone(wrapEl(div) as any));
+
+      fireDragEvent(div, createDragEvent("dragenter", [], []));
+
+      expect(result.current.isOverDropZone$.get()).toBe(true);
+    });
+
+    it("dragleave resets isOverDropZone$ to false when counter reaches 0", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDropZone(wrapEl(div) as any));
+
+      fireDragEvent(div, createDragEvent("dragenter", [], []));
+      expect(result.current.isOverDropZone$.get()).toBe(true);
+
+      fireDragEvent(div, createDragEvent("dragleave", [], []));
+      expect(result.current.isOverDropZone$.get()).toBe(false);
+    });
+
+    it("drop resets isOverDropZone$ to false", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDropZone(wrapEl(div) as any));
+
+      fireDragEvent(div, createDragEvent("dragenter", [], []));
+      expect(result.current.isOverDropZone$.get()).toBe(true);
+
+      fireDragEvent(div, createDragEvent("drop", [], []));
+      expect(result.current.isOverDropZone$.get()).toBe(false);
+    });
+  });
+
   it("dragleave when counter is 0 does not underflow", () => {
     const div = createDiv();
     const { result } = renderHook(() => useDropZone(wrapEl(div) as any));

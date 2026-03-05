@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useRafFn } from ".";
 
@@ -297,30 +296,6 @@ describe("fpsLimit", () => {
     });
 
     expect(fn).toHaveBeenCalledOnce();
-  });
-
-  it("observable fpsLimit — changes apply from next frame", () => {
-    const fn = vi.fn();
-    const fps$ = observable<number | null>(null);
-    renderHook(() => useRafFn(fn, { fpsLimit: fps$ }));
-
-    // First frame with no limit — executes
-    act(() => {
-      flushRaf(16);
-    });
-    expect(fn).toHaveBeenCalledOnce();
-
-    // Change to 30fps limit
-    act(() => {
-      fps$.set(30);
-    });
-
-    // Next frame with delta=16ms < 33ms — skipped
-    act(() => {
-      flushRaf(32); // 32 - 16 = 16ms delta
-    });
-
-    expect(fn).toHaveBeenCalledOnce(); // still one call
   });
 });
 

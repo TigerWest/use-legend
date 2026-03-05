@@ -1,7 +1,9 @@
 "use client";
 import { isObservable, type Observable } from "@legendapp/state";
 import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/state/react";
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
+import { useLatest } from "@usels/core/shared/useLatest";
+import { useConstant } from "@usels/core/shared/useConstant";
 import { isRef$, type MaybeElement } from "@usels/core";
 import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
 import { get, type Arrayable, type MaybeObservable } from "@usels/core";
@@ -134,21 +136,15 @@ export function useEventListener(...args: any[]): () => void {
 
   // Always keep the latest listeners in a ref so that the forwarder always
   // calls the current listeners, even after re-renders change the functions.
-  const listenersRef = useRef(toArray(rawListener));
-  useLayoutEffect(() => {
-    listenersRef.current = toArray(rawListener);
-  });
+  const listenersRef = useLatest(toArray(rawListener));
 
   // Stable forwarder — one function reference per hook instance, created once.
-  const forwarder = useRef((ev: Event) => {
+  const forwarder = useConstant(() => (ev: Event) => {
     listenersRef.current.forEach((l) => l(ev));
   });
 
   // Options ref prevents recreating listeners when only options change.
-  const optionsRef = useRef(rawOptions);
-  useLayoutEffect(() => {
-    optionsRef.current = rawOptions;
-  });
+  const optionsRef = useLatest(rawOptions);
 
   // Observable mount flag — lets useObserve react when component mounts.
   const mounted$ = useObservable(false);
@@ -216,7 +212,7 @@ export function useEventListener(...args: any[]): () => void {
         ? { ...resolvedOpts }
         : resolvedOpts;
 
-    const fn = forwarder.current;
+    const fn = forwarder;
     cleanupsRef.current = targets.flatMap((el) =>
       events.map((event) => {
         el.addEventListener(event, fn, opts);

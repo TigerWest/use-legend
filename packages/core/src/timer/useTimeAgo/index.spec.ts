@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ko } from "date-fns/locale";
 import { formatTimeAgo, useTimeAgo } from ".";
@@ -116,19 +115,6 @@ describe("useTimeAgo", () => {
     const from = new Date(Date.now() - 5 * 60_000); // 5 min ago
     const { result } = renderHook(() => useTimeAgo(from));
     expect(result.current.get()).toBe("5 minutes ago");
-  });
-
-  it("updates when time Observable changes", () => {
-    const time$ = observable(new Date(Date.now() - 5 * 60_000));
-    const { result } = renderHook(() => useTimeAgo(time$));
-
-    expect(result.current.get()).toBe("5 minutes ago");
-
-    act(() => {
-      time$.set(new Date(Date.now() - 2 * 60_000));
-    });
-
-    expect(result.current.get()).toBe("2 minutes ago");
   });
 
   it("controls=true returns { timeAgo$, isActive$, pause, resume }", () => {

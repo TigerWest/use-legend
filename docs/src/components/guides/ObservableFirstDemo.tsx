@@ -1,25 +1,12 @@
 import { Memo, useObservable } from "@legendapp/state/react";
 import { useIntervalFn } from "@usels/core";
 import { useRef, useState } from "react";
+import { cardStyle } from "./_cardStyle";
 
 function useRenderCount() {
   const renders = useRef(0);
   renders.current += 1;
   return renders.current;
-}
-
-function cardStyle(accent: string) {
-  return {
-    border: `1px solid ${accent}`,
-    margin: 0,
-    borderRadius: "10px",
-    padding: "14px",
-    background: "var(--sl-color-bg, #fff)",
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "8px",
-    minWidth: 240,
-  };
 }
 
 function StateDrivenCard() {

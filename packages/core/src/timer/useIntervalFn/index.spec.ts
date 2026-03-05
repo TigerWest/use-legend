@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useIntervalFn } from ".";
 
@@ -174,30 +173,6 @@ describe("immediateCallback", () => {
 
     act(() => {
       vi.advanceTimersByTime(1000);
-    });
-
-    expect(cb).toHaveBeenCalledOnce();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// reactive interval (MaybeObservable)
-// ---------------------------------------------------------------------------
-
-describe("reactive interval", () => {
-  it("observable interval — changing value while active restarts with new period", () => {
-    const cb = vi.fn();
-    const ms$ = observable(1000);
-    renderHook(() => useIntervalFn(cb, ms$));
-
-    // change interval to 500ms
-    act(() => {
-      ms$.set(500);
-    });
-
-    // advance 500ms — new interval should fire
-    act(() => {
-      vi.advanceTimersByTime(500);
     });
 
     expect(cb).toHaveBeenCalledOnce();

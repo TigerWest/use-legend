@@ -1,6 +1,7 @@
 "use client";
 import { useMount, useObservable } from "@legendapp/state/react";
 import { useRef } from "react";
+import { useLatest } from "@shared/useLatest";
 import type { AnyFn, MaybeObservable, Stoppable, TimerHandle } from "../../types";
 import { get } from "@utilities/get";
 
@@ -18,9 +19,7 @@ export function useTimeoutFn<CallbackFn extends AnyFn>(
 ): Stoppable<Parameters<CallbackFn> | []> {
   const isPending$ = useObservable(false);
   const timer = useRef<TimerHandle>(undefined);
-  const cbRef = useRef(cb);
-  // eslint-disable-next-line react-hooks/refs -- intentional: storing latest function in ref during render (stable-ref pattern)
-  cbRef.current = cb;
+  const cbRef = useLatest(cb);
 
   const immediateCallback = options?.immediateCallback ?? false;
 

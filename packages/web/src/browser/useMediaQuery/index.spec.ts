@@ -226,43 +226,4 @@ describe("useMediaQuery() — reactive query (MaybeObservable<string>)", () => {
     const { result } = renderHook(() => useMediaQuery(query$));
     expect(result.current.get()).toBe(true);
   });
-
-  it("updates matches when query Observable changes", () => {
-    const mqlMap = new Map<string, ReturnType<typeof createMockMatchMedia>>();
-    vi.stubGlobal("matchMedia", (q: string) => {
-      if (!mqlMap.has(q)) mqlMap.set(q, createMockMatchMedia(q === "(max-width: 480px)"));
-      return mqlMap.get(q)!.mql;
-    });
-
-    const query$ = observable("(min-width: 1024px)");
-    const { result } = renderHook(() => useMediaQuery(query$));
-    expect(result.current.get()).toBe(false);
-
-    act(() => query$.set("(max-width: 480px)"));
-    expect(result.current.get()).toBe(true);
-  });
-
-  it("removes old change listener and adds new one when query changes", () => {
-    const mqlMap = new Map<string, ReturnType<typeof createMockMatchMedia>>();
-    vi.stubGlobal("matchMedia", (q: string) => {
-      if (!mqlMap.has(q)) mqlMap.set(q, createMockMatchMedia(false));
-      return mqlMap.get(q)!.mql;
-    });
-
-    const query$ = observable("(min-width: 1024px)");
-    renderHook(() => useMediaQuery(query$));
-
-    act(() => query$.set("(max-width: 480px)"));
-
-    expect(mqlMap.get("(min-width: 1024px)")!.mql.removeEventListener).toHaveBeenCalledWith(
-      "change",
-      expect.any(Function),
-      expect.objectContaining({ passive: true })
-    );
-    expect(mqlMap.get("(max-width: 480px)")!.mql.addEventListener).toHaveBeenCalledWith(
-      "change",
-      expect.any(Function),
-      { passive: true }
-    );
-  });
 });

@@ -102,6 +102,37 @@ describe("useDraggable()", () => {
     vi.restoreAllMocks();
   });
 
+  describe("initial values", () => {
+    it("initial x$, y$ are 0 when initialValue is not provided", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDraggable(wrapEl(div)));
+
+      expect(result.current.x$.get()).toBe(0);
+      expect(result.current.y$.get()).toBe(0);
+    });
+
+    it("initial isDragging$ is false", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDraggable(wrapEl(div)));
+
+      expect(result.current.isDragging$.get()).toBe(false);
+    });
+
+    it("initial position$ is { x: 0, y: 0 }", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDraggable(wrapEl(div)));
+
+      expect(result.current.position$.get()).toEqual({ x: 0, y: 0 });
+    });
+
+    it("initial style$ is \"left: 0px; top: 0px;\"", () => {
+      const div = createDiv();
+      const { result } = renderHook(() => useDraggable(wrapEl(div)));
+
+      expect(result.current.style$.get()).toBe("left: 0px; top: 0px;");
+    });
+  });
+
   it("initialValue sets initial x$, y$, style$", () => {
     const div = createDiv();
     const { result } = renderHook(() =>

@@ -1,5 +1,5 @@
 import { type Observable } from "@legendapp/state";
-import { useRef } from "react";
+import { useConstant } from "@shared/useConstant";
 
 /**
  * Reads an Observable value **once at mount** and returns a stable reference.
@@ -37,11 +37,9 @@ export function usePeekInitial<T>(
 ): T | NonNullable<T> {
   // { v: T } wrapper: allows T itself to be null/undefined without conflicting
   // with the `null` sentinel used to detect "not yet initialized".
-  const ref = useRef<{ v: T | NonNullable<T> } | null>(null);
-  if (ref.current === null) {
+  const result = useConstant(() => {
     const peeked = obs.peek();
-    ref.current = { v: (peeked ?? fallback) as T | NonNullable<T> };
-  }
-  // eslint-disable-next-line react-hooks/refs
-  return ref.current.v;
+    return { v: (peeked ?? fallback) as T | NonNullable<T> };
+  });
+  return result.v;
 }

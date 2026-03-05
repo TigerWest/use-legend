@@ -1,7 +1,8 @@
 import { isObservable, ObservableHint } from "@legendapp/state";
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { type Ref, type RefObject, useMemo, useRef } from "react";
+import { type Ref, type RefObject, useMemo } from "react";
+import { useLatest } from "@shared/useLatest";
 import { isWindow } from "@shared";
 
 export type Ref$<T> = ((node: T | null) => void) & {
@@ -64,9 +65,7 @@ export function useRef$<T extends Element = Element>(externalRef?: Ref<T> | null
   const el$ = useObservable<OpaqueObject<T> | null>(null);
 
   // store externalRef — simple assignment each render, no new closure
-  const extRef = useRef(externalRef);
-  // eslint-disable-next-line react-hooks/refs -- intentional: storing latest prop in ref during render (stable-ref pattern)
-  extRef.current = externalRef;
+  const extRef = useLatest(externalRef);
 
   return useMemo(
     () =>

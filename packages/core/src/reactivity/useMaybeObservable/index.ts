@@ -1,7 +1,8 @@
 import { isObservable, ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { get } from "@utilities/get";
+import { useLatest } from "@shared/useLatest";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 import { getElement } from "@elements/useRef$";
 import type { MaybeElement } from "@elements/useRef$";
@@ -124,8 +125,7 @@ export function useMaybeObservable<T>(
   options: DeepMaybeObservable<T> | undefined,
   transform?: Transform<T>
 ): Observable<T | undefined> {
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
+  const optionsRef = useLatest(options);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const depKey = useMemo(() => Symbol(), [options]);
   const compute = (): T | undefined => {

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, renderHook } from "@testing-library/react";
-import { observable, ObservableHint } from "@legendapp/state";
+import { isObservable, observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
@@ -36,6 +36,27 @@ function makeEntry(isIntersecting: boolean, time = 0): IntersectionObserverEntry
 }
 
 describe("useElementVisibility()", () => {
+  describe("initial values", () => {
+    it("returns isVisible$ as Observable<boolean>", () => {
+      const el = document.createElement("div");
+      const { result } = renderHook(() => useElementVisibility(wrapEl(el)));
+      expect(isObservable(result.current)).toBe(true);
+      expect(typeof result.current.get()).toBe("boolean");
+    });
+
+    it("initial value is false by default", () => {
+      const el = document.createElement("div");
+      const { result } = renderHook(() => useElementVisibility(wrapEl(el)));
+      expect(result.current.get()).toBe(false);
+    });
+
+    it("initial value is custom initialValue when provided", () => {
+      const el = document.createElement("div");
+      const { result } = renderHook(() => useElementVisibility(wrapEl(el), { initialValue: true }));
+      expect(result.current.get()).toBe(true);
+    });
+  });
+
   it("returns false by default", () => {
     const el = document.createElement("div");
     const { result } = renderHook(() => useElementVisibility(wrapEl(el)));

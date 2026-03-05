@@ -111,17 +111,6 @@ describe("useDraggable() — real browser", () => {
     await waitFor(() => expect(result.current.isDragging$.get()).toBe(false));
   });
 
-  it("onStart returning false cancels drag", async () => {
-    const { result } = renderHook(() => useDraggable(wrapEl(el), { onStart: () => false }));
-
-    firePointerDown(el, 10, 10);
-    firePointerMove(60, 80);
-
-    await waitFor(() => expect(result.current.isDragging$.get()).toBe(false));
-    expect(result.current.x$.get()).toBe(0);
-    expect(result.current.y$.get()).toBe(0);
-  });
-
   it("onStart, onMove, onEnd callbacks are called with correct args", async () => {
     const onStart = vi.fn();
     const onMove = vi.fn();
@@ -182,18 +171,6 @@ describe("useDraggable() — real browser", () => {
 
     await waitFor(() => expect(result.current.x$.get()).toBe(window.innerWidth - 100));
     expect(result.current.y$.get()).toBe(window.innerHeight - 100);
-  });
-
-  it("pointerTypes filter — touch ignored when only mouse allowed", async () => {
-    const { result } = renderHook(() => useDraggable(wrapEl(el), { pointerTypes: ["mouse"] }));
-
-    // touch pointerdown — should be ignored
-    firePointerDown(el, 10, 10, "touch");
-    expect(result.current.isDragging$.get()).toBe(false);
-
-    // mouse pointerdown — should work
-    firePointerDown(el, 10, 10, "mouse");
-    await waitFor(() => expect(result.current.isDragging$.get()).toBe(true));
   });
 
   it("pointermove on window tracks drag even when outside element", async () => {

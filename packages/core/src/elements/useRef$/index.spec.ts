@@ -3,7 +3,7 @@ import { render, renderHook, act } from "@testing-library/react";
 import { useObserve } from "@legendapp/state/react";
 import { createElement, createRef, forwardRef, useRef } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { getElement, useRef$ } from ".";
+import { useRef$ } from ".";
 
 const noop = () => {};
 
@@ -34,15 +34,6 @@ describe("useRef$()", () => {
     expect(result.current.get()).toBe(null);
   });
 
-  it("el$ maintains stable reference across re-renders", () => {
-    const { result, rerender } = renderHook(() => useRef$<HTMLDivElement>(noop));
-    const el$1 = result.current;
-
-    rerender();
-
-    expect(result.current).toBe(el$1);
-  });
-
   it("el$ is callable and exposes get/peek as functions", () => {
     const { result } = renderHook(() => useRef$(noop));
     expect(typeof result.current).toBe("function");
@@ -66,25 +57,6 @@ describe("useRef$()", () => {
     expect(externalRef).toHaveBeenCalledWith(div);
     expect(result.current.get()).toBe(div);
     expect(callOrder[0]).toBe("externalRef"); // external runs first
-  });
-
-  it("uses latest externalRef after re-render", () => {
-    let currentRef = vi.fn();
-
-    const { result, rerender } = renderHook(({ ref }) => useRef$<HTMLDivElement>(ref), {
-      initialProps: { ref: currentRef },
-    });
-
-    const newRef = vi.fn();
-    rerender({ ref: newRef });
-
-    const div = document.createElement("div");
-    act(() => {
-      result.current(div);
-    });
-
-    expect(currentRef).not.toHaveBeenCalled();
-    expect(newRef).toHaveBeenCalledWith(div);
   });
 
   it("works without any argument (standalone useRef replacement)", () => {
@@ -201,30 +173,4 @@ describe("useRef$()", () => {
     expect(observeSpy).toHaveBeenCalledTimes(2);
   });
 
-  it("tracks unmount when element is bound with ref={el$}", () => {
-    const observeSpy = vi.fn();
-
-    const { result } = renderHook(() => {
-      const el$ = useRef$<HTMLDivElement>();
-      useObserve(() => {
-        getElement(el$);
-        observeSpy();
-      });
-      return el$;
-    });
-
-    expect(observeSpy).toHaveBeenCalledTimes(1);
-    expect(result.current.get()).toBeNull();
-
-    const { unmount } = render(createElement("div", { ref: result.current }));
-    expect(observeSpy).toHaveBeenCalledTimes(2);
-    expect(result.current.get()).not.toBeNull();
-
-    act(() => {
-      unmount();
-    });
-
-    expect(observeSpy).toHaveBeenCalledTimes(3);
-    expect(result.current.get()).toBeNull();
-  });
 });

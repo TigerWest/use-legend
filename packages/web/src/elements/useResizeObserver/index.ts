@@ -1,6 +1,7 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect } from "@legendapp/state/react";
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
+import { useLatest } from "@usels/core/shared/useLatest";
 import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
 import { MaybeElement } from "@usels/core";
 
@@ -45,16 +46,10 @@ export function useResizeObserver(
   const observerRef = useRef<ResizeObserver | null>(null);
 
   // Always use the latest callback without recreating the observer on every render.
-  const callbackRef = useRef(callback);
-  useLayoutEffect(() => {
-    callbackRef.current = callback;
-  });
+  const callbackRef = useLatest(callback);
 
   // Always use the latest options in setup() without reactive tracking.
-  const optionsRef = useRef(options);
-  useLayoutEffect(() => {
-    optionsRef.current = options;
-  });
+  const optionsRef = useLatest(options);
 
   const cleanup = () => {
     observerRef.current?.disconnect();
