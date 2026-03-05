@@ -16,7 +16,7 @@
     "test:unit": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "test:browser": "pnpm -r --filter @usels/core --filter @usels/integrations test:browser",
+    "test:browser": "pnpm -r --filter @usels/core --filter @usels/web --filter @usels/integrations test:browser",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint \"packages/*/src/**/*.{ts,tsx}\" --max-warnings=0",
     "lint:fix": "eslint \"packages/*/src/**/*.{ts,tsx}\" --max-warnings=0 --fix",

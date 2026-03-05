@@ -16,6 +16,7 @@ export default defineConfig({
       'packages/core/vitest.config.ts',
       'packages/eslint/vitest.config.ts',
       'packages/integrations/vitest.config.ts',
+      'packages/web/vitest.config.ts',
     ],
 
     // Coverage configuration

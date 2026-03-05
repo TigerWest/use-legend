@@ -74,10 +74,8 @@ ruleTester.run('observable-naming', observableNaming, {
       `,
       options: [
         {
-          trackFunctions: {
-            '@legendapp/state': ['observable', 'computed'],
-            '@legendapp/state/react': ['useObservable', 'useObservableState'],
-            '@usels/core': [],
+          libraries: {
+            '@legendapp/state/react': { tracks: ['useObservable'] },
           },
           allowPattern: '^_',
         },
@@ -97,6 +95,66 @@ ruleTester.run('observable-naming', observableNaming, {
         import { useObservableState } from '@legendapp/state/react';
         const value$ = useObservableState(0);
       `,
+    },
+    // 11. @usels/core: ignored functions should NOT be flagged (default ignores)
+    {
+      code: `
+        import { usePeekInitial, get, peek, useRafFn, useDebounceFn, useThrottleFn } from '@usels/core';
+        const immediate = usePeekInitial(obs, true);
+        const value = get(obs);
+        const peeked = peek(obs);
+      `,
+    },
+    // 12. @usels/core: observable-returning function WITH $ suffix is valid
+    {
+      code: `
+        import { useAutoReset } from '@usels/core';
+        const count$ = useAutoReset(0, 1000);
+      `,
+    },
+    // 13. @usels/web: ignored functions should NOT be flagged
+    {
+      code: `
+        import { usePeekInitial, get } from '@usels/web';
+        const immediate = usePeekInitial(obs, true);
+        const value = get(obs);
+      `,
+    },
+    // 14. @usels/web: observable-returning function WITH $ suffix is valid
+    {
+      code: `
+        import { useDebounced } from '@usels/web';
+        const debounced$ = useDebounced(value$, 300);
+      `,
+    },
+    // 15. Aliased ignored function should still be ignored
+    {
+      code: `
+        import { get as getValue } from '@usels/core';
+        const value = getValue(obs);
+      `,
+    },
+    // 16. libraries: {} (track all) — untracked lib is not flagged
+    {
+      code: `
+        import { something } from 'untracked-lib';
+        const val = something();
+      `,
+    },
+    // 17. tracks + ignores: tracks takes precedence, ignored fn is not tracked
+    {
+      code: `
+        import { foo, bar } from 'my-lib';
+        const val = bar();
+      `,
+      options: [
+        {
+          libraries: {
+            'my-lib': { tracks: ['foo'], ignores: ['bar'] },
+          },
+          allowPattern: null,
+        },
+      ],
     },
   ],
 
@@ -188,10 +246,8 @@ ruleTester.run('observable-naming', observableNaming, {
       `,
       options: [
         {
-          trackFunctions: {
-            '@legendapp/state': ['observable', 'computed'],
-            '@legendapp/state/react': ['useObservable', 'useObservableState'],
-            '@usels/core': [],
+          libraries: {
+            '@legendapp/state/react': { tracks: ['useObservable'] },
           },
           allowPattern: '^_',
         },
@@ -200,6 +256,95 @@ ruleTester.run('observable-naming', observableNaming, {
         {
           messageId: 'missingDollarSuffix',
           data: { name: 'count' },
+        },
+      ],
+    },
+    // 8. @usels/core: observable-returning function without $ suffix
+    {
+      code: `
+        import { useAutoReset } from '@usels/core';
+        const count = useAutoReset(0, 1000);
+      `,
+      errors: [
+        {
+          messageId: 'missingDollarSuffix',
+          data: { name: 'count' },
+        },
+      ],
+    },
+    // 9. @usels/web: observable-returning function without $ suffix
+    {
+      code: `
+        import { useDebounced } from '@usels/web';
+        const debounced = useDebounced(value$, 300);
+      `,
+      errors: [
+        {
+          messageId: 'missingDollarSuffix',
+          data: { name: 'debounced' },
+        },
+      ],
+    },
+    // 10. libraries: {} (track all) — all functions flagged
+    {
+      code: `
+        import { anything } from 'custom-observable-lib';
+        const val = anything();
+      `,
+      options: [
+        {
+          libraries: {
+            'custom-observable-lib': {},
+          },
+          allowPattern: null,
+        },
+      ],
+      errors: [
+        {
+          messageId: 'missingDollarSuffix',
+          data: { name: 'val' },
+        },
+      ],
+    },
+    // 11. ignores: function NOT in ignores is still tracked
+    {
+      code: `
+        import { tracked, ignored } from 'my-lib';
+        const val = tracked();
+      `,
+      options: [
+        {
+          libraries: {
+            'my-lib': { ignores: ['ignored'] },
+          },
+          allowPattern: null,
+        },
+      ],
+      errors: [
+        {
+          messageId: 'missingDollarSuffix',
+          data: { name: 'val' },
+        },
+      ],
+    },
+    // 12. tracks + ignores: tracks takes precedence, tracked fn is still flagged
+    {
+      code: `
+        import { foo } from 'my-lib';
+        const val = foo();
+      `,
+      options: [
+        {
+          libraries: {
+            'my-lib': { tracks: ['foo'], ignores: ['foo'] },
+          },
+          allowPattern: null,
+        },
+      ],
+      errors: [
+        {
+          messageId: 'missingDollarSuffix',
+          data: { name: 'val' },
         },
       ],
     },

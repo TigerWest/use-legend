@@ -1,7 +1,7 @@
 {
-  "name": "@usels/core",
-  "version": "0.1.0",
-  "description": "Observable-native React utility hooks for Legend-State, inspired by VueUse and react-use",
+  "name": "@usels/web",
+  "version": "0.0.3-beta.5",
+  "description": "Browser-specific hooks for Legend-State (includes @usels/core)",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "date-fns": "^4.1.0",
+    "@usels/core": "workspace:*",
     "es-toolkit": "^1.0.0"
   },
   "scripts": {
@@ -58,7 +58,8 @@
     "legendapp",
     "legend-state",
     "utilities",
-    "helpers"
+    "hooks",
+    "browser"
   ],
   "license": "MIT",
   "publishConfig": {

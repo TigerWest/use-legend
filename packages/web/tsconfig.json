@@ -7,13 +7,10 @@
     "jsx": "react-jsx",
     "baseUrl": "./src",
     "paths": {
+      "@browser/*": ["browser/*"],
       "@elements/*": ["elements/*"],
-      "@reactivity/*": ["reactivity/*"],
-      "@shared": ["shared/index.ts"],
-      "@shared/*": ["shared/*"],
-      "@timer/*": ["timer/*"],
-      "@utilities/*": ["utilities/*"],
-      "@components/*": ["components/*"]
+      "@sensors/*": ["sensors/*"],
+      "@timer/*": ["timer/*"]
     }
   }
 }
