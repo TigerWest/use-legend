@@ -10,8 +10,6 @@ import { useMouseInElement } from ".";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-
 function createDiv(rect: Partial<DOMRect> = {}) {
   const div = document.createElement("div");
   const full: DOMRect = {
@@ -113,12 +111,7 @@ describe("useMouseInElement() — element lifecycle", () => {
       const roCountBefore = ResizeObserverMock.instances.filter(
         (i) => !i.disconnected && i.observed.length > 0
       ).length;
-      const moCountBefore = MutationObserverMock.instances.filter(
-        (i) => !i.disconnected
-      ).length;
-
-      const winAddCountBefore = addSpy.mock.calls.length;
-      const docAddCountBefore = docAddSpy.mock.calls.length;
+      const moCountBefore = MutationObserverMock.instances.filter((i) => !i.disconnected).length;
 
       const div = createDiv();
       act(() => result.current.el$(div));
@@ -132,14 +125,16 @@ describe("useMouseInElement() — element lifecycle", () => {
       const moActive = MutationObserverMock.instances.filter((i) => !i.disconnected);
       expect(moActive.length).toBeGreaterThan(moCountBefore);
 
-      // window listeners (mousemove, scroll, resize) should have been registered
-      // Note: useMouseInElement registers these at hook mount time (unconditionally),
-      // so total window+doc listener count after mount covers all 4 event-based resources
-      const winAddCountAfter = addSpy.mock.calls.length;
-      const docAddCountAfter = docAddSpy.mock.calls.length;
-      expect(winAddCountAfter + docAddCountAfter).toBeGreaterThan(
-        winAddCountBefore + docAddCountBefore
-      );
+      // window/document listeners (mousemove, scroll, resize, mouseleave) are registered
+      // at mount time (unconditionally), so they are already counted in the "before" snapshot
+      const registeredEvents = [
+        ...addSpy.mock.calls.map((c) => c[0]),
+        ...docAddSpy.mock.calls.map((c) => c[0]),
+      ];
+      expect(registeredEvents).toContain("mousemove");
+      expect(registeredEvents).toContain("mouseleave");
+      expect(registeredEvents).toContain("scroll");
+      expect(registeredEvents).toContain("resize");
     });
 
     it("Ref$ target element → null: all resources are cleaned up", () => {
@@ -309,9 +304,7 @@ describe("useMouseInElement() — element lifecycle", () => {
       expect(result.current.mouse.elementX$.get()).toBe(60);
 
       // Verify symmetric: total disconnected RO count equals at least the number of cycles that ended on null
-      const disconnectedROCount = ResizeObserverMock.instances.filter(
-        (i) => i.disconnected
-      ).length;
+      const disconnectedROCount = ResizeObserverMock.instances.filter((i) => i.disconnected).length;
       expect(disconnectedROCount).toBeGreaterThanOrEqual(1);
 
       // Same symmetry for MutationObserver

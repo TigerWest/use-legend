@@ -144,9 +144,7 @@ describe("useElementSize() — element lifecycle", () => {
       const div = document.createElement("div");
       const target$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(div));
 
-      const { result } = renderHook(() =>
-        useElementSize(target$ as any, { width: 7, height: 14 })
-      );
+      const { result } = renderHook(() => useElementSize(target$ as any, { width: 7, height: 14 }));
 
       // Observer should be active on div
       const activeInstance = ResizeObserverMock.instances.find((i) => i.observed.includes(div));
@@ -196,9 +194,7 @@ describe("useElementSize() — element lifecycle", () => {
       expect(instanceAfterRemount).toBeDefined();
 
       // Verify the remounted observer actually fires
-      act(() =>
-        instanceAfterRemount!.trigger(div2, { contentRect: { width: 400, height: 300 } })
-      );
+      act(() => instanceAfterRemount!.trigger(div2, { contentRect: { width: 400, height: 300 } }));
       expect(result.current.size.width$.get()).toBe(400);
       expect(result.current.size.height$.get()).toBe(300);
     });

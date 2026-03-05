@@ -172,5 +172,4 @@ describe("useRef$()", () => {
     // called again when element changes
     expect(observeSpy).toHaveBeenCalledTimes(2);
   });
-
 });

@@ -231,9 +231,9 @@ export function useEventListener(...args: any[]): () => void {
     cleanupsRef.current = [];
   });
 
-  // Return a manual cleanup function for imperative removal.
-  return () => {
+  // Return a stable manual cleanup function for imperative removal.
+  return useConstant(() => () => {
     cleanupsRef.current.forEach((fn) => fn());
     cleanupsRef.current = [];
-  };
+  });
 }

@@ -70,13 +70,19 @@ describe("useScroll() — rerender stability", () => {
       );
 
       const addScrollAfterMount = addSpy.mock.calls.filter(([type]) => type === "scroll").length;
-      const removeScrollAfterMount = removeSpy.mock.calls.filter(([type]) => type === "scroll").length;
+      const removeScrollAfterMount = removeSpy.mock.calls.filter(
+        ([type]) => type === "scroll"
+      ).length;
 
       rerender({ count: 1 });
       rerender({ count: 2 });
 
-      expect(addSpy.mock.calls.filter(([type]) => type === "scroll").length).toBe(addScrollAfterMount);
-      expect(removeSpy.mock.calls.filter(([type]) => type === "scroll").length).toBe(removeScrollAfterMount);
+      expect(addSpy.mock.calls.filter(([type]) => type === "scroll").length).toBe(
+        addScrollAfterMount
+      );
+      expect(removeSpy.mock.calls.filter(([type]) => type === "scroll").length).toBe(
+        removeScrollAfterMount
+      );
     });
 
     it("idle timer is not reset by unrelated re-render", () => {

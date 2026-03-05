@@ -215,11 +215,12 @@ describe("useEventListener() — element lifecycle", () => {
 
       expect(removeSpy).toHaveBeenCalledTimes(1);
 
-      // listener should no longer be invoked
+      // listener should no longer be invoked — no click was fired before setting null,
+      // so the total call count is zero.
       act(() => {
         div.dispatchEvent(new Event("click"));
       });
-      expect(listener).toHaveBeenCalledOnce(); // only the call before null
+      expect(listener).not.toHaveBeenCalled();
     });
   });
 
@@ -241,22 +242,34 @@ describe("useEventListener() — element lifecycle", () => {
       const removeSpy = vi.spyOn(div, "removeEventListener");
 
       // Cycle 1: mount → unmount
-      act(() => { result.current.el$(div); });
-      act(() => { result.current.el$(null); });
+      act(() => {
+        result.current.el$(div);
+      });
+      act(() => {
+        result.current.el$(null);
+      });
 
       // Cycle 2: mount → unmount
-      act(() => { result.current.el$(div); });
-      act(() => { result.current.el$(null); });
+      act(() => {
+        result.current.el$(div);
+      });
+      act(() => {
+        result.current.el$(null);
+      });
 
       // Cycle 3: mount
-      act(() => { result.current.el$(div); });
+      act(() => {
+        result.current.el$(div);
+      });
 
       // After 3 mounts and 2 unmounts, add should be called 3 times, remove 2 times
       expect(addSpy.mock.calls.length).toBe(3);
       expect(removeSpy.mock.calls.length).toBe(2);
 
       // After final unmount, they should be symmetric
-      act(() => { result.current.el$(null); });
+      act(() => {
+        result.current.el$(null);
+      });
       expect(addSpy.mock.calls.length).toBe(removeSpy.mock.calls.length);
     });
 
@@ -271,9 +284,13 @@ describe("useEventListener() — element lifecycle", () => {
       const elA = document.createElement("div");
       const elB = document.createElement("div");
 
-      act(() => { result.current.el$(elA); });
+      act(() => {
+        result.current.el$(elA);
+      });
       // Switch to elB — elA should no longer trigger listener
-      act(() => { result.current.el$(elB); });
+      act(() => {
+        result.current.el$(elB);
+      });
 
       listener.mockClear();
 

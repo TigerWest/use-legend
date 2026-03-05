@@ -87,7 +87,9 @@ describe("useAnimate() \u2014 reactive options (real browser)", () => {
         result.current.pause();
       });
 
-      await waitFor(() => expect(result.current.playState$.get()).toBe("paused"), { timeout: 2000 });
+      await waitFor(() => expect(result.current.playState$.get()).toBe("paused"), {
+        timeout: 2000,
+      });
 
       act(() => {
         result.current.currentTime$.set(50);

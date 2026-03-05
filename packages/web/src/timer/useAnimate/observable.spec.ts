@@ -65,14 +65,13 @@ beforeEach(() => {
   Element.prototype.animate = mockAnimate;
 
   // Mock KeyframeEffect so we can track effect replacements
-  (global as unknown as Record<string, unknown>).KeyframeEffect = mockKeyframeEffect.mockImplementation(
-    function (_el: Element, kf: Keyframe[] | null) {
+  (global as unknown as Record<string, unknown>).KeyframeEffect =
+    mockKeyframeEffect.mockImplementation(function (_el: Element, kf: Keyframe[] | null) {
       const keyframes = kf ?? [];
       return {
         getKeyframes: () => keyframes,
       };
-    }
-  );
+    });
 
   rafCallbacks = new Map();
   rafId = 0;

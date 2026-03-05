@@ -260,7 +260,7 @@ describe("useResizeObserver() — element lifecycle", () => {
   });
 
   describe("full cycle (null → element → null → element)", () => {
-    it("Ref$ target null → element → null → element: full lifecycle without leaks", () => {
+    it("Ref$ target null → element → null → element: full lifecycle without leaks", async () => {
       const cb = vi.fn();
       const disconnectSpy = vi.spyOn(ResizeObserverMock.prototype, "disconnect");
 
@@ -297,7 +297,9 @@ describe("useResizeObserver() — element lifecycle", () => {
       ).toBeDefined();
 
       // Unmount should disconnect the final observer
-      unmount();
+      await act(async () => {
+        unmount();
+      });
       expect(disconnectSpy.mock.calls.length).toBeGreaterThan(disconnectAfterNull);
     });
   });

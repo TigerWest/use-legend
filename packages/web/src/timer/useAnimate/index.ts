@@ -109,15 +109,7 @@ export function useAnimate(
   const initialPlaybackRate = usePeekInitial(opts$.playbackRate, 1);
   const _window = usePeekInitial(opts$.window) ?? defaultWindow;
 
-  // Callback refs — kept up-to-date reactively (Rule 2)
-  const onReadyRef = useRef(opts$.peek()?.onReady);
-  const onErrorRef = useRef(opts$.peek()?.onError ?? ((e: unknown) => console.error(e)));
-
-  useObserve(() => {
-    const raw = opts$.get();
-    onReadyRef.current = raw?.onReady;
-    onErrorRef.current = raw?.onError ?? ((e: unknown) => console.error(e));
-  });
+  const fireError = (e: unknown) => (opts$.peek()?.onError ?? console.error)(e);
 
   // ── Core state ──
   const isSupported$ = useSupported(
@@ -225,7 +217,7 @@ export function useAnimate(
       syncResume();
     }
 
-    onReadyRef.current?.(animRef.current);
+    opts$.peek()?.onReady?.(animRef.current);
   }
 
   // ── Action functions ──
@@ -236,7 +228,7 @@ export function useAnimate(
         syncResume();
       } catch (e) {
         syncPause();
-        onErrorRef.current(e);
+        fireError(e);
       }
     } else {
       update();
@@ -249,7 +241,7 @@ export function useAnimate(
       syncState();
       syncPause();
     } catch (e) {
-      onErrorRef.current(e);
+      fireError(e);
     }
   };
 
@@ -283,7 +275,7 @@ export function useAnimate(
       syncResume();
     } catch (e) {
       syncPause();
-      onErrorRef.current(e);
+      fireError(e);
     }
   };
 
@@ -300,7 +292,7 @@ export function useAnimate(
       syncState();
       syncPause();
     } catch (e) {
-      onErrorRef.current(e);
+      fireError(e);
     }
   };
 
@@ -310,7 +302,7 @@ export function useAnimate(
       syncState();
       syncPause();
     } catch (e) {
-      onErrorRef.current(e);
+      fireError(e);
     }
   };
 

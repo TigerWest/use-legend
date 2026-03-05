@@ -2,6 +2,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { useRef$ } from ".";
+import { createRef } from "react";
 
 // ---------------------------------------------------------------------------
 // useRef$() — rerender stability
@@ -60,12 +61,9 @@ describe("useRef$() — rerender stability", () => {
     });
 
     it("RefObject.current remains accurate after re-render", () => {
-      const { createRef } = require("react");
       const refObject = createRef<HTMLDivElement>();
 
-      const { result, rerender } = renderHook(() =>
-        useRef$<HTMLDivElement>(refObject)
-      );
+      const { result, rerender } = renderHook(() => useRef$<HTMLDivElement>(refObject));
       const div = document.createElement("div");
 
       act(() => {
@@ -90,8 +88,7 @@ describe("useRef$() — rerender stability", () => {
       const firstRef = vi.fn();
 
       const { result, rerender } = renderHook(
-        ({ ref }: { ref: (node: HTMLDivElement | null) => void }) =>
-          useRef$<HTMLDivElement>(ref),
+        ({ ref }: { ref: (node: HTMLDivElement | null) => void }) => useRef$<HTMLDivElement>(ref),
         { initialProps: { ref: firstRef } }
       );
 
@@ -113,8 +110,7 @@ describe("useRef$() — rerender stability", () => {
       const ref2 = vi.fn(() => calls.push("ref2"));
 
       const { result, rerender } = renderHook(
-        ({ ref }: { ref: (node: HTMLDivElement | null) => void }) =>
-          useRef$<HTMLDivElement>(ref),
+        ({ ref }: { ref: (node: HTMLDivElement | null) => void }) => useRef$<HTMLDivElement>(ref),
         { initialProps: { ref: ref1 } }
       );
 

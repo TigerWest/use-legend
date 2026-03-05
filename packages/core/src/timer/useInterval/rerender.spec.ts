@@ -23,9 +23,7 @@ describe("useInterval() — rerender stability", () => {
 
   describe("state preservation", () => {
     it("does not reset counter when unrelated state causes re-render", () => {
-      const { result, rerender } = renderHook(() =>
-        useInterval(1000, { controls: true })
-      );
+      const { result, rerender } = renderHook(() => useInterval(1000, { controls: true }));
 
       act(() => {
         vi.advanceTimersByTime(3000);
@@ -46,9 +44,7 @@ describe("useInterval() — rerender stability", () => {
 
   describe("value accuracy", () => {
     it("interval continues ticking correctly after re-render", () => {
-      const { result, rerender } = renderHook(() =>
-        useInterval(1000, { controls: true })
-      );
+      const { result, rerender } = renderHook(() => useInterval(1000, { controls: true }));
 
       act(() => {
         vi.advanceTimersByTime(2000);
@@ -74,8 +70,7 @@ describe("useInterval() — rerender stability", () => {
     it("callback receives correct count value after re-render", () => {
       const received: number[] = [];
       const { rerender } = renderHook(
-        (props: { cb: (count: number) => void }) =>
-          useInterval(1000, { callback: props.cb }),
+        (props: { cb: (count: number) => void }) => useInterval(1000, { callback: props.cb }),
         { initialProps: { cb: (c: number) => received.push(c) } }
       );
 

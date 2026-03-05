@@ -13,13 +13,11 @@ describe("useResizeObserver() — types", () => {
 
   describe("return type", () => {
     it("returns UseResizeObserverReturn", () => {
-      expectTypeOf<typeof useResizeObserver>()
-        .returns.toEqualTypeOf<UseResizeObserverReturn>();
+      expectTypeOf<typeof useResizeObserver>().returns.toEqualTypeOf<UseResizeObserverReturn>();
     });
 
     it("return type has stop function", () => {
-      expectTypeOf<UseResizeObserverReturn["stop"]>()
-        .toEqualTypeOf<() => void>();
+      expectTypeOf<UseResizeObserverReturn["stop"]>().toEqualTypeOf<() => void>();
     });
   });
 
@@ -31,34 +29,40 @@ describe("useResizeObserver() — types", () => {
     it("accepts single Element target via Observable<OpaqueObject<Element>>", () => {
       const div = document.createElement("div");
       const target$ = observable<OpaqueObject<HTMLDivElement> | null>(ObservableHint.opaque(div));
-      expectTypeOf<typeof useResizeObserver>()
-        .toBeCallableWith(target$ as Observable<OpaqueObject<Element> | null>, vi.fn());
+      expectTypeOf<typeof useResizeObserver>().toBeCallableWith(
+        target$ as Observable<OpaqueObject<Element> | null>,
+        vi.fn()
+      );
     });
 
     it("accepts Element[] array target", () => {
       const div = document.createElement("div");
       const span = document.createElement("span");
-      const t1 = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(div));
-      const t2 = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(span));
-      expectTypeOf<typeof useResizeObserver>()
-        .toBeCallableWith([t1, t2] as MaybeElement[], vi.fn());
+      const t1$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(div));
+      const t2$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(span));
+      expectTypeOf<typeof useResizeObserver>().toBeCallableWith(
+        [t1$, t2$] as MaybeElement[],
+        vi.fn()
+      );
     });
 
     it("accepts Ref$ target", () => {
-      expectTypeOf<typeof useResizeObserver>()
-        .toBeCallableWith(undefined as unknown as ReturnType<typeof useRef$<HTMLDivElement>>, vi.fn());
+      expectTypeOf<typeof useResizeObserver>().toBeCallableWith(
+        undefined as unknown as ReturnType<typeof useRef$<HTMLDivElement>>,
+        vi.fn()
+      );
     });
 
     it("accepts null as target", () => {
-      expectTypeOf<typeof useResizeObserver>()
-        .toBeCallableWith(null, vi.fn());
+      expectTypeOf<typeof useResizeObserver>().toBeCallableWith(null, vi.fn());
     });
 
     it("accepts options as third argument", () => {
       const div = document.createElement("div");
       const target$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(div));
-      expectTypeOf<typeof useResizeObserver>()
-        .toBeCallableWith(target$, vi.fn(), { box: "border-box" } satisfies UseResizeObserverOptions);
+      expectTypeOf<typeof useResizeObserver>().toBeCallableWith(target$, vi.fn(), {
+        box: "border-box",
+      } satisfies UseResizeObserverOptions);
     });
   });
 
@@ -69,9 +73,7 @@ describe("useResizeObserver() — types", () => {
   describe("generic inference", () => {
     it("callback entries type matches ResizeObserverCallback", () => {
       // The callback parameter must be ResizeObserverCallback
-      expectTypeOf<typeof useResizeObserver>()
-        .parameter(1)
-        .toEqualTypeOf<ResizeObserverCallback>();
+      expectTypeOf<typeof useResizeObserver>().parameter(1).toEqualTypeOf<ResizeObserverCallback>();
     });
 
     it("options box accepts only valid box model strings", () => {

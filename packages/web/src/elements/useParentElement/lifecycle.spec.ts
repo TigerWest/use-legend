@@ -6,8 +6,6 @@ import { describe, it, expect, afterEach } from "vitest";
 import { useRef$ } from "@usels/core";
 import { useParentElement } from ".";
 
-const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-
 // ---------------------------------------------------------------------------
 // DOM helpers
 // ---------------------------------------------------------------------------

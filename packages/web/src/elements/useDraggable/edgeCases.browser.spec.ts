@@ -77,9 +77,7 @@ function firePointerMove(clientX: number, clientY: number) {
 
 describe("useDraggable() — edge cases (real browser)", () => {
   it("onStart returning false cancels drag", async () => {
-    const { result } = renderHook(() =>
-      useDraggable(wrapEl(el), { onStart: () => false })
-    );
+    const { result } = renderHook(() => useDraggable(wrapEl(el), { onStart: () => false }));
 
     firePointerDown(el, 10, 10);
     firePointerMove(60, 80);
@@ -90,9 +88,7 @@ describe("useDraggable() — edge cases (real browser)", () => {
   });
 
   it("pointerTypes filter — touch ignored when only mouse allowed", async () => {
-    const { result } = renderHook(() =>
-      useDraggable(wrapEl(el), { pointerTypes: ["mouse"] })
-    );
+    const { result } = renderHook(() => useDraggable(wrapEl(el), { pointerTypes: ["mouse"] }));
 
     // touch pointerdown — should be ignored
     firePointerDown(el, 10, 10, "touch");

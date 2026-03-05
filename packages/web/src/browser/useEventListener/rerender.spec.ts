@@ -75,10 +75,9 @@ describe("useEventListener() — rerender stability", () => {
       const removeSpy = vi.spyOn(div, "removeEventListener");
       const listener = vi.fn();
 
-      const { rerender } = renderHook(
-        ({ el }) => useEventListener(el, "click", listener),
-        { initialProps: { el: div } }
-      );
+      const { rerender } = renderHook(({ el }) => useEventListener(el, "click", listener), {
+        initialProps: { el: div },
+      });
 
       const addCountAfterMount = addSpy.mock.calls.length;
       const removeCountAfterMount = removeSpy.mock.calls.length;
@@ -174,10 +173,9 @@ describe("useEventListener() — rerender stability", () => {
       const div = document.createElement("div");
       const listener = vi.fn();
 
-      const { result, rerender } = renderHook(
-        ({ el }) => useEventListener(el, "click", listener),
-        { initialProps: { el: div } }
-      );
+      const { result, rerender } = renderHook(({ el }) => useEventListener(el, "click", listener), {
+        initialProps: { el: div },
+      });
 
       const cleanupBefore = result.current;
       rerender({ el: div });

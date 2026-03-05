@@ -11,63 +11,53 @@ import type { MaybeElement } from "@usels/core";
 describe("useDraggable() — types", () => {
   describe("generic constraint", () => {
     it("target accepts HTMLElement wrapped as MaybeElement", () => {
-      expectTypeOf<typeof useDraggable>()
-        .parameter(0)
-        .toExtend<MaybeElement>();
+      expectTypeOf<typeof useDraggable>().parameter(0).toExtend<MaybeElement>();
     });
 
     it("target parameter accepts null", () => {
-      expectTypeOf<typeof useDraggable>()
-        .toBeCallableWith(null);
+      expectTypeOf<typeof useDraggable>().toBeCallableWith(null);
     });
   });
 
   describe("return type", () => {
     it("UseDraggableReturn type includes x$", () => {
-      expectTypeOf<UseDraggableReturn["x$"]>()
-        .toEqualTypeOf<Observable<number>>();
+      expectTypeOf<UseDraggableReturn["x$"]>().toEqualTypeOf<Observable<number>>();
     });
 
     it("UseDraggableReturn type includes y$", () => {
-      expectTypeOf<UseDraggableReturn["y$"]>()
-        .toEqualTypeOf<Observable<number>>();
+      expectTypeOf<UseDraggableReturn["y$"]>().toEqualTypeOf<Observable<number>>();
     });
 
     it("UseDraggableReturn type includes isDragging$", () => {
-      expectTypeOf<UseDraggableReturn["isDragging$"]>()
-        .toEqualTypeOf<Observable<boolean>>();
+      expectTypeOf<UseDraggableReturn["isDragging$"]>().toEqualTypeOf<Observable<boolean>>();
     });
 
     it("UseDraggableReturn type includes style$", () => {
-      expectTypeOf<UseDraggableReturn["style$"]>()
-        .toEqualTypeOf<Observable<string>>();
+      expectTypeOf<UseDraggableReturn["style$"]>().toEqualTypeOf<Observable<string>>();
     });
 
     it("UseDraggableReturn type includes position$", () => {
-      expectTypeOf<UseDraggableReturn["position$"]>()
-        .toEqualTypeOf<Observable<Position>>();
+      expectTypeOf<UseDraggableReturn["position$"]>().toEqualTypeOf<Observable<Position>>();
     });
   });
 
   describe("option types", () => {
     it("accepts Observable<boolean> for disabled option", () => {
-      expectTypeOf<typeof useDraggable>()
-        .toBeCallableWith(null, { disabled: observable(false) });
+      expectTypeOf<typeof useDraggable>().toBeCallableWith(null, { disabled: observable(false) });
     });
 
     it("accepts Observable<string> for axis option", () => {
-      expectTypeOf<typeof useDraggable>()
-        .toBeCallableWith(null, { axis: observable<"x" | "y" | "both">("both") });
+      expectTypeOf<typeof useDraggable>().toBeCallableWith(null, {
+        axis: observable<"x" | "y" | "both">("both"),
+      });
     });
 
     it("accepts plain boolean for disabled option", () => {
-      expectTypeOf<typeof useDraggable>()
-        .toBeCallableWith(null, { disabled: true });
+      expectTypeOf<typeof useDraggable>().toBeCallableWith(null, { disabled: true });
     });
 
     it("accepts plain axis string for axis option", () => {
-      expectTypeOf<typeof useDraggable>()
-        .toBeCallableWith(null, { axis: "x" as const });
+      expectTypeOf<typeof useDraggable>().toBeCallableWith(null, { axis: "x" as const });
     });
 
     it("rejects invalid axis value", () => {

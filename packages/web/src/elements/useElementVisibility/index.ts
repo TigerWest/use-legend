@@ -1,10 +1,11 @@
 "use client";
 import type { Observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 import type { MaybeElement } from "@usels/core";
 import { useIntersectionObserver } from "@elements/useIntersectionObserver";
 import type { UseIntersectionObserverOptions } from "@elements/useIntersectionObserver";
+import { normalizeTargets } from "@elements/useResizeObserver";
 
 export interface UseElementVisibilityOptions {
   /** Initial visibility value. Default: false */
@@ -71,6 +72,14 @@ export function useElementVisibility(
       threshold: opts$.threshold,
     } as DeepMaybeObservable<UseIntersectionObserverOptions>
   );
+
+  // Reset visibility when target element is removed
+  useObserveEffect(() => {
+    const targets = normalizeTargets(element);
+    if (!targets.length) {
+      isVisible$.set(opts$.initialValue.peek() ?? false);
+    }
+  });
 
   return isVisible$;
 }

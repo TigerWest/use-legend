@@ -5,8 +5,7 @@ import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useElementBounding } from ".";
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock
@@ -82,8 +81,15 @@ afterEach(() => {
 function createDivWithRect(rect: Partial<DOMRect> = {}) {
   const div = document.createElement("div");
   const full: DOMRect = {
-    x: 0, y: 0, top: 0, right: 200, bottom: 100,
-    left: 0, width: 200, height: 100, toJSON: () => ({}),
+    x: 0,
+    y: 0,
+    top: 0,
+    right: 200,
+    bottom: 100,
+    left: 0,
+    width: 200,
+    height: 100,
+    toJSON: () => ({}),
     ...rect,
   };
   vi.spyOn(div, "getBoundingClientRect").mockReturnValue(full);
@@ -99,9 +105,7 @@ describe("useElementBounding() — edge cases", () => {
     const div = createDivWithRect({ width: 200, height: 100 });
     const rafSpy = vi.spyOn(window, "requestAnimationFrame");
 
-    const { result } = renderHook(() =>
-      useElementBounding(wrapEl(div) as any)
-    );
+    const { result } = renderHook(() => useElementBounding(wrapEl(div) as any));
 
     // Flush the initial RAF queued on mount
     act(() => vi.runAllTimers());
@@ -134,8 +138,15 @@ describe("useElementBounding() — edge cases", () => {
   it("works with SVGElement", () => {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     const rect: DOMRect = {
-      x: 5, y: 10, top: 10, right: 105, bottom: 60,
-      left: 5, width: 100, height: 50, toJSON: () => ({}),
+      x: 5,
+      y: 10,
+      top: 10,
+      right: 105,
+      bottom: 60,
+      left: 5,
+      width: 100,
+      height: 50,
+      toJSON: () => ({}),
     };
     vi.spyOn(svg, "getBoundingClientRect").mockReturnValue(rect);
 

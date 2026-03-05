@@ -22,13 +22,11 @@ if (typeof window !== "undefined" && !window.DragEvent) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-
 function createDiv() {
   return document.createElement("div");
 }
 
-function createDragEvent(type: string, files: File[] = [], mimeTypes: string[] = []): DragEvent {
+function createDragEvent(type: string, _files: File[] = [], mimeTypes: string[] = []): DragEvent {
   const event = new DragEvent(type, { bubbles: true, cancelable: true });
 
   const items = mimeTypes.map((mime) => ({

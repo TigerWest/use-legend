@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, renderHook, act } from "@testing-library/react";
 import { useObserve } from "@legendapp/state/react";
-import { createElement, useState } from "react";
+import { createElement } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { getElement, useRef$ } from ".";
 

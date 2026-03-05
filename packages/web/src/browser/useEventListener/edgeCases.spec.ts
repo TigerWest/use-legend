@@ -2,7 +2,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
-import { useState } from "react";
+
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { useEventListener } from ".";
 
@@ -51,14 +51,15 @@ describe("useEventListener() — edge cases", () => {
     // Same element wrapped twice — each observable resolves to the same element
     renderHook(() => useEventListener([wrapEl(div), wrapEl(div)] as any, "click", listener));
 
-    // Each occurrence in the array gets one registration
+    // Each occurrence in the array gets one registration attempt
     expect(addSpy).toHaveBeenCalledTimes(2);
 
-    // Both fire listener — but it should fire once per actual addEventListener call
+    // The DOM deduplicates identical listener registrations (same fn + same target +
+    // same type), so dispatching one event fires the forwarder — and the listener — once.
     act(() => {
       div.dispatchEvent(new Event("click"));
     });
-    expect(listener).toHaveBeenCalledTimes(2);
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 
   it("stale closure — latest listener is always called (regression guard)", () => {
@@ -67,8 +68,7 @@ describe("useEventListener() — edge cases", () => {
     const freshListener = vi.fn();
 
     const { rerender } = renderHook(
-      ({ listener }: { listener: (e: Event) => void }) =>
-        useEventListener(div, "click", listener),
+      ({ listener }: { listener: (e: Event) => void }) => useEventListener(div, "click", listener),
       { initialProps: { listener: staleListener } }
     );
 

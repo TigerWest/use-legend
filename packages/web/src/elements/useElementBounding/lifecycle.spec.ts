@@ -92,8 +92,15 @@ afterEach(() => {
 function createDivWithRect(rect: Partial<DOMRect> = {}) {
   const div = document.createElement("div");
   const full: DOMRect = {
-    x: 0, y: 0, top: 0, right: 200, bottom: 100,
-    left: 0, width: 200, height: 100, toJSON: () => ({}),
+    x: 0,
+    y: 0,
+    top: 0,
+    right: 200,
+    bottom: 100,
+    left: 0,
+    width: 200,
+    height: 100,
+    toJSON: () => ({}),
     ...rect,
   };
   vi.spyOn(div, "getBoundingClientRect").mockReturnValue(full);
@@ -118,9 +125,7 @@ describe("useElementBounding() — element lifecycle", () => {
       const roCountBefore = ResizeObserverMock.instances.filter(
         (i) => !i.disconnected && i.observed.length > 0
       ).length;
-      const moCountBefore = MutationObserverMock.instances.filter(
-        (i) => !i.disconnected
-      ).length;
+      const moCountBefore = MutationObserverMock.instances.filter((i) => !i.disconnected).length;
 
       const div = createDivWithRect({ width: 150, height: 75 });
       act(() => result.current.el$(div));
@@ -144,7 +149,7 @@ describe("useElementBounding() — element lifecycle", () => {
       addSpy.mockRestore();
     });
 
-    it("Ref$ target element → null: all observers disconnected and listeners removed", () => {
+    it("Ref$ target element → null: all observers disconnected and listeners removed", async () => {
       const removeSpy = vi.spyOn(window, "removeEventListener");
 
       const { result, unmount } = renderHook(() => {
@@ -171,7 +176,9 @@ describe("useElementBounding() — element lifecycle", () => {
       expect(moInstance!.disconnected).toBe(true);
 
       // window scroll/resize listeners are removed on unmount (not on element removal)
+      // useUnmount uses microtask queue, so we need to flush after unmount
       unmount();
+      await vi.advanceTimersByTimeAsync(0);
       const scrollRemoved = removeSpy.mock.calls.some(([e]) => e === "scroll");
       const resizeRemoved = removeSpy.mock.calls.some(([e]) => e === "resize");
       expect(scrollRemoved).toBe(true);
@@ -241,8 +248,16 @@ describe("useElementBounding() — element lifecycle", () => {
         return { el$, bounding };
       });
 
-      const div = createDivWithRect({ width: 250, height: 125, x: 5, y: 15,
-        top: 15, right: 255, bottom: 140, left: 5 });
+      const div = createDivWithRect({
+        width: 250,
+        height: 125,
+        x: 5,
+        y: 15,
+        top: 15,
+        right: 255,
+        bottom: 140,
+        left: 5,
+      });
       act(() => result.current.el$(div));
 
       expect(result.current.bounding.width$.get()).toBe(250);

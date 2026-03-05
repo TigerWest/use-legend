@@ -1,7 +1,8 @@
 import type { Observable } from "@legendapp/state";
-import { useMount, useObservable, useUnmount } from "@legendapp/state/react";
+import { useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
 import { useCallback, useRef } from "react";
 import { type MaybeElement, peekElement } from "@usels/core";
+import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
 import { useResizeObserver } from "@elements/useResizeObserver";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useEventListener } from "@browser/useEventListener";
@@ -131,9 +132,9 @@ export function useElementBounding(
     { passive: true }
   );
 
-  useMount(() => {
-    unmountedRef.current = false;
-    if (opts$.immediate.peek() !== false) update();
+  useObserveEffect(() => {
+    normalizeTargets(target); // register reactive dep
+    update();
   });
   useUnmount(() => {
     unmountedRef.current = true;

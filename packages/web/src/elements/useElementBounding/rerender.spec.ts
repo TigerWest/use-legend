@@ -5,8 +5,7 @@ import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useElementBounding } from ".";
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock
@@ -94,8 +93,15 @@ afterEach(() => {
 function createDivWithRect(rect: Partial<DOMRect> = {}) {
   const div = document.createElement("div");
   const full: DOMRect = {
-    x: 0, y: 0, top: 0, right: 200, bottom: 100,
-    left: 0, width: 200, height: 100, toJSON: () => ({}),
+    x: 0,
+    y: 0,
+    top: 0,
+    right: 200,
+    bottom: 100,
+    left: 0,
+    width: 200,
+    height: 100,
+    toJSON: () => ({}),
     ...rect,
   };
   vi.spyOn(div, "getBoundingClientRect").mockReturnValue(full);

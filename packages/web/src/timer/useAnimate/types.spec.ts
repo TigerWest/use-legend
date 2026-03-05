@@ -23,9 +23,7 @@ describe("useAnimate() \u2014 types", () => {
     });
 
     it("isSupported$ is ReadonlyObservable<boolean>", () => {
-      expectTypeOf<UseAnimateReturn["isSupported$"]>().toEqualTypeOf<
-        ReadonlyObservable<boolean>
-      >();
+      expectTypeOf<UseAnimateReturn["isSupported$"]>().toEqualTypeOf<ReadonlyObservable<boolean>>();
     });
 
     it("animate$ is ReadonlyObservable<Animation | null>", () => {
@@ -41,9 +39,7 @@ describe("useAnimate() \u2014 types", () => {
     });
 
     it("currentTime$ is Observable<number | null>", () => {
-      expectTypeOf<UseAnimateReturn["currentTime$"]>().toEqualTypeOf<
-        Observable<number | null>
-      >();
+      expectTypeOf<UseAnimateReturn["currentTime$"]>().toEqualTypeOf<Observable<number | null>>();
     });
 
     it("playbackRate$ is Observable<number>", () => {

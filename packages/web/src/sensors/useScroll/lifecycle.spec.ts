@@ -127,9 +127,7 @@ describe("useScroll() — element lifecycle", () => {
 
     it("Observable target element → null: scroll listener is removed", () => {
       const el = makeEl();
-      const target$ = observable<OpaqueObject<HTMLDivElement> | null>(
-        ObservableHint.opaque(el)
-      );
+      const target$ = observable<OpaqueObject<HTMLDivElement> | null>(ObservableHint.opaque(el));
 
       renderHook(() => useScroll(target$ as any));
 
@@ -142,9 +140,7 @@ describe("useScroll() — element lifecycle", () => {
 
     it("Observable target element → null → element: listener re-registered", () => {
       const el = makeEl();
-      const target$ = observable<OpaqueObject<HTMLDivElement> | null>(
-        ObservableHint.opaque(el)
-      );
+      const target$ = observable<OpaqueObject<HTMLDivElement> | null>(ObservableHint.opaque(el));
 
       const { result } = renderHook(() => useScroll(target$ as any));
 

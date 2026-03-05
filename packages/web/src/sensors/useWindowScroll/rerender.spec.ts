@@ -54,25 +54,21 @@ describe("useWindowScroll() — rerender stability", () => {
           void props.count;
           return useWindowScroll();
         },
-        { initialProps: { count: 0 } },
+        { initialProps: { count: 0 } }
       );
 
-      const addCallsAfterMount = addSpy.mock.calls.filter(
-        ([type]) => type === "scroll",
-      ).length;
+      const addCallsAfterMount = addSpy.mock.calls.filter(([type]) => type === "scroll").length;
       const removeCallsAfterMount = removeSpy.mock.calls.filter(
-        ([type]) => type === "scroll",
+        ([type]) => type === "scroll"
       ).length;
 
       // Trigger re-render with unrelated prop change
       rerender({ count: 1 });
       rerender({ count: 2 });
 
-      const addCallsAfterRerender = addSpy.mock.calls.filter(
-        ([type]) => type === "scroll",
-      ).length;
+      const addCallsAfterRerender = addSpy.mock.calls.filter(([type]) => type === "scroll").length;
       const removeCallsAfterRerender = removeSpy.mock.calls.filter(
-        ([type]) => type === "scroll",
+        ([type]) => type === "scroll"
       ).length;
 
       expect(addCallsAfterRerender).toBe(addCallsAfterMount);
@@ -87,7 +83,7 @@ describe("useWindowScroll() — rerender stability", () => {
           void props.count;
           return useWindowScroll();
         },
-        { initialProps: { count: 0 } },
+        { initialProps: { count: 0 } }
       );
 
       // Simulate a scroll event
@@ -120,7 +116,7 @@ describe("useWindowScroll() — rerender stability", () => {
           right: expect.any(Boolean),
           top: expect.any(Boolean),
           bottom: expect.any(Boolean),
-        }),
+        })
       );
     });
   });

@@ -3,11 +3,9 @@ import { renderHook, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useRef$ } from "@usels/core";
 import { useElementBounding } from ".";
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock
@@ -198,8 +196,15 @@ describe("useElementBounding()", () => {
 
       // Update mock return value for next call
       vi.spyOn(div, "getBoundingClientRect").mockReturnValue({
-        x: 0, y: 0, top: 0, right: 400, bottom: 300,
-        left: 0, width: 400, height: 300, toJSON: () => ({}),
+        x: 0,
+        y: 0,
+        top: 0,
+        right: 400,
+        bottom: 300,
+        left: 0,
+        width: 400,
+        height: 300,
+        toJSON: () => ({}),
       });
 
       const roInstance = ResizeObserverMock.instances.find(
@@ -221,8 +226,15 @@ describe("useElementBounding()", () => {
       );
 
       vi.spyOn(div, "getBoundingClientRect").mockReturnValue({
-        x: 5, y: 10, top: 10, right: 505, bottom: 210,
-        left: 5, width: 500, height: 200, toJSON: () => ({}),
+        x: 5,
+        y: 10,
+        top: 10,
+        right: 505,
+        bottom: 210,
+        left: 5,
+        width: 500,
+        height: 200,
+        toJSON: () => ({}),
       });
 
       const moInstance = MutationObserverMock.instances.find((i) => !i.disconnected);
@@ -242,8 +254,15 @@ describe("useElementBounding()", () => {
       );
 
       vi.spyOn(div, "getBoundingClientRect").mockReturnValue({
-        x: 0, y: 50, top: 50, right: 200, bottom: 150,
-        left: 0, width: 200, height: 100, toJSON: () => ({}),
+        x: 0,
+        y: 50,
+        top: 50,
+        right: 200,
+        bottom: 150,
+        left: 0,
+        width: 200,
+        height: 100,
+        toJSON: () => ({}),
       });
 
       act(() => {
@@ -262,8 +281,15 @@ describe("useElementBounding()", () => {
       );
 
       vi.spyOn(div, "getBoundingClientRect").mockReturnValue({
-        x: 0, y: 0, top: 0, right: 800, bottom: 400,
-        left: 0, width: 800, height: 400, toJSON: () => ({}),
+        x: 0,
+        y: 0,
+        top: 0,
+        right: 800,
+        bottom: 400,
+        left: 0,
+        width: 800,
+        height: 400,
+        toJSON: () => ({}),
       });
 
       act(() => {
@@ -277,14 +303,10 @@ describe("useElementBounding()", () => {
 
   describe("null target guard", () => {
     it("does not observe when target is null", () => {
-      renderHook(() =>
-        useElementBounding(null as any, { useCssTransforms: false })
-      );
+      renderHook(() => useElementBounding(null as any, { useCssTransforms: false }));
 
       // ResizeObserver and MutationObserver may still be created but should not be observing any element
-      const observingRO = ResizeObserverMock.instances.filter(
-        (i) => i.observed.length > 0
-      );
+      const observingRO = ResizeObserverMock.instances.filter((i) => i.observed.length > 0);
       expect(observingRO).toHaveLength(0);
     });
 
@@ -296,14 +318,12 @@ describe("useElementBounding()", () => {
   });
 
   describe("unmount cleanup", () => {
-    it("cleans up all resources on unmount", () => {
+    it("cleans up all resources on unmount", async () => {
       const div = createDivWithRect();
       const cancelSpy = vi.spyOn(window, "cancelAnimationFrame");
       const removeSpy = vi.spyOn(window, "removeEventListener");
 
-      const { result, unmount } = renderHook(() =>
-        useElementBounding(wrapEl(div) as any)
-      );
+      const { result, unmount } = renderHook(() => useElementBounding(wrapEl(div) as any));
 
       // Flush the mount RAF
       act(() => flushRaf());
@@ -311,7 +331,9 @@ describe("useElementBounding()", () => {
       // Trigger update() to queue a new RAF before unmount
       act(() => result.current.update());
 
+      // useUnmount uses microtask queue, so we need to flush after unmount
       unmount();
+      await vi.advanceTimersByTimeAsync(0);
 
       // RO disconnected
       const disconnectedRO = ResizeObserverMock.instances.filter((i) => i.disconnected);
@@ -334,7 +356,7 @@ describe("useElementBounding()", () => {
       removeSpy.mockRestore();
     });
 
-    it("resets bounding values to zero on unmount (reset=true by default)", () => {
+    it("resets bounding values to zero on unmount (reset=true by default)", async () => {
       const div = createDivWithRect({ width: 200, height: 100 });
 
       const { result, unmount } = renderHook(() =>
@@ -344,7 +366,9 @@ describe("useElementBounding()", () => {
       // Values should be populated after mount
       expect(result.current.width$.get()).toBe(200);
 
+      // useUnmount uses microtask queue, so we need to flush after unmount
       unmount();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(result.current.width$.get()).toBe(0);
       expect(result.current.height$.get()).toBe(0);

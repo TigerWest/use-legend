@@ -26,8 +26,6 @@ if (typeof window !== "undefined" && !window.PointerEvent) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
-
 function createDiv(rect: Partial<DOMRect> = {}) {
   const div = document.createElement("div");
   const full: DOMRect = {
@@ -237,20 +235,18 @@ describe("useDraggable() — element lifecycle", () => {
       // Remove element while drag is in progress
       act(() => result.current.el$(null));
 
-      // pointermove on window should no longer update state (pressedDelta was cleared via
-      // isDragging$ state check — however the window listener stays registered).
-      // The key check: element pointerdown listener is removed so no new drag can start.
-      // isDragging$ may still be true until a pointerup fires — but no further moves update.
-      const xBefore = result.current.drag.x$.get();
+      // pressedDelta is still set after element removal (no automatic clear).
+      // window pointermove listener is still registered, so moves still update position.
+      const xBefore = result.current.drag.x$.get(); // 40 after the (50,50) move
+      // Move to (200,200): pressedDelta still {x:10} → x = 200-10 = 190
       firePointerMove(200, 200);
-      // After element removal pressedDelta is still set until pointerup, so x$ could update.
-      // The important check is that isDragging$ goes false after pointerup.
+      // pointerup clears pressedDelta and sets isDragging=false
       firePointerUp();
       expect(result.current.drag.isDragging$.get()).toBe(false);
 
-      // After null + pointerup, further moves do nothing
+      // After pointerup, pressedDelta is null — further moves are no-ops. x$ stays at 190.
       firePointerMove(300, 300);
-      expect(result.current.drag.x$.get()).toBe(xBefore + 190); // value from before pointerup
+      expect(result.current.drag.x$.get()).toBe(xBefore + 150); // 40 + 150 = 190
     });
 
     it("x$, y$ reset when target element is removed", () => {

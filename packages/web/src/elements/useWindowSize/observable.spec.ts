@@ -61,8 +61,7 @@ describe("useWindowSize() — reactive options", () => {
   describe("Observable option change", () => {
     it("type change via re-render triggers immediate re-measurement without resize event", async () => {
       const { result, rerender } = renderHook(
-        (props: { type: "inner" | "outer" | "visual" }) =>
-          useWindowSize({ type: props.type }),
+        (props: { type: "inner" | "outer" | "visual" }) => useWindowSize({ type: props.type }),
         { initialProps: { type: "inner" as "inner" | "outer" | "visual" } }
       );
 
@@ -121,9 +120,7 @@ describe("useWindowSize() — reactive options", () => {
     it("includeScrollbar as Observable → reactive re-measurement when Observable value changes", async () => {
       const includeScrollbar$ = observable(true);
 
-      const { result } = renderHook(() =>
-        useWindowSize({ includeScrollbar: includeScrollbar$ })
-      );
+      const { result } = renderHook(() => useWindowSize({ includeScrollbar: includeScrollbar$ }));
 
       // Initial: true → reads innerWidth/innerHeight
       expect(result.current.width.get()).toBe(1024);

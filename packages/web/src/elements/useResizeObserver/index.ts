@@ -1,5 +1,5 @@
 import type { Observable } from "@legendapp/state";
-import { useObservable, useObserveEffect } from "@legendapp/state/react";
+import { useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
@@ -75,6 +75,10 @@ export function useResizeObserver(
     normalizeTargets(target); // registers reactive dep for Ref$/Observable targets
     setup();
   });
+
+  // Explicit unmount cleanup — useObserveEffect's onCleanup only fires on
+  // reactive re-runs, not guaranteed on React unmount.
+  useUnmount(cleanup);
 
   return { isSupported$, stop: cleanup };
 }

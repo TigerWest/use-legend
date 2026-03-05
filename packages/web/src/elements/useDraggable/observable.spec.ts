@@ -145,7 +145,7 @@ describe("useDraggable() — reactive options", () => {
       expect(result.current.x$.get()).toBe(30);
     });
 
-    it("Observable axis change from \"both\" to \"x\" restricts movement to x only", () => {
+    it('Observable axis change from "both" to "x" restricts movement to x only', () => {
       const div = createDiv();
       const axis$ = observable<"x" | "y" | "both">("both");
       const { result } = renderHook(() => useDraggable(wrapEl(div), { axis: axis$ }));
@@ -170,7 +170,7 @@ describe("useDraggable() — reactive options", () => {
       firePointerMove(60, 50);
 
       expect(result.current.x$.get()).toBe(60); // moved
-      expect(result.current.y$.get()).toBe(0);  // frozen at current y value
+      expect(result.current.y$.get()).toBe(0); // frozen at current y value
     });
   });
 
@@ -181,18 +181,34 @@ describe("useDraggable() — reactive options", () => {
       // Large container — no clamping
       const container1 = document.createElement("div");
       vi.spyOn(container1, "getBoundingClientRect").mockReturnValue({
-        left: 0, top: 0, right: 1000, bottom: 1000, width: 1000, height: 1000,
-        x: 0, y: 0, toJSON: () => ({}),
+        left: 0,
+        top: 0,
+        right: 1000,
+        bottom: 1000,
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
       });
 
       // Small container — clamps to 100px
       const container2 = document.createElement("div");
       vi.spyOn(container2, "getBoundingClientRect").mockReturnValue({
-        left: 0, top: 0, right: 100, bottom: 100, width: 100, height: 100,
-        x: 0, y: 0, toJSON: () => ({}),
+        left: 0,
+        top: 0,
+        right: 100,
+        bottom: 100,
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
       });
 
-      const container$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(container1));
+      const container$ = observable<OpaqueObject<Element> | null>(
+        ObservableHint.opaque(container1)
+      );
 
       const { result } = renderHook(() =>
         useDraggable(wrapEl(div), { containerElement: container$ as any })

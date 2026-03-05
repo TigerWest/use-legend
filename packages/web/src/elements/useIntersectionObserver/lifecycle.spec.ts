@@ -130,6 +130,11 @@ describe("useIntersectionObserver() — element lifecycle", () => {
         return { el$, io: useIntersectionObserver(el$, vi.fn()) };
       });
 
+      // useObserveEffect runs once at mount (with null Ref$ target → empty targets array),
+      // creating an observer with no observed elements. Clear counts before element assignment.
+      MockIntersectionObserver.mockClear();
+      mockObserve.mockClear();
+
       // Assign element
       act(() => result.current.el$(div));
       expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
@@ -153,6 +158,11 @@ describe("useIntersectionObserver() — element lifecycle", () => {
         const el$ = useRef$<Element>();
         return { el$, io: useIntersectionObserver(el$, vi.fn()) };
       });
+
+      // useObserveEffect runs once at mount (null Ref$ → empty targets), creating one observer.
+      // Clear before first element assignment to test the null → element transition cleanly.
+      MockIntersectionObserver.mockClear();
+      mockObserve.mockClear();
 
       // null → element
       act(() => result.current.el$(div1));

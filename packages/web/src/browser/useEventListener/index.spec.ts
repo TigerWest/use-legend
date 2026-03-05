@@ -367,4 +367,3 @@ describe("useEventListener() — returned cleanup function", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 });
-

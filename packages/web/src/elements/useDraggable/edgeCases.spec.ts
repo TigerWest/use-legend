@@ -25,8 +25,7 @@ if (typeof window !== "undefined" && !window.PointerEvent) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) =>
-  observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 
 function createDiv(rect: Partial<DOMRect> = {}) {
   const div = document.createElement("div");
@@ -113,9 +112,7 @@ describe("useDraggable() — edge cases", () => {
       toJSON: () => ({}),
     });
 
-    const target$ = observable<OpaqueObject<Element> | null>(
-      ObservableHint.opaque(svg)
-    );
+    const target$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(svg));
 
     expect(() => {
       renderHook(() => useDraggable(target$ as any));

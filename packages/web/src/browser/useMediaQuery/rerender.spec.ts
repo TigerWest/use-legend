@@ -82,9 +82,9 @@ describe("useMediaQuery() — rerender stability", () => {
       rerender();
       rerender();
 
-      const countAfterRerender = (mql.addEventListener as ReturnType<typeof vi.fn>).mock.calls.filter(
-        ([type]: [string]) => type === "change"
-      ).length;
+      const countAfterRerender = (
+        mql.addEventListener as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(([type]: [string]) => type === "change").length;
 
       expect(countAfterRerender).toBe(countAfterMount);
     });

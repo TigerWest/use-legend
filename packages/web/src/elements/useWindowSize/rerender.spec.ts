@@ -49,9 +49,7 @@ describe("useWindowSize() — rerender stability", () => {
         { initialProps: { count: 0 } }
       );
 
-      const addCallsAfterMount = addSpy.mock.calls.filter(
-        ([type]) => type === "resize"
-      ).length;
+      const addCallsAfterMount = addSpy.mock.calls.filter(([type]) => type === "resize").length;
       const removeCallsAfterMount = removeSpy.mock.calls.filter(
         ([type]) => type === "resize"
       ).length;
@@ -60,9 +58,7 @@ describe("useWindowSize() — rerender stability", () => {
       rerender({ count: 1 });
       rerender({ count: 2 });
 
-      const addCallsAfterRerender = addSpy.mock.calls.filter(
-        ([type]) => type === "resize"
-      ).length;
+      const addCallsAfterRerender = addSpy.mock.calls.filter(([type]) => type === "resize").length;
       const removeCallsAfterRerender = removeSpy.mock.calls.filter(
         ([type]) => type === "resize"
       ).length;

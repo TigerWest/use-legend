@@ -15,22 +15,14 @@ describe("useWindowFocus() — rerender stability", () => {
 
       const { rerender } = renderHook(() => useWindowFocus());
 
-      const focusCallsAfterMount = addSpy.mock.calls.filter(
-        ([type]) => type === "focus"
-      ).length;
-      const blurCallsAfterMount = addSpy.mock.calls.filter(
-        ([type]) => type === "blur"
-      ).length;
+      const focusCallsAfterMount = addSpy.mock.calls.filter(([type]) => type === "focus").length;
+      const blurCallsAfterMount = addSpy.mock.calls.filter(([type]) => type === "blur").length;
 
       rerender();
       rerender();
 
-      const focusCallsAfterRerender = addSpy.mock.calls.filter(
-        ([type]) => type === "focus"
-      ).length;
-      const blurCallsAfterRerender = addSpy.mock.calls.filter(
-        ([type]) => type === "blur"
-      ).length;
+      const focusCallsAfterRerender = addSpy.mock.calls.filter(([type]) => type === "focus").length;
+      const blurCallsAfterRerender = addSpy.mock.calls.filter(([type]) => type === "blur").length;
 
       expect(focusCallsAfterRerender).toBe(focusCallsAfterMount);
       expect(blurCallsAfterRerender).toBe(blurCallsAfterMount);

@@ -68,9 +68,7 @@ describe("useIntersectionObserver() — edge cases", () => {
 
   it("isActive$=false prevents observer creation", () => {
     const el = document.createElement("div");
-    renderHook(() =>
-      useIntersectionObserver(wrapEl(el), vi.fn(), { immediate: false })
-    );
+    renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn(), { immediate: false }));
 
     expect(MockIntersectionObserver).not.toHaveBeenCalled();
   });

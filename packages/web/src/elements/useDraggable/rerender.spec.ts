@@ -257,9 +257,15 @@ describe("useDraggable() — rerender stability", () => {
       const { rerender } = renderHook(
         (props: { label: string }) => {
           return useDraggable(wrapEl(div), {
-            onStart: () => { capturedLabel = props.label + ":start"; },
-            onMove: () => { capturedLabel = props.label + ":move"; },
-            onEnd: () => { capturedLabel = props.label + ":end"; },
+            onStart: () => {
+              capturedLabel = props.label + ":start";
+            },
+            onMove: () => {
+              capturedLabel = props.label + ":move";
+            },
+            onEnd: () => {
+              capturedLabel = props.label + ":end";
+            },
           });
         },
         { initialProps: { label: "initial" } }

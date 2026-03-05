@@ -67,10 +67,9 @@ describe("useIntersectionObserver() — rerender stability", () => {
         return { observe: mockObserve, disconnect: mockDisconnect };
       });
 
-      const { rerender } = renderHook(
-        ({ cb }) => useIntersectionObserver(wrapEl(el), cb),
-        { initialProps: { cb: cb1 } }
-      );
+      const { rerender } = renderHook(({ cb }) => useIntersectionObserver(wrapEl(el), cb), {
+        initialProps: { cb: cb1 },
+      });
 
       expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
       MockIntersectionObserver.mockClear();
@@ -96,9 +95,7 @@ describe("useIntersectionObserver() — rerender stability", () => {
     it("isActive$ remains true after unrelated re-render", () => {
       const el = document.createElement("div");
 
-      const { result, rerender } = renderHook(() =>
-        useIntersectionObserver(wrapEl(el), vi.fn())
-      );
+      const { result, rerender } = renderHook(() => useIntersectionObserver(wrapEl(el), vi.fn()));
 
       expect(result.current.isActive$.get()).toBe(true);
 

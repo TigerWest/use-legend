@@ -96,9 +96,7 @@ describe("useAnimate() \u2014 edge cases", () => {
 
   it("post-unmount play() call does not throw", () => {
     const el = document.createElement("div");
-    const { result, unmount } = renderHook(() =>
-      useAnimate(wrapEl(el), kf, { duration: 1000 })
-    );
+    const { result, unmount } = renderHook(() => useAnimate(wrapEl(el), kf, { duration: 1000 }));
 
     act(() => {
       unmount();

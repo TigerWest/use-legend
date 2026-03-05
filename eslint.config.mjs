@@ -51,6 +51,7 @@ export default [
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+      "use-legend/prefer-use-observable": "off",
     },
   },
   // Prettier: ESLint과 충돌하는 포맷팅 규칙 비활성화 + prettier 위반을 ESLint 오류로 표시

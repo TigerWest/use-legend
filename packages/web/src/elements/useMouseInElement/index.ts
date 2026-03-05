@@ -86,7 +86,10 @@ export function useMouseInElement(
   // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const update = useCallback(() => {
     const el = peekElement(target) as HTMLElement | null;
-    if (!el || !(el instanceof Element)) return;
+    if (!el || !(el instanceof Element)) {
+      state$.isOutside.set(true);
+      return;
+    }
 
     const rects = Array.from(el.getClientRects());
     if (!rects.length) return;

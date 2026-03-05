@@ -65,12 +65,6 @@ let mockAnimate: ReturnType<typeof vi.fn>;
 let rafCallbacks: Map<number, FrameRequestCallback>;
 let rafId: number;
 
-const flushRaf = (timestamp = 16) => {
-  const cbs = [...rafCallbacks.values()];
-  rafCallbacks.clear();
-  cbs.forEach((cb) => cb(timestamp));
-};
-
 beforeEach(() => {
   animationInstances = [];
   mockPlay.mockClear();
@@ -186,7 +180,7 @@ describe("useAnimate()", () => {
   });
 
   describe("unmount cleanup", () => {
-    it("unmount calls animation.cancel()", () => {
+    it("unmount calls animation.cancel()", async () => {
       const el = document.createElement("div");
       const { unmount } = renderHook(() =>
         useAnimate(wrapEl(el), [{ opacity: 0 }, { opacity: 1 }], { duration: 1000 })
@@ -195,7 +189,7 @@ describe("useAnimate()", () => {
       expect(animationInstances.length).toBe(1);
       const instance = animationInstances[0];
 
-      act(() => {
+      await act(async () => {
         unmount();
       });
 

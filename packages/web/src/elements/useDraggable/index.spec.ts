@@ -125,7 +125,7 @@ describe("useDraggable()", () => {
       expect(result.current.position$.get()).toEqual({ x: 0, y: 0 });
     });
 
-    it("initial style$ is \"left: 0px; top: 0px;\"", () => {
+    it('initial style$ is "left: 0px; top: 0px;"', () => {
       const div = createDiv();
       const { result } = renderHook(() => useDraggable(wrapEl(div)));
 

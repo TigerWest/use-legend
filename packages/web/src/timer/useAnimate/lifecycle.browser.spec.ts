@@ -47,7 +47,9 @@ describe("useAnimate() \u2014 element lifecycle (real browser)", () => {
 
       await waitFor(() => expect(result.current.animate$.get()).not.toBeNull(), { timeout: 2000 });
 
-      await waitFor(() => expect(result.current.playState$.get()).toBe("paused"), { timeout: 2000 });
+      await waitFor(() => expect(result.current.playState$.get()).toBe("paused"), {
+        timeout: 2000,
+      });
     });
   });
 

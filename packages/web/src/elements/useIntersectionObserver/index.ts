@@ -1,4 +1,3 @@
-import type { Observable } from "@legendapp/state";
 import { useMount, useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
 import {
@@ -8,7 +7,7 @@ import {
   type MaybeObservable,
 } from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
-import type { MaybeElement } from "@usels/core";
+import type { MaybeElement, ReadonlyObservable } from "@usels/core";
 import { normalizeTargets } from "@elements/useResizeObserver";
 
 export interface UseIntersectionObserverOptions {
@@ -23,8 +22,8 @@ export interface UseIntersectionObserverOptions {
 }
 
 export interface UseIntersectionObserverReturn {
-  isSupported$: Observable<boolean>;
-  isActive$: Observable<boolean>;
+  isSupported$: ReadonlyObservable<boolean>;
+  isActive$: ReadonlyObservable<boolean>;
   stop: () => void;
   pause: () => void;
   resume: () => void;
@@ -85,13 +84,15 @@ export function useIntersectionObserver(
             return isWindow(el as unknown) ? null : el;
           })();
 
+    const targets = normalizeTargets(target);
+    if (!targets.length) return;
+
     observerRef.current = new IntersectionObserver(callback, {
       root: root ?? undefined,
       rootMargin: opts$.rootMargin.peek() as string | undefined,
       threshold: (opts$.threshold.peek() as number | number[] | undefined) ?? 0,
     });
 
-    const targets = normalizeTargets(target);
     targets.forEach((el) => observerRef.current?.observe(el));
   };
 

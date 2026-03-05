@@ -46,10 +46,26 @@ describe("useScroll() — edge cases", () => {
     vi.useFakeTimers();
     Object.defineProperty(window, "scrollX", { writable: true, configurable: true, value: 0 });
     Object.defineProperty(window, "scrollY", { writable: true, configurable: true, value: 0 });
-    Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: 1024 });
-    Object.defineProperty(window, "innerHeight", { writable: true, configurable: true, value: 768 });
-    Object.defineProperty(document.documentElement, "scrollWidth", { writable: true, configurable: true, value: 1024 });
-    Object.defineProperty(document.documentElement, "scrollHeight", { writable: true, configurable: true, value: 2000 });
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: 1024,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      writable: true,
+      configurable: true,
+      value: 768,
+    });
+    Object.defineProperty(document.documentElement, "scrollWidth", {
+      writable: true,
+      configurable: true,
+      value: 1024,
+    });
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      writable: true,
+      configurable: true,
+      value: 2000,
+    });
   });
 
   afterEach(() => {

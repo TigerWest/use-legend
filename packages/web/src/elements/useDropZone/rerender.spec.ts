@@ -245,9 +245,15 @@ describe("useDropZone() — rerender stability", () => {
       const { rerender } = renderHook(
         (props: { label: string }) => {
           return useDropZone(wrapEl(div) as any, {
-            onEnter: () => { enterLabel = props.label; },
-            onLeave: () => { leaveLabel = props.label; },
-            onOver: () => { overLabel = props.label; },
+            onEnter: () => {
+              enterLabel = props.label;
+            },
+            onLeave: () => {
+              leaveLabel = props.label;
+            },
+            onOver: () => {
+              overLabel = props.label;
+            },
           });
         },
         { initialProps: { label: "initial" } }

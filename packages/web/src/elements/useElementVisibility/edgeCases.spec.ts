@@ -53,9 +53,7 @@ describe("useElementVisibility() — edge cases", () => {
 
   it("custom initialValue is returned before observer fires", () => {
     const el = document.createElement("div");
-    const { result } = renderHook(() =>
-      useElementVisibility(wrapEl(el), { initialValue: true })
-    );
+    const { result } = renderHook(() => useElementVisibility(wrapEl(el), { initialValue: true }));
 
     // initialValue: true should be the starting value before any IO entry fires
     expect(result.current.get()).toBe(true);
