@@ -22,7 +22,7 @@ const count = useObservable(0);
 const el = useRef$<HTMLDivElement>();
 ```
 
-> Enforce this automatically with [`@usels/eslint-plugin`](/use-legend/guides/eslint/).
+> Enforce this automatically with [`@usels/eslint-plugin`](/guides/eslint/).
 
 ---
 

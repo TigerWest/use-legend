@@ -1,0 +1,58 @@
+---
+import ObservableFirstDemo from "./ObservableFirstDemo";
+import demoSource from "./ObservableFirstDemo.tsx?raw";
+import { Code } from "astro/components";
+---
+
+<div class="guide-demo-frame">
+  <ObservableFirstDemo client:load />
+</div>
+
+<details class="guide-demo-code">
+  <summary>Show code</summary>
+  <div class="guide-demo-code-content">
+    <Code
+      code={demoSource}
+      lang="tsx"
+      themes={{ light: "github-dark", dark: "github-dark" }}
+      defaultColor="dark"
+      wrap={false}
+    />
+  </div>
+</details>
+
+<style>
+  .guide-demo-frame {
+    margin: 0.75rem 0 1rem;
+  }
+
+  .guide-demo-code {
+    margin-top: 0.5rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--sl-color-gray-6);
+  }
+
+  .guide-demo-code summary {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    user-select: none;
+    list-style: none;
+  }
+
+  .guide-demo-code summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .guide-demo-code-content {
+    border-top: 1px solid var(--sl-color-gray-5);
+    overflow: auto;
+  }
+
+  .guide-demo-code-content :global(pre) {
+    margin: 0;
+    border-radius: 0;
+  }
+</style>

@@ -11,6 +11,7 @@ import { autoWrap } from "@usels/vite-plugin-legend-memo";
 const DOCS_WARMUP_MODE = process.env.DOCS_WARMUP_MODE ?? "off";
 const DOCS_FAST_DEV = process.env.DOCS_FAST_DEV === "1";
 const DOCS_ENABLE_TWOSLASH = process.env.DOCS_ENABLE_TWOSLASH !== "0";
+const DOCS_ENABLE_NATIVE_TAB = process.env.DOCS_ENABLE_NATIVE_TAB === "1";
 
 const WARMUP_SSR_FILES_BY_MODE = {
   off: [],
@@ -21,6 +22,45 @@ const WARMUP_SSR_FILES_BY_MODE = {
 const warmupSsrFiles = DOCS_ENABLE_TWOSLASH
   ? (WARMUP_SSR_FILES_BY_MODE[DOCS_WARMUP_MODE] ?? WARMUP_SSR_FILES_BY_MODE.off)
   : [];
+
+const expressiveCodeThemes = DOCS_FAST_DEV ? ["github-light"] : ["github-dark", "github-light"];
+const CORE_SRC = fileURLToPath(new URL("../packages/core/src", import.meta.url));
+const WEB_SRC = fileURLToPath(new URL("../packages/web/src", import.meta.url));
+const NATIVE_SRC = fileURLToPath(new URL("../packages/native/src", import.meta.url));
+const INTEGRATIONS_SRC = fileURLToPath(new URL("../packages/integrations/src", import.meta.url));
+
+function rewriteWebAliasImports() {
+  const replacements = [
+    ["@browser/", "@web-browser/"],
+    ["@elements/", "@web-elements/"],
+    ["@sensors/", "@web-sensors/"],
+  ];
+
+  return {
+    name: "rewrite-web-alias-imports",
+    enforce: "pre",
+    transform(code, id) {
+      if (!id.includes("/packages/web/src/")) {
+        return null;
+      }
+
+      let nextCode = code;
+      for (const [from, to] of replacements) {
+        nextCode = nextCode.replaceAll(`"${from}`, `"${to}`);
+        nextCode = nextCode.replaceAll(`'${from}`, `'${to}`);
+      }
+
+      if (nextCode === code) {
+        return null;
+      }
+
+      return {
+        code: nextCode,
+        map: null,
+      };
+    },
+  };
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -39,23 +79,36 @@ export default defineConfig({
             }
           : undefined,
     },
-    plugins: [autoWrap({ allGet: true })],
+    plugins: [rewriteWebAliasImports(), autoWrap({ allGet: true })],
     resolve: {
-      alias: {
-        "@demos/core": fileURLToPath(new URL("../packages/core/src", import.meta.url)),
-        "@demos/integrations": fileURLToPath(
-          new URL("../packages/integrations/src", import.meta.url)
-        ),
+      alias: [
+        { find: "@demos/core", replacement: CORE_SRC },
+        { find: "@demos/web", replacement: WEB_SRC },
+        { find: "@demos/native", replacement: NATIVE_SRC },
+        { find: "@demos/integrations", replacement: INTEGRATIONS_SRC },
+        // Resolve workspace packages to source during docs builds.
+        { find: /^@usels\/core$/, replacement: `${CORE_SRC}/index.ts` },
+        { find: /^@usels\/core\/(.*)$/, replacement: `${CORE_SRC}/$1` },
+        { find: /^@usels\/web$/, replacement: `${WEB_SRC}/index.ts` },
+        { find: /^@usels\/web\/(.*)$/, replacement: `${WEB_SRC}/$1` },
+        { find: /^@usels\/native$/, replacement: `${NATIVE_SRC}/index.ts` },
+        { find: /^@usels\/native\/(.*)$/, replacement: `${NATIVE_SRC}/$1` },
+        { find: /^@usels\/integrations$/, replacement: `${INTEGRATIONS_SRC}/index.ts` },
+        { find: /^@usels\/integrations\/(.*)$/, replacement: `${INTEGRATIONS_SRC}/$1` },
         // core package path aliases (used by demo.tsx files)
-        "@browser": fileURLToPath(new URL("../packages/core/src/browser", import.meta.url)),
-        "@elements": fileURLToPath(new URL("../packages/core/src/elements", import.meta.url)),
-        "@reactivity": fileURLToPath(new URL("../packages/core/src/reactivity", import.meta.url)),
-        "@sensors": fileURLToPath(new URL("../packages/core/src/sensors", import.meta.url)),
-        "@shared": fileURLToPath(new URL("../packages/core/src/shared", import.meta.url)),
-        "@timer": fileURLToPath(new URL("../packages/core/src/timer", import.meta.url)),
-        "@utilities": fileURLToPath(new URL("../packages/core/src/utilities", import.meta.url)),
-        "@components": fileURLToPath(new URL("../packages/core/src/components", import.meta.url)),
-      },
+        { find: "@browser", replacement: `${WEB_SRC}/browser` },
+        { find: "@elements", replacement: `${CORE_SRC}/elements` },
+        { find: "@reactivity", replacement: `${CORE_SRC}/reactivity` },
+        { find: "@sensors", replacement: `${WEB_SRC}/sensors` },
+        { find: "@shared", replacement: `${CORE_SRC}/shared` },
+        { find: "@timer", replacement: `${CORE_SRC}/timer` },
+        { find: "@utilities", replacement: `${CORE_SRC}/utilities` },
+        { find: "@components", replacement: `${CORE_SRC}/components` },
+        // web package path aliases are namespaced to avoid collisions with core aliases.
+        { find: "@web-browser", replacement: `${WEB_SRC}/browser` },
+        { find: "@web-elements", replacement: `${WEB_SRC}/elements` },
+        { find: "@web-sensors", replacement: `${WEB_SRC}/sensors` },
+      ],
     },
   },
   integrations: [
@@ -113,26 +166,50 @@ export default defineConfig({
           : [],
       },
       components: {
+        Header: "./src/components/overrides/Header.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       },
+      routeMiddleware: "./src/route-data.ts",
       sidebar: [
         {
           label: "Guides",
           items: [
+            { label: "Introduction", slug: "guides" },
             { label: "Getting Started", slug: "guides/getting-started" },
-            { label: "Best Practices", slug: "guides/best-practices" },
-            { label: "ESLint Plugin", slug: "guides/eslint" },
+            {
+              label: "Patterns & Best Practices",
+              items: [
+                { label: "Best Practices", slug: "guides/best-practices" },
+                { label: "Recommend Pattern", slug: "guides/recommend-pattern" },
+              ],
+            },
+            {
+              label: "Tooling",
+              items: [
+                { label: "ESLint Plugin", slug: "guides/eslint" },
+                { label: "Babel", slug: "guides/babel" },
+                { label: "Vite", slug: "guides/vite" },
+              ],
+            },
           ],
         },
-        // {
-        //   label: "Reference",
-        //   autogenerate: { directory: "reference" },
-        // },
         {
           label: "Core",
           autogenerate: { directory: "core" },
         },
+        {
+          label: "Web",
+          autogenerate: { directory: "web" },
+        },
+        ...(DOCS_ENABLE_NATIVE_TAB
+          ? [
+              {
+                label: "Native",
+                autogenerate: { directory: "native" },
+              },
+            ]
+          : []),
         {
           label: "Integrations",
           autogenerate: { directory: "integrations" },

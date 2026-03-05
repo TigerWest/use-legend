@@ -118,7 +118,8 @@ const data$ = observable({ name: 'foo' });
 |---------|-----------|
 | `@legendapp/state` | `observable`, `computed` |
 | `@legendapp/state/react` | `useObservable`, `useObservableState` |
-| `@usels/core` | all exported `use*` hooks |
+| `@usels/web` | all exported `use*` hooks |
+| `@usels/native` | all exported `use*` hooks |
 
 **Options:**
 ```ts

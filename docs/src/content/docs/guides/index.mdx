@@ -1,0 +1,39 @@
+---
+title: Introduction
+sidebar:
+  order: 0
+---
+
+import ObservableFirstDemoEmbed from "../../../components/guides/ObservableFirstDemoEmbed.astro"
+
+Use Legend-State as the first state model in app code.
+
+## Observable-First Rules
+
+- No `useState`
+- No `useReducer`
+- No component-wide re-rendering as the default update path
+
+Instead, keep mutable values in observables and update only the UI nodes that depend on those values.
+Hooks are still useful, but mainly for composing side effects, timers, sensors, and reusable logic around observables.
+
+## Why hooks + observables work well together
+
+When an interval updates a regular React state value, the whole component re-renders.
+When the interval updates an observable, only the bound text node updates and the parent component render count stays stable.
+
+## Demo
+
+<ObservableFirstDemoEmbed />
+
+Use this pattern for high-frequency updates (timers, polling, streaming, sensors) to keep React work minimal while keeping logic composable with hooks.
+
+## Continue Reading
+
+- [Getting Started](/guides/getting-started/)
+- [Best Practices](/guides/best-practices/)
+- [Provider Pattern](/guides/provider-pattern/)
+- [Global Store Pattern](/guides/global-store-pattern/)
+- [ESLint Plugin](/guides/eslint/)
+- [Babel](/guides/babel/)
+- [Vite](/guides/vite/)

@@ -23,16 +23,24 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 ## Packages
 
 <CardGrid>
-  <Card title="@usels/core" icon="puzzle">
-    Observable-native hooks for DOM and browser interaction — element refs, resize, intersection, scroll, mouse, media queries, and more. Every hook accepts `Ref$` for reactive element targeting.
+  <Card title="Guides" icon="seti:config">
+    Task-oriented documentation for onboarding and best practices.
+    [Open Guides](/guides/getting-started/)
   </Card>
-  <Card title="@usels/integrations" icon="rocket">
-    third-party integration built for Legend-State
+  <Card title="Core Docs" icon="puzzle">
+    Foundational APIs included in `@usels/web` and `@usels/native`.
+    [Open Core](/core/)
   </Card>
-  <Card title="@usels/vite-plugin-legend-memo" icon="setting">
-    Vite plugin that automatically wraps `obs$.get()` calls in JSX with `<Memo>` at build time — no manual wrapping needed. Place before `@vitejs/plugin-react` in your config.
+  <Card title="Web Docs" icon="setting">
+    API reference for `@usels/web`.
+    [Open Web](/web/)
   </Card>
-  <Card title="@usels/babel-plugin-legend-memo" icon="seti:config">
-    Babel plugin that transforms `obs$.get()` into fine-grained `<Memo>` boundaries. Use directly with babel or via the Vite plugin wrapper.
+  <Card title="Native Docs" icon="setting">
+    API reference for `@usels/native`.
+    [Open Native](/native/)
+  </Card>
+  <Card title="Integrations Docs" icon="rocket">
+    API reference for `@usels/integrations`.
+    [Open Integrations](/integrations/)
   </Card>
 </CardGrid>

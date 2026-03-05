@@ -8,8 +8,9 @@ description: Install use-legend and explore observable-native React hooks built 
 ## Installation
 
 ```bash
-# Core + required peer deps
-npm install @usels/core@beta @legendapp/state react
+# Web + required peer deps
+npm install @usels/web@beta @legendapp/state react
+
 
 # Auto Memo transform plugin (recommended)
 npm install -D @usels/vite-plugin-legend-memo
@@ -94,7 +95,7 @@ module.exports = {
 The foundation of `use-ls`. `useRef$` works like React's `useRef` but returns a `Ref$` — an observable that any `use-ls` hook can react to automatically.
 
 ```tsx
-import { useRef$, useEventListener } from '@usels/core';
+import { useRef$, useEventListener } from '@usels/web';
 import { observable } from '@legendapp/state';
 
 function ClickCounter() {
@@ -122,7 +123,7 @@ When `button$` mounts or is replaced, `useEventListener` re-registers automatica
 Tracks an element's dimensions as an observable. No manual `ResizeObserver` setup required.
 
 ```tsx
-import { useRef$, useElementSize } from '@usels/core';
+import { useRef$, useElementSize } from '@usels/web';
 
 function SizeDisplay() {
   const el$ = useRef$<HTMLDivElement>();
@@ -145,7 +146,7 @@ function SizeDisplay() {
 Tracks an element's scroll position as an observable.
 
 ```tsx
-import { useRef$, useScroll } from '@usels/core';
+import { useRef$, useScroll } from '@usels/web';
 
 function ScrollTracker() {
   const container$ = useRef$<HTMLDivElement>();
@@ -170,7 +171,7 @@ To track the entire window's scroll position, use `useWindowScroll()` instead.
 Returns a CSS media query result as an observable boolean. Breakpoint logic can be lifted out of components into shared observables.
 
 ```tsx
-import { useMediaQuery } from '@usels/core';
+import { useMediaQuery } from '@usels/web';
 
 function Layout() {
   const isMobile$ = useMediaQuery('(max-width: 768px)');
