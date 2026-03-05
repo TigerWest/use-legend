@@ -65,6 +65,9 @@ importers:
       '@astrojs/starlight':
         specifier: ^0.37.6
         version: 0.37.6(astro@5.17.2)
+      '@catppuccin/starlight':
+        specifier: ^1.1.1
+        version: 1.1.1(@astrojs/starlight@0.37.6)(astro@5.17.2)
       '@legendapp/state':
         specifier: 3.0.0-beta.44
         version: 3.0.0-beta.44(react@19.2.3)
@@ -254,10 +257,10 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitest/browser':
         specifier: ^4.0.18
-        version: 4.0.18(vitest@4.0.18)
+        version: 4.0.18(vite@5.4.21)(vitest@4.0.18)
       '@vitest/browser-playwright':
         specifier: ^4.0.18
-        version: 4.0.18(playwright@1.58.2)(vitest@4.0.18)
+        version: 4.0.18(playwright@1.58.2)(vite@5.4.21)(vitest@4.0.18)
       '@vitest/coverage-istanbul':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18)
@@ -870,6 +873,16 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       fontkitten: 1.0.2
+    dev: false
+
+  /@catppuccin/starlight@1.1.1(@astrojs/starlight@0.37.6)(astro@5.17.2):
+    resolution: {integrity: sha512-iyI/gdGfqREetGti3O11l7iMLCmt0LRSbIis8ySlZo8hqb749KyMmisO/9kqBvk2oFKw9hGNDbutcNxKSI2spg==}
+    peerDependencies:
+      '@astrojs/starlight': '>=0.34'
+      astro: ^5.0.0
+    dependencies:
+      '@astrojs/starlight': 0.37.6(astro@5.17.2)
+      astro: 5.17.2(tsx@4.21.0)(typescript@5.9.3)
     dev: false
 
   /@csstools/color-helpers@5.1.0:
@@ -2948,51 +2961,12 @@ packages:
       - vite
     dev: true
 
-  /@vitest/browser-playwright@4.0.18(playwright@1.58.2)(vitest@4.0.18):
-    resolution: {integrity: sha512-gfajTHVCiwpxRj1qh0Sh/5bbGLG4F/ZH/V9xvFVoFddpITfMta9YGow0W6ZpTTORv2vdJuz9TnrNSmjKvpOf4g==}
-    peerDependencies:
-      playwright: '*'
-      vitest: 4.0.18
-    dependencies:
-      '@vitest/browser': 4.0.18(vitest@4.0.18)
-      '@vitest/mocker': 4.0.18(vite@6.4.1)
-      playwright: 1.58.2
-      tinyrainbow: 3.0.3
-      vitest: 4.0.18(@vitest/browser-playwright@4.0.18)(jsdom@25.0.1)
-    transitivePeerDependencies:
-      - bufferutil
-      - msw
-      - utf-8-validate
-      - vite
-    dev: true
-
   /@vitest/browser@4.0.18(vite@5.4.21)(vitest@4.0.18):
     resolution: {integrity: sha512-gVQqh7paBz3gC+ZdcCmNSWJMk70IUjDeVqi+5m5vYpEHsIwRgw3Y545jljtajhkekIpIp5Gg8oK7bctgY0E2Ng==}
     peerDependencies:
       vitest: 4.0.18
     dependencies:
       '@vitest/mocker': 4.0.18(vite@5.4.21)
-      '@vitest/utils': 4.0.18
-      magic-string: 0.30.21
-      pixelmatch: 7.1.0
-      pngjs: 7.0.0
-      sirv: 3.0.2
-      tinyrainbow: 3.0.3
-      vitest: 4.0.18(@vitest/browser-playwright@4.0.18)(jsdom@25.0.1)
-      ws: 8.19.0
-    transitivePeerDependencies:
-      - bufferutil
-      - msw
-      - utf-8-validate
-      - vite
-    dev: true
-
-  /@vitest/browser@4.0.18(vitest@4.0.18):
-    resolution: {integrity: sha512-gVQqh7paBz3gC+ZdcCmNSWJMk70IUjDeVqi+5m5vYpEHsIwRgw3Y545jljtajhkekIpIp5Gg8oK7bctgY0E2Ng==}
-    peerDependencies:
-      vitest: 4.0.18
-    dependencies:
-      '@vitest/mocker': 4.0.18(vite@6.4.1)
       '@vitest/utils': 4.0.18
       magic-string: 0.30.21
       pixelmatch: 7.1.0

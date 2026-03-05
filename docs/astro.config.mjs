@@ -2,6 +2,7 @@
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
+import starlightCatppuccin from "@catppuccin/starlight";
 import { defineConfig } from "astro/config";
 import ecTwoSlash from "expressive-code-twoslash";
 import { fileURLToPath } from "node:url";
@@ -62,6 +63,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "use-legend",
+      plugins: [starlightCatppuccin()],
       head: [
         {
           tag: "script",
