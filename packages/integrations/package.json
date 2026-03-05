@@ -17,7 +17,7 @@
     "dev": "tsup --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:browser": "vitest --config vitest.browser.config.ts",
+    "test:browser": "vitest --config vitest.browser.config.ts --run",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

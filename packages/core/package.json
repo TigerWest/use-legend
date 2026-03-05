@@ -26,7 +26,6 @@
     "dev": "tsup --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:browser": "vitest --config vitest.browser.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
