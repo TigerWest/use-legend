@@ -1,6 +1,6 @@
 {
   "name": "@usels/native",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React Native hooks for Legend-State (includes @usels/core)",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
