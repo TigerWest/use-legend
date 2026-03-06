@@ -42,17 +42,19 @@ function isGetCallNode(node: Node, opts: PluginOptions): boolean {
  * - Ignores .get(key) calls with arguments (Map.get(key))
  * - When opts.allGet is false (default), root object must end with '$'
  */
-const FUNCTION_BOUNDARY_TYPES = new Set([
+const TRAVERSAL_BOUNDARY_TYPES = new Set([
   "ArrowFunctionExpression",
   "FunctionExpression",
   "FunctionDeclaration",
+  "JSXElement",
+  "JSXFragment",
 ]);
 
 export function hasGetCall(exprPath: NodePath, opts: PluginOptions): boolean {
   // If the root node itself is a function boundary, do not descend into it.
   // path.traverse() visits CHILDREN only, so the ArrowFunctionExpression visitor
   // inside traverse() would NOT fire for the root — leading to false positives.
-  if (FUNCTION_BOUNDARY_TYPES.has(exprPath.node.type)) {
+  if (TRAVERSAL_BOUNDARY_TYPES.has(exprPath.node.type)) {
     return false;
   }
 
@@ -72,6 +74,12 @@ export function hasGetCall(exprPath: NodePath, opts: PluginOptions): boolean {
       innerPath.skip();
     },
     FunctionDeclaration(innerPath) {
+      innerPath.skip();
+    },
+    JSXElement(innerPath) {
+      innerPath.skip();
+    },
+    JSXFragment(innerPath) {
       innerPath.skip();
     },
 

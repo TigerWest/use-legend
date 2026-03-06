@@ -128,5 +128,105 @@ pluginTester({
         }
       `,
     },
+
+    'does NOT wrap parent when attribute value is JSXElement containing .get()': {
+      code: `
+        function App() {
+          return (
+            <DemoPanel
+              aside={
+                <StatusBadge
+                  label={isTracking$.get() ? "on" : "off"}
+                  tone={isTracking$.get() ? "green" : "orange"}
+                />
+              }
+            >
+              content
+            </DemoPanel>
+          );
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return (
+            <DemoPanel
+              aside={
+                <Memo>
+                  {() => (
+                    <StatusBadge
+                      label={isTracking$.get() ? "on" : "off"}
+                      tone={isTracking$.get() ? "green" : "orange"}
+                    />
+                  )}
+                </Memo>
+              }
+            >
+              content
+            </DemoPanel>
+          );
+        }
+      `,
+    },
+
+    'wraps parent for its own .get() AND nested JSXElement separately': {
+      code: `
+        function App() {
+          return (
+            <DemoPanel
+              other={others$.get()}
+              aside={
+                <StatusBadge
+                  label={isTracking$.get() ? "on" : "off"}
+                  tone={isTracking$.get() ? "green" : "orange"}
+                />
+              }
+            >
+              content
+            </DemoPanel>
+          );
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return (
+            <Memo>
+              {() => (
+                <DemoPanel
+                  other={others$.get()}
+                  aside={
+                    <Memo>
+                      {() => (
+                        <StatusBadge
+                          label={isTracking$.get() ? "on" : "off"}
+                          tone={isTracking$.get() ? "green" : "orange"}
+                        />
+                      )}
+                    </Memo>
+                  }
+                >
+                  content
+                </DemoPanel>
+              )}
+            </Memo>
+          );
+        }
+      `,
+    },
+
+    'wraps parent when ternary has .get() outside nested JSX': {
+      code: `
+        function App() {
+          return <Parent value={flag$.get() ? <A /> : <B />} />;
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return <Memo>{() => <Parent value={flag$.get() ? <A /> : <B />} />}</Memo>;
+        }
+      `,
+    },
   },
 });
