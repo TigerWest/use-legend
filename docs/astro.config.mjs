@@ -12,7 +12,6 @@ import { autoWrap } from "@usels/vite-plugin-legend-memo";
 const DOCS_WARMUP_MODE = process.env.DOCS_WARMUP_MODE ?? "off";
 const DOCS_FAST_DEV = process.env.DOCS_FAST_DEV === "1";
 const DOCS_ENABLE_TWOSLASH = process.env.DOCS_ENABLE_TWOSLASH !== "0";
-const DOCS_ENABLE_NATIVE_TAB = process.env.DOCS_ENABLE_NATIVE_TAB === "1";
 
 const WARMUP_SSR_FILES_BY_MODE = {
   off: [],
@@ -168,11 +167,9 @@ export default defineConfig({
           : [],
       },
       components: {
-        Header: "./src/components/overrides/Header.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       },
-      routeMiddleware: "./src/route-data.ts",
       sidebar: [
         {
           label: "Guides",
@@ -188,6 +185,7 @@ export default defineConfig({
             },
             {
               label: "Tooling",
+              collapsed: true,
               items: [
                 { label: "ESLint Plugin", slug: "guides/eslint" },
                 { label: "Babel", slug: "guides/babel" },
@@ -204,18 +202,14 @@ export default defineConfig({
           label: "Web",
           autogenerate: { directory: "web" },
         },
-        ...(DOCS_ENABLE_NATIVE_TAB
-          ? [
-              {
-                label: "Native",
-                autogenerate: { directory: "native" },
-              },
-            ]
-          : []),
         {
           label: "Integrations",
           autogenerate: { directory: "integrations" },
         },
+        // {
+        //   label: "Native",
+        //   autogenerate: { directory: "native" },
+        // },
       ],
     }),
     mdx(),
