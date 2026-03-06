@@ -15,7 +15,8 @@
       "@timer/*": ["../packages/core/src/timer/*"],
       "@utilities/*": ["../packages/core/src/utilities/*"],
       "@components/*": ["../packages/core/src/components/*"],
-      "@state/*": ["../packages/core/src/state/*"]
+      "@state/*": ["../packages/core/src/state/*"],
+      "@sync/*": ["../packages/core/src/sync/*"]
     }
   }
 }

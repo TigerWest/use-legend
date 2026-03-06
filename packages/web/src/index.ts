@@ -24,3 +24,5 @@ export * from "./elements/useDropZone";
 // Sensors
 export * from "./sensors/useScroll";
 export * from "./sensors/useWindowScroll";
+export * from "./browser/useLocalStorage";
+export * from "./browser/useSessionStorage";

@@ -297,7 +297,7 @@ export const demoClasses = {
     "w-full rounded-xl border border-[var(--sl-color-hairline-light)] bg-[var(--sl-color-bg)] px-[13px] py-[11px] text-sm leading-5 text-[var(--sl-color-text)] caret-[var(--sl-color-accent)] outline-none focus:ring-2 focus:ring-[var(--sl-color-accent)]",
   numberInput:
     "w-28 rounded-xl border border-[var(--sl-color-hairline-light)] bg-[var(--sl-color-bg)] px-3 py-2 text-sm leading-5 text-[var(--sl-color-text)] caret-[var(--sl-color-accent)] outline-none focus:ring-2 focus:ring-[var(--sl-color-accent)]",
-  settingField: "flex min-w-[152px] flex-col gap-1.5",
+  settingField: "flex  flex-col gap-1.5",
   settingLabel: "text-[11px] font-bold uppercase tracking-[0.04em] text-[var(--sl-color-gray-3)]",
   settingRow: "flex flex-wrap items-end justify-between gap-3",
   slider: "m-0 w-full accent-[var(--sl-color-accent)]",

@@ -14,7 +14,8 @@
       "@shared/*": ["shared/*"],
       "@timer/*": ["timer/*"],
       "@utilities/*": ["utilities/*"],
-      "@components/*": ["components/*"]
+      "@components/*": ["components/*"],
+      "@sync/*": ["sync/*"]
     }
   }
 }

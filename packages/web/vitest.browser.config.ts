@@ -4,6 +4,12 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
+  optimizeDeps: {
+    include: [
+      '@legendapp/state/sync',
+      '@legendapp/state/persist-plugins/local-storage',
+    ],
+  },
   test: {
     include: ['src/**/*.browser.spec.ts'],
     globals: true,
