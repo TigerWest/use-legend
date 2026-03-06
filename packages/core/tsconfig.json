@@ -8,6 +8,7 @@
     "baseUrl": "./src",
     "paths": {
       "@elements/*": ["elements/*"],
+      "@state/*": ["state/*"],
       "@reactivity/*": ["reactivity/*"],
       "@shared": ["shared/index.ts"],
       "@shared/*": ["shared/*"],

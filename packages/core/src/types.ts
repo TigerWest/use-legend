@@ -44,6 +44,14 @@ export type DeepMaybeObservable<T> =
       [K in keyof T]?: MaybeObservable<NonNullable<T[K]>>;
     };
 
+/**
+ * A single history record containing a serialized snapshot and its timestamp.
+ */
+export interface UseHistoryRecord<T> {
+  snapshot: T;
+  timestamp: number;
+}
+
 // --- TIER 0-A: Base utility types (VueUse equivalents) ---
 
 export type Fn = () => void;

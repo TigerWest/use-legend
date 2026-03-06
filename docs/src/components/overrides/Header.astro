@@ -36,6 +36,14 @@ function isActiveTab(key: string): boolean {
 
 <DefaultHeader />
 
+<nav class="category-mobile" aria-label="Documentation categories">
+  {tabs.map(tab => (
+    <a class:list={{ 'mobile-tab': true, active: isActiveTab(tab.key) }} href={tab.href}>
+      {tab.label}
+    </a>
+  ))}
+</nav>
+
 <nav class="category-inline" aria-label="Documentation categories">
   {tabs.map(tab => (
     <a class:list={{ tab: true, active: isActiveTab(tab.key) }} href={tab.href}>
@@ -52,6 +60,12 @@ function isActiveTab(key: string): boolean {
 
     const socialIcons = mount.querySelector('.social-icons')
     mount.insertBefore(nav, socialIcons ?? mount.firstChild)
+
+    const header = document.querySelector('header')
+    const mobileNav = document.querySelector('.category-mobile')
+    if (header && mobileNav) {
+      header.after(mobileNav)
+    }
   })()
 </script>
 
@@ -95,5 +109,47 @@ function isActiveTab(key: string): boolean {
     :global(header .right-group) .category-inline {
       display: none;
     }
+
+    .category-mobile {
+      display: flex;
+    }
+  }
+
+  .category-mobile {
+    align-items: center;
+    border-bottom: 1px solid var(--sl-color-hairline-light);
+    display: none;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem var(--sl-content-pad-x, 1rem);
+    scrollbar-width: none;
+  }
+
+  .category-mobile::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-tab {
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 999px;
+    color: var(--sl-color-gray-2);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.375rem 0.625rem;
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .mobile-tab:hover {
+    border-color: var(--sl-color-accent-high);
+    color: var(--sl-color-accent-high);
+  }
+
+  .mobile-tab.active {
+    background-color: var(--sl-color-accent-low);
+    border-color: var(--sl-color-accent);
+    color: var(--sl-color-accent-high);
   }
 </style>

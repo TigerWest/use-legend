@@ -4,6 +4,12 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Scan workspace demo/source files that are imported into docs at runtime. */
+@source "../../../packages/core/src/**/*.{ts,tsx}";
+@source "../../../packages/web/src/**/*.{ts,tsx}";
+@source "../../../packages/native/src/**/*.{ts,tsx}";
+@source "../../../packages/integrations/src/**/*.{ts,tsx}";
+
 @theme {
   --color-accent-50: var(--color-indigo-50);
   --color-accent-100: var(--color-indigo-100);

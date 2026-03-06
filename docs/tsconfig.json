@@ -14,7 +14,8 @@
       "@shared/*": ["../packages/core/src/shared/*"],
       "@timer/*": ["../packages/core/src/timer/*"],
       "@utilities/*": ["../packages/core/src/utilities/*"],
-      "@components/*": ["../packages/core/src/components/*"]
+      "@components/*": ["../packages/core/src/components/*"],
+      "@state/*": ["../packages/core/src/state/*"]
     }
   }
 }

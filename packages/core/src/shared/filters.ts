@@ -8,7 +8,7 @@
 import { debounce, throttle } from "es-toolkit";
 import { observable } from "@legendapp/state";
 import type { AnyFn, Awaitable, MaybeObservable, Pausable } from "../types";
-import { get } from "@utilities/get";
+import { peek } from "@utilities/peek";
 import { noop } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic event filter, matches VueUse pattern
@@ -37,7 +37,7 @@ export interface DebounceFilterOptions {
    * debounceFilter(300, { maxWait: 1000 })
    * // Fires at most every 1000ms even if calls keep coming in
    */
-  maxWait?: MaybeObservable<number>;
+  maxWait?: MaybeObservable<number | undefined>;
 }
 
 /**
@@ -134,7 +134,9 @@ export function debounceFilter(
   };
 
   const filter: EventFilter = (invoke) => {
-    const duration = get(ms);
+    // Use non-tracked reads so changing a reactive delay does not become
+    // a dependency of outer observers such as useHistory's source watcher.
+    const duration = peek(ms);
 
     // Rebuild debounced wrapper if duration changed (Observable ms support)
     if (duration !== currentMs || !debouncedFn) {
@@ -155,7 +157,7 @@ export function debounceFilter(
 
       // Start maxWait timer on the first call of a new debounce window.
       // Forces execution if calls keep coming beyond maxWait ms.
-      const maxDuration = options.maxWait !== undefined ? get(options.maxWait) : undefined;
+      const maxDuration = options.maxWait !== undefined ? peek(options.maxWait) : undefined;
       if (maxDuration !== undefined && maxDuration > 0 && !maxWaitTimer) {
         maxWaitTimer = setTimeout(() => {
           maxWaitTimer = null;
@@ -212,7 +214,9 @@ export function throttleFilter(
   };
 
   const filter: EventFilter = (invoke) => {
-    const duration = get(ms);
+    // Use non-tracked reads so changing a reactive interval only affects
+    // the next source event instead of re-triggering outer observers.
+    const duration = peek(ms);
 
     // Rebuild throttled wrapper if duration changed (Observable ms support)
     if (duration !== currentMs || !throttledFn) {

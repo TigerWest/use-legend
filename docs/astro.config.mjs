@@ -104,6 +104,7 @@ export default defineConfig({
         { find: "@timer", replacement: `${CORE_SRC}/timer` },
         { find: "@utilities", replacement: `${CORE_SRC}/utilities` },
         { find: "@components", replacement: `${CORE_SRC}/components` },
+        { find: "@state", replacement: `${CORE_SRC}/state` },
         // web package path aliases are namespaced to avoid collisions with core aliases.
         { find: "@web-browser", replacement: `${WEB_SRC}/browser` },
         { find: "@web-elements", replacement: `${WEB_SRC}/elements` },
