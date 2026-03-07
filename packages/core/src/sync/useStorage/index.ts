@@ -1,51 +1,21 @@
 "use client";
 
-import type { Observable } from "@legendapp/state";
-import type { ReadonlyObservable } from "../../types";
-import { useMemo } from "react";
-import { useObservable } from "@legendapp/state/react";
-import { syncState } from "@legendapp/state";
-import { synced, type PersistOptions } from "@legendapp/state/sync";
+import { useConstant } from "@shared/useConstant";
+import { useUnmount } from "@legendapp/state/react";
+import { storage } from "./core";
+
+export { storage } from "./core";
+export type { StorageOptions, StorageReturn } from "./core";
 
 /**
  * Options for `useStorage`.
  */
-export interface UseStorageOptions {
-  /**
-   * Legend-State persist plugin to use as the storage backend.
-   * @see https://legendapp.com/open-source/state/v3/sync/persist-sync/
-   */
-  plugin: PersistOptions["plugin"];
-  /**
-   * Transform data on load/save. Useful for data migration, format conversion, or encryption.
-   */
-  transform?: PersistOptions["transform"];
-  /**
-   * Persist pending changes and retry sync after app restart.
-   */
-  retrySync?: PersistOptions["retrySync"];
-  /**
-   * Mark the persisted data as read-only (no writes).
-   */
-  readonly?: PersistOptions["readonly"];
-  /**
-   * Additional plugin-specific options (e.g. IndexedDB prefixID/itemID, MMKV config).
-   */
-  options?: PersistOptions["options"];
-}
+export type UseStorageOptions = import("./core").StorageOptions;
 
 /**
  * Return type for `useStorage`.
  */
-export interface UseStorageReturn<T> {
-  /** The persisted observable data. */
-  data$: Observable<T>;
-  /** Whether persisted data has been loaded (relevant for async plugins like IndexedDB). */
-  isLoaded$: ReadonlyObservable<boolean>;
-  isPersistLoaded$: ReadonlyObservable<boolean>;
-  /** The most recent persist error, if any. */
-  error$: ReadonlyObservable<Error | undefined>;
-}
+export type UseStorageReturn<T> = import("./core").StorageReturn<T>;
 
 /**
  * Reactive storage binding powered by Legend-State's
@@ -82,29 +52,9 @@ export function useStorage(
   options: UseStorageOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): UseStorageReturn<any> {
-  const { plugin, transform, retrySync, readonly: readonlyOpt, options: pluginOptions } = options;
+  const { dispose, ...result } = useConstant(() => storage(key, defaults, options));
 
-  const data$ = useObservable(
-    synced({
-      initial: defaults,
-      persist: {
-        name: key,
-        plugin,
-        transform,
-        retrySync,
-        readonly: readonlyOpt,
-        options: pluginOptions,
-      },
-    })
-  );
+  useUnmount(dispose);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Observable<T> is compatible at runtime; Legend-State's ObservableParam type is overly narrow
-  const state$ = useMemo(() => syncState(data$ as any), [data$]);
-
-  return {
-    data$,
-    isLoaded$: state$.isLoaded,
-    isPersistLoaded$: state$.isPersistLoaded as unknown as ReadonlyObservable<boolean>,
-    error$: state$.error as unknown as ReadonlyObservable<Error | undefined>,
-  };
+  return result;
 }

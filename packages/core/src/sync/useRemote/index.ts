@@ -1,63 +1,21 @@
 "use client";
 
-import type { Observable } from "@legendapp/state";
-import type { ReadonlyObservable } from "../../types";
-import { useMemo } from "react";
-import { useObservable } from "@legendapp/state/react";
-import { syncState } from "@legendapp/state";
-import { synced } from "@legendapp/state/sync";
+import { useConstant } from "@shared/useConstant";
+import { useUnmount } from "@legendapp/state/react";
+import { remote } from "./core";
+
+export { remote } from "./core";
+export type { RemoteOptions, RemoteReturn } from "./core";
 
 /**
  * Options for `useRemote`.
  */
-export interface UseRemoteOptions<T> {
-  /**
-   * Function that fetches remote data.
-   */
-  get: () => Promise<T> | T;
-  /**
-   * Function that sends changes to the remote.
-   */
-  set?: (params: { value: T; changes: object[] }) => Promise<void> | void;
-  /**
-   * Initial value before the first fetch completes.
-   */
-  initial?: T;
-  /**
-   * How incoming data merges with existing state.
-   * @default "set"
-   */
-  mode?: "set" | "assign" | "merge" | "append" | "prepend";
-  /**
-   * Milliseconds to debounce before sending changes to remote.
-   */
-  debounceSet?: number;
-  /**
-   * Transform data on load/save.
-   */
-  transform?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    load?: (value: any) => T;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    save?: (value: T) => any;
-  };
-}
+export type UseRemoteOptions<T> = import("./core").RemoteOptions<T>;
 
 /**
  * Return type for `useRemote`.
  */
-export interface UseRemoteReturn<T> {
-  /** The synced observable data. */
-  data$: Observable<T>;
-  /** Whether the initial remote fetch has completed. */
-  isLoaded$: ReadonlyObservable<boolean>;
-  /** Whether a fetch (initial or refetch) is currently in progress. */
-  isFetching$: ReadonlyObservable<boolean>;
-  /** The most recent sync error, if any. */
-  error$: ReadonlyObservable<Error | undefined>;
-  /** Trigger a manual re-fetch from remote. */
-  refetch: () => void;
-}
+export type UseRemoteReturn<T> = import("./core").RemoteReturn<T>;
 
 /**
  * Reactive remote data binding powered by Legend-State's
@@ -82,38 +40,9 @@ export interface UseRemoteReturn<T> {
  * ```
  */
 export function useRemote<T>(options: UseRemoteOptions<T>): UseRemoteReturn<T> {
-  const { get, set, initial, mode, debounceSet, transform } = options;
+  const { dispose, ...result } = useConstant(() => remote(options));
 
-  const isFetching$ = useObservable(false);
+  useUnmount(dispose);
 
-  const wrappedGet = async () => {
-    isFetching$.set(true);
-    try {
-      return await get();
-    } finally {
-      isFetching$.set(false);
-    }
-  };
-
-  const data$ = useObservable<T>(
-    synced({
-      get: wrappedGet,
-      set,
-      initial: initial as T,
-      mode,
-      debounceSet,
-      transform,
-    })
-  );
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Observable<T> is compatible at runtime; Legend-State's ObservableParam type is overly narrow
-  const state$ = useMemo(() => syncState(data$ as any), [data$]);
-
-  return {
-    data$,
-    isLoaded$: state$.isLoaded as unknown as ReadonlyObservable<boolean>,
-    isFetching$: isFetching$ as unknown as ReadonlyObservable<boolean>,
-    error$: state$.error as unknown as ReadonlyObservable<Error | undefined>,
-    refetch: () => state$.sync(),
-  };
+  return result;
 }

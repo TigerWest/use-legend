@@ -111,6 +111,39 @@ return <span>{count}</span>;
 return <span>{count$.get()}</span>;
 ```
 
+### Demo UI Components (Required)
+
+Use the shared `_demo` components for consistent demo styling. **Do not use raw inline styles.**
+
+Import from `../../shared/_demo` (relative to each hook's directory). Reference `packages/core/src/shared/_demo/index.tsx` for the full API.
+
+**Required structure:** `DemoShell` > `DemoPanel` > content components.
+
+```tsx
+// ✅ Good — using _demo components
+import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "../../shared/_demo";
+
+export default function Demo() {
+  return (
+    <DemoShell eyebrow="Category Label">
+      <DemoPanel
+        title="Panel title"
+        description="Optional description."
+        aside={<StatusBadge label="Status" tone="green" />}
+      >
+        <input className={demoClasses.input} />
+        <div className={demoClasses.actionRow}>
+          <ActionButton onClick={handler} tone="accent" grow>Click</ActionButton>
+        </div>
+      </DemoPanel>
+    </DemoShell>
+  );
+}
+```
+
+**Available components:** `DemoShell`, `DemoPanel`, `StatusBadge`, `StatCard`, `ValueToken`, `ActionButton`, `HistoryList`
+**Available class sets:** `demoClasses.input`, `.actionRow`, `.valueRow`, `.statsGrid`, `.settingRow`, `.settingField`, `.settingLabel`, `.numberInput`, `.counterRow`, `.counterValue`, `.slider`
+
 ````
 
 If a demo file exists, `collect-docs.ts` automatically generates it as `.mdx` and imports the Demo component.
