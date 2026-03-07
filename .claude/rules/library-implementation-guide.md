@@ -6,10 +6,106 @@ paths:
 
 # Library Implementation Guide
 
+## Foundation — 2-Layer Architecture: Core + Hook
+
+Every utility follows a **2-layer** structure: a framework-agnostic **core observable function**
+and a thin **React hook wrapper**.
+
+### Directory Layout
+
+```
+packages/core/src/
+  category/
+    useMyHook/
+      core.ts           # core observable function (myHook)
+      index.ts          # React hook wrapper (useMyHook)
+      index.spec.ts     # tests (validates hook public API)
+```
+
+### Core Function Rules
+
+| Rule | Description |
+|------|-------------|
+| **No React** | Never import `react` or `@legendapp/state/react` |
+| **Observable args** | Reactive parameters use `Observable<T>` (hook converts via `useMaybeObservable`) |
+| **`observe()` only** | Use `observe()` from `@legendapp/state`, not `useObserve()` |
+| **Return `Disposable`** | Every core function returns `Disposable & { ... }` — all subscriptions/timers cleaned up via `dispose()` |
+| **Observable results** | Output values are `Observable<T>` — no additional wrapping needed in hook |
+| **Plain non-reactive opts** | Mount-time-only settings (edges, maxWait) are plain values, captured in closure |
+
+```ts
+import { type Observable, observe, observable } from "@legendapp/state";
+import type { Disposable } from "../../types";
+
+function debounced<T>(
+  source$: Observable<T>,
+  delay$: Observable<number>,
+  options?: DebounceOptions         // non-reactive → plain
+): Disposable & { value$: Observable<T> } {
+  const value$ = observable<T>(source$.peek());
+
+  const unsub = observe(() => {
+    const val = source$.get();      // reactive dep
+    const ms = delay$.get();        // reactive dep
+    // debounce logic...
+    value$.set(val);
+  });
+
+  return {
+    value$,
+    dispose: () => unsub(),
+  };
+}
+```
+
+### Hook Wrapper Rules
+
+| Rule | Description |
+|------|-------------|
+| **`useMaybeObservable()`** | Convert `MaybeObservable<T>` / `DeepMaybeObservable<T>` → `Observable<T>` |
+| **`useConstant(() => coreFn(...))`** | Call core function exactly once — stable across re-renders |
+| **`useUnmount(dispose)`** | Cleanup on unmount (or `useEffect(() => dispose, [dispose])`) |
+| **Preserve public API** | Return type stays the same — no breaking changes |
+
+```ts
+import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
+import { useConstant } from "@shared/useConstant";
+import { useUnmount } from "@legendapp/state/react";
+import { debounced } from "./core";
+
+export function useDebounced<T>(
+  value: MaybeObservable<T>,
+  ms: MaybeObservable<number> = 200,
+  options?: DebounceOptions
+): ReadonlyObservable<T> {
+  const source$ = useMaybeObservable(value);
+  const delay$ = useMaybeObservable(ms);
+
+  const { value$, dispose } = useConstant(() => debounced(source$, delay$, options));
+
+  useUnmount(dispose);
+
+  return value$ as ReadonlyObservable<T>;
+}
+```
+
+### Naming Convention
+
+| Layer | Pattern | Example |
+|-------|---------|---------|
+| Core function | `name()` | `debounced()`, `history()`, `intervalFn()` |
+| Core file | `core.ts` | in each hook directory |
+| Hook | `useName()` | `useDebounced()`, `useHistory()` |
+| Hook file | `index.ts` | (existing convention) |
+| Observable variable | `name$` | `value$`, `source$`, `size$` |
+
+---
+
 ## Rule 1 — Element Parameters: Use `useRef$` and `MaybeElement`
 
-When a hook accepts a DOM element, use `MaybeElement` as the parameter type.
-This allows callers to pass an `Ref$` ref, a raw element, or an Observable element.
+When a function accepts a DOM element, use `MaybeElement` as the parameter type.
+This allows callers to pass a `Ref$` ref, a raw element, or an Observable element.
+`MaybeElement` works in **both** core functions and hooks — `getElement()` / `peekElement()` are pure functions with no React dependency.
 
 ```ts
 // ❌ Bad — raw HTMLElement only
@@ -23,7 +119,28 @@ function useMyHook(element: MaybeElement) { ... }
 
 ### Resolving MaybeElement Internally
 
-Use `getElement` / `peekElement` / `isRef$` from `useRef$`:
+Use `getElement` / `peekElement` / `isRef$` from `useRef$`.
+These are **pure functions** — usable in both core functions and hooks.
+
+#### In a Core Function (uses `observe`)
+
+```ts
+import { getElement, peekElement } from "../useRef$";
+
+function elementSize(target: MaybeElement): Disposable & { size$: Observable<Size> } {
+  const size$ = observable({ width: 0, height: 0 });
+
+  const unsub = observe(() => {
+    const el = getElement(target);  // reactive tracking registered
+    if (!el || !(el instanceof HTMLElement)) return;
+    // ResizeObserver setup...
+  });
+
+  return { size$, dispose: () => unsub() };
+}
+```
+
+#### In a Hook (uses `useObserve`)
 
 ```ts
 import { getElement, peekElement, isRef$ } from "../useRef$";
@@ -37,6 +154,18 @@ function useMyHook(element: MaybeElement) {
 
   // Non-reactive read — use inside setup() callback (called from useObserve)
   const el = peekElement(element);
+}
+```
+
+#### Hook Wrapper — pass MaybeElement directly to core
+
+When wrapping a core function, pass `MaybeElement` as-is — no conversion needed:
+
+```ts
+export function useElementSize(target: MaybeElement, options?: ElementSizeOptions) {
+  const { size$, dispose } = useConstant(() => elementSize(target, options));
+  useUnmount(dispose);
+  return size$;
 }
 ```
 
@@ -78,9 +207,27 @@ because it handles opaque wrapping automatically.
 
 ---
 
-## Rule 2 — Options Parameters: Use `DeepMaybeObservable`
+## Rule 2 — Options Parameters: Core vs Hook
 
-When designing a useHook function, define the options interface with **plain types** and wrap the parameter with `DeepMaybeObservable<T>`.
+### Core Function — `Observable<T>` directly
+
+Core functions receive reactive parameters as `Observable<T>`. Non-reactive options use plain types.
+`DeepMaybeObservable` is **not** used in core — it is a hook-layer concern.
+
+```ts
+// Core — reactive args as Observable, non-reactive as plain
+interface DebounceOptions { maxWait?: number; }
+
+function debounced<T>(
+  source$: Observable<T>,         // reactive → Observable
+  delay$: Observable<number>,     // reactive → Observable
+  options?: DebounceOptions       // non-reactive → plain
+): Disposable & { value$: Observable<T> } { ... }
+```
+
+### Hook Wrapper — `DeepMaybeObservable<T>`
+
+When designing a hook function, define the options interface with **plain types** and wrap the parameter with `DeepMaybeObservable<T>`.
 
 ```ts
 // ❌ Bad — per-field MaybeObservable in the interface
@@ -113,10 +260,11 @@ produce a **one-time snapshot**. Observable changes after mount are silently ign
 
 ---
 
-### Standard Pattern — `useMaybeObservable(options, transform?)`
+### Hook Standard Pattern — `useMaybeObservable(options, transform?)`
 
 `useMaybeObservable` normalizes `DeepMaybeObservable<T>` into a stable computed
 `Observable<T | undefined>`. Use it at the top of every hook that accepts `DeepMaybeObservable` options.
+The resulting `Observable` is then passed to the core function via `useConstant`.
 
 ```ts
 import { useMaybeObservable } from "../reactivity/useMaybeObservable";
@@ -235,21 +383,65 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 }
 ```
 
+### Hook-to-Core Bridge Pattern
+
+When the core function needs both reactive Observable args and non-reactive plain options:
+
+```ts
+export function useHistory<Raw, Serialized = Raw>(
+  source$: Observable<Raw>,
+  options?: DeepMaybeObservable<UseHistoryOptions<Raw, Serialized>>
+): UseHistoryReturn<Raw, Serialized> {
+  const opts$ = useMaybeObservable(options, {
+    dump: "function",
+    parse: "function",
+    shouldCommit: "function",
+  });
+
+  // opts$.peek() → snapshot plain object for core (non-reactive options captured in closure)
+  const result = useConstant(() => history<Raw, Serialized>(source$, opts$.peek()));
+
+  useUnmount(result.dispose);
+  return result;
+}
+```
+
 ---
 
-## Rule 3 — Mount-time-only Properties: Use `usePeekInitial`
+## Rule 3 — Mount-time-only Properties
 
-Some options are intentionally captured **once at mount** and never updated reactively:
+Some options are intentionally captured **once at creation** and never updated reactively:
 
 - `initialValue` — seeds the initial state of an Observable; later changes have no meaning
 - `once` — lifecycle behavior determined at mount; dynamic changes do not apply retroactively
 - `interval` / `controls` — determines scheduler type or hook selection; changing after mount has no effect
 
 For these fields, omit the hint (use `'default'`) and read them with `usePeekInitial(obs$, fallback)`.
-This is **intentional** and explicitly signals "read once, fixed at mount" — distinct from
+This is **intentional** and explicitly signals "read once, fixed at creation" — distinct from
 the Anti-pattern in Rule 2 where `.get()` is accidentally used for fields that *should* be reactive.
 
-### `usePeekInitial(obs$, fallback?)` — mount-time Observable read
+### Core Function — plain value closure capture
+
+Core functions have no React lifecycle, so `usePeekInitial` is unnecessary.
+Plain values received as parameters are naturally captured in the closure at creation time:
+
+```ts
+function history<T>(source$: Observable<T>, options?: HistoryOptions<T>) {
+  // Plain values captured at creation — never changes
+  const shouldCommitFn = options?.shouldCommit;
+  const deep = options?.deep ?? false;
+
+  const unsub = observe(() => {
+    const value = source$.get();
+    if (shouldCommitFn && !shouldCommitFn(value)) return;
+    // ...
+  });
+
+  return { dispose: () => unsub(), /* ... */ };
+}
+```
+
+### Hook Wrapper — `usePeekInitial(obs$, fallback?)`
 
 `usePeekInitial` reads an Observable **once at first render** via `.peek()` and returns a
 `useRef`-backed stable value. Re-renders always return the same captured value.
@@ -328,19 +520,20 @@ const controls: Pausable = isRaf ? rafControls : intervalControls;
 
 > **Mount-time-only field decision rule**
 >
-> | Field characteristic | Access pattern | Reason |
-> |----------------------|----------------|--------|
-> | Changes should re-trigger setup | `opts$.field.get()` inside `useObserve` | Legend-State auto-deref registers dep at call site |
-> | Fixed at mount by design | `usePeekInitial(opts$.field, fallback)` | `useRef`-backed mount-time snapshot — stable and intentional |
-> | Mount-time seed for an Observable | `usePeekInitial(opts$.field, fallback)` | Observable ignores later changes; `usePeekInitial` makes intent clear |
-> | Conditional hook selection | `usePeekInitial(opts$.field, fallback)` | Value fixed at mount — React rules-of-hooks safe |
+> | Field characteristic | Core function | Hook wrapper | Reason |
+> |----------------------|---------------|--------------|--------|
+> | Changes should re-trigger setup | `source$.get()` inside `observe()` | `opts$.field.get()` inside `useObserve` | Reactive dep registered |
+> | Fixed at creation by design | `options?.field` (plain value) | `usePeekInitial(opts$.field, fallback)` | Captured once, never changes |
+> | Creation-time seed for an Observable | `options?.field` (plain value) | `usePeekInitial(opts$.field, fallback)` | Observable ignores later changes |
+> | Conditional hook selection | N/A (no hooks in core) | `usePeekInitial(opts$.field, fallback)` | Value fixed at mount — rules-of-hooks safe |
 
 ---
 
 ## Rule 4 — Observable Return Fields: `$` Suffix
 
-When a hook returns an **object**, append `$` to any field that is an `Observable` type.
-This lets callers immediately recognize reactive values without checking `.get()` / `.peek()`.
+When a function returns an **object**, append `$` to any field that is an `Observable` type.
+This applies to **both** core functions and hooks.
+Callers can immediately recognize reactive values without checking `.get()` / `.peek()`.
 
 ```ts
 // ❌ Bad — caller cannot distinguish whether isActive is Observable
@@ -379,13 +572,39 @@ return {
 };
 ```
 
+### Core → Hook pass-through
+
+Core functions return `Disposable & { value$, isActive$, ... }`.
+The hook wrapper strips `dispose` (handled by `useUnmount`) and passes the rest through:
+
+```ts
+// Core
+function intervalFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
+  const isActive$ = observable(true);
+  // ...
+  return { isActive$, pause, resume, dispose };
+}
+
+// Hook — strip dispose, pass-through controls
+function useIntervalFn(fn: AnyFn, interval: MaybeObservable<number>): Pausable {
+  const interval$ = useMaybeObservable(interval);
+  const result = useConstant(() => intervalFn(fn, interval$));
+  useUnmount(result.dispose);
+  const { dispose: _, ...controls } = result;
+  return controls;
+}
+```
+
 ---
 
 ## Rule 5 — Internal-only Observable State: `ReadonlyObservable<T>`
 
-When a hook **exclusively manages** an Observable internally and callers should not `.set()` it directly,
+When a function **exclusively manages** an Observable internally and callers should not `.set()` it directly,
 narrow the return type to `ReadonlyObservable<T>`.
 Reactive reads (`.get()`, `.peek()`, `.onChange()`) are allowed, but write methods are blocked at the type level.
+
+In the 2-layer architecture, the **core function** returns `Observable<T>` (full access internally),
+and the **hook wrapper** narrows it to `ReadonlyObservable<T>` when exposing to callers.
 
 ```ts
 import type { ReadonlyObservable } from "../../types";
@@ -407,11 +626,30 @@ function useMyHook(): { count$: ReadonlyObservable<number> } {
 
 ### Return type decision criteria
 
-| Scenario | Return type |
-|---|---|
-| Hook exclusively manages state (timer, loop, event, etc.) | `ReadonlyObservable<T>` |
-| Simple Observable return (the hook itself is that Observable) | `Observable<T>` |
-| Caller is intended to write directly | `Observable<T>` |
+| Scenario | Core return | Hook return |
+|---|---|---|
+| Internally managed state (timer, loop, event) | `Observable<T>` | `ReadonlyObservable<T>` |
+| Simple Observable return | `Observable<T>` | `Observable<T>` or `ReadonlyObservable<T>` |
+| Caller is intended to write directly | `Observable<T>` | `Observable<T>` |
+
+### Core → Hook narrowing pattern
+
+```ts
+// Core — returns writable Observable (full internal access)
+function myUtil(source$: Observable<number>): Disposable & { value$: Observable<number> } {
+  const value$ = observable(source$.peek());
+  // ... observe, modify value$ internally ...
+  return { value$, dispose };
+}
+
+// Hook — narrows to ReadonlyObservable (external read-only)
+function useMyUtil(source: MaybeObservable<number>): ReadonlyObservable<number> {
+  const source$ = useMaybeObservable(source);
+  const { value$, dispose } = useConstant(() => myUtil(source$));
+  useUnmount(dispose);
+  return value$ as ReadonlyObservable<number>;
+}
+```
 
 ### Real-world examples
 
@@ -432,13 +670,50 @@ export function useElementVisibility(...): Observable<boolean>; // simple return
 
 ---
 
-## Rule 6 — `Pausable` / `Stoppable` / `Awaitable` Utilities
+## Rule 6 — `Disposable` / `Pausable` / `Stoppable` / `Awaitable` Utilities
 
-These three types are shared interfaces defined in `../../types`. Hooks matching these patterns must return the corresponding type so callers get a consistent API.
+These types are shared interfaces defined in `../../types`. Functions matching these patterns must return the corresponding type so callers get a consistent API.
+
+### `Disposable` — Core Function Cleanup (required)
+
+Every core function **must** return `Disposable`. All subscriptions, timers, and observers are cleaned up via `dispose()`.
+
+```ts
+export interface Disposable {
+  dispose: () => void;
+}
+```
+
+| Criteria | Example |
+|---|---|
+| Any `observe()` subscription | `dispose: () => unsub()` |
+| `setTimeout` / `setInterval` | `dispose: () => clearInterval(handle)` |
+| `ResizeObserver` / `MutationObserver` | `dispose: () => observer.disconnect()` |
+| Composed core functions | `dispose: () => { innerA.dispose(); innerB.dispose(); }` |
+
+```ts
+function myUtil(source$: Observable<T>): Disposable & { result$: Observable<T> } {
+  const result$ = observable<T>(source$.peek());
+  const subscriptions: (() => void)[] = [];
+
+  subscriptions.push(
+    observe(() => {
+      result$.set(source$.get());
+    })
+  );
+
+  return {
+    result$,
+    dispose: () => subscriptions.forEach((unsub) => unsub()),
+  };
+}
+```
+
+> **Hook wrappers** handle `dispose` via `useUnmount(result.dispose)` — callers never call `dispose()` directly.
 
 ### `Pausable` — Pause/Resume Loops
 
-Used for hooks that run repeatedly and are controlled via `pause()` / `resume()`.
+Used for functions that run repeatedly and are controlled via `pause()` / `resume()`.
 
 ```ts
 export interface Pausable {
@@ -448,22 +723,29 @@ export interface Pausable {
 }
 ```
 
-| Criteria | Example hooks |
-|---|---|
-| setInterval / rAF-based repeating loop | `useIntervalFn`, `useRafFn` |
-| Subscription where pause/resume is meaningful | `useNow` |
+| Criteria | Core example | Hook example |
+|---|---|---|
+| setInterval / rAF-based repeating loop | `intervalFn()`, `rafFn()` | `useIntervalFn`, `useRafFn` |
+| Subscription where pause/resume is meaningful | — | `useNow` |
 
 ```ts
-function useMyPoller(fn: AnyFn, interval: number): Pausable {
-  const isActive$ = useObservable(false);
-  const pause = () => { ... };
-  const resume = () => { ... };
-  return { isActive$, pause, resume };
+// Core — returns Disposable & Pausable
+function pollerFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
+  const isActive$ = observable(false);
+  const pause = () => { isActive$.set(false); /* clearInterval... */ };
+  const resume = () => { isActive$.set(true); /* setInterval... */ };
+  const unsub = observe(() => { /* re-setup on interval$.get() change */ });
+  return { isActive$, pause, resume, dispose: () => { pause(); unsub(); } };
 }
 
-// call site
-const { isActive$, pause, resume } = useMyPoller(fetchData, 5000);
-isActive$.get(); // boolean — check if currently running
+// Hook — strips dispose, returns Pausable
+function usePoller(fn: AnyFn, interval: MaybeObservable<number>): Pausable {
+  const interval$ = useMaybeObservable(interval);
+  const result = useConstant(() => pollerFn(fn, interval$));
+  useUnmount(result.dispose);
+  const { dispose: _, ...controls } = result;
+  return controls;
+}
 ```
 
 ### `Stoppable<StartFnArgs>` — One-shot Timers
@@ -479,10 +761,10 @@ export interface Stoppable<StartFnArgs extends any[] = any[]> {
 }
 ```
 
-| Criteria | Example hooks |
-|---|---|
-| setTimeout-based delayed execution | `useTimeoutFn` |
-| Async operation pending state tracking | custom async hooks |
+| Criteria | Core example | Hook example |
+|---|---|---|
+| setTimeout-based delayed execution | `timeoutFn()` | `useTimeoutFn` |
+| Async operation pending state tracking | — | custom async hooks |
 
 ```ts
 function useDelayed<T extends AnyFn>(
@@ -585,6 +867,22 @@ function useMyHook(options: UseMyHookOptions = {}) {
 ```
 
 ### SSR Guard Placement
+
+#### Core Function — guard at function top level
+
+Core functions have no React hooks, so early return is safe at the top level.
+Return a no-op `Disposable` with default values:
+
+```ts
+function mediaQuery(query$: Observable<string>): Disposable & { matches$: Observable<boolean> } {
+  if (!defaultWindow) {
+    return { matches$: observable(false), dispose: () => {} };
+  }
+  // ... actual implementation
+}
+```
+
+#### Hook Wrapper — guard inside callbacks
 
 Place SSR guards (`if (!defaultWindow) return`) **immediately before actual usage**.
 Put them inside functions like `resume()`, `update()` where DOM access actually occurs —
