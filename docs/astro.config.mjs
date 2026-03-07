@@ -196,7 +196,13 @@ export default defineConfig({
         },
         {
           label: "Core",
-          autogenerate: { directory: "core" },
+          items: [
+            { label: "State", autogenerate: { directory: "core/state" } },
+            { label: "Reactivity", autogenerate: { directory: "core/reactivity" } },
+            { label: "Sync", autogenerate: { directory: "core/sync" } },
+            { label: "Timer", autogenerate: { directory: "core/timer" } },
+            { label: "Utilities", autogenerate: { directory: "core/utilities" } },
+          ],
         },
         {
           label: "Web",
