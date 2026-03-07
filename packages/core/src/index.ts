@@ -23,6 +23,7 @@ export * from "@state/useHistory";
 export * from "@state/useThrottledHistory";
 export * from "@state/useDebouncedHistory";
 export * from "@state/createProvider";
+export * from "@state/createStore";
 
 export * from "@shared/filters";
 
