@@ -1,5 +1,5 @@
 import type { Observable } from "@legendapp/state";
-import { Memo, useObservable } from "@legendapp/state/react";
+import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@shared/useConstant";
 import { useDebouncedHistory } from ".";
 import {
@@ -10,96 +10,69 @@ import {
   StatusBadge,
   ValueToken,
   demoClasses,
-} from "../_historyDemoUi";
+} from "../../shared/_demo";
 
 export default function UseDebouncedHistoryDemo() {
   const text$ = useObservable("");
   const debounceMs$ = useObservable(600);
   const historyOptions = useConstant(() => ({ debounce: debounceMs$ }));
   const { undo, redo, canUndo$, canRedo$, history$ } = useDebouncedHistory(text$, historyOptions);
-  const historyListProps = {
-    title: "Debounced timeline",
-    emptyText: "Type, pause briefly, and the settled value will appear here.",
-    history$,
-    tone: "green" as const,
-    renderSnapshot: (record$: Observable<{ snapshot: unknown; timestamp: number }>) => (
-      <ValueToken>
-        {record$.snapshot.get() === "" ? '""' : `"${String(record$.snapshot.get())}"`}
-      </ValueToken>
-    ),
-  };
-
   return (
-    <DemoShell
-      eyebrow="Debounced Commits"
-      title="Only settled input gets saved"
-      description="Rapid typing stays fluid, but history records only after the input has been idle for 600ms."
-    >
+    <DemoShell eyebrow="Debounced Commits">
       <DemoPanel
         title="Settling editor"
         description="Type quickly, pause, then inspect how only the settled value lands in history."
-        tone="green"
-        aside={
-          <Memo>
-            {() => <StatusBadge label={`Commit after ${debounceMs$.get()}ms`} tone="green" />}
-          </Memo>
-        }
+        aside={<StatusBadge label={`Commit after ${debounceMs$.get()}ms`} tone="green" />}
       >
-        <Memo>
-          {() => (
-            <input
-              type="text"
-              placeholder="Type in bursts to see debounced history"
-              value={text$.get()}
-              onChange={(e) => text$.set(e.target.value)}
-              className={demoClasses.input}
-            />
-          )}
-        </Memo>
+        <input
+          type="text"
+          placeholder="Type in bursts to see debounced history"
+          value={text$.get()}
+          onChange={(e) => text$.set(e.target.value)}
+          className={demoClasses.input}
+        />
         <div className={demoClasses.settingRow}>
           <div className={demoClasses.settingField}>
             <label className={demoClasses.settingLabel} htmlFor="debounced-history-delay">
               Debounce (ms)
             </label>
-            <Memo>
-              {() => (
-                <input
-                  id="debounced-history-delay"
-                  type="number"
-                  min={50}
-                  step={50}
-                  inputMode="numeric"
-                  value={debounceMs$.get()}
-                  onChange={(e) => {
-                    const next = e.target.valueAsNumber;
-                    if (!Number.isNaN(next)) debounceMs$.set(Math.max(50, next));
-                  }}
-                  className={demoClasses.numberInput}
-                />
-              )}
-            </Memo>
+            <input
+              id="debounced-history-delay"
+              type="number"
+              min={50}
+              step={50}
+              inputMode="numeric"
+              value={debounceMs$.get()}
+              onChange={(e) => {
+                const next = e.target.valueAsNumber;
+                if (!Number.isNaN(next)) debounceMs$.set(Math.max(50, next));
+              }}
+              className={demoClasses.numberInput}
+            />
           </div>
-          <Memo>{() => <ValueToken>Snapshots: {history$.get().length}</ValueToken>}</Memo>
+          <ValueToken>Snapshots: {history$.get().length}</ValueToken>
         </div>
         <div className={demoClasses.actionRow}>
-          <Memo>
-            {() => (
-              <ActionButton onClick={undo} disabled={!canUndo$.get()} grow>
-                Undo
-              </ActionButton>
-            )}
-          </Memo>
-          <Memo>
-            {() => (
-              <ActionButton onClick={redo} disabled={!canRedo$.get()} grow>
-                Redo
-              </ActionButton>
-            )}
-          </Memo>
+          <ActionButton onClick={undo} disabled={!canUndo$.get()} grow>
+            Undo
+          </ActionButton>
+          <ActionButton onClick={redo} disabled={!canRedo$.get()} grow>
+            Redo
+          </ActionButton>
         </div>
       </DemoPanel>
 
-      <HistoryList {...historyListProps} />
+      <HistoryList
+        title="Debounced timeline"
+        emptyText="Type, pause briefly, and the settled value will appear here."
+        history$={history$}
+        tone="green"
+        renderSnapshot={(record$: Observable<{ snapshot: unknown; timestamp: number }>) => (
+          <ValueToken>
+            {record$.snapshot.get() === "" ? '""' : `"${String(record$.snapshot.get())}"`}
+          </ValueToken>
+        )}
+      />
     </DemoShell>
   );
 }

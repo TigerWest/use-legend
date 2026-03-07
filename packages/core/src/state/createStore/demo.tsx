@@ -192,7 +192,6 @@ function TodoApp() {
     <DemoShell eyebrow="Store Pattern">
       <DemoPanel
         title="Tasks"
-        tone="accent"
         aside={
           <Memo>
             {() => {

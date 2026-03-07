@@ -106,6 +106,11 @@ export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
           const openingElement = attrNode.parent as TSESTree.JSXOpeningElement;
           const componentName = getJsxElementName(openingElement);
 
+          // Props ending with `$` explicitly accept observables (e.g. history$={history$})
+          if (attrName && attrName.endsWith("$")) {
+            return;
+          }
+
           // Globally allowed props (e.g. React's `ref` for observable refs)
           if (attrName && allowedGlobalProps.includes(attrName)) {
             return;
