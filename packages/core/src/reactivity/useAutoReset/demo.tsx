@@ -1,61 +1,43 @@
 import { useAutoReset } from ".";
+import {
+  ActionButton,
+  DemoPanel,
+  DemoShell,
+  StatusBadge,
+  ValueToken,
+  demoClasses,
+} from "../../shared/_demo";
 
 export default function UseAutoResetDemo() {
   const message$ = useAutoReset("", 2000);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button
-          type="button"
-          onClick={() => message$.set("Saved!")}
-          style={{
-            padding: "8px 16px",
-            margin: 0,
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            cursor: "pointer",
-          }}
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          onClick={() => message$.set("Error!")}
-          style={{
-            padding: "8px 16px",
-            margin: 0,
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            cursor: "pointer",
-          }}
-        >
-          Error
-        </button>
-        <button
-          type="button"
-          onClick={() => message$.set("")}
-          style={{
-            padding: "8px 16px",
-            margin: 0,
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            cursor: "pointer",
-          }}
-        >
-          Clear
-        </button>
-      </div>
-      <div
-        style={{
-          padding: "10px 14px",
-          borderRadius: "6px",
-          minHeight: "40px",
-          border: "1px solid #eee",
-        }}
+    <DemoShell eyebrow="Auto Reset">
+      <DemoPanel
+        title="Flash message"
+        description="Set a message and watch it reset to empty after 2 seconds."
+        aside={
+          <StatusBadge
+            label={message$.get() ? "Active" : "Idle"}
+            tone={message$.get() ? "green" : "neutral"}
+          />
+        }
       >
-        {message$.get() || "(empty — resets after 2s)"}
-      </div>
-    </div>
+        <div className={demoClasses.actionRow}>
+          <ActionButton onClick={() => message$.set("Saved!")} tone="green" grow>
+            Save
+          </ActionButton>
+          <ActionButton onClick={() => message$.set("Error!")} tone="orange" grow>
+            Error
+          </ActionButton>
+          <ActionButton onClick={() => message$.set("")} grow>
+            Clear
+          </ActionButton>
+        </div>
+        <div className={demoClasses.valueRow}>
+          <ValueToken>{message$.get() || "(empty — resets after 2s)"}</ValueToken>
+        </div>
+      </DemoPanel>
+    </DemoShell>
   );
 }

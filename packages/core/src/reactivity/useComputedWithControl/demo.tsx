@@ -1,7 +1,7 @@
-import type React from "react";
 import type { Observable } from "@legendapp/state";
 import { For, useObservable } from "@legendapp/state/react";
 import { useComputedWithControl } from ".";
+import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "../../shared/_demo";
 
 interface Product {
   name: string;
@@ -26,8 +26,6 @@ export default function UseComputedWithControlDemo() {
   const category$ = useObservable("all");
   const computeCount$ = useObservable(0);
 
-  // query$ is the source → typing triggers recomputation.
-  // sortBy$, category$ are read inside fn but NOT tracked → changes alone don't trigger.
   const { value$: results$, trigger: applyFilters } = useComputedWithControl(
     query$,
     (query: string) => {
@@ -42,108 +40,70 @@ export default function UseComputedWithControlDemo() {
     }
   );
 
-  const inputStyle: React.CSSProperties = {
-    padding: "8px 12px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    margin: 0,
-  };
-
-  const selectStyle: React.CSSProperties = {
-    ...inputStyle,
-    appearance: "none",
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "right 8px center",
-    paddingRight: "28px",
-  };
-
-  const buttonStyle = {
-    ...inputStyle,
-    cursor: "pointer",
-    fontWeight: 600,
-    margin: 0,
-  };
-
-  const descStyle = { fontSize: "13px", color: "#666", margin: 0 };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      <p style={descStyle}>
-        <strong>Search</strong> is the source — typing triggers recomputation immediately.
-        <br />
-        <strong>Category / Sort</strong> are read inside the getter but are <em>not tracked</em> —
-        changing them alone does nothing.
-        <br />
-        <strong>Apply Filters</strong> calls <code>trigger()</code> to force recomputation with the
-        latest category &amp; sort values.
-      </p>
-      <input
-        type="text"
-        placeholder="Search products..."
-        value={query$.get()}
-        onChange={(e) => query$.set(e.target.value)}
-        style={{ ...inputStyle, flex: 1 }}
-      />
-      <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-        <select
-          value={category$.get()}
-          onChange={(e) => category$.set(e.target.value)}
-          style={selectStyle}
-        >
-          <option value="all">All Categories</option>
-          <option value="electronics">Electronics</option>
-          <option value="office">Office</option>
-          <option value="lifestyle">Lifestyle</option>
-        </select>
-        <select
-          value={sortBy$.get()}
-          onChange={(e) => sortBy$.set(e.target.value as "name" | "price")}
-          style={selectStyle}
-        >
-          <option value="name">Sort by Name</option>
-          <option value="price">Sort by Price</option>
-        </select>
-        <button type="button" onClick={applyFilters} style={buttonStyle}>
-          Apply Filters
-        </button>
-        <span style={{ fontSize: "13px", color: "#888" }}>
-          Computed {computeCount$.get()} times
-        </span>
-      </div>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          margin: 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-        }}
+    <DemoShell eyebrow="Controlled Compute">
+      <DemoPanel
+        title="Product search"
+        description="Search is the tracked source — typing recomputes. Category & Sort are untracked — press Apply Filters to trigger manually."
+        aside={<StatusBadge label={`${computeCount$.get()} runs`} tone="accent" />}
       >
-        <For each={results$ as unknown as Observable<Product[]>} optimized>
-          {(item$) => (
-            <li
-              style={{
-                padding: "8px 12px",
-                borderRadius: "6px",
-                border: "1px solid #eee",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={query$.get()}
+          onChange={(e) => query$.set(e.target.value)}
+          className={demoClasses.input}
+        />
+        <div className={`${demoClasses.settingRow} justify-start`}>
+          <div className={demoClasses.settingField}>
+            <label className={demoClasses.settingLabel}>Category</label>
+            <select
+              value={category$.get()}
+              onChange={(e) => category$.set(e.target.value)}
+              className={demoClasses.numberInput}
             >
-              <span>
-                {item$.name.get()}{" "}
-                <span style={{ color: "#888", fontSize: "12px" }}>({item$.category.get()})</span>
-              </span>
-              <span>{item$.price.get().toLocaleString()}won</span>
-            </li>
+              <option value="all">All</option>
+              <option value="electronics">Electronics</option>
+              <option value="office">Office</option>
+              <option value="lifestyle">Lifestyle</option>
+            </select>
+          </div>
+          <div className={demoClasses.settingField}>
+            <label className={demoClasses.settingLabel}>Sort</label>
+            <select
+              value={sortBy$.get()}
+              onChange={(e) => sortBy$.set(e.target.value as "name" | "price")}
+              className={demoClasses.numberInput}
+            >
+              <option value="name">Name</option>
+              <option value="price">Price</option>
+            </select>
+          </div>
+          <ActionButton onClick={applyFilters} tone="accent">
+            Apply Filters
+          </ActionButton>
+        </div>
+        <ul className="m-0 flex list-none flex-col gap-1 p-0">
+          <For each={results$ as unknown as Observable<Product[]>} optimized>
+            {(item$) => (
+              <li className="flex items-center justify-between rounded-xl border border-[var(--sl-color-hairline-light)] bg-[var(--sl-color-bg)] px-3 py-2">
+                <span className="text-sm text-[var(--sl-color-text)]">
+                  {item$.name.get()}{" "}
+                  <span className="text-xs text-[var(--sl-color-gray-3)]">
+                    ({item$.category.get()})
+                  </span>
+                </span>
+                <span className="text-sm font-semibold text-[var(--sl-color-text)]">
+                  {item$.price.get().toLocaleString()}won
+                </span>
+              </li>
+            )}
+          </For>
+          {results$.get().length === 0 && (
+            <li className="px-3 py-2 text-sm text-[var(--sl-color-gray-3)]">No results</li>
           )}
-        </For>
-        {results$.get().length === 0 && (
-          <li style={{ padding: "8px 12px", color: "#888" }}>No results</li>
-        )}
-      </ul>
-    </div>
+        </ul>
+      </DemoPanel>
+    </DemoShell>
   );
 }
