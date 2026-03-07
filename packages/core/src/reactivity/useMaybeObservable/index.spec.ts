@@ -472,3 +472,144 @@ describe("useMaybeObservable() — trigger count with plain useState options", (
     dispose();
   });
 });
+
+// =============================================================================
+// Linked option (bidirectional write-back)
+// =============================================================================
+
+describe("useMaybeObservable() — linked option (bidirectional)", () => {
+  it("outer Observable + linked: read works", () => {
+    const source$ = observable<SimpleOpts>({ val: "hello" });
+    const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(source$, { linked: true }));
+    expect(result.current.val.get()).toBe("hello");
+  });
+
+  it("outer Observable + linked: set writes back to source", () => {
+    const source$ = observable<SimpleOpts>({ val: "original" });
+    const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(source$, { linked: true }));
+    act(() => {
+      result.current.set({ val: "updated" });
+    });
+    expect(source$.val.get()).toBe("updated");
+  });
+
+  it("outer Observable + linked: source change propagates to result", () => {
+    const source$ = observable<SimpleOpts>({ val: "a" });
+    const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(source$, { linked: true }));
+    act(() => {
+      source$.set({ val: "b" });
+    });
+    expect(result.current.val.get()).toBe("b");
+  });
+
+  it("outer Observable + linked: bidirectional round-trip", () => {
+    const source$ = observable<SimpleOpts>({ val: "start" });
+    const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(source$, { linked: true }));
+
+    // read
+    expect(result.current.val.get()).toBe("start");
+
+    // write via result → source
+    act(() => {
+      result.current.set({ val: "from-result" });
+    });
+    expect(source$.val.get()).toBe("from-result");
+
+    // write via source → result
+    act(() => {
+      source$.set({ val: "from-source" });
+    });
+    expect(result.current.val.get()).toBe("from-source");
+  });
+
+  it("plain value + linked: set is silently ignored (no crash)", () => {
+    const { result } = renderHook(() =>
+      useMaybeObservable<SimpleOpts>({ val: "plain" }, { linked: true })
+    );
+    expect(result.current.val.get()).toBe("plain");
+
+    // set should not throw
+    expect(() => {
+      act(() => {
+        result.current.set({ val: "ignored" });
+      });
+    }).not.toThrow();
+  });
+
+  it("per-field Observable + linked: set is silently ignored", () => {
+    const val$ = observable("field");
+    const opts = { val: val$ };
+    const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(opts, { linked: true }));
+    expect(result.current.val.get()).toBe("field");
+
+    // set should not throw — per-field is not an outer Observable
+    expect(() => {
+      act(() => {
+        result.current.set({ val: "ignored" });
+      });
+    }).not.toThrow();
+
+    // original per-field observable unchanged
+    expect(val$.get()).toBe("field");
+  });
+
+  it("linked: false (default) — set does NOT write back", () => {
+    const source$ = observable<SimpleOpts>({ val: "original" });
+    const { result } = renderHook(() => useMaybeObservable<SimpleOpts>(source$));
+    act(() => {
+      result.current.set({ val: "attempted" });
+    });
+    // without linked, set goes to the computed observable, not back to source
+    // source should remain unchanged
+    expect(source$.val.get()).toBe("original");
+  });
+
+  it("linked + function-form transform: get uses transform", () => {
+    const source$ = observable<SimpleOpts>({ val: "raw" });
+    const { result } = renderHook(() =>
+      useMaybeObservable<SimpleOpts>(source$, {
+        transform: (raw) => {
+          const v = isObservable(raw) ? (raw as typeof source$).get() : raw;
+          return v ? { val: v.val + "!" } : undefined;
+        },
+        linked: true,
+      })
+    );
+    expect(result.current.val.get()).toBe("raw!");
+  });
+
+  it("linked + transform: set writes raw value to source (bypasses transform)", () => {
+    const source$ = observable<SimpleOpts>({ val: "raw" });
+    const { result } = renderHook(() =>
+      useMaybeObservable<SimpleOpts>(source$, {
+        transform: (raw) => {
+          const v = isObservable(raw) ? (raw as typeof source$).get() : raw;
+          return v ? { val: v.val + "!" } : undefined;
+        },
+        linked: true,
+      })
+    );
+    // get returns transformed
+    expect(result.current.val.get()).toBe("raw!");
+
+    // set writes raw value directly to source
+    act(() => {
+      result.current.set({ val: "new" });
+    });
+    expect(source$.val.get()).toBe("new");
+
+    // get now reflects new source through transform
+    expect(result.current.val.get()).toBe("new!");
+  });
+
+  it("linked: Observable reference is stable across rerenders", () => {
+    const source$ = observable<SimpleOpts>({ val: "stable" });
+    const { result, rerender } = renderHook(() =>
+      useMaybeObservable<SimpleOpts>(source$, { linked: true })
+    );
+    const first = result.current;
+    rerender();
+    const second = result.current;
+    expect(first).toBe(second);
+  });
+});

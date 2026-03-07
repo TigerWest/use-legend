@@ -1,4 +1,4 @@
-import { isObservable, ObservableHint, type Observable } from "@legendapp/state";
+import { isObservable, linked, ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useMemo } from "react";
 import { get } from "@utilities/get";
@@ -45,6 +45,28 @@ export type FieldTransformMap<T> = {
 export type Transform<T> =
   | FieldTransformMap<T>
   | ((current: DeepMaybeObservable<T> | undefined) => T | undefined);
+
+/**
+ * Extended config for `useMaybeObservable`.
+ * Combines per-field hints / custom compute with the `linked` write-back option.
+ *
+ * When the second argument is a plain `Transform<T>` (object-form or function-form),
+ * it is treated as backward-compatible shorthand (equivalent to `{ transform: ... }`).
+ * Use this extended form when `linked` is needed alongside a transform.
+ */
+export interface UseMaybeObservableConfig<T> {
+  /**
+   * Per-field hints or custom compute function.
+   * Same as passing `Transform<T>` directly as the second argument.
+   */
+  transform?: Transform<T>;
+  /**
+   * When true, the returned Observable supports write-back via linked({ get, set }).
+   * Only effective when options is an outer Observable<T>.
+   * Plain values and per-field Observables are silently ignored (no write target).
+   */
+  linked?: boolean;
+}
 
 function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>): T | undefined {
   if (raw == null) return undefined;
@@ -123,8 +145,22 @@ function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>):
  */
 export function useMaybeObservable<T>(
   options: DeepMaybeObservable<T> | undefined,
-  transform?: Transform<T>
+  config?: Transform<T> | UseMaybeObservableConfig<T>
 ): Observable<T | undefined> {
+  // Resolve config: backward-compat (Transform<T>) vs extended ({ transform, linked })
+  let transform: Transform<T> | undefined;
+  let isLinked = false;
+  if (config != null) {
+    if (typeof config === "function") {
+      transform = config;
+    } else if ("linked" in config || "transform" in config) {
+      transform = (config as UseMaybeObservableConfig<T>).transform;
+      isLinked = (config as UseMaybeObservableConfig<T>).linked === true;
+    } else {
+      transform = config as Transform<T>;
+    }
+  }
+
   const optionsRef = useLatest(options);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const depKey = useMemo(() => Symbol(), [options]);
@@ -144,5 +180,18 @@ export function useMaybeObservable<T>(
     }
     return resolved;
   };
-  return useObservable(compute, [depKey]) as unknown as Observable<T | undefined>;
+  const initialValue = isLinked
+    ? linked({
+        get: compute,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legend-State's SetParams<T> conditional types break generic inference
+        set: ({ value }: any) => {
+          const raw = optionsRef.current;
+          if (isObservable(raw)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Observable<T> loses .set() with unconstrained generics
+            (raw as any).set(value);
+          }
+        },
+      })
+    : compute;
+  return useObservable(initialValue, [depKey]) as unknown as Observable<T | undefined>;
 }
