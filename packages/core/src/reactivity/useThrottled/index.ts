@@ -1,10 +1,13 @@
 "use client";
-import { useObservable, useObserve } from "@legendapp/state/react";
+import type { Observable } from "@legendapp/state";
 import type { MaybeObservable, ReadonlyObservable } from "../../types";
-import { get } from "@utilities/get";
-import { useThrottleFn } from "@utilities/useThrottleFn";
 import type { ThrottleFilterOptions } from "@shared/filters";
-import { peek } from "@utilities/peek";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { useConstant } from "@shared/useConstant";
+import { throttled } from "./core";
+import { useUnmount } from "@legendapp/state/react";
+
+export { throttled } from "./core";
 
 /**
  * Throttle an Observable value.
@@ -28,26 +31,20 @@ export function useThrottled<T>(
   ms: MaybeObservable<number> = 200,
   options: ThrottleFilterOptions = {}
 ): ReadonlyObservable<T> {
-  // Legend-State's Observable<T> expands to a complex conditional union when T is
-  // an unconstrained generic, losing .set() and other methods at the type level.
-  // We use `any` internally and narrow at the return boundary.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see above
-  const throttled$ = useObservable<any>(peek(value));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs DeepMaybeObservable<T> mismatch with unconstrained generics
+  const source$ = useMaybeObservable(value as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same reason as above
+  const interval$ = useMaybeObservable(ms as any);
 
-  // Throttled updater — useThrottleFn handles useRef stabilization
-  const update = useThrottleFn(
-    (newValue: T) => {
-      throttled$.set(newValue);
-    },
-    ms,
-    options
+  const { value$, dispose } = useConstant(() =>
+    throttled(
+      source$ as unknown as Observable<T>,
+      interval$ as unknown as Observable<number>,
+      options
+    )
   );
 
-  // Watch source changes — get(value) registers reactive dependency
-  useObserve(() => {
-    const current = get(value);
-    update(current);
-  });
+  useUnmount(dispose);
 
-  return throttled$ as unknown as ReadonlyObservable<T>;
+  return value$ as unknown as ReadonlyObservable<T>;
 }

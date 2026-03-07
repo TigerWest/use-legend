@@ -1,10 +1,13 @@
 "use client";
-import { useObservable, useObserve } from "@legendapp/state/react";
+import type { Observable } from "@legendapp/state";
 import type { MaybeObservable, ReadonlyObservable } from "../../types";
-import { get } from "@utilities/get";
-import { useDebounceFn } from "@utilities/useDebounceFn";
 import type { DebounceFilterOptions } from "@shared/filters";
-import { peek } from "@utilities/peek";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { useConstant } from "@shared/useConstant";
+import { debounced } from "./core";
+import { useUnmount } from "@legendapp/state/react";
+
+export { debounced } from "./core";
 
 /**
  * Debounce an Observable value.
@@ -28,27 +31,16 @@ export function useDebounced<T>(
   ms: MaybeObservable<number> = 200,
   options: DebounceFilterOptions = {}
 ): ReadonlyObservable<T> {
-  // Legend-State's Observable<T> expands to a complex conditional union when T is
-  // an unconstrained generic, losing .set() and other methods at the type level.
-  // All existing hooks avoid this by using concrete types (boolean, number, etc.).
-  // We use `any` internally and narrow at the return boundary.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see above
-  const debounced$ = useObservable<any>(peek(value));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs DeepMaybeObservable<T> mismatch with unconstrained generics
+  const source$ = useMaybeObservable(value as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same reason as above
+  const delay$ = useMaybeObservable(ms as any);
 
-  // Debounced updater — useDebounceFn handles useRef stabilization
-  const update = useDebounceFn(
-    (newValue: T) => {
-      debounced$.set(newValue);
-    },
-    ms,
-    options
+  const { value$, dispose } = useConstant(() =>
+    debounced(source$ as unknown as Observable<T>, delay$ as unknown as Observable<number>, options)
   );
 
-  // Watch source changes — get(value) registers reactive dependency
-  useObserve(() => {
-    const current = get(value);
-    update(current);
-  });
+  useUnmount(dispose);
 
-  return debounced$ as unknown as ReadonlyObservable<T>;
+  return value$ as unknown as ReadonlyObservable<T>;
 }

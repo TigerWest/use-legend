@@ -1,12 +1,11 @@
 "use client";
-import { isObservable } from "@legendapp/state";
-import type { Observable } from "@legendapp/state";
-import { useMount, useObservable } from "@legendapp/state/react";
 import type { Fn, MaybeObservable, ReadonlyObservable } from "../../types";
-import { peek } from "@utilities/peek";
 import { useLatest } from "@shared/useLatest";
 import { useConstant } from "@shared/useConstant";
-import { toArray } from "@shared/utils";
+import { computedWithControl } from "./core";
+import { useUnmount } from "@legendapp/state/react";
+
+export { computedWithControl } from "./core";
 
 /**
  * Computed Observable with explicit source control and manual trigger.
@@ -44,29 +43,15 @@ export function useComputedWithControl<T>(
 ): { value$: ReadonlyObservable<T>; trigger: Fn } {
   const fnRef = useLatest(fn);
 
-  const readSource = () => (Array.isArray(source) ? source.map((s) => peek(s)) : peek(source));
-  const initialValue = useConstant(() => fn(readSource(), undefined));
+  // Wrap fn so core always calls the latest version (survives React re-renders)
+  const fnWrapper = (sourceValue: any, prev: T | undefined) => fnRef.current(sourceValue, prev);
 
-  const value$ = useObservable<any>(initialValue);
+  // Pass source directly — core handles MaybeObservable via peek/isObservable
+  const { value$, trigger, dispose } = useConstant(() =>
+    computedWithControl(source as any, fnWrapper)
+  );
 
-  // Subscribe to source changes via onChange — fn runs OUTSIDE tracking context,
-  // so .get() calls inside fn do NOT register as reactive dependencies.
-  useMount(() => {
-    const sources = toArray(source);
-    const disposers = sources
-      .filter((s) => isObservable(s))
-      .map((s) =>
-        (s as Observable<any>).onChange(() => {
-          value$.set(fnRef.current(readSource(), value$.peek()));
-        })
-      );
-
-    return () => disposers.forEach((d) => d());
-  });
-
-  const trigger = () => {
-    value$.set(fnRef.current(readSource(), value$.peek()));
-  };
+  useUnmount(dispose);
 
   return { value$: value$ as unknown as ReadonlyObservable<T>, trigger };
 }

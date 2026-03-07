@@ -1,10 +1,12 @@
 "use client";
 import type { Observable } from "@legendapp/state";
-import { useMount, useObservable, useObserve } from "@legendapp/state/react";
-import { useRef } from "react";
-import type { MaybeObservable, TimerHandle, WidenPrimitive } from "../../types";
-import { get } from "@utilities/get";
-import { peek } from "@utilities/peek";
+import type { MaybeObservable, WidenPrimitive } from "../../types";
+import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { useConstant } from "@shared/useConstant";
+import { autoReset } from "./core";
+import { useUnmount } from "@legendapp/state/react";
+
+export { autoReset } from "./core";
 
 /**
  * Observable that automatically resets to a default value after a specified delay.
@@ -24,25 +26,16 @@ export function useAutoReset<T>(
   defaultValue: MaybeObservable<T>,
   afterMs: MaybeObservable<number> = 1000
 ): Observable<WidenPrimitive<T>> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see useDebounced for rationale
-  const value$ = useObservable<any>(peek(defaultValue));
-  const timer = useRef<TimerHandle>(undefined);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs DeepMaybeObservable<T> mismatch with unconstrained generics
+  const defaultValue$ = useMaybeObservable(defaultValue as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same reason as above
+  const afterMs$ = useMaybeObservable(afterMs as any);
 
-  useObserve(() => {
-    const current = value$.get();
-    const def = peek(defaultValue);
+  const { value$, dispose } = useConstant(() =>
+    autoReset(defaultValue$ as unknown as Observable<T>, afterMs$ as unknown as Observable<number>)
+  );
 
-    clearTimeout(timer.current);
+  useUnmount(dispose);
 
-    if (!Object.is(current, def)) {
-      const ms = get(afterMs);
-      timer.current = setTimeout(() => {
-        value$.set(peek(defaultValue));
-      }, ms);
-    }
-  });
-
-  useMount(() => () => clearTimeout(timer.current));
-
-  return value$ as unknown as Observable<WidenPrimitive<T>>;
+  return value$;
 }
