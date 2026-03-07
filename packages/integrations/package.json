@@ -1,6 +1,6 @@
 {
   "name": "@usels/integrations",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Observable-native third-party integrations for Legend-State, inspired by VueUse and react-use",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
