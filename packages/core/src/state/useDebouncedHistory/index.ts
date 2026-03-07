@@ -1,13 +1,15 @@
 "use client";
 
 import { type Observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { useObservable, useUnmount } from "@legendapp/state/react";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
-import { debounceFilter } from "@shared/filters";
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
 import { get } from "@utilities/get";
-import { useHistory, type UseHistoryOptions, type UseHistoryReturn } from "../useHistory";
+import { debouncedHistory } from "./core";
+import type { UseHistoryOptions, UseHistoryReturn } from "../useHistory";
+
+export { debouncedHistory, type DebouncedHistoryOptions } from "./core";
 
 export type UseDebouncedHistoryOptions<Raw, Serialized = Raw> = Omit<
   UseHistoryOptions<Raw, Serialized>,
@@ -61,10 +63,14 @@ export function useDebouncedHistory<Raw, Serialized = Raw>(
     return get(value);
   });
 
-  const filter = useConstant(() => debounceFilter(debounceMs$, { maxWait: maxWait$ }));
+  const result = useConstant(() =>
+    debouncedHistory<Raw, Serialized>(source$, debounceMs$, {
+      ...(opts$.peek() ?? {}),
+      maxWait: maxWait$,
+    })
+  );
 
-  return useHistory(source$, {
-    ...(opts$.peek() ?? {}),
-    eventFilter: filter,
-  } as DeepMaybeObservable<UseHistoryOptions<Raw, Serialized>>);
+  useUnmount(result.dispose);
+
+  return result;
 }

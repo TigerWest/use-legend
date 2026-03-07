@@ -1,14 +1,16 @@
 "use client";
 
 import { type Observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { useObservable, useUnmount } from "@legendapp/state/react";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
-import { throttleFilter } from "@shared/filters";
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
 import { usePeekInitial } from "../../reactivity/usePeekInitial";
 import { get } from "@utilities/get";
-import { useHistory, type UseHistoryOptions, type UseHistoryReturn } from "../useHistory";
+import { throttledHistory } from "./core";
+import type { UseHistoryOptions, UseHistoryReturn } from "../useHistory";
+
+export { throttledHistory, type ThrottledHistoryOptions } from "./core";
 
 export type UseThrottledHistoryOptions<Raw, Serialized = Raw> = Omit<
   UseHistoryOptions<Raw, Serialized>,
@@ -66,17 +68,18 @@ export function useThrottledHistory<Raw, Serialized = Raw>(
   const trailing = usePeekInitial(opts$.trailing as Observable<boolean | undefined>, true);
   const leading = usePeekInitial(opts$.leading as Observable<boolean | undefined>, true);
 
-  const edges: Array<"leading" | "trailing"> = useConstant(() => {
-    const result: Array<"leading" | "trailing"> = [];
-    if (leading) result.push("leading");
-    if (trailing) result.push("trailing");
-    return result;
+  const result = useConstant(() => {
+    const edges: Array<"leading" | "trailing"> = [];
+    if (leading) edges.push("leading");
+    if (trailing) edges.push("trailing");
+
+    return throttledHistory<Raw, Serialized>(source$, throttleMs$, {
+      ...(opts$.peek() ?? {}),
+      edges,
+    });
   });
 
-  const filter = useConstant(() => throttleFilter(throttleMs$, { edges }));
+  useUnmount(result.dispose);
 
-  return useHistory(source$, {
-    ...(opts$.peek() ?? {}),
-    eventFilter: filter,
-  } as DeepMaybeObservable<UseHistoryOptions<Raw, Serialized>>);
+  return result;
 }

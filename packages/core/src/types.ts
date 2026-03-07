@@ -71,6 +71,10 @@ export type WidenPrimitive<T> = T extends string
       ? boolean
       : T;
 
+export interface Disposable {
+  dispose: () => void;
+}
+
 export interface Pausable {
   readonly isActive$: ReadonlyObservable<boolean>;
   pause: Fn;

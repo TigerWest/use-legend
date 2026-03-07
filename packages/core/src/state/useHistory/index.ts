@@ -1,19 +1,15 @@
 "use client";
 
-import { type Observable, batch as legendBatch } from "@legendapp/state";
-import { useObserve } from "@legendapp/state/react";
-import { useRef } from "react";
+import { type Observable } from "@legendapp/state";
 import type { DeepMaybeObservable, Fn, ReadonlyObservable } from "../../types";
 import type { EventFilter } from "@shared/filters";
-import { pausableFilter } from "@shared/filters";
-import { noop } from "@shared/utils";
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import {
-  useManualHistory,
-  type UseManualHistoryOptions,
-  type UseManualHistoryReturn,
-} from "../useManualHistory";
+import { history } from "./core";
+import type { UseManualHistoryOptions, UseManualHistoryReturn } from "../useManualHistory";
+import { useUnmount } from "@legendapp/state/react";
+
+export { history, type HistoryOptions, type HistoryReturn } from "./core";
 
 export interface UseHistoryOptions<Raw, Serialized = Raw> extends UseManualHistoryOptions<
   Raw,
@@ -80,96 +76,11 @@ export function useHistory<Raw, Serialized = Raw>(
     shouldCommit: "function",
   });
 
-  // Mount-time-only options
-  const mountConfig = useConstant(() => {
-    const raw = opts$.peek();
-    return {
-      eventFilter: raw?.eventFilter as EventFilter | undefined,
-    };
-  });
+  // 1. core 함수 1회 호출 (useConstant — 리렌더에도 재생성 안 됨)
+  const result = useConstant(() => history<Raw, Serialized>(source$, opts$.peek()));
 
-  // Delegate stack management to useManualHistory
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- UseHistoryOptions extends UseManualHistoryOptions; extra fields are safely ignored
-  const manual = useManualHistory<Raw, Serialized>(source$, options as any);
+  // 2. unmount 시 cleanup
+  useUnmount(result.dispose);
 
-  // Pausable filter — composes with optional eventFilter (throttle/debounce)
-  const pausable = useConstant(() => pausableFilter(mountConfig.eventFilter));
-
-  // Flag to prevent circular auto-commit during undo/redo/transaction
-  const isRestoringRef = useRef(false);
-  // Flag to track if disposed
-  const isDisposedRef = useRef(false);
-  // Skip the initial observe pass: useManualHistory already seeded the first snapshot.
-  const hasObservedInitialRef = useRef(false);
-
-  // Auto-commit on source$ change
-  useObserve(() => {
-    const value = source$.get(); // register reactive dependency
-
-    if (!hasObservedInitialRef.current) {
-      hasObservedInitialRef.current = true;
-      return;
-    }
-
-    if (isRestoringRef.current || isDisposedRef.current) return;
-
-    pausable.eventFilter(
-      () => {
-        const shouldCommit = opts$.peek()?.shouldCommit as ((v: Raw) => boolean) | undefined;
-        if (shouldCommit && !shouldCommit(value)) return;
-        manual.commit();
-      },
-      { fn: noop, args: [], thisArg: undefined }
-    );
-  });
-
-  // Wrapped undo/redo — set isRestoring to prevent auto-commit
-  const undo = () => {
-    isRestoringRef.current = true;
-    manual.undo();
-    isRestoringRef.current = false;
-  };
-
-  const redo = () => {
-    isRestoringRef.current = true;
-    manual.redo();
-    isRestoringRef.current = false;
-  };
-
-  const pause = () => {
-    pausable.pause();
-  };
-
-  const resume = (commitCurrent?: boolean) => {
-    pausable.resume();
-    if (commitCurrent) manual.commit();
-  };
-
-  const transaction = (fn: (cancel: Fn) => void) => {
-    let canceled = false;
-    isRestoringRef.current = true;
-    legendBatch(() => {
-      fn(() => {
-        canceled = true;
-      });
-    });
-    isRestoringRef.current = false;
-    if (!canceled) manual.commit();
-  };
-
-  const dispose = () => {
-    isDisposedRef.current = true;
-    pausable.pause();
-  };
-
-  return {
-    ...manual,
-    undo,
-    redo,
-    isTracking$: pausable.isActive$,
-    pause,
-    resume,
-    transaction,
-    dispose,
-  };
+  return result;
 }
