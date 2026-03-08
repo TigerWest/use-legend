@@ -3,9 +3,9 @@ import { useMount } from "@legendapp/state/react";
 import type { DeepMaybeObservable, ReadonlyObservable } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { fps, type FpsOptions } from "./core";
+import { createFps, type FpsOptions } from "./core";
 
-export { fps } from "./core";
+export { createFps } from "./core";
 export type { FpsOptions } from "./core";
 
 export type UseFpsOptions = Pick<FpsOptions, "every">;
@@ -14,7 +14,7 @@ export function useFps(options?: DeepMaybeObservable<UseFpsOptions>): ReadonlyOb
   const opts$ = useMaybeObservable(options);
   const every = opts$.peek()?.every ?? 10;
 
-  const result = useConstant(() => fps({ every, immediate: false }));
+  const result = useConstant(() => createFps({ every, immediate: false }));
 
   useMount(() => {
     result.resume();

@@ -1,6 +1,6 @@
 import { observable, type Observable } from "@legendapp/state";
 import type { Disposable, Fn, Pausable } from "../../types";
-import { intervalFn } from "@timer/useIntervalFn/core";
+import { createIntervalFn } from "@timer/useIntervalFn/core";
 
 export interface IntervalOptions {
   /** If true, starts immediately. @default true */
@@ -18,7 +18,7 @@ export interface IntervalReturn {
  * Core observable function for reactive counter with setInterval.
  * No React dependency — uses intervalFn core internally.
  */
-export function interval(
+export function createInterval(
   interval$: Observable<number>,
   options?: IntervalOptions
 ): Disposable & IntervalReturn & Pausable {
@@ -32,7 +32,7 @@ export function interval(
 
   const reset = () => counter$.set(0);
 
-  const result = intervalFn(update, interval$, {
+  const result = createIntervalFn(update, interval$, {
     immediate: options?.immediate ?? true,
   });
 

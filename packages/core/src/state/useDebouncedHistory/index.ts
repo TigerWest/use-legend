@@ -6,10 +6,10 @@ import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
 import { get } from "@utilities/get";
-import { debouncedHistory } from "./core";
+import { createDebouncedHistory } from "./core";
 import type { UseHistoryOptions, UseHistoryReturn } from "../useHistory";
 
-export { debouncedHistory, type DebouncedHistoryOptions } from "./core";
+export { createDebouncedHistory, type DebouncedHistoryOptions } from "./core";
 
 export type UseDebouncedHistoryOptions<Raw, Serialized = Raw> = Omit<
   UseHistoryOptions<Raw, Serialized>,
@@ -64,7 +64,7 @@ export function useDebouncedHistory<Raw, Serialized = Raw>(
   });
 
   const result = useConstant(() =>
-    debouncedHistory<Raw, Serialized>(source$, debounceMs$, {
+    createDebouncedHistory<Raw, Serialized>(source$, debounceMs$, {
       ...(opts$.peek() ?? {}),
       maxWait: maxWait$,
     })

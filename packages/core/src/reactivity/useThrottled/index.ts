@@ -4,10 +4,10 @@ import type { MaybeObservable, ReadonlyObservable } from "../../types";
 import type { ThrottleFilterOptions } from "@shared/filters";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { throttled } from "./core";
+import { createThrottled } from "./core";
 import { useUnmount } from "@legendapp/state/react";
 
-export { throttled } from "./core";
+export { createThrottled } from "./core";
 
 /**
  * Throttle an Observable value.
@@ -37,7 +37,7 @@ export function useThrottled<T>(
   const interval$ = useMaybeObservable(ms as any);
 
   const { value$, dispose } = useConstant(() =>
-    throttled(
+    createThrottled(
       source$ as unknown as Observable<T>,
       interval$ as unknown as Observable<number>,
       options

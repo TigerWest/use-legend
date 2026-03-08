@@ -1,7 +1,6 @@
 "use client";
-import { useObservable, useObserve } from "@legendapp/state/react";
-import { formatDistance } from "date-fns";
-import type { Locale } from "date-fns";
+import type { Observable } from "@legendapp/state";
+import { useMount } from "@legendapp/state/react";
 import type {
   DeepMaybeObservable,
   MaybeObservable,
@@ -9,28 +8,11 @@ import type {
   ReadonlyObservable,
 } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { get } from "@utilities/get";
-import { useNow } from "@timer/useNow";
+import { useConstant } from "@shared/useConstant";
+import { createTimeAgo } from "./core";
 
-export type UseTimeAgoUnitNamesDefault =
-  | "second"
-  | "minute"
-  | "hour"
-  | "day"
-  | "week"
-  | "month"
-  | "year";
-
-/** ms threshold for each unit name — used by the `max` option */
-const UNIT_MAX_MS: Record<UseTimeAgoUnitNamesDefault, number> = {
-  second: 60_000,
-  minute: 2_760_000,
-  hour: 72_000_000,
-  day: 518_400_000,
-  week: 2_419_200_000,
-  month: 28_512_000_000,
-  year: Infinity,
-};
+export { createTimeAgo, formatTimeAgo } from "./core";
+export type { UseTimeAgoUnitNamesDefault, FormatTimeAgoOptions, TimeAgoOptions } from "./core";
 
 export interface UseTimeAgoOptions<Controls extends boolean = false> {
   controls?: Controls;
@@ -42,11 +24,11 @@ export interface UseTimeAgoOptions<Controls extends boolean = false> {
   /**
    * date-fns Locale for i18n — mount-time-only
    */
-  locale?: Locale;
+  locale?: import("date-fns").Locale;
   /**
    * Max diff before fullDateFormatter is used — reactive
    */
-  max?: UseTimeAgoUnitNamesDefault | number;
+  max?: import("./core").UseTimeAgoUnitNamesDefault | number;
   /** Formatter for dates exceeding max — function hint */
   fullDateFormatter?: (date: Date) => string;
   /**
@@ -55,47 +37,6 @@ export interface UseTimeAgoOptions<Controls extends boolean = false> {
    * @default false
    */
   showSecond?: boolean;
-}
-
-export interface FormatTimeAgoOptions {
-  locale?: Locale;
-  max?: UseTimeAgoUnitNamesDefault | number;
-  fullDateFormatter?: (date: Date) => string;
-  showSecond?: boolean;
-}
-
-const JUST_NOW_MS = 45_000;
-
-/** Pure function — no Observables, independently testable */
-export function formatTimeAgo(
-  from: Date,
-  options: FormatTimeAgoOptions = {},
-  now: Date | number = Date.now()
-): string {
-  const {
-    max,
-    fullDateFormatter = (d) => d.toISOString().slice(0, 10),
-    showSecond = false,
-    locale,
-  } = options;
-
-  const nowDate = new Date(now);
-  const absDiff = Math.abs(+nowDate - +from);
-
-  if (max !== undefined) {
-    const maxMs = typeof max === "number" ? max : (UNIT_MAX_MS[max] ?? Infinity);
-    if (absDiff > maxMs) return fullDateFormatter(from);
-  }
-
-  if (!showSecond && absDiff < JUST_NOW_MS) {
-    return "just now";
-  }
-
-  return formatDistance(from, nowDate, {
-    addSuffix: true,
-    includeSeconds: showSecond,
-    locale,
-  });
 }
 
 export function useTimeAgo(
@@ -118,32 +59,38 @@ export function useTimeAgo(
   // mount-time-only
   const exposeControls = opts$.controls.peek() ?? false;
   const updateInterval = opts$.updateInterval.peek() ?? 30_000;
-  const locale = opts$.locale.peek() as Locale | undefined;
+  const locale = opts$.locale.peek() as import("date-fns").Locale | undefined;
 
-  const { now$, ...controls } = useNow({ controls: true, interval: updateInterval });
+  const time$ = useMaybeObservable(time);
 
-  const timeAgo$ = useObservable<string>("");
+  const result = useConstant(() =>
+    createTimeAgo(
+      time$ as unknown as Observable<Date | number | string>,
+      opts$.max as unknown as Observable<
+        import("./core").UseTimeAgoUnitNamesDefault | number | undefined
+      >,
+      opts$.showSecond as unknown as Observable<boolean | undefined>,
+      {
+        updateInterval,
+        locale,
+        fullDateFormatter: opts$.peek()?.fullDateFormatter as ((date: Date) => string) | undefined,
+        immediate: false,
+      }
+    )
+  );
 
-  useObserve(() => {
-    const currentNow = now$.get();
-    const target = get(time);
-
-    // reactive fields
-    const max = opts$.max.get();
-    const showSecond = opts$.showSecond.get() ?? false;
-    const fullDateFormatter = opts$.peek()?.fullDateFormatter;
-
-    timeAgo$.set(
-      formatTimeAgo(
-        new Date(target as Date | number | string),
-        { max, locale, fullDateFormatter, showSecond },
-        currentNow
-      )
-    );
+  useMount(() => {
+    result.resume();
+    return () => result.dispose();
   });
 
   if (exposeControls) {
-    return { timeAgo$: timeAgo$ as ReadonlyObservable<string>, ...controls };
+    return {
+      timeAgo$: result.timeAgo$ as ReadonlyObservable<string>,
+      isActive$: result.isActive$,
+      pause: result.pause,
+      resume: result.resume,
+    };
   }
-  return timeAgo$ as ReadonlyObservable<string>;
+  return result.timeAgo$ as ReadonlyObservable<string>;
 }

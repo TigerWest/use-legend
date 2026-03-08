@@ -12,7 +12,7 @@ import { createFilterWrapper, debounceFilter, type DebounceFilterOptions } from 
  * @param options - `edges` for leading/trailing control; `maxWait` to cap maximum delay.
  * @returns Disposable with an Observable reflecting the debounced value.
  */
-export function debounced<T>(
+export function createDebounced<T>(
   source$: Observable<T>,
   delay$: Observable<number>,
   options: DebounceFilterOptions = {}

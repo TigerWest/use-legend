@@ -63,7 +63,7 @@ export interface RemoteReturn<T> {
  * @param options - Remote sync configuration.
  * @returns `Disposable & { data$, isLoaded$, isFetching$, error$, refetch }`
  */
-export function remote<T>(options: RemoteOptions<T>): Disposable & RemoteReturn<T> {
+export function createRemote<T>(options: RemoteOptions<T>): Disposable & RemoteReturn<T> {
   const { get, set, initial, mode, debounceSet, transform } = options;
 
   const isFetching$ = observable(false);

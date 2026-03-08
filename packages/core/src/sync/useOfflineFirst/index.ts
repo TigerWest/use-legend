@@ -2,9 +2,9 @@
 
 import { useConstant } from "@shared/useConstant";
 import { useUnmount } from "@legendapp/state/react";
-import { offlineFirst } from "./core";
+import { createOfflineFirst } from "./core";
 
-export { offlineFirst } from "./core";
+export { createOfflineFirst } from "./core";
 export type { OfflineFirstOptions, OfflineFirstReturn } from "./core";
 
 /**
@@ -45,7 +45,7 @@ export type UseOfflineFirstReturn<T> = import("./core").OfflineFirstReturn<T>;
  * ```
  */
 export function useOfflineFirst<T>(options: UseOfflineFirstOptions<T>): UseOfflineFirstReturn<T> {
-  const { dispose, ...result } = useConstant(() => offlineFirst(options));
+  const { dispose, ...result } = useConstant(() => createOfflineFirst(options));
 
   useUnmount(dispose);
 

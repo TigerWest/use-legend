@@ -11,9 +11,9 @@ import type {
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
 import { useLatest } from "@shared/useLatest";
-import { interval } from "./core";
+import { createInterval } from "./core";
 
-export { interval } from "./core";
+export { createInterval } from "./core";
 export type { IntervalOptions, IntervalReturn } from "./core";
 
 export interface UseIntervalOptions<Controls extends boolean = false> {
@@ -54,7 +54,7 @@ export function useInterval(
   const callbackRef = useLatest(opts$.peek()?.callback);
 
   const result = useConstant(() =>
-    interval(interval$ as unknown as Observable<number>, {
+    createInterval(interval$ as unknown as Observable<number>, {
       immediate: false,
       callback: (count: number) => callbackRef.current?.(count),
     })

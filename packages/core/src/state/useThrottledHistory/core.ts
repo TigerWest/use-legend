@@ -1,6 +1,6 @@
 import { type Observable } from "@legendapp/state";
 import { throttleFilter } from "@shared/filters";
-import { history, type HistoryOptions, type HistoryReturn } from "../useHistory/core";
+import { createHistory, type HistoryOptions, type HistoryReturn } from "../useHistory/core";
 
 export interface ThrottledHistoryOptions<Raw, Serialized = Raw> extends Omit<
   HistoryOptions<Raw, Serialized>,
@@ -21,7 +21,7 @@ export interface ThrottledHistoryOptions<Raw, Serialized = Raw> extends Omit<
  * @param interval$ - Throttle interval in milliseconds (reactive).
  * @param options - History configuration and edge control.
  */
-export function throttledHistory<Raw, Serialized = Raw>(
+export function createThrottledHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
   interval$: Observable<number>,
   options?: ThrottledHistoryOptions<Raw, Serialized>
@@ -30,5 +30,5 @@ export function throttledHistory<Raw, Serialized = Raw>(
     edges: options?.edges,
   });
 
-  return history(source$, { ...options, eventFilter: filter });
+  return createHistory(source$, { ...options, eventFilter: filter });
 }

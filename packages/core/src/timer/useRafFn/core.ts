@@ -23,7 +23,7 @@ export interface RafFnOptions {
  * Core observable function for requestAnimationFrame loop.
  * No React dependency — uses plain observable and local state.
  */
-export function rafFn(
+export function createRafFn(
   fn: (args: RafFnCallbackArguments) => void,
   options?: RafFnOptions
 ): Disposable & Pausable {

@@ -3,10 +3,10 @@ import type { Observable } from "@legendapp/state";
 import type { Fn, MaybeObservable, WidenPrimitive } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { manualReset } from "./core";
+import { createManualReset } from "./core";
 import { useUnmount } from "@legendapp/state/react";
 
-export { manualReset } from "./core";
+export { createManualReset } from "./core";
 
 /**
  * Observable with a manual `reset()` function that restores the value to its default.
@@ -29,7 +29,7 @@ export function useManualReset<T>(defaultValue: MaybeObservable<T>): {
   const defaultValue$ = useMaybeObservable(defaultValue as any);
 
   const { value$, reset, dispose } = useConstant(() =>
-    manualReset(defaultValue$ as unknown as Observable<T>)
+    createManualReset(defaultValue$ as unknown as Observable<T>)
   );
 
   useUnmount(dispose);

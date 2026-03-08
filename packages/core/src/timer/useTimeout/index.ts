@@ -1,5 +1,6 @@
 "use client";
-import { useObservable, useObserve } from "@legendapp/state/react";
+import type { Observable } from "@legendapp/state";
+import { useMount } from "@legendapp/state/react";
 import type {
   DeepMaybeObservable,
   Fn,
@@ -8,7 +9,12 @@ import type {
   Stoppable,
 } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { useTimeoutFn } from "@timer/useTimeoutFn";
+import { useConstant } from "@shared/useConstant";
+import { useLatest } from "@shared/useLatest";
+import { createTimeout } from "./core";
+
+export { createTimeout } from "./core";
+export type { TimeoutOptions } from "./core";
 
 export interface UseTimeoutOptions<Controls extends boolean = false> {
   controls?: Controls;
@@ -33,36 +39,32 @@ export function useTimeout(
   interval: MaybeObservable<number> = 1000,
   options?: DeepMaybeObservable<UseTimeoutOptions<boolean>>
 ): ReadonlyObservable<boolean> | ({ ready$: ReadonlyObservable<boolean> } & Stoppable) {
-  // ✅ 'function' hint: callback field
-  const opts$ = useMaybeObservable(options, {
-    callback: "function",
-  });
+  const opts$ = useMaybeObservable(options, { callback: "function" });
+  const interval$ = useMaybeObservable(interval);
 
-  // ✅ mount-time-only: .peek()
   const exposeControls = opts$.controls.peek() ?? false;
   const immediate = opts$.immediate.peek() ?? true;
+  const callbackRef = useLatest(opts$.peek()?.callback);
 
-  // ready$ tracks natural completion only (stop() does NOT set ready=true)
-  const ready$ = useObservable(false);
-
-  // ✅ callback accessed via opts$.peek()?.callback pattern
-  // Note: explicit cast needed — TypeScript cannot infer Fn type in generic useTimeoutFn<CallbackFn> context
-  const controls = useTimeoutFn(
-    (): void => {
-      ready$.set(true); // fired naturally → ready
-      (opts$.peek()?.callback as Fn | undefined)?.();
-    },
-    interval,
-    { immediate }
+  const result = useConstant(() =>
+    createTimeout(interval$ as unknown as Observable<number>, {
+      immediate: false,
+      callback: () => (callbackRef.current as Fn | undefined)?.(),
+    })
   );
 
-  // Reset ready$ when a new timeout starts (isPending becomes true)
-  useObserve(() => {
-    if (controls.isPending$.get()) ready$.set(false);
+  useMount(() => {
+    if (immediate) result.start();
+    return () => result.dispose();
   });
 
   if (exposeControls) {
-    return { ready$: ready$ as ReadonlyObservable<boolean>, ...controls };
+    return {
+      ready$: result.ready$ as ReadonlyObservable<boolean>,
+      isPending$: result.isPending$,
+      stop: result.stop,
+      start: result.start,
+    };
   }
-  return ready$ as ReadonlyObservable<boolean>;
+  return result.ready$ as ReadonlyObservable<boolean>;
 }

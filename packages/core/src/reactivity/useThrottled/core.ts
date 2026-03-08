@@ -12,7 +12,7 @@ import { createFilterWrapper, throttleFilter, type ThrottleFilterOptions } from 
  * @param options - `edges` for leading/trailing control.
  * @returns Disposable with an Observable reflecting the throttled value.
  */
-export function throttled<T>(
+export function createThrottled<T>(
   source$: Observable<T>,
   interval$: Observable<number>,
   options: ThrottleFilterOptions = {}

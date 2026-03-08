@@ -4,9 +4,9 @@ import type { DeepMaybeObservable, Pausable, ReadonlyObservable } from "../../ty
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { usePeekInitial } from "@reactivity/usePeekInitial";
 import { useConstant } from "@shared/useConstant";
-import { now } from "./core";
+import { createNow } from "./core";
 
-export { now } from "./core";
+export { createNow } from "./core";
 export type { NowOptions } from "./core";
 
 export interface UseNowOptions<Controls extends boolean = false> {
@@ -34,7 +34,7 @@ export function useNow(
   const exposeControls = usePeekInitial(opts$.controls, false);
   const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
 
-  const result = useConstant(() => now({ interval, immediate: false }));
+  const result = useConstant(() => createNow({ interval, immediate: false }));
 
   useMount(() => {
     result.resume();

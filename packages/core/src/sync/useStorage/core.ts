@@ -53,13 +53,13 @@ export interface StorageReturn<T> {
  * @param options - Configuration options. `plugin` is required.
  * @returns `Disposable & { data$, isLoaded$, isPersistLoaded$, error$ }`
  */
-export function storage<T>(
+export function createStorage<T>(
   key: string,
   defaults: T,
   options: StorageOptions
 ): Disposable & StorageReturn<T>;
 
-export function storage(
+export function createStorage(
   key: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaults: any,

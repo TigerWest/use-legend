@@ -2,9 +2,9 @@
 
 import { useConstant } from "@shared/useConstant";
 import { useUnmount } from "@legendapp/state/react";
-import { storage } from "./core";
+import { createStorage } from "./core";
 
-export { storage } from "./core";
+export { createStorage } from "./core";
 export type { StorageOptions, StorageReturn } from "./core";
 
 /**
@@ -52,7 +52,7 @@ export function useStorage(
   options: UseStorageOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): UseStorageReturn<any> {
-  const { dispose, ...result } = useConstant(() => storage(key, defaults, options));
+  const { dispose, ...result } = useConstant(() => createStorage(key, defaults, options));
 
   useUnmount(dispose);
 

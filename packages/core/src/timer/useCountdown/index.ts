@@ -1,6 +1,6 @@
 "use client";
-import { useObservable } from "@legendapp/state/react";
-import { useRef } from "react";
+import type { Observable } from "@legendapp/state";
+import { useMount } from "@legendapp/state/react";
 import type {
   DeepMaybeObservable,
   Fn,
@@ -10,9 +10,12 @@ import type {
 } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { usePeekInitial } from "@reactivity/usePeekInitial";
-import { useIntervalFn } from "@timer/useIntervalFn";
-import { get } from "@utilities/get";
-import { peek } from "@utilities/peek";
+import { useConstant } from "@shared/useConstant";
+import { useLatest } from "@shared/useLatest";
+import { createCountdown } from "./core";
+
+export { createCountdown } from "./core";
+export type { CountdownOptions, CountdownReturn } from "./core";
 
 export interface UseCountdownOptions {
   /** Interval between ticks in ms — mount-time-only @default 1000 */
@@ -41,55 +44,36 @@ export function useCountdown(
   options?: DeepMaybeObservable<UseCountdownOptions>
 ): UseCountdownReturn {
   const opts$ = useMaybeObservable(options, { onTick: "function", onComplete: "function" });
+  const initialCount$ = useMaybeObservable(initialCount);
   const interval = usePeekInitial(opts$.interval, 1000);
   const immediate = usePeekInitial(opts$.immediate, true);
 
-  const remaining$ = useObservable<number>(Math.max(0, get(initialCount)));
-  const pauseRef = useRef<Fn | null>(null);
+  const onTickRef = useLatest(opts$.peek()?.onTick);
+  const onCompleteRef = useLatest(opts$.peek()?.onComplete);
 
-  const update = () => {
-    const prev = remaining$.peek();
-    const next = Math.max(0, prev - 1);
-    remaining$.set(next);
-    opts$.peek()?.onTick?.(next);
-    if (next <= 0) {
-      pauseRef.current?.();
-      (opts$.peek()?.onComplete as (() => void) | undefined)?.();
+  const result = useConstant(() =>
+    createCountdown(initialCount$ as unknown as Observable<number>, {
+      interval,
+      immediate: false,
+      onTick: (n) => (onTickRef.current as ((n: number) => void) | undefined)?.(n),
+      onComplete: () => (onCompleteRef.current as (() => void) | undefined)?.(),
+    })
+  );
+
+  useMount(() => {
+    if (immediate && (initialCount$ as unknown as Observable<number>).peek() > 0) {
+      result.resume();
     }
-  };
-
-  const controls = useIntervalFn(update, interval, {
-    immediate: immediate && peek(initialCount) > 0,
+    return () => result.dispose();
   });
-  // eslint-disable-next-line react-hooks/refs -- intentional: storing pause in ref to break circular dependency with update()
-  pauseRef.current = controls.pause;
-
-  const resume = () => {
-    if (remaining$.peek() <= 0) return;
-    controls.resume();
-  };
-
-  const reset = (count?: number) => {
-    remaining$.set(Math.max(0, count ?? get(initialCount)));
-  };
-
-  const stop = () => {
-    controls.pause();
-    reset();
-  };
-
-  const start = (count?: number) => {
-    reset(count);
-    resume();
-  };
 
   return {
-    remaining$,
-    isActive$: controls.isActive$,
-    pause: controls.pause,
-    resume,
-    reset,
-    stop,
-    start,
+    remaining$: result.remaining$,
+    isActive$: result.isActive$,
+    pause: result.pause,
+    resume: result.resume,
+    reset: result.reset,
+    stop: result.stop,
+    start: result.start,
   };
 }

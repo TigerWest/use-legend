@@ -2,9 +2,9 @@
 
 import { useConstant } from "@shared/useConstant";
 import { useUnmount } from "@legendapp/state/react";
-import { remote } from "./core";
+import { createRemote } from "./core";
 
-export { remote } from "./core";
+export { createRemote } from "./core";
 export type { RemoteOptions, RemoteReturn } from "./core";
 
 /**
@@ -40,7 +40,7 @@ export type UseRemoteReturn<T> = import("./core").RemoteReturn<T>;
  * ```
  */
 export function useRemote<T>(options: UseRemoteOptions<T>): UseRemoteReturn<T> {
-  const { dispose, ...result } = useConstant(() => remote(options));
+  const { dispose, ...result } = useConstant(() => createRemote(options));
 
   useUnmount(dispose);
 

@@ -4,10 +4,10 @@ import { type Observable } from "@legendapp/state";
 import type { DeepMaybeObservable, Fn, ReadonlyObservable, UseHistoryRecord } from "../../types";
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { manualHistory } from "./core";
+import { createManualHistory } from "./core";
 import { useUnmount } from "@legendapp/state/react";
 
-export { manualHistory, type ManualHistoryOptions, type ManualHistoryReturn } from "./core";
+export { createManualHistory, type ManualHistoryOptions, type ManualHistoryReturn } from "./core";
 
 export interface UseManualHistoryOptions<Raw, Serialized = Raw> {
   /**
@@ -86,7 +86,7 @@ export function useManualHistory<Raw, Serialized = Raw>(
   });
 
   const { dispose, ...result } = useConstant(() =>
-    manualHistory<Raw, Serialized>(source$, opts$.peek())
+    createManualHistory<Raw, Serialized>(source$, opts$.peek())
   );
 
   useUnmount(dispose);

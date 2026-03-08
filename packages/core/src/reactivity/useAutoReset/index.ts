@@ -3,10 +3,10 @@ import type { Observable } from "@legendapp/state";
 import type { MaybeObservable, WidenPrimitive } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { autoReset } from "./core";
+import { createAutoReset } from "./core";
 import { useUnmount } from "@legendapp/state/react";
 
-export { autoReset } from "./core";
+export { createAutoReset } from "./core";
 
 /**
  * Observable that automatically resets to a default value after a specified delay.
@@ -32,7 +32,10 @@ export function useAutoReset<T>(
   const afterMs$ = useMaybeObservable(afterMs as any);
 
   const { value$, dispose } = useConstant(() =>
-    autoReset(defaultValue$ as unknown as Observable<T>, afterMs$ as unknown as Observable<number>)
+    createAutoReset(
+      defaultValue$ as unknown as Observable<T>,
+      afterMs$ as unknown as Observable<number>
+    )
   );
 
   useUnmount(dispose);

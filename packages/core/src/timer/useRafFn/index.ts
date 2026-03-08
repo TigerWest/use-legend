@@ -3,10 +3,10 @@ import { useMount } from "@legendapp/state/react";
 import { useLatest } from "@shared/useLatest";
 import { useConstant } from "@shared/useConstant";
 import type { Pausable } from "../../types";
-import { rafFn } from "./core";
+import { createRafFn } from "./core";
 import type { RafFnCallbackArguments, RafFnOptions } from "./core";
 
-export { rafFn } from "./core";
+export { createRafFn } from "./core";
 export type { RafFnCallbackArguments, RafFnOptions } from "./core";
 
 export type UseRafFnCallbackArguments = RafFnCallbackArguments;
@@ -19,7 +19,7 @@ export function useRafFn(
   const fnRef = useLatest(fn);
 
   const result = useConstant(() =>
-    rafFn((args) => fnRef.current(args), { ...options, immediate: false })
+    createRafFn((args) => fnRef.current(args), { ...options, immediate: false })
   );
 
   useMount(() => {

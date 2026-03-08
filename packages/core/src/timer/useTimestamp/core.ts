@@ -3,7 +3,7 @@ import type { Disposable, Pausable } from "../../types";
 import { createRafFn } from "@timer/useRafFn/core";
 import { createIntervalFn } from "@timer/useIntervalFn/core";
 
-export interface NowOptions {
+export interface TimestampOptions {
   /**
    * Update interval — determines scheduler type.
    * - 'requestAnimationFrame': rAF-based (default, smoother)
@@ -13,22 +13,31 @@ export interface NowOptions {
   interval?: "requestAnimationFrame" | number;
   /** If true, starts immediately. @default true */
   immediate?: boolean;
+  /** Callback invoked on every update */
+  callback?: (timestamp: number) => void;
 }
 
 /**
- * Core observable function for reactive current Date.
- * Unlike the hook version, conditionally creates only the needed scheduler
- * (no need to satisfy React rules-of-hooks).
+ * Core observable function for reactive timestamp.
+ * No React dependency — uses rafFn/intervalFn core internally.
+ * Unlike the hook version, conditionally creates only the needed scheduler.
  */
-export function createNow(
-  options?: NowOptions
-): Disposable & Pausable & { now$: Observable<Date> } {
+export function createTimestamp(
+  offset$: Observable<number>,
+  options?: TimestampOptions
+): Disposable & Pausable & { timestamp$: Observable<number> } {
   const interval = options?.interval ?? "requestAnimationFrame";
   const isRaf = interval === "requestAnimationFrame";
   const immediate = options?.immediate ?? true;
+  const callback = options?.callback;
 
-  const now$ = observable<Date>(new Date());
-  const update = () => now$.set(new Date());
+  const ts$ = observable<number>(Date.now() + (offset$.peek() ?? 0));
+
+  const update = () => {
+    const value = Date.now() + (offset$.peek() ?? 0);
+    ts$.set(value);
+    callback?.(value);
+  };
 
   const scheduler = isRaf
     ? createRafFn(update, { immediate })
@@ -36,5 +45,5 @@ export function createNow(
         immediate,
       });
 
-  return { now$, ...scheduler };
+  return { timestamp$: ts$, ...scheduler };
 }

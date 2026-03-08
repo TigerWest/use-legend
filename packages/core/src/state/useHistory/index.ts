@@ -5,11 +5,11 @@ import type { DeepMaybeObservable, Fn, ReadonlyObservable } from "../../types";
 import type { EventFilter } from "@shared/filters";
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { history } from "./core";
+import { createHistory } from "./core";
 import type { UseManualHistoryOptions, UseManualHistoryReturn } from "../useManualHistory";
 import { useUnmount } from "@legendapp/state/react";
 
-export { history, type HistoryOptions, type HistoryReturn } from "./core";
+export { createHistory, type HistoryOptions, type HistoryReturn } from "./core";
 
 export interface UseHistoryOptions<Raw, Serialized = Raw> extends UseManualHistoryOptions<
   Raw,
@@ -77,7 +77,7 @@ export function useHistory<Raw, Serialized = Raw>(
   });
 
   // 1. core 함수 1회 호출 (useConstant — 리렌더에도 재생성 안 됨)
-  const result = useConstant(() => history<Raw, Serialized>(source$, opts$.peek()));
+  const result = useConstant(() => createHistory<Raw, Serialized>(source$, opts$.peek()));
 
   // 2. unmount 시 cleanup
   useUnmount(result.dispose);

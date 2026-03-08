@@ -12,7 +12,7 @@ export interface IntervalFnOptions {
  * Core observable function for setInterval with pause/resume.
  * No React dependency — uses observable() and observe().
  */
-export function intervalFn(
+export function createIntervalFn(
   fn: AnyFn,
   interval$: Observable<number>,
   options?: IntervalFnOptions

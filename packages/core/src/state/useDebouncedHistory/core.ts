@@ -1,7 +1,7 @@
 import { type Observable } from "@legendapp/state";
 import type { MaybeObservable } from "../../types";
 import { debounceFilter } from "@shared/filters";
-import { history, type HistoryOptions, type HistoryReturn } from "../useHistory/core";
+import { createHistory, type HistoryOptions, type HistoryReturn } from "../useHistory/core";
 
 export interface DebouncedHistoryOptions<Raw, Serialized = Raw> extends Omit<
   HistoryOptions<Raw, Serialized>,
@@ -21,7 +21,7 @@ export interface DebouncedHistoryOptions<Raw, Serialized = Raw> extends Omit<
  * @param delay$ - Debounce delay in milliseconds (reactive).
  * @param options - History configuration and maxWait.
  */
-export function debouncedHistory<Raw, Serialized = Raw>(
+export function createDebouncedHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
   delay$: Observable<number>,
   options?: DebouncedHistoryOptions<Raw, Serialized>
@@ -30,5 +30,5 @@ export function debouncedHistory<Raw, Serialized = Raw>(
     maxWait: options?.maxWait,
   });
 
-  return history(source$, { ...options, eventFilter: filter });
+  return createHistory(source$, { ...options, eventFilter: filter });
 }

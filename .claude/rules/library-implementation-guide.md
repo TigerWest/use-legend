@@ -17,7 +17,7 @@ and a thin **React hook wrapper**.
 packages/core/src/
   category/
     useMyHook/
-      core.ts           # core observable function (myHook)
+      core.ts           # core observable function (createMyHook)
       index.ts          # React hook wrapper (useMyHook)
       index.spec.ts     # tests (validates hook public API)
 ```
@@ -37,7 +37,7 @@ packages/core/src/
 import { type Observable, observe, observable } from "@legendapp/state";
 import type { Disposable } from "../../types";
 
-function debounced<T>(
+function createDebounced<T>(
   source$: Observable<T>,
   delay$: Observable<number>,
   options?: DebounceOptions         // non-reactive → plain
@@ -71,7 +71,7 @@ function debounced<T>(
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
 import { useUnmount } from "@legendapp/state/react";
-import { debounced } from "./core";
+import { createDebounced } from "./core";
 
 export function useDebounced<T>(
   value: MaybeObservable<T>,
@@ -81,7 +81,7 @@ export function useDebounced<T>(
   const source$ = useMaybeObservable(value);
   const delay$ = useMaybeObservable(ms);
 
-  const { value$, dispose } = useConstant(() => debounced(source$, delay$, options));
+  const { value$, dispose } = useConstant(() => createDebounced(source$, delay$, options));
 
   useUnmount(dispose);
 
@@ -93,7 +93,7 @@ export function useDebounced<T>(
 
 | Layer | Pattern | Example |
 |-------|---------|---------|
-| Core function | `name()` | `debounced()`, `history()`, `intervalFn()` |
+| Core function | `createName()` | `createDebounced()`, `createHistory()`, `createIntervalFn()` |
 | Core file | `core.ts` | in each hook directory |
 | Hook | `useName()` | `useDebounced()`, `useHistory()` |
 | Hook file | `index.ts` | (existing convention) |
@@ -127,7 +127,7 @@ These are **pure functions** — usable in both core functions and hooks.
 ```ts
 import { getElement, peekElement } from "../useRef$";
 
-function elementSize(target: MaybeElement): Disposable & { size$: Observable<Size> } {
+function createElementSize(target: MaybeElement): Disposable & { size$: Observable<Size> } {
   const size$ = observable({ width: 0, height: 0 });
 
   const unsub = observe(() => {
@@ -163,7 +163,7 @@ When wrapping a core function, pass `MaybeElement` as-is — no conversion neede
 
 ```ts
 export function useElementSize(target: MaybeElement, options?: ElementSizeOptions) {
-  const { size$, dispose } = useConstant(() => elementSize(target, options));
+  const { size$, dispose } = useConstant(() => createElementSize(target, options));
   useUnmount(dispose);
   return size$;
 }
@@ -218,7 +218,7 @@ Core functions receive reactive parameters as `Observable<T>`. Non-reactive opti
 // Core — reactive args as Observable, non-reactive as plain
 interface DebounceOptions { maxWait?: number; }
 
-function debounced<T>(
+function createDebounced<T>(
   source$: Observable<T>,         // reactive → Observable
   delay$: Observable<number>,     // reactive → Observable
   options?: DebounceOptions       // non-reactive → plain
@@ -399,7 +399,7 @@ export function useHistory<Raw, Serialized = Raw>(
   });
 
   // opts$.peek() → snapshot plain object for core (non-reactive options captured in closure)
-  const result = useConstant(() => history<Raw, Serialized>(source$, opts$.peek()));
+  const result = useConstant(() => createHistory<Raw, Serialized>(source$, opts$.peek()));
 
   useUnmount(result.dispose);
   return result;
@@ -426,7 +426,7 @@ Core functions have no React lifecycle, so `usePeekInitial` is unnecessary.
 Plain values received as parameters are naturally captured in the closure at creation time:
 
 ```ts
-function history<T>(source$: Observable<T>, options?: HistoryOptions<T>) {
+function createHistory<T>(source$: Observable<T>, options?: HistoryOptions<T>) {
   // Plain values captured at creation — never changes
   const shouldCommitFn = options?.shouldCommit;
   const deep = options?.deep ?? false;
@@ -579,7 +579,7 @@ The hook wrapper strips `dispose` (handled by `useUnmount`) and passes the rest 
 
 ```ts
 // Core
-function intervalFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
+function createIntervalFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
   const isActive$ = observable(true);
   // ...
   return { isActive$, pause, resume, dispose };
@@ -588,7 +588,7 @@ function intervalFn(fn: AnyFn, interval$: Observable<number>): Disposable & Paus
 // Hook — strip dispose, pass-through controls
 function useIntervalFn(fn: AnyFn, interval: MaybeObservable<number>): Pausable {
   const interval$ = useMaybeObservable(interval);
-  const result = useConstant(() => intervalFn(fn, interval$));
+  const result = useConstant(() => createIntervalFn(fn, interval$));
   useUnmount(result.dispose);
   const { dispose: _, ...controls } = result;
   return controls;
@@ -636,7 +636,7 @@ function useMyHook(): { count$: ReadonlyObservable<number> } {
 
 ```ts
 // Core — returns writable Observable (full internal access)
-function myUtil(source$: Observable<number>): Disposable & { value$: Observable<number> } {
+function createMyUtil(source$: Observable<number>): Disposable & { value$: Observable<number> } {
   const value$ = observable(source$.peek());
   // ... observe, modify value$ internally ...
   return { value$, dispose };
@@ -645,7 +645,7 @@ function myUtil(source$: Observable<number>): Disposable & { value$: Observable<
 // Hook — narrows to ReadonlyObservable (external read-only)
 function useMyUtil(source: MaybeObservable<number>): ReadonlyObservable<number> {
   const source$ = useMaybeObservable(source);
-  const { value$, dispose } = useConstant(() => myUtil(source$));
+  const { value$, dispose } = useConstant(() => createMyUtil(source$));
   useUnmount(dispose);
   return value$ as ReadonlyObservable<number>;
 }
@@ -692,7 +692,7 @@ export interface Disposable {
 | Composed core functions | `dispose: () => { innerA.dispose(); innerB.dispose(); }` |
 
 ```ts
-function myUtil(source$: Observable<T>): Disposable & { result$: Observable<T> } {
+function createMyUtil(source$: Observable<T>): Disposable & { result$: Observable<T> } {
   const result$ = observable<T>(source$.peek());
   const subscriptions: (() => void)[] = [];
 
@@ -725,12 +725,12 @@ export interface Pausable {
 
 | Criteria | Core example | Hook example |
 |---|---|---|
-| setInterval / rAF-based repeating loop | `intervalFn()`, `rafFn()` | `useIntervalFn`, `useRafFn` |
+| setInterval / rAF-based repeating loop | `createIntervalFn()`, `createRafFn()` | `useIntervalFn`, `useRafFn` |
 | Subscription where pause/resume is meaningful | — | `useNow` |
 
 ```ts
 // Core — returns Disposable & Pausable
-function pollerFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
+function createPollerFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
   const isActive$ = observable(false);
   const pause = () => { isActive$.set(false); /* clearInterval... */ };
   const resume = () => { isActive$.set(true); /* setInterval... */ };
@@ -741,7 +741,7 @@ function pollerFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausab
 // Hook — strips dispose, returns Pausable
 function usePoller(fn: AnyFn, interval: MaybeObservable<number>): Pausable {
   const interval$ = useMaybeObservable(interval);
-  const result = useConstant(() => pollerFn(fn, interval$));
+  const result = useConstant(() => createPollerFn(fn, interval$));
   useUnmount(result.dispose);
   const { dispose: _, ...controls } = result;
   return controls;
@@ -874,7 +874,7 @@ Core functions have no React hooks, so early return is safe at the top level.
 Return a no-op `Disposable` with default values:
 
 ```ts
-function mediaQuery(query$: Observable<string>): Disposable & { matches$: Observable<boolean> } {
+function createMediaQuery(query$: Observable<string>): Disposable & { matches$: Observable<boolean> } {
   if (!defaultWindow) {
     return { matches$: observable(false), dispose: () => {} };
   }

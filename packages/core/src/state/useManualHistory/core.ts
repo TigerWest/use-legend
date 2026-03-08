@@ -55,7 +55,7 @@ export interface ManualHistoryReturn<Raw, Serialized = Raw> extends Disposable {
  * @param source$ - The Observable to track.
  * @param options - Configuration for capacity, cloning, and serialization.
  */
-export function manualHistory<Raw, Serialized = Raw>(
+export function createManualHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
   options?: ManualHistoryOptions<Raw, Serialized>
 ): ManualHistoryReturn<Raw, Serialized> {

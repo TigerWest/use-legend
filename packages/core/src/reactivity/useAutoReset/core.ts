@@ -10,7 +10,7 @@ import type { Disposable, TimerHandle, WidenPrimitive } from "../../types";
  * @param afterMs$ - Observable holding the delay in milliseconds before auto-reset.
  * @returns Disposable with writable Observable that auto-resets.
  */
-export function autoReset<T>(
+export function createAutoReset<T>(
   defaultValue$: Observable<T>,
   afterMs$: Observable<number>
 ): Disposable & { value$: Observable<WidenPrimitive<T>> } {

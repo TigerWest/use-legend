@@ -4,7 +4,7 @@ import type { EventFilter } from "@shared/filters";
 import { pausableFilter } from "@shared/filters";
 import { noop } from "@shared/utils";
 import {
-  manualHistory,
+  createManualHistory,
   type ManualHistoryOptions,
   type ManualHistoryReturn,
 } from "../useManualHistory/core";
@@ -51,12 +51,12 @@ export interface HistoryReturn<Raw, Serialized = Raw>
  * @param source$ - The Observable to track.
  * @param options - Configuration for auto-tracking, filtering, and serialization.
  */
-export function history<Raw, Serialized = Raw>(
+export function createHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
   options?: HistoryOptions<Raw, Serialized>
 ): HistoryReturn<Raw, Serialized> {
   // Delegate stack management to manualHistory
-  const manual = manualHistory<Raw, Serialized>(source$, options);
+  const manual = createManualHistory<Raw, Serialized>(source$, options);
 
   // Pausable filter — composes with optional eventFilter (throttle/debounce)
   const pausable = pausableFilter(options?.eventFilter);

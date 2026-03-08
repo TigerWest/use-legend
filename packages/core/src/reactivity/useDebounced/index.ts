@@ -4,10 +4,10 @@ import type { MaybeObservable, ReadonlyObservable } from "../../types";
 import type { DebounceFilterOptions } from "@shared/filters";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { debounced } from "./core";
+import { createDebounced } from "./core";
 import { useUnmount } from "@legendapp/state/react";
 
-export { debounced } from "./core";
+export { createDebounced } from "./core";
 
 /**
  * Debounce an Observable value.
@@ -37,7 +37,11 @@ export function useDebounced<T>(
   const delay$ = useMaybeObservable(ms as any);
 
   const { value$, dispose } = useConstant(() =>
-    debounced(source$ as unknown as Observable<T>, delay$ as unknown as Observable<number>, options)
+    createDebounced(
+      source$ as unknown as Observable<T>,
+      delay$ as unknown as Observable<number>,
+      options
+    )
   );
 
   useUnmount(dispose);

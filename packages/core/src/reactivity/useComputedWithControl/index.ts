@@ -2,10 +2,10 @@
 import type { Fn, MaybeObservable, ReadonlyObservable } from "../../types";
 import { useLatest } from "@shared/useLatest";
 import { useConstant } from "@shared/useConstant";
-import { computedWithControl } from "./core";
+import { createComputedWithControl } from "./core";
 import { useUnmount } from "@legendapp/state/react";
 
-export { computedWithControl } from "./core";
+export { createComputedWithControl } from "./core";
 
 /**
  * Computed Observable with explicit source control and manual trigger.
@@ -48,7 +48,7 @@ export function useComputedWithControl<T>(
 
   // Pass source directly — core handles MaybeObservable via peek/isObservable
   const { value$, trigger, dispose } = useConstant(() =>
-    computedWithControl(source as any, fnWrapper)
+    createComputedWithControl(source as any, fnWrapper)
   );
 
   useUnmount(dispose);

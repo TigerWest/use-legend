@@ -8,7 +8,7 @@ import type { Disposable, Fn, WidenPrimitive } from "../../types";
  * @param defaultValue$ - Observable holding the default/reset target value.
  * @returns Disposable with writable Observable and reset function.
  */
-export function manualReset<T>(
+export function createManualReset<T>(
   defaultValue$: Observable<T>
 ): Disposable & { value$: Observable<WidenPrimitive<T>>; reset: Fn } {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see useDebounced for rationale

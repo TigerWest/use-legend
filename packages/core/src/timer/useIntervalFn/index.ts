@@ -5,10 +5,10 @@ import { useLatest } from "@shared/useLatest";
 import { useConstant } from "@shared/useConstant";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import type { AnyFn, MaybeObservable, Pausable } from "../../types";
-import { intervalFn } from "./core";
+import { createIntervalFn } from "./core";
 import type { IntervalFnOptions } from "./core";
 
-export { intervalFn } from "./core";
+export { createIntervalFn } from "./core";
 export type { IntervalFnOptions } from "./core";
 
 export type UseIntervalFnOptions = IntervalFnOptions;
@@ -22,7 +22,7 @@ export function useIntervalFn(
   const cbRef = useLatest(cb);
 
   const result = useConstant(() =>
-    intervalFn(
+    createIntervalFn(
       (...args: unknown[]) => cbRef.current(...args),
       interval$ as unknown as Observable<number>,
       { ...options, immediate: false }

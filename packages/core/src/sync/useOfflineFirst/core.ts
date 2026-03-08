@@ -85,7 +85,7 @@ export interface OfflineFirstReturn<T> {
  * @param options - Offline-first sync configuration.
  * @returns `Disposable & { data$, isLoaded$, isFetching$, isPersistLoaded$, error$, lastSync$, refetch, clearPersist }`
  */
-export function offlineFirst<T>(
+export function createOfflineFirst<T>(
   options: OfflineFirstOptions<T>
 ): Disposable & OfflineFirstReturn<T> {
   const { get, set, initial, persistKey, persistPlugin, mode, debounceSet, transform, retry } =

@@ -7,10 +7,10 @@ import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
 import { usePeekInitial } from "../../reactivity/usePeekInitial";
 import { get } from "@utilities/get";
-import { throttledHistory } from "./core";
+import { createThrottledHistory } from "./core";
 import type { UseHistoryOptions, UseHistoryReturn } from "../useHistory";
 
-export { throttledHistory, type ThrottledHistoryOptions } from "./core";
+export { createThrottledHistory, type ThrottledHistoryOptions } from "./core";
 
 export type UseThrottledHistoryOptions<Raw, Serialized = Raw> = Omit<
   UseHistoryOptions<Raw, Serialized>,
@@ -73,7 +73,7 @@ export function useThrottledHistory<Raw, Serialized = Raw>(
     if (leading) edges.push("leading");
     if (trailing) edges.push("trailing");
 
-    return throttledHistory<Raw, Serialized>(source$, throttleMs$, {
+    return createThrottledHistory<Raw, Serialized>(source$, throttleMs$, {
       ...(opts$.peek() ?? {}),
       edges,
     });

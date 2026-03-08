@@ -14,19 +14,19 @@ import { peek } from "@utilities/peek";
 /* eslint-disable @typescript-eslint/no-explicit-any -- overload + implementation signatures require any for type compatibility */
 
 // Overload: single source
-export function computedWithControl<S, T>(
+export function createComputedWithControl<S, T>(
   source$: Observable<S>,
   fn: (sourceValue: S, prev: T | undefined) => T
 ): Disposable & { value$: Observable<T>; trigger: Fn };
 
 // Overload: array source
-export function computedWithControl<T>(
+export function createComputedWithControl<T>(
   source$: MaybeObservable<any>[],
   fn: (sourceValues: any[], prev: T | undefined) => T
 ): Disposable & { value$: Observable<T>; trigger: Fn };
 
 // Implementation
-export function computedWithControl<T>(
+export function createComputedWithControl<T>(
   source$: MaybeObservable<any> | MaybeObservable<any>[],
   fn: (sourceValue: any, prev: T | undefined) => T
 ): Disposable & { value$: Observable<T>; trigger: Fn } {
