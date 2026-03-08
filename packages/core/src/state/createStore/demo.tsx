@@ -220,7 +220,7 @@ function TodoApp() {
         >
           <div className="flex flex-col gap-2">
             <For each={todos$} optimized>
-              {/* eslint-disable-next-line use-legend/no-observable-in-jsx -- For callback provides observable item */}
+              {}
               {(todo$) => <TodoItem todo$={todo$} />}
             </For>
           </div>
@@ -232,7 +232,7 @@ function TodoApp() {
 
 export default function CreateStoreDemo() {
   return (
-    <StoreProvider>
+    <StoreProvider _devtools>
       <TodoApp />
     </StoreProvider>
   );

@@ -1,10 +1,13 @@
 "use client";
-import { useObservable } from "@legendapp/state/react";
+import { useMount } from "@legendapp/state/react";
 import type { DeepMaybeObservable, Pausable, ReadonlyObservable } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
 import { usePeekInitial } from "@reactivity/usePeekInitial";
-import { useRafFn } from "@timer/useRafFn";
-import { useIntervalFn } from "@timer/useIntervalFn";
+import { useConstant } from "@shared/useConstant";
+import { now } from "./core";
+
+export { now } from "./core";
+export type { NowOptions } from "./core";
 
 export interface UseNowOptions<Controls extends boolean = false> {
   /**
@@ -26,26 +29,25 @@ export function useNow(options: UseNowOptions<true>): { now$: ReadonlyObservable
 export function useNow(
   options?: DeepMaybeObservable<UseNowOptions<boolean>>
 ): ReadonlyObservable<Date> | ({ now$: ReadonlyObservable<Date> } & Pausable) {
-  // ✅ DeepMaybeObservable → normalize
   const opts$ = useMaybeObservable(options);
 
-  // ✅ mount-time-only: usePeekInitial — stable across re-renders
   const exposeControls = usePeekInitial(opts$.controls, false);
   const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
 
-  const now$ = useObservable<Date>(new Date());
-  const update = () => now$.set(new Date());
+  const result = useConstant(() => now({ interval, immediate: false }));
 
-  // Always call both hooks unconditionally (react-hooks/rules-of-hooks)
-  // Scheduler selection is fixed at mount — only the chosen one starts via `immediate`
-  const isRaf = interval === "requestAnimationFrame";
-  const intervalMs: number = typeof interval === "number" ? interval : 1000;
-  const rafControls = useRafFn(update, { immediate: isRaf });
-  const intervalControls = useIntervalFn(update, intervalMs, { immediate: !isRaf });
-  const controls: Pausable = isRaf ? rafControls : intervalControls;
+  useMount(() => {
+    result.resume();
+    return () => result.dispose();
+  });
 
   if (exposeControls) {
-    return { now$: now$ as ReadonlyObservable<Date>, ...controls };
+    return {
+      now$: result.now$ as ReadonlyObservable<Date>,
+      isActive$: result.isActive$,
+      pause: result.pause,
+      resume: result.resume,
+    };
   }
-  return now$ as ReadonlyObservable<Date>;
+  return result.now$ as ReadonlyObservable<Date>;
 }

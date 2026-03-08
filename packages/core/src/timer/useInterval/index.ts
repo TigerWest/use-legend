@@ -1,5 +1,6 @@
 "use client";
-import { useObservable } from "@legendapp/state/react";
+import type { Observable } from "@legendapp/state";
+import { useMount } from "@legendapp/state/react";
 import type {
   DeepMaybeObservable,
   Fn,
@@ -8,7 +9,12 @@ import type {
   ReadonlyObservable,
 } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { useIntervalFn } from "@timer/useIntervalFn";
+import { useConstant } from "@shared/useConstant";
+import { useLatest } from "@shared/useLatest";
+import { interval } from "./core";
+
+export { interval } from "./core";
+export type { IntervalOptions, IntervalReturn } from "./core";
 
 export interface UseIntervalOptions<Controls extends boolean = false> {
   controls?: Controls;
@@ -35,36 +41,38 @@ export function useInterval(
   options: UseIntervalOptions<true>
 ): Readonly<UseIntervalReturn & Pausable>;
 export function useInterval(
-  interval: MaybeObservable<number> = 1000,
+  intervalValue: MaybeObservable<number> = 1000,
   options?: DeepMaybeObservable<UseIntervalOptions<boolean>>
 ): ReadonlyObservable<number> | Readonly<UseIntervalReturn & Pausable> {
-  // ✅ 'function' hint: callback field
   const opts$ = useMaybeObservable(options, {
     callback: "function",
   });
+  const interval$ = useMaybeObservable(intervalValue);
 
-  // ✅ mount-time-only: .peek()
   const exposeControls = opts$.controls.peek() ?? false;
   const immediate = opts$.immediate.peek() ?? true;
+  const callbackRef = useLatest(opts$.peek()?.callback);
 
-  const counter$ = useObservable<number>(0);
+  const result = useConstant(() =>
+    interval(interval$ as unknown as Observable<number>, {
+      immediate: false,
+      callback: (count: number) => callbackRef.current?.(count),
+    })
+  );
 
-  const update = () => {
-    counter$.set(counter$.peek() + 1);
-    // ✅ function hint field: opts$.peek()?.callback pattern
-    opts$.peek()?.callback?.(counter$.peek());
-  };
-
-  const reset = () => counter$.set(0);
-
-  const controls = useIntervalFn(update, interval, { immediate });
+  useMount(() => {
+    if (immediate) result.resume();
+    return () => result.dispose();
+  });
 
   if (exposeControls) {
     return Object.freeze({
-      counter$: counter$ as ReadonlyObservable<number>,
-      reset,
-      ...controls,
+      counter$: result.counter$ as ReadonlyObservable<number>,
+      reset: result.reset,
+      isActive$: result.isActive$,
+      pause: result.pause,
+      resume: result.resume,
     });
   }
-  return counter$ as ReadonlyObservable<number>;
+  return result.counter$ as ReadonlyObservable<number>;
 }
