@@ -22,6 +22,7 @@ export * from "./elements/useDraggable";
 export * from "./elements/useDropZone";
 
 // Sensors
+export * from "./sensors/useMouse";
 export * from "./sensors/useScroll";
 export * from "./sensors/useWindowScroll";
 export * from "./browser/useLocalStorage";

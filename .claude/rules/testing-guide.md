@@ -126,6 +126,8 @@ Only for hooks that accept an element target:
 | In-progress cancellation    | `in-progress drag cancelled when element is removed`             |
 | Old element isolation       | `events on old element are not reported after target change`     |
 | Leak verification           | `addEventListener/removeEventListener call counts are symmetric` |
+| **Functional after mount**  | `dispatched event updates state after element mount`             |
+| **Functional after re-mount** | `dispatched event updates state after null → element → null → element` |
 
 ### Test Pattern
 
@@ -148,6 +150,13 @@ act(() => target$.set(null)); // unmount
 - On element addition: `observe()`, `addEventListener()`, `requestAnimationFrame()`, `setInterval()` called
 - After full cycle: registration/cleanup call counts are symmetric (no leaks)
 - Callbacks for the previous element are no longer invoked
+- **Functional verification (required):** After mount and re-mount, dispatch a real event on the element and assert that the hook's state actually updates. Spy-based checks (call counts) alone are **not sufficient** — they can pass even when the hook is broken.
+
+> **Warning:** Spy-based lifecycle tests (addEventListener/removeEventListener counts) verify that cleanup code runs, but do NOT verify that the hook actually works after element registration. Always include at least one test per target type (Ref$, Observable) that dispatches a real event after mount and asserts state changes.
+
+### Browser Variant Requirement
+
+Hooks with element targets **should** have a `lifecycle.browser.spec.ts` that runs the same mount/unmount/re-mount scenarios with real DOM events instead of spies. This catches issues that JSDOM-based tests miss (e.g. lazy computed activation, real event propagation, async cleanup timing).
 
 ---
 
@@ -269,7 +278,7 @@ Each browser variant follows the same structure as its JSDOM counterpart.
 
 | Hook Characteristic              | Required Files                   | Optional Files                                |
 | -------------------------------- | -------------------------------- | --------------------------------------------- |
-| Has element target               | `index`, `rerender`, `lifecycle` | `observable`, `edgeCases`, `browser`          |
+| Has element target               | `index`, `rerender`, `lifecycle`, `lifecycle.browser` | `observable`, `edgeCases`, `index.browser`    |
 | No element target (timers, etc.) | `index`, `rerender`              | `observable`, `edgeCases`                     |
 | Has Observable options           | `index`                          | `observable`                                  |
 | Uses browser-only APIs           | `index`, `browser`               | `lifecycle`, `edgeCases`                      |
