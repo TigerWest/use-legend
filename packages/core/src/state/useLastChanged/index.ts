@@ -29,8 +29,7 @@ export function useLastChanged<T>(
   source: MaybeObservable<T>,
   initialValue?: number | null
 ): ReadonlyObservable<number | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs Observable<T> mismatch with unconstrained generics
-  const source$ = useMaybeObservable(source as any);
+  const source$ = useMaybeObservable(source);
 
   const { timestamp$, dispose } = useConstant(() =>
     createLastChanged(source$ as unknown as Observable<T>, { initialValue: initialValue ?? null })

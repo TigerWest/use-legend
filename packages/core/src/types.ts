@@ -39,6 +39,7 @@ export type MaybeObservable<T = any> = T | Observable<T>;
  * ```
  */
 export type DeepMaybeObservable<T> =
+  | T
   | Observable<T>
   | {
       [K in keyof T]?: MaybeObservable<NonNullable<T[K]>>;

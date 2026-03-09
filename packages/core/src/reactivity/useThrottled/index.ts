@@ -31,10 +31,8 @@ export function useThrottled<T>(
   ms: MaybeObservable<number> = 200,
   options: ThrottleFilterOptions = {}
 ): ReadonlyObservable<T> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs DeepMaybeObservable<T> mismatch with unconstrained generics
-  const source$ = useMaybeObservable(value as any);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same reason as above
-  const interval$ = useMaybeObservable(ms as any);
+  const source$ = useMaybeObservable(value);
+  const interval$ = useMaybeObservable(ms);
 
   const { value$, dispose } = useConstant(() =>
     createThrottled(

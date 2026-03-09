@@ -25,8 +25,7 @@ export function useManualReset<T>(defaultValue: MaybeObservable<T>): {
   value$: Observable<WidenPrimitive<T>>;
   reset: Fn;
 } {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs DeepMaybeObservable<T> mismatch with unconstrained generics
-  const defaultValue$ = useMaybeObservable(defaultValue as any);
+  const defaultValue$ = useMaybeObservable(defaultValue);
 
   const { value$, reset, dispose } = useConstant(() =>
     createManualReset(defaultValue$ as unknown as Observable<T>)

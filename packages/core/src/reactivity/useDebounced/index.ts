@@ -31,10 +31,8 @@ export function useDebounced<T>(
   ms: MaybeObservable<number> = 200,
   options: DebounceFilterOptions = {}
 ): ReadonlyObservable<T> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs DeepMaybeObservable<T> mismatch with unconstrained generics
-  const source$ = useMaybeObservable(value as any);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same reason as above
-  const delay$ = useMaybeObservable(ms as any);
+  const source$ = useMaybeObservable(value);
+  const delay$ = useMaybeObservable(ms);
 
   const { value$, dispose } = useConstant(() =>
     createDebounced(

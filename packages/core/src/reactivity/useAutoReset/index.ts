@@ -26,10 +26,8 @@ export function useAutoReset<T>(
   defaultValue: MaybeObservable<T>,
   afterMs: MaybeObservable<number> = 1000
 ): Observable<WidenPrimitive<T>> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeObservable<T> vs DeepMaybeObservable<T> mismatch with unconstrained generics
-  const defaultValue$ = useMaybeObservable(defaultValue as any);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same reason as above
-  const afterMs$ = useMaybeObservable(afterMs as any);
+  const defaultValue$ = useMaybeObservable(defaultValue);
+  const afterMs$ = useMaybeObservable(afterMs);
 
   const { value$, dispose } = useConstant(() =>
     createAutoReset(
