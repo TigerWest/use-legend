@@ -6,9 +6,12 @@ paths:
 
 # Library Implementation Guide
 
+> **Scope:** This guide applies to `packages/core` and `packages/integrations` only.
+> `packages/web` and `packages/native` do **not** use the 2-layer architecture — they implement hooks directly in `index.ts` without a `core.ts` layer.
+
 ## Foundation — 2-Layer Architecture: Core + Hook
 
-Every utility follows a **2-layer** structure: a framework-agnostic **core observable function**
+Every utility in **core / integrations** follows a **2-layer** structure: a framework-agnostic **core observable function**
 and a thin **React hook wrapper**.
 
 ### Directory Layout
