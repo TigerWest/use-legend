@@ -125,11 +125,3 @@ function DataPanel() {
   );
 }
 ```
-
-## Notes
-
-- **`queryFn` and `.peek()`** — Always use `.peek()` (not `.get()`) inside `queryFn` when reading observable values. Using `.get()` would register reactive dependencies and cause unexpected re-renders.
-- **Observable state fields** — All returned fields are `Observable`. To read them in a reactive component, call `.get()`. For non-reactive reads (e.g. event handlers), use `.peek()`.
-- **Conditional rendering** — Use `<Show if={obs$}>` from `@legendapp/state/react` for conditional JSX, not `{obs.get() && <JSX>}`.
-- **Cache key identity** — Observable elements in `queryKey` are resolved to their plain values before being passed to TanStack Query. The cache key is always a plain array, matching TanStack's standard behavior.
-- **`staleTime` and caching** — When `queryKey` changes, TanStack decides whether to fetch fresh data or serve from cache based on `staleTime`. No manual `refetch()` is needed on key changes.

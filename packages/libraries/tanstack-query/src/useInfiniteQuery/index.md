@@ -110,10 +110,3 @@ const query = useInfiniteQuery({
 isReady$.set(true); // triggers the first fetch
 ```
 
-## Notes
-
-- **Same Observable pattern as `useQuery`** — `queryKey` elements, `enabled`, `staleTime`, and other options accept `Observable` values. When they change, the query automatically reacts.
-- **`queryFn` and `.peek()`** — Use `.peek()` inside `queryFn` to read observable values without registering reactive dependencies.
-- **Pagination methods** — `fetchNextPage`, `fetchPreviousPage`, and `refetch` are methods on the Observable. Call them directly: `query.fetchNextPage()`.
-- **Conditional rendering** — Use `<Show if={obs$}>` from `@legendapp/state/react` for conditional JSX, not `{obs.get() && <JSX>}`.
-- **`data` shape** — `data.get()` returns `InfiniteData<TData>` with `pages` (array of page results) and `pageParams` (array of page parameters).

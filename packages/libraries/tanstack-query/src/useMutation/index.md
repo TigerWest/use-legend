@@ -95,9 +95,3 @@ function SubmitForm() {
 }
 ```
 
-## Notes
-
-- **Observable state fields** — All returned fields are `Observable`. Call `.get()` in reactive components, `.peek()` for non-reactive reads (e.g. event handlers).
-- **Calling methods** — `mutate`, `mutateAsync`, and `reset` are stored on the Observable. Access them with the `.get()()` pattern: `mutation.mutate.get()(variables)`.
-- **Conditional rendering** — Use `<Show if={obs$}>` from `@legendapp/state/react` for conditional JSX, not `{obs.get() && <JSX>}`.
-- **Cache invalidation** — Use `onSuccess` callback with `queryClient.invalidateQueries()` to refetch related queries after a successful mutation.

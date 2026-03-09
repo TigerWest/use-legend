@@ -19,15 +19,15 @@ export type UseMutationOptions<
 > = CreateMutationOptions<TData, TVariables, TContext>;
 
 /**
- * TanStack Query Mutation과 Legend-App-State를 연결하는 커스텀 훅
- * MutationObserver를 사용하여 뮤테이션 상태를 observable로 관리합니다.
+ * Connects TanStack Query Mutation with Legend-State observables.
+ * Uses MutationObserver to manage mutation state as observables.
  *
  * @example
  * ```tsx
  * import { QueryClient } from '@tanstack/react-query'
  * import { QueryClientProvider, useMutation } from '@usels/tanstack-query'
  *
- * // QueryClient를 생성하고 Provider로 제공
+ * // Create a QueryClient and provide it via Provider
  * const queryClient = new QueryClient()
  *
  * function App() {
@@ -38,7 +38,7 @@ export type UseMutationOptions<
  *   )
  * }
  *
- * // 컴포넌트에서 사용
+ * // Usage in a component
  * function YourComponent() {
  *   const createProduct$ = useMutation({
  *     mutationFn: (product: NewProduct) =>

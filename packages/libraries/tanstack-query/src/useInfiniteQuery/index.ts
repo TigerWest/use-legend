@@ -24,10 +24,10 @@ export type UseInfiniteQueryOptions<
 > = CreateInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>;
 
 /**
- * TanStack Query Infinite Query와 Legend-App-State를 연결하는 커스텀 훅
- * InfiniteQueryObserver를 사용하여 쿼리 상태를 observable로 관리합니다.
+ * Connects TanStack Query Infinite Query with Legend-State observables.
+ * Uses InfiniteQueryObserver to manage query state as observables.
  *
- * Observable 값을 파라미터로 받을 수 있으며, 변경 시 자동으로 refetch됩니다.
+ * Accepts Observable values as parameters and automatically refetches on change.
  *
  * @example
  * ```tsx

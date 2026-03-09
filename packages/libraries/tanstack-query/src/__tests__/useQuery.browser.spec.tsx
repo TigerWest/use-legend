@@ -1,8 +1,8 @@
 /**
  * tanstack-query integrations - Browser Mode Spec
  *
- * jsdom spec (useQuery.spec.tsx)과 달리 실제 Chromium에서 실행됩니다.
- * - 실제 fetch API, 실제 브라우저 환경에서의 React 렌더링 검증
+ * Unlike the jsdom spec (useQuery.spec.tsx), this runs in real Chromium.
+ * - Validates real fetch API and React rendering in a real browser environment
  */
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
