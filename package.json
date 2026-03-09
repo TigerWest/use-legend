@@ -4,12 +4,13 @@
   "private": true,
   "description": "Observable-native React utility hooks inspired by VueUse and react-use, built on Legend-State",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/libraries/*"
   ],
   "scripts": {
     "docs:dev": "pnpm --filter docs dev",
     "build": "pnpm -r build",
-    "build:packages": "pnpm --filter './packages/**' build",
+    "build:packages": "pnpm --filter './packages/**' --filter './packages/libraries/**' build",
     "dev": "pnpm -r dev",
     "prepare": "husky",
     "test": "vitest run && pnpm test:browser",
