@@ -186,5 +186,131 @@ pluginTester({
         }
       `,
     },
+
+    'wraps .get() inside JSXElement child within attribute': {
+      code: `
+        function App() {
+          return <Panel aside={<Token>{count$.get()}</Token>}>content</Panel>;
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return (
+            <Panel
+              aside={
+                <Token>
+                  <Memo>{() => count$.get()}</Memo>
+                </Token>
+              }
+            >
+              content
+            </Panel>
+          );
+        }
+      `,
+    },
+
+    'wraps function call with .get() arg inside JSXElement child within attribute': {
+      code: `
+        function App() {
+          return <Panel aside={<Token>{formatDate(date$.get())}</Token>}>content</Panel>;
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return (
+            <Panel
+              aside={
+                <Token>
+                  <Memo>{() => formatDate(date$.get())}</Memo>
+                </Token>
+              }
+            >
+              content
+            </Panel>
+          );
+        }
+      `,
+    },
+
+    'wraps .get() inside doubly nested attribute JSXElements': {
+      code: `
+        function App() {
+          return <Panel aside={<Token some={<OtherToken>{formatDate(date$.get())}</OtherToken>}></Token>}>content</Panel>;
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return (
+            <Panel
+              aside={
+                <Token
+                  some={
+                    <OtherToken>
+                      <Memo>{() => formatDate(date$.get())}</Memo>
+                    </OtherToken>
+                  }
+                ></Token>
+              }
+            >
+              content
+            </Panel>
+          );
+        }
+      `,
+    },
+
+    'wraps .get() inside arrow function returning JSXElement in attribute': {
+      code: `
+        function App() {
+          return <Panel aside={() => <Token>{date$.get()}</Token>}>content</Panel>;
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return (
+            <Panel
+              aside={() => (
+                <Token>
+                  <Memo>{() => date$.get()}</Memo>
+                </Token>
+              )}
+            >
+              content
+            </Panel>
+          );
+        }
+      `,
+    },
+
+    'wraps .get() in deeply nested JSXElement within attribute': {
+      code: `
+        function App() {
+          return <Panel aside={<Outer><Inner>{obs$.get()}</Inner></Outer>}>content</Panel>;
+        }
+      `,
+      output: `
+        import { Memo } from "@legendapp/state/react";
+        function App() {
+          return (
+            <Panel
+              aside={
+                <Outer>
+                  <Inner>
+                    <Memo>{() => obs$.get()}</Memo>
+                  </Inner>
+                </Outer>
+              }
+            >
+              content
+            </Panel>
+          );
+        }
+      `,
+    },
   },
 });
