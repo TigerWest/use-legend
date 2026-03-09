@@ -4,9 +4,10 @@ import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
 import { type MaybeElement, getElement, peekElement } from "@usels/core";
+import { useConstant } from "@usels/core/shared/useConstant";
 import {
   useMaybeObservable,
-  usePeekInitial,
+  useInitialPick,
   useSupported,
   useRafFn,
   get,
@@ -103,11 +104,18 @@ export function useAnimate(
   );
 
   // Mount-time-only fields (Rule 3)
-  const immediate = usePeekInitial(opts$.immediate, true);
-  const commitStyles = usePeekInitial(opts$.commitStyles, false);
-  const persist = usePeekInitial(opts$.persist, false);
-  const initialPlaybackRate = usePeekInitial(opts$.playbackRate, 1);
-  const _window = usePeekInitial(opts$.window) ?? defaultWindow;
+  const {
+    immediate,
+    commitStyles,
+    persist,
+    playbackRate: initialPlaybackRate,
+  } = useInitialPick(opts$, {
+    immediate: true,
+    commitStyles: false,
+    persist: false,
+    playbackRate: 1,
+  });
+  const _window = useConstant(() => opts$.window.peek()) ?? defaultWindow;
 
   const fireError = (e: unknown) => (opts$.peek()?.onError ?? console.error)(e);
 

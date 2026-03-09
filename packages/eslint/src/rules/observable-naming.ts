@@ -33,7 +33,7 @@ const USELS_IGNORES: string[] = [
   "getElement",
   "peekElement",
   "isRef$",
-  "usePeekInitial",
+  "useInitialPick",
   "useDebounceFn",
   "useThrottleFn",
   "useWhenMounted",

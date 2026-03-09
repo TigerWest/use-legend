@@ -5,7 +5,7 @@ import { useObservable, useUnmount } from "@legendapp/state/react";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
 import { useConstant } from "@shared/useConstant";
-import { usePeekInitial } from "../../reactivity/usePeekInitial";
+import { useInitialPick } from "../../reactivity/useInitialPick";
 import { get } from "@utilities/get";
 import { createThrottledHistory } from "./core";
 import type { UseHistoryOptions, UseHistoryReturn } from "../useHistory";
@@ -65,8 +65,7 @@ export function useThrottledHistory<Raw, Serialized = Raw>(
     const value = (opts$.throttle as Observable<MaybeObservable<number> | undefined>).get();
     return get(value) ?? 200;
   }, []);
-  const trailing = usePeekInitial(opts$.trailing as Observable<boolean | undefined>, true);
-  const leading = usePeekInitial(opts$.leading as Observable<boolean | undefined>, true);
+  const { trailing, leading } = useInitialPick(opts$, { trailing: true, leading: true });
 
   const result = useConstant(() => {
     const edges: Array<"leading" | "trailing"> = [];

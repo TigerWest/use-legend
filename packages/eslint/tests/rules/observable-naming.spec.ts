@@ -99,8 +99,8 @@ ruleTester.run('observable-naming', observableNaming, {
     // 11. @usels/core: ignored functions should NOT be flagged (default ignores)
     {
       code: `
-        import { usePeekInitial, get, peek, useRafFn, useDebounceFn, useThrottleFn } from '@usels/core';
-        const immediate = usePeekInitial(obs, true);
+        import { useInitialPick, get, peek, useRafFn, useDebounceFn, useThrottleFn } from '@usels/core';
+        const { immediate } = useInitialPick(obs, { immediate: true });
         const value = get(obs);
         const peeked = peek(obs);
       `,
@@ -115,8 +115,8 @@ ruleTester.run('observable-naming', observableNaming, {
     // 13. @usels/web: ignored functions should NOT be flagged
     {
       code: `
-        import { usePeekInitial, get } from '@usels/web';
-        const immediate = usePeekInitial(obs, true);
+        import { useInitialPick, get } from '@usels/web';
+        const { immediate } = useInitialPick(obs, { immediate: true });
         const value = get(obs);
       `,
     },

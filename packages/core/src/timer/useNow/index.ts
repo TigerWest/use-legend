@@ -2,7 +2,7 @@
 import { useMount } from "@legendapp/state/react";
 import type { DeepMaybeObservable, Pausable, ReadonlyObservable } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { usePeekInitial } from "@reactivity/usePeekInitial";
+import { useInitialPick } from "@reactivity/useInitialPick";
 import { useConstant } from "@shared/useConstant";
 import { createNow } from "./core";
 
@@ -31,8 +31,10 @@ export function useNow(
 ): ReadonlyObservable<Date> | ({ now$: ReadonlyObservable<Date> } & Pausable) {
   const opts$ = useMaybeObservable(options);
 
-  const exposeControls = usePeekInitial(opts$.controls, false);
-  const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
+  const { controls: exposeControls, interval } = useInitialPick(opts$, {
+    controls: false,
+    interval: "requestAnimationFrame" as const,
+  });
 
   const result = useConstant(() => createNow({ interval, immediate: false }));
 

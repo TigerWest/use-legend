@@ -10,7 +10,7 @@ export * from "@utilities/useThrottleFn";
 export * from "@reactivity/useRef$";
 
 export * from "@reactivity/useMaybeObservable";
-export * from "@reactivity/usePeekInitial";
+export * from "@reactivity/useInitialPick";
 export * from "@reactivity/useSilentObservable";
 export * from "@reactivity/useAutoReset";
 export * from "@reactivity/useManualReset";

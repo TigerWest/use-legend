@@ -411,124 +411,42 @@ export function useHistory<Raw, Serialized = Raw>(
 
 ---
 
-## Rule 3 — Mount-time-only Properties
+## Rule 3 — Mount-time-only Properties (Special Cases Only)
 
-Some options are intentionally captured **once at creation** and never updated reactively:
+> **Most options should be reactive.** Only use `useInitialPick` when changing a field after mount is **structurally impossible or meaningless**.
+> Ask yourself: "If this field changes after mount, does it matter?" If yes, make it reactive.
 
-- `initialValue` — seeds the initial state of an Observable; later changes have no meaning
-- `once` — lifecycle behavior determined at mount; dynamic changes do not apply retroactively
-- `interval` / `controls` — determines scheduler type or hook selection; changing after mount has no effect
+`useInitialPick` is restricted to these cases:
 
-For these fields, omit the hint (use `'default'`) and read them with `usePeekInitial(obs$, fallback)`.
-This is **intentional** and explicitly signals "read once, fixed at creation" — distinct from
-the Anti-pattern in Rule 2 where `.get()` is accidentally used for fields that *should* be reactive.
-
-### Core Function — plain value closure capture
-
-Core functions have no React lifecycle, so `usePeekInitial` is unnecessary.
-Plain values received as parameters are naturally captured in the closure at creation time:
-
-```ts
-function createHistory<T>(source$: Observable<T>, options?: HistoryOptions<T>) {
-  // Plain values captured at creation — never changes
-  const shouldCommitFn = options?.shouldCommit;
-  const deep = options?.deep ?? false;
-
-  const unsub = observe(() => {
-    const value = source$.get();
-    if (shouldCommitFn && !shouldCommitFn(value)) return;
-    // ...
-  });
-
-  return { dispose: () => unsub(), /* ... */ };
-}
-```
-
-### Hook Wrapper — `usePeekInitial(obs$, fallback?)`
-
-`usePeekInitial` reads an Observable **once at first render** via `.peek()` and returns a
-`useRef`-backed stable value. Re-renders always return the same captured value.
-
-```ts
-import { usePeekInitial } from "../reactivity/usePeekInitial";
-
-// With fallback — return type is NonNullable<T>
-const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
-
-// Without fallback — return type is T (may be undefined)
-const once = usePeekInitial(opts$.once);
-```
-
-**Why `usePeekInitial` over raw `.peek()`:**
-
-| | `opts$.field.peek()` | `usePeekInitial(opts$.field, fallback)` |
+| Allowed case | Example | Why mount-time-only |
 |---|---|---|
-| Re-render stability | Re-evaluates every render (may see stale computed) | `useRef`-backed — always returns first-render value |
-| Fallback handling | Manual `?? fallback` at every call site | Built-in — `fallback` param with `NonNullable<T>` return type |
-| Intent clarity | Requires comment to distinguish from accidental `.peek()` | Function name itself declares "mount-time-only" intent |
+| Scheduler type selection | `interval: "requestAnimationFrame" \| number` | Cannot switch rAF ↔ setInterval after mount |
+| Conditional hook branching | `controls: boolean` | React rules-of-hooks — branch must not change |
+| Observable initial seed | `initialValue` | Seed is consumed once at Observable creation |
 
-### Standard Pattern
+**These must be reactive** (do NOT use `useInitialPick`):
+- Runtime-adjustable settings: `rootMargin`, `threshold`, `distance`, `offset`
+- User-togglable flags: `enabled`, `immediate`
+- Any field where post-mount changes should take effect
 
-```ts
-import { useMaybeObservable } from "../reactivity/useMaybeObservable";
-import { usePeekInitial } from "../reactivity/usePeekInitial";
+### Core Function
 
-interface UseMyHookOptions {
-  initialValue?: boolean;  // mount-time-only — fixed at mount
-  once?: boolean;          // mount-time-only — fixed at mount
-  rootMargin?: string;     // reactive — should update when changed
-}
+Core functions have no React lifecycle — parameters are naturally captured in the closure. `useInitialPick` is not needed.
 
-function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useMaybeObservable(options, {
-    scrollTarget: 'element',
-    // initialValue, once: omitted → 'default' → use usePeekInitial for mount-time read
-    // rootMargin: omitted → 'default' → Legend-State auto-deref → reactive
-  });
-
-  // ✅ mount-time-only: usePeekInitial — stable across re-renders
-  const initialValue = usePeekInitial(opts$.initialValue, false);
-  const once = usePeekInitial(opts$.once, false);
-
-  const state$ = useObservable<boolean>(initialValue);
-
-  const { stop } = useIntersectionObserver(element, (entries) => {
-    const latest = entries.at(-1);
-    if (!latest) return;
-    state$.set(latest.isIntersecting);
-    if (once && latest.isIntersecting) stop();
-  }, {
-    rootMargin: opts$.rootMargin, // ✅ Observable child — downstream useObserve tracks it
-  });
-
-  return state$;
-}
-```
-
-### Scheduler Selection Pattern (conditional hook call)
-
-`usePeekInitial` is safe for conditional hook selection because the value is fixed at mount,
-so the branch never changes across re-renders (satisfying React's rules-of-hooks).
+### Hook Wrapper — `useInitialPick(opts$, defaults)`
 
 ```ts
-const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
-const exposeControls = usePeekInitial(opts$.controls, false);
-
-// Safe — interval never changes after mount
-const isRaf = interval === "requestAnimationFrame";
-const rafControls = useRafFn(update, { immediate: isRaf });
-const intervalControls = useIntervalFn(update, intervalMs, { immediate: !isRaf });
-const controls: Pausable = isRaf ? rafControls : intervalControls;
+const { interval, controls: exposeControls } = useInitialPick(opts$, {
+  interval: "requestAnimationFrame" as const,
+  controls: false,
+});
 ```
 
-> **Mount-time-only field decision rule**
->
-> | Field characteristic | Core function | Hook wrapper | Reason |
-> |----------------------|---------------|--------------|--------|
-> | Changes should re-trigger setup | `source$.get()` inside `observe()` | `opts$.field.get()` inside `useObserve` | Reactive dep registered |
-> | Fixed at creation by design | `options?.field` (plain value) | `usePeekInitial(opts$.field, fallback)` | Captured once, never changes |
-> | Creation-time seed for an Observable | `options?.field` (plain value) | `usePeekInitial(opts$.field, fallback)` | Observable ignores later changes |
-> | Conditional hook selection | N/A (no hooks in core) | `usePeekInitial(opts$.field, fallback)` | Value fixed at mount — rules-of-hooks safe |
+For fields without a NonNullable default (e.g., SSR-nullable `window`), read separately:
+
+```ts
+const _window = useConstant(() => opts$.window.peek()) ?? defaultWindow;
+```
 
 ---
 

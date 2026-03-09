@@ -3,7 +3,7 @@ import type { Observable } from "@legendapp/state";
 import { useMount } from "@legendapp/state/react";
 import type { DeepMaybeObservable, Pausable, ReadonlyObservable } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { usePeekInitial } from "@reactivity/usePeekInitial";
+import { useInitialPick } from "@reactivity/useInitialPick";
 import { useConstant } from "@shared/useConstant";
 import { useLatest } from "@shared/useLatest";
 import { createTimestamp } from "./core";
@@ -33,8 +33,10 @@ export function useTimestamp(
 ): ReadonlyObservable<number> | ({ timestamp$: ReadonlyObservable<number> } & Pausable) {
   const opts$ = useMaybeObservable(options, { callback: "function" });
 
-  const exposeControls = usePeekInitial(opts$.controls, false);
-  const interval = usePeekInitial(opts$.interval, "requestAnimationFrame" as const);
+  const { controls: exposeControls, interval } = useInitialPick(opts$, {
+    controls: false,
+    interval: "requestAnimationFrame" as const,
+  });
   const callbackRef = useLatest(opts$.peek()?.callback);
 
   const result = useConstant(() =>

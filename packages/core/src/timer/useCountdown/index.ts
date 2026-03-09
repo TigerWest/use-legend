@@ -9,7 +9,7 @@ import type {
   ReadonlyObservable,
 } from "../../types";
 import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { usePeekInitial } from "@reactivity/usePeekInitial";
+import { useInitialPick } from "@reactivity/useInitialPick";
 import { useConstant } from "@shared/useConstant";
 import { useLatest } from "@shared/useLatest";
 import { createCountdown } from "./core";
@@ -45,8 +45,7 @@ export function useCountdown(
 ): UseCountdownReturn {
   const opts$ = useMaybeObservable(options, { onTick: "function", onComplete: "function" });
   const initialCount$ = useMaybeObservable(initialCount);
-  const interval = usePeekInitial(opts$.interval, 1000);
-  const immediate = usePeekInitial(opts$.immediate, true);
+  const { interval, immediate } = useInitialPick(opts$, { interval: 1000, immediate: true });
 
   const onTickRef = useLatest(opts$.peek()?.onTick);
   const onCompleteRef = useLatest(opts$.peek()?.onComplete);
