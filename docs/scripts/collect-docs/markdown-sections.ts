@@ -1,11 +1,8 @@
 import { GITHUB_REPO_URL } from './config'
-import type { ChangelogEntry, Contributor } from './types'
 
 export function buildAutoSections(meta: {
   typeDeclarations: string
   sourceFile: string
-  contributors: Contributor[]
-  changelog: ChangelogEntry[]
 }): string {
   const sections: string[] = []
 
@@ -16,18 +13,6 @@ export function buildAutoSections(meta: {
   if (meta.sourceFile) {
     const githubUrl = `${GITHUB_REPO_URL}/blob/main/${meta.sourceFile}`
     sections.push(`## Source\n\n[View on GitHub](${githubUrl})`)
-  }
-
-  if (meta.contributors.length > 0) {
-    const list = meta.contributors.map(c => `- ${c.name}`).join('\n')
-    sections.push(`## Contributors\n\n${list}`)
-  }
-
-  if (meta.changelog.length > 0) {
-    const list = meta.changelog
-      .map(e => `- \`${e.hash}\` ${e.date.slice(0, 10)} - ${e.message} (${e.author})`)
-      .join('\n')
-    sections.push(`## Changelog\n\n${list}`)
   }
 
   return sections.join('\n\n')

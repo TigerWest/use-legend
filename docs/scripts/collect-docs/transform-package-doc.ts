@@ -2,7 +2,6 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import matter from "gray-matter";
 import { PACKAGES_ROOT } from "./config";
-import { getGitChangelog, getGitContributors, getGitLastChanged } from "./git-helpers";
 import { buildAutoSections, serializeFrontmatter } from "./markdown-sections";
 import { extractTypeDeclarations } from "./type-declarations";
 import type { GeneratedDoc } from "./types";
@@ -12,10 +11,6 @@ export async function transformPackageDoc(
 ): Promise<{ finalContent: string; hasDemo: boolean }> {
   const sourceContent = await fs.readFile(doc.sourcePath, "utf-8");
   const { data: frontmatter, content: body } = matter(sourceContent);
-
-  const lastChanged = getGitLastChanged(doc.sourcePath);
-  const contributors = getGitContributors(doc.sourcePath);
-  const changelog = getGitChangelog(doc.sourcePath);
 
   const dir = path.dirname(doc.sourcePath);
   const basename = doc.filename;
@@ -44,16 +39,11 @@ export async function transformPackageDoc(
     sourceFile,
   };
 
-  if (lastChanged) enhancedFrontmatter.lastChanged = lastChanged;
-  if (contributors.length > 0) enhancedFrontmatter.contributors = contributors;
-
   delete enhancedFrontmatter.order;
 
   const autoSections = buildAutoSections({
     typeDeclarations,
     sourceFile,
-    contributors,
-    changelog,
   });
 
   const demoPath = path.join(path.dirname(doc.sourcePath), "demo.tsx");

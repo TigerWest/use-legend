@@ -1,15 +1,3 @@
-export interface Contributor {
-  name: string
-  email: string
-}
-
-export interface ChangelogEntry {
-  hash: string
-  date: string
-  message: string
-  author: string
-}
-
 export interface DocMetadata {
   title: string
   description?: string
@@ -17,8 +5,6 @@ export interface DocMetadata {
   category?: string
   package?: string
   sourceFile?: string
-  lastChanged?: string
-  contributors?: Contributor[]
 }
 
 export type SourcePackageName = 'core' | 'web' | 'native' | 'integrations'
