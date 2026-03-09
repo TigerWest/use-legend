@@ -48,6 +48,6 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: pnpm publish -r --no-git-checks --filter '!@usels/native' ${{ steps.dist-tag.outputs.TAG }}
+        run: pnpm publish -r --no-git-checks --filter '!@usels/integrations' --filter '!@usels/native' ${{ steps.dist-tag.outputs.TAG }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
