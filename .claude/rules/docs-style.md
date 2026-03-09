@@ -111,6 +111,76 @@ return <span>{count}</span>;
 return <span>{count$.get()}</span>;
 ```
 
+#### Rule: No snapshot variables from `.get()`
+
+**Never** store `.get()` result in a plain `const` and reuse it. The plain value loses reactivity — changes to the Observable won't trigger re-renders.
+
+```tsx
+// ❌ Bad — snapshot: status is a plain string, won't react to changes
+const status = mutation.status.get();
+return <span>{status}</span>;
+
+// ✅ Good — call .get() inline in JSX (babel plugin tracks it)
+return <span>{mutation.status.get()}</span>;
+
+// ✅ Good — for derived reactive values, use useObservable with a computation
+const statusLabel$ = useObservable(() =>
+  mutation.isPending.get() ? "Pending" : mutation.isSuccess.get() ? "Success" : "Idle"
+);
+return <span>{statusLabel$.get()}</span>;
+```
+
+#### Rule: Use `<For>` for list rendering
+
+**Never** use `.get().map()` or `.map()` on observable arrays in JSX. Use `<For each={obs$}>` from `@legendapp/state/react` for fine-grained per-item reactivity. If the observable can be `undefined`, derive a fallback array with `useObservable`.
+
+```tsx
+import { For, useObservable } from "@legendapp/state/react";
+
+// ❌ Bad — .get().map() re-renders entire list on any item change
+{query.data.get()?.map((item) => <span key={item.id}>{item.name}</span>)}
+
+// ❌ Bad — .map() on observable array without For
+{items$.map((item$) => <span key={item$.id.get()}>{item$.name.get()}</span>)}
+
+// ✅ Good — For tracks each item individually
+<For each={items$}>{(item$) => <span>{item$.name.get()}</span>}</For>
+
+// ✅ Good — derive a non-undefined array when the source can be undefined
+const items$ = useObservable(() => query.data.get() ?? []);
+<For each={items$}>{(item$) => <span>{item$.name.get()}</span>}</For>
+
+// ✅ Good — flatten paginated data into a derived observable
+const allItems$ = useObservable(() =>
+  (query.data.get()?.pages ?? []).flatMap((page) => page.items)
+);
+<For each={allItems$}>{(item$) => <div>{item$.name.get()}</div>}</For>
+```
+
+> **Note:** Plain (non-observable) arrays can still use `.map()` as usual. This rule only applies to observable arrays (variables ending with `$`).
+
+#### Rule: Use `<Show>` for conditional rendering
+
+**Never** use `{obs.get() && <JSX>}` or `{obs.get() ? <A> : <B>}` for conditional rendering of JSX elements. Use `<Show if={obs$}>` from `@legendapp/state/react` for fine-grained reactivity.
+
+```tsx
+import { Show } from "@legendapp/state/react";
+
+// ❌ Bad — inline conditional with .get() re-renders entire component
+{query.isError.get() && <p>Error: {query.error.get()?.message}</p>}
+{query.isLoading.get() ? <p>Loading...</p> : <p>{query.data.get()}</p>}
+
+// ✅ Good — Show only re-renders its children when the condition changes
+<Show if={query.isError}>
+  <p>Error: {query.error.get()?.message}</p>
+</Show>
+<Show if={query.isLoading} else={<p>{query.data.get()}</p>}>
+  <p>Loading...</p>
+</Show>
+```
+
+> **Note:** Using `.get()` inline in **prop values** (e.g. `label={obs.get() ? "A" : "B"}`) is fine — this is about conditional rendering of **JSX elements**, not prop expressions.
+
 ### Demo UI Components (Required)
 
 Use the shared `_demo` components for consistent demo styling. **Do not use raw inline styles.**

@@ -1,7 +1,6 @@
 ---
 title: useQueryClient
 description: Hook to access QueryClient from context
-draft: true
 category: Hooks
 ---
 

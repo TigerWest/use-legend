@@ -3,62 +3,9 @@ title: useQuery
 category: Hooks
 ---
 
-React hook for data fetching that bridges TanStack Query with Legend-State. Returns query state as an `Observable`, and accepts `Observable` values anywhere in the options — including individual elements inside `queryKey`. When an observable value changes, the query automatically re-fetches.
+React hook for data fetching that bridges TanStack Query with Legend-State. Returns query state as an `Observable`, and accepts `Observable` values anywhere in the options — including individual elements inside `queryKey`. When an observable value changes, the query automatically re-fetches. Options follow TanStack Query's standard `UseQueryOptions` — refer to [TanStack Query docs](https://tanstack.com/query/latest/docs/framework/react/reference/useQuery) for full option details. Each option field accepts `MaybeObservable<T>` for reactive control.
 
-## Import
-
-```typescript
-import { useQuery } from "@usels/integrations";
-```
-
-## Options
-
-`useQuery` accepts `DeepMaybeObservable<UseQueryOptions<TData>>` — each field can be a plain value or an `Observable`.
-
-| Option                 | Type                                     | Required | Description                                                                                              |
-| ---------------------- | ---------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `queryKey`             | `readonly unknown[]`                     | Yes      | Query key array. Elements can be plain values, `Observable`s, or plain objects containing `Observable`s. |
-| `queryFn`              | `() => Promise<TData>`                   | Yes      | Function to fetch data. Use `.peek()` inside to avoid registering reactive deps.                         |
-| `enabled`              | `MaybeObservable<boolean>`               | —        | Whether the query should run. Defaults to `true`.                                                        |
-| `staleTime`            | `MaybeObservable<number>`                | —        | Time in ms before data is considered stale.                                                              |
-| `gcTime`               | `MaybeObservable<number>`                | —        | Time in ms before inactive query cache is garbage collected.                                             |
-| `retry`                | `MaybeObservable<number \| boolean>`     | —        | Number of retry attempts on failure, or `false` to disable.                                              |
-| `refetchOnWindowFocus` | `MaybeObservable<boolean>`               | —        | Refetch when window regains focus.                                                                       |
-| `refetchOnMount`       | `MaybeObservable<boolean>`               | —        | Refetch when component mounts.                                                                           |
-| `refetchOnReconnect`   | `MaybeObservable<boolean>`               | —        | Refetch when network reconnects.                                                                         |
-| `throwOnError`         | `boolean \| ((error: Error) => boolean)` | —        | Throw errors to the nearest error boundary.                                                              |
-| `suspense`             | `boolean`                                | —        | Enable React Suspense mode. Requires a `<Suspense>` boundary in the tree.                                |
-
-## Returns
-
-`Observable<QueryState<TData>>` — all fields are observable. Access values with `.get()` inside reactive contexts or `.peek()` for non-reactive reads.
-
-| Field                 | Type                                | Description                                           |
-| --------------------- | ----------------------------------- | ----------------------------------------------------- |
-| `data`                | `TData \| undefined`                | Fetched data.                                         |
-| `error`               | `Error \| null`                     | Error from the last failed fetch.                     |
-| `status`              | `"pending" \| "error" \| "success"` | Overall query status.                                 |
-| `fetchStatus`         | `"fetching" \| "paused" \| "idle"`  | Current fetch lifecycle status.                       |
-| `isPending`           | `boolean`                           | No data yet and a fetch is in progress.               |
-| `isSuccess`           | `boolean`                           | Data has been fetched successfully.                   |
-| `isError`             | `boolean`                           | Last fetch resulted in an error.                      |
-| `isLoading`           | `boolean`                           | `isPending && isFetching` — first fetch in progress.  |
-| `isFetching`          | `boolean`                           | Any fetch (initial or background) is in progress.     |
-| `isRefetching`        | `boolean`                           | Background refetch in progress (data already exists). |
-| `isPaused`            | `boolean`                           | Fetch is paused (e.g. offline).                       |
-| `isStale`             | `boolean`                           | Data is older than `staleTime`.                       |
-| `isFetched`           | `boolean`                           | Data has been fetched at least once.                  |
-| `isFetchedAfterMount` | `boolean`                           | Data was fetched after the current mount.             |
-| `isEnabled`           | `boolean`                           | Whether the query is currently enabled.               |
-| `isLoadingError`      | `boolean`                           | Error occurred during the initial load.               |
-| `isRefetchError`      | `boolean`                           | Error occurred during a background refetch.           |
-| `isPlaceholderData`   | `boolean`                           | Currently showing placeholder data.                   |
-| `dataUpdatedAt`       | `number`                            | Timestamp of the last successful data update.         |
-| `errorUpdatedAt`      | `number`                            | Timestamp of the last error.                          |
-| `failureCount`        | `number`                            | Number of consecutive failures.                       |
-| `failureReason`       | `Error \| null`                     | Reason for the last failure.                          |
-| `errorUpdateCount`    | `number`                            | Total number of errors encountered.                   |
-| `refetch`             | `() => void`                        | Manually trigger a refetch.                           |
+## Demo
 
 ## Usage
 
@@ -66,6 +13,7 @@ import { useQuery } from "@usels/integrations";
 
 ```tsx twoslash
 // @noErrors
+import { For, Show, useObservable } from "@legendapp/state/react";
 import { useQuery } from "@usels/integrations";
 
 function ProductList() {
@@ -74,13 +22,17 @@ function ProductList() {
     queryFn: () => fetch("/api/products").then((r) => r.json()),
   });
 
+  const products$ = useObservable(() => query.data.get() ?? []);
+
   return (
     <div>
-      {query.isLoading.get() && <p>Loading...</p>}
-      {query.isError.get() && <p>Error: {query.error.get()?.message}</p>}
-      {query.data.get()?.map((p: any) => (
-        <div key={p.id}>{p.name}</div>
-      ))}
+      <Show if={query.isLoading}>
+        <p>Loading...</p>
+      </Show>
+      <Show if={query.isError}>
+        <p>Error: {query.error.get()?.message}</p>
+      </Show>
+      <For each={products$}>{(p$) => <div>{p$.name.get()}</div>}</For>
     </div>
   );
 }
@@ -168,7 +120,7 @@ function DataPanel() {
   return (
     <div>
       <p>Updated: {new Date(query.dataUpdatedAt.get()).toLocaleTimeString()}</p>
-      <button onClick={() => query.refetch.get()()}>Refresh</button>
+      <button onClick={() => query.refetch()}>Refresh</button>
     </div>
   );
 }
@@ -178,5 +130,6 @@ function DataPanel() {
 
 - **`queryFn` and `.peek()`** — Always use `.peek()` (not `.get()`) inside `queryFn` when reading observable values. Using `.get()` would register reactive dependencies and cause unexpected re-renders.
 - **Observable state fields** — All returned fields are `Observable`. To read them in a reactive component, call `.get()`. For non-reactive reads (e.g. event handlers), use `.peek()`.
+- **Conditional rendering** — Use `<Show if={obs$}>` from `@legendapp/state/react` for conditional JSX, not `{obs.get() && <JSX>}`.
 - **Cache key identity** — Observable elements in `queryKey` are resolved to their plain values before being passed to TanStack Query. The cache key is always a plain array, matching TanStack's standard behavior.
 - **`staleTime` and caching** — When `queryKey` changes, TanStack decides whether to fetch fresh data or serve from cache based on `staleTime`. No manual `refetch()` is needed on key changes.
