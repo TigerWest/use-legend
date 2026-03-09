@@ -4,7 +4,7 @@ import { observable } from "@legendapp/state";
 import { useObserve } from "@legendapp/state/react";
 import { Suspense, type ReactNode } from "react";
 import { useQuery } from ".";
-import { createWrapper } from "../../__tests__/test-utils";
+import { createWrapper } from "../__tests__/test-utils";
 
 describe("useQuery", () => {
   beforeEach(() => {

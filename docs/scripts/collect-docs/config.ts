@@ -15,6 +15,7 @@ export const SOURCE_PACKAGES = [
   { name: 'web', dir: 'web' },
   { name: 'native', dir: 'native' },
   { name: 'integrations', dir: 'integrations' },
+  { name: 'tanstack-query', dir: 'libraries/tanstack-query' },
 ] as const
 
 export function getOutputTargets(sourcePackage: SourcePackageName, relativeDocPath: string): OutputTarget[] {
@@ -28,6 +29,8 @@ export function getOutputTargets(sourcePackage: SourcePackageName, relativeDocPa
         ? [{ section: 'native', relativeDocPath }]
         : []
     case 'integrations':
+      return [{ section: 'integrations', relativeDocPath }]
+    case 'tanstack-query':
       return [{ section: 'integrations', relativeDocPath }]
     default:
       return []

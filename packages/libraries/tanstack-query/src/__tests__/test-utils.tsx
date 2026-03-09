@@ -1,6 +1,6 @@
 import React from "react";
 import { QueryClient, MutationCache, QueryCache } from "@tanstack/react-query";
-import { QueryClientProvider } from "../tanstack-query/QueryClientProvider";
+import { QueryClientProvider } from "../QueryClientProvider";
 
 export function createTestQueryClient(): QueryClient {
   return new QueryClient({

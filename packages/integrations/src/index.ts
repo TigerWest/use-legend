@@ -1,22 +1,2 @@
-export { QueryClientProvider, QueryClient } from "./tanstack-query/QueryClientProvider";
-export {
-  HydrationBoundary,
-  dehydrate,
-  hydrate,
-  type DehydratedState,
-  type DehydrateOptions,
-  type HydrateOptions,
-} from "./tanstack-query/HydrationBoundary";
-export { useQueryClient } from "./tanstack-query/useQueryClient";
-export { useQuery } from "./tanstack-query/useQuery";
-export { useMutation } from "./tanstack-query/useMutation";
-export { useInfiniteQuery } from "./tanstack-query/useInfiniteQuery";
-
-export type { UseQueryOptions, QueryState } from "./tanstack-query/useQuery";
-
-export type { UseMutationOptions, MutationState } from "./tanstack-query/useMutation";
-
-export type {
-  UseInfiniteQueryOptions,
-  InfiniteQueryState,
-} from "./tanstack-query/useInfiniteQuery";
+// @usels/integrations - lightweight single-hook integrations
+// Complex library integrations are in separate packages (e.g., @usels/tanstack-query)

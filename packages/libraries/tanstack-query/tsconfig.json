@@ -1,0 +1,13 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "@demos/core/*": ["../../core/src/*"]
+    }
+  }
+}

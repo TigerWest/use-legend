@@ -6,6 +6,7 @@
     "paths": {
       "@demos/core/*": ["../packages/core/src/*"],
       "@demos/integrations/*": ["../packages/integrations/src/*"],
+      "@demos/libraries/tanstack-query/*": ["../packages/libraries/tanstack-query/src/*"],
       "@browser/*": ["../packages/core/src/browser/*"],
       "@elements/*": ["../packages/core/src/elements/*"],
       "@reactivity/*": ["../packages/core/src/reactivity/*"],

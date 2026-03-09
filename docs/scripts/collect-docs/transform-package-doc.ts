@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import matter from "gray-matter";
-import { PACKAGES_ROOT } from "./config";
+import { PACKAGES_ROOT, SOURCE_PACKAGES } from "./config";
 import { buildAutoSections, serializeFrontmatter } from "./markdown-sections";
 import { extractTypeDeclarations } from "./type-declarations";
 import type { GeneratedDoc } from "./types";
@@ -33,9 +33,14 @@ export async function transformPackageDoc(
   }
 
   const sourceFile = path.relative(PACKAGES_ROOT, doc.sourcePath);
+  const sourcePackageConfig = SOURCE_PACKAGES.find(pkg => pkg.name === doc.sourcePackage);
+  const sourcePackageDir = sourcePackageConfig?.dir ?? doc.sourcePackage;
+  const packageSection = sourcePackageConfig
+    ? (doc.sourcePackage === 'tanstack-query' ? 'integrations' : doc.sourcePackage)
+    : doc.sourcePackage;
   const enhancedFrontmatter: Record<string, unknown> = {
     ...frontmatter,
-    package: doc.sourcePackage,
+    package: packageSection,
     sourceFile,
   };
 
@@ -58,12 +63,12 @@ export async function transformPackageDoc(
   let finalContent = `---\n${serializeFrontmatter(enhancedFrontmatter)}\n---\n`;
 
   if (hasDemo) {
-    const packageSrcDir = path.join(PACKAGES_ROOT, "packages", doc.sourcePackage, "src");
+    const packageSrcDir = path.join(PACKAGES_ROOT, "packages", sourcePackageDir, "src");
     const demoRelPath = path
       .relative(packageSrcDir, path.dirname(demoPath))
       .split(path.sep)
       .join("/");
-    const demoImportPath = `@demos/${doc.sourcePackage}/${demoRelPath}/demo`;
+    const demoImportPath = `@demos/${sourcePackageDir}/${demoRelPath}/demo`;
     finalContent += `\nimport Demo from '${demoImportPath}'\n`;
   }
 

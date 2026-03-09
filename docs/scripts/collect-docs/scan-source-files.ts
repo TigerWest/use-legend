@@ -60,10 +60,12 @@ export async function scanSourceFiles(): Promise<SourceDoc[]> {
       continue
     }
 
-    const relativeToPackages = path.relative(PACKAGES_ROOT, sourcePath)
-    const parts = relativeToPackages.split(path.sep)
-    const sourcePackage = parts[1] as SourcePackageName
-    const sourcePackageDir = SOURCE_PACKAGES.find(pkg => pkg.name === sourcePackage)?.dir
+    const sourcePackageEntry = SOURCE_PACKAGES.find(pkg => {
+      const pkgSrcRoot = path.join(PACKAGES_ROOT, 'packages', pkg.dir, 'src')
+      return sourcePath.startsWith(pkgSrcRoot)
+    })
+    const sourcePackage = sourcePackageEntry?.name as SourcePackageName
+    const sourcePackageDir = sourcePackageEntry?.dir
 
     if (!sourcePackageDir) {
       errors.push(`Unknown package for source file: ${sourcePath}`)

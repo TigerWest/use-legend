@@ -8,7 +8,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { observable } from "@legendapp/state";
 import { useQuery } from "../useQuery";
-import { createWrapper } from "../../__tests__/test-utils";
+import { createWrapper } from "./test-utils";
 
 describe("useQuery() — real browser", () => {
   it("runs in an actual browser environment (not jsdom)", () => {

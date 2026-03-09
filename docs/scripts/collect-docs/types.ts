@@ -7,7 +7,7 @@ export interface DocMetadata {
   sourceFile?: string
 }
 
-export type SourcePackageName = 'core' | 'web' | 'native' | 'integrations'
+export type SourcePackageName = 'core' | 'web' | 'native' | 'integrations' | 'tanstack-query'
 
 export type OutputSection = 'core' | 'web' | 'native' | 'integrations'
 

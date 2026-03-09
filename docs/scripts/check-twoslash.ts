@@ -22,6 +22,7 @@ const MONO_ROOT = path.resolve(DOCS_ROOT, "../..");
 const PACKAGES = [
   { name: 'core', dir: 'core' },
   { name: 'integrations', dir: 'integrations' },
+  { name: 'tanstack-query', dir: 'libraries/tanstack-query' },
 ] as const
 
 // Same compiler options as astro.config.mjs

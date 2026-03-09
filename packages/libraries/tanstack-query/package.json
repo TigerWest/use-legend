@@ -1,7 +1,7 @@
 {
-  "name": "@usels/integrations",
+  "name": "@usels/tanstack-query",
   "version": "0.3.0",
-  "description": "Lightweight single-hook integrations for Legend-State",
+  "description": "Observable-native TanStack Query integration for Legend-State",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -23,11 +23,13 @@
   "keywords": [
     "legendapp",
     "state",
-    "integrations",
+    "tanstack-query",
+    "react-query",
     "observable",
     "reactive"
   ],
   "dependencies": {
+    "@tanstack/query-core": "^5.90.20",
     "@usels/core": "workspace:*"
   },
   "peerDependencies": {
@@ -48,12 +50,18 @@
   },
   "devDependencies": {
     "@legendapp/state": "3.0.0-beta.44",
+    "@tanstack/query-core": "^5.90.20",
+    "@tanstack/react-query": "^5.60.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
     "@types/node": "^25.3.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.0.18",
     "jsdom": "^25.0.0",
+    "playwright": "^1.58.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tsup": "^8.0.1",

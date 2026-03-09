@@ -9,6 +9,7 @@ const PACKAGES = [
   { name: 'web', dir: 'web' },
   ...(DOCS_ENABLE_NATIVE_TAB ? [{ name: 'native', dir: 'native' }] : []),
   { name: 'integrations', dir: 'integrations' },
+  { name: 'tanstack-query', dir: 'libraries/tanstack-query' },
 ] as const
 
 const watchPatterns = PACKAGES.flatMap(pkg => [

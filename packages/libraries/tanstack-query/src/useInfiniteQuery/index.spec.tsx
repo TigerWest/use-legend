@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { useInfiniteQuery } from ".";
-import { createWrapper } from "../../__tests__/test-utils";
+import { createWrapper } from "../__tests__/test-utils";
 
 describe("useInfiniteQuery", () => {
   beforeEach(() => {

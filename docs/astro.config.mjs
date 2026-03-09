@@ -27,6 +27,7 @@ const CORE_SRC = fileURLToPath(new URL("../packages/core/src", import.meta.url))
 const WEB_SRC = fileURLToPath(new URL("../packages/web/src", import.meta.url));
 const NATIVE_SRC = fileURLToPath(new URL("../packages/native/src", import.meta.url));
 const INTEGRATIONS_SRC = fileURLToPath(new URL("../packages/integrations/src", import.meta.url));
+const TANSTACK_QUERY_SRC = fileURLToPath(new URL("../packages/libraries/tanstack-query/src", import.meta.url));
 
 function rewriteWebAliasImports() {
   const replacements = [
@@ -85,6 +86,7 @@ export default defineConfig({
         { find: "@demos/web", replacement: WEB_SRC },
         { find: "@demos/native", replacement: NATIVE_SRC },
         { find: "@demos/integrations", replacement: INTEGRATIONS_SRC },
+        { find: "@demos/libraries/tanstack-query", replacement: TANSTACK_QUERY_SRC },
         // Resolve workspace packages to source during docs builds.
         { find: /^@usels\/core$/, replacement: `${CORE_SRC}/index.ts` },
         { find: /^@usels\/core\/(.*)$/, replacement: `${CORE_SRC}/$1` },
@@ -94,6 +96,8 @@ export default defineConfig({
         { find: /^@usels\/native\/(.*)$/, replacement: `${NATIVE_SRC}/$1` },
         { find: /^@usels\/integrations$/, replacement: `${INTEGRATIONS_SRC}/index.ts` },
         { find: /^@usels\/integrations\/(.*)$/, replacement: `${INTEGRATIONS_SRC}/$1` },
+        { find: /^@usels\/tanstack-query$/, replacement: `${TANSTACK_QUERY_SRC}/index.ts` },
+        { find: /^@usels\/tanstack-query\/(.*)$/, replacement: `${TANSTACK_QUERY_SRC}/$1` },
         // core package path aliases (used by demo.tsx files)
         { find: "@browser", replacement: `${WEB_SRC}/browser` },
         { find: "@elements", replacement: `${CORE_SRC}/elements` },
@@ -208,8 +212,12 @@ export default defineConfig({
           label: "Web",
           autogenerate: { directory: "web" },
         },
+        // {
+        //   label: "Integrations",
+        //   autogenerate: { directory: "integrations" },
+        // },
         {
-          label: "Integrations",
+          label: "TanStack Query",
           autogenerate: { directory: "integrations" },
         },
         // {
