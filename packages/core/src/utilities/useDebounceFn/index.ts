@@ -1,8 +1,11 @@
 "use client";
 import type { AnyFn, MaybeObservable, PromisifyFn } from "../../types";
-import { createFilterWrapper, debounceFilter, type DebounceFilterOptions } from "@shared/filters";
+import { type DebounceFilterOptions } from "@shared/filters";
 import { useConstant } from "@shared/useConstant";
 import { useLatest } from "@shared/useLatest";
+import { createDebounceFn } from "./core";
+
+export { createDebounceFn } from "./core";
 
 /**
  * Debounce execution of a function.
@@ -28,11 +31,9 @@ export function useDebounceFn<T extends AnyFn>(
 ): PromisifyFn<T> {
   const fnRef = useLatest(fn);
 
-  const wrapped = useConstant<PromisifyFn<T>>(() => {
-    const filter = debounceFilter(ms, options);
-    return createFilterWrapper(filter, ((...args: Parameters<T>) =>
-      fnRef.current(...args)) as T) as unknown as PromisifyFn<T>;
-  });
+  const { debouncedFn } = useConstant(() =>
+    createDebounceFn(((...args: Parameters<T>) => fnRef.current(...args)) as T, ms, options)
+  );
 
-  return wrapped;
+  return debouncedFn;
 }

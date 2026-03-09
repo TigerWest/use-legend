@@ -1,8 +1,11 @@
 "use client";
 import type { AnyFn, MaybeObservable, PromisifyFn } from "../../types";
-import { createFilterWrapper, throttleFilter, type ThrottleFilterOptions } from "@shared/filters";
+import { type ThrottleFilterOptions } from "@shared/filters";
 import { useConstant } from "@shared/useConstant";
 import { useLatest } from "@shared/useLatest";
+import { createThrottleFn } from "./core";
+
+export { createThrottleFn } from "./core";
 
 /**
  * Throttle execution of a function. Especially useful for rate limiting
@@ -29,11 +32,9 @@ export function useThrottleFn<T extends AnyFn>(
 ): PromisifyFn<T> {
   const fnRef = useLatest(fn);
 
-  const wrapped = useConstant<PromisifyFn<T>>(() => {
-    const filter = throttleFilter(ms, options);
-    return createFilterWrapper(filter, ((...args: Parameters<T>) =>
-      fnRef.current(...args)) as T) as unknown as PromisifyFn<T>;
-  });
+  const { throttledFn } = useConstant(() =>
+    createThrottleFn(((...args: Parameters<T>) => fnRef.current(...args)) as T, ms, options)
+  );
 
-  return wrapped;
+  return throttledFn;
 }
