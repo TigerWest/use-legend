@@ -23,45 +23,6 @@ const warmupSsrFiles = DOCS_ENABLE_TWOSLASH
   ? (WARMUP_SSR_FILES_BY_MODE[DOCS_WARMUP_MODE] ?? WARMUP_SSR_FILES_BY_MODE.off)
   : [];
 
-const CORE_SRC = fileURLToPath(new URL("../packages/core/src", import.meta.url));
-const WEB_SRC = fileURLToPath(new URL("../packages/web/src", import.meta.url));
-const NATIVE_SRC = fileURLToPath(new URL("../packages/native/src", import.meta.url));
-const INTEGRATIONS_SRC = fileURLToPath(new URL("../packages/integrations/src", import.meta.url));
-const TANSTACK_QUERY_SRC = fileURLToPath(new URL("../packages/libraries/tanstack-query/src", import.meta.url));
-
-function rewriteWebAliasImports() {
-  const replacements = [
-    ["@browser/", "@web-browser/"],
-    ["@elements/", "@web-elements/"],
-    ["@sensors/", "@web-sensors/"],
-  ];
-
-  return {
-    name: "rewrite-web-alias-imports",
-    enforce: "pre",
-    transform(code, id) {
-      if (!id.includes("/packages/web/src/")) {
-        return null;
-      }
-
-      let nextCode = code;
-      for (const [from, to] of replacements) {
-        nextCode = nextCode.replaceAll(`"${from}`, `"${to}`);
-        nextCode = nextCode.replaceAll(`'${from}`, `'${to}`);
-      }
-
-      if (nextCode === code) {
-        return null;
-      }
-
-      return {
-        code: nextCode,
-        map: null,
-      };
-    },
-  };
-}
-
 // https://astro.build/config
 export default defineConfig({
   site: "https://tigerwest.github.io/use-legend",
@@ -79,39 +40,10 @@ export default defineConfig({
             }
           : undefined,
     },
-    plugins: [tailwindcss(), rewriteWebAliasImports(), autoWrap({ allGet: true })],
+    plugins: [tailwindcss(), autoWrap({ allGet: true })],
     resolve: {
       alias: [
-        { find: "@demos/core", replacement: CORE_SRC },
-        { find: "@demos/web", replacement: WEB_SRC },
-        { find: "@demos/native", replacement: NATIVE_SRC },
-        { find: "@demos/integrations", replacement: INTEGRATIONS_SRC },
-        { find: "@demos/libraries/tanstack-query", replacement: TANSTACK_QUERY_SRC },
-        // Resolve workspace packages to source during docs builds.
-        { find: /^@usels\/core$/, replacement: `${CORE_SRC}/index.ts` },
-        { find: /^@usels\/core\/(.*)$/, replacement: `${CORE_SRC}/$1` },
-        { find: /^@usels\/web$/, replacement: `${WEB_SRC}/index.ts` },
-        { find: /^@usels\/web\/(.*)$/, replacement: `${WEB_SRC}/$1` },
-        { find: /^@usels\/native$/, replacement: `${NATIVE_SRC}/index.ts` },
-        { find: /^@usels\/native\/(.*)$/, replacement: `${NATIVE_SRC}/$1` },
-        { find: /^@usels\/integrations$/, replacement: `${INTEGRATIONS_SRC}/index.ts` },
-        { find: /^@usels\/integrations\/(.*)$/, replacement: `${INTEGRATIONS_SRC}/$1` },
-        { find: /^@usels\/tanstack-query$/, replacement: `${TANSTACK_QUERY_SRC}/index.ts` },
-        { find: /^@usels\/tanstack-query\/(.*)$/, replacement: `${TANSTACK_QUERY_SRC}/$1` },
-        // core package path aliases (used by demo.tsx files)
-        { find: "@browser", replacement: `${WEB_SRC}/browser` },
-        { find: "@elements", replacement: `${CORE_SRC}/elements` },
-        { find: "@reactivity", replacement: `${CORE_SRC}/reactivity` },
-        { find: "@sensors", replacement: `${WEB_SRC}/sensors` },
-        { find: "@shared", replacement: `${CORE_SRC}/shared` },
-        { find: "@timer", replacement: `${CORE_SRC}/timer` },
-        { find: "@utilities", replacement: `${CORE_SRC}/utilities` },
-        { find: "@components", replacement: `${CORE_SRC}/components` },
-        { find: "@state", replacement: `${CORE_SRC}/state` },
-        // web package path aliases are namespaced to avoid collisions with core aliases.
-        { find: "@web-browser", replacement: `${WEB_SRC}/browser` },
-        { find: "@web-elements", replacement: `${WEB_SRC}/elements` },
-        { find: "@web-sensors", replacement: `${WEB_SRC}/sensors` },
+        { find: "@demos", replacement: fileURLToPath(new URL("./src/components/demos", import.meta.url)) },
       ],
     },
   },
@@ -218,7 +150,7 @@ export default defineConfig({
         // },
         {
           label: "TanStack Query",
-          autogenerate: { directory: "integrations" },
+          autogenerate: { directory: "tanstack-query" },
         },
         // {
         //   label: "Native",

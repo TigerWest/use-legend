@@ -14,7 +14,7 @@ React hook for infinite scrolling and pagination that bridges TanStack Query wit
 ```tsx twoslash
 // @noErrors
 import { For, Show, useObservable } from "@legendapp/state/react";
-import { useInfiniteQuery } from "@usels/integrations";
+import { useInfiniteQuery } from "@usels/tanstack-query";
 
 interface Page {
   items: { id: number; name: string }[];
@@ -56,7 +56,7 @@ function InfiniteList() {
 
 ```tsx twoslash
 // @noErrors
-import { useInfiniteQuery } from "@usels/integrations";
+import { useInfiniteQuery } from "@usels/tanstack-query";
 import { observable } from "@legendapp/state";
 import { For, useObservable } from "@legendapp/state/react";
 
@@ -93,7 +93,7 @@ function FilteredInfiniteList() {
 
 ```tsx twoslash
 // @noErrors
-import { useInfiniteQuery } from "@usels/integrations";
+import { useInfiniteQuery } from "@usels/tanstack-query";
 import { observable } from "@legendapp/state";
 
 const isReady$ = observable(false);

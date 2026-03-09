@@ -9,7 +9,7 @@ Inspired by [VueUse](https://vueuse.org/) and [react-use](https://github.com/str
 | Package | Description |
 |---------|-------------|
 | [`@usels/core`](./packages/core) | React hooks for elements, sensors, and browser APIs |
-| [`@usels/integrations`](./packages/integrations) | third party integration with Legend-State |
+| [`@usels/tanstack-query`](./packages/libraries/tanstack-query) | TanStack Query integration with Legend-State |
 
 ### @usels/core
 

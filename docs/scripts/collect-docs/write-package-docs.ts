@@ -9,8 +9,8 @@ export async function writePackageDocs(generatedDocs: GeneratedDoc[]): Promise<v
   await Promise.all(
     generatedDocs.map(async (doc) => {
       const { finalContent, hasDemo } = await transformPackageDoc(doc)
-      const targetExt = hasDemo ? '.mdx' : '.md'
-      const targetPath = doc.targetPath.replace(/\.md$/, targetExt)
+      const targetExt = hasDemo ? '.gen.mdx' : '.gen.md'
+      const targetPath = doc.targetPath.replace(/\.gen\.md$/, targetExt)
 
       await fs.mkdir(path.dirname(targetPath), { recursive: true })
       await fs.writeFile(targetPath, finalContent, 'utf-8')

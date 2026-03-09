@@ -13,7 +13,7 @@ The QueryClient instance from context.
 ## Usage
 
 ```typescript
-import { useQueryClient } from '@usels/integrations'
+import { useQueryClient } from '@usels/tanstack-query'
 
 function MyComponent() {
   const queryClient = useQueryClient()

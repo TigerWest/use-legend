@@ -1,7 +1,7 @@
 "use client";
 import { useContext } from "react";
-import { QueryClient } from "@tanstack/query-core";
-import { QueryClientContext } from "../QueryClientProvider";
+
+import { QueryClientContext, QueryClient } from "../QueryClientProvider";
 
 /**
  * Hook to retrieve the QueryClient from context
@@ -10,7 +10,7 @@ import { QueryClientContext } from "../QueryClientProvider";
  *
  * @example
  * ```tsx
- * import { useQueryClient } from '@usels/integrations'
+ * import { useQueryClient } from '@usels/tanstack-query'
  *
  * function MyComponent() {
  *   const queryClient = useQueryClient()

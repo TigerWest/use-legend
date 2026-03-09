@@ -18,7 +18,7 @@ export interface QueryClientProviderProps {
  * @example
  * ```tsx
  * import { QueryClient } from '@tanstack/react-query'
- * import { QueryClientProvider } from '@usels/integrations'
+ * import { QueryClientProvider } from '@usels/tanstack-query'
  *
  * const queryClient = new QueryClient()
  *

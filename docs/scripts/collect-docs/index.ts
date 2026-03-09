@@ -19,6 +19,7 @@ export async function runCollectDocs(): Promise<void> {
       cleanSectionDirectory('web'),
       cleanSectionDirectory('native'),
       cleanSectionDirectory('integrations'),
+      cleanSectionDirectory('tanstack-query'),
       cleanLegacyDirectories(),
     ])
 

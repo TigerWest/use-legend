@@ -4,20 +4,7 @@
   "exclude": ["dist"],
   "compilerOptions": {
     "paths": {
-      "@demos/core/*": ["../packages/core/src/*"],
-      "@demos/integrations/*": ["../packages/integrations/src/*"],
-      "@demos/libraries/tanstack-query/*": ["../packages/libraries/tanstack-query/src/*"],
-      "@browser/*": ["../packages/core/src/browser/*"],
-      "@elements/*": ["../packages/core/src/elements/*"],
-      "@reactivity/*": ["../packages/core/src/reactivity/*"],
-      "@sensors/*": ["../packages/core/src/sensors/*"],
-      "@shared": ["../packages/core/src/shared/index.ts"],
-      "@shared/*": ["../packages/core/src/shared/*"],
-      "@timer/*": ["../packages/core/src/timer/*"],
-      "@utilities/*": ["../packages/core/src/utilities/*"],
-      "@components/*": ["../packages/core/src/components/*"],
-      "@state/*": ["../packages/core/src/state/*"],
-      "@sync/*": ["../packages/core/src/sync/*"]
+      "@demos/*": ["./src/components/demos/*"]
     }
   }
 }

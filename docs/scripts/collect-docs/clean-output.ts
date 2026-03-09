@@ -3,20 +3,16 @@ import * as path from 'path'
 import { DOCS_CONTENT_ROOT } from './config'
 import type { OutputSection } from './types'
 
-export async function cleanSectionDirectory(section: OutputSection): Promise<void> {
-  const sectionDir = path.join(DOCS_CONTENT_ROOT, section)
-
+async function cleanGeneratedFiles(dir: string): Promise<void> {
   try {
-    const entries = await fs.readdir(sectionDir, { withFileTypes: true })
+    const entries = await fs.readdir(dir, { withFileTypes: true })
     for (const entry of entries) {
-      const entryPath = path.join(sectionDir, entry.name)
+      const entryPath = path.join(dir, entry.name)
       if (entry.isDirectory()) {
-        await fs.rm(entryPath, { force: true, recursive: true })
+        await cleanGeneratedFiles(entryPath)
         continue
       }
-
-      const isManualIndex = entry.isFile() && (entry.name === 'index.md' || entry.name === 'index.mdx')
-      if (!isManualIndex) {
+      if (entry.isFile() && /\.gen\.(md|mdx)$/.test(entry.name)) {
         await fs.rm(entryPath, { force: true })
       }
     }
@@ -25,6 +21,11 @@ export async function cleanSectionDirectory(section: OutputSection): Promise<voi
       throw error
     }
   }
+}
+
+export async function cleanSectionDirectory(section: OutputSection): Promise<void> {
+  const sectionDir = path.join(DOCS_CONTENT_ROOT, section)
+  await cleanGeneratedFiles(sectionDir)
 }
 
 export async function cleanLegacyDirectories(): Promise<void> {

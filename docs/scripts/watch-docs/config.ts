@@ -14,8 +14,10 @@ const PACKAGES = [
 
 const watchPatterns = PACKAGES.flatMap(pkg => [
   path.join(PACKAGES_ROOT, 'packages', pkg.dir, 'src', '**/*.{md,mdx}'),
-  path.join(PACKAGES_ROOT, 'packages', pkg.dir, 'src', '**/demo.tsx'),
-]).concat(path.join(ASTRO_ROOT, 'src', 'content', 'docs', 'guides', '**/*.{md,mdx}'))
+]).concat(
+  path.join(ASTRO_ROOT, 'src', 'components', 'demos', '**/*.tsx'),
+  path.join(ASTRO_ROOT, 'src', 'content', 'docs', 'guides', '**/*.{md,mdx}')
+)
 
 const ignorePatterns = [
   path.join(PACKAGES_ROOT, 'packages', '*', 'src', '**', '__tests__', '**'),

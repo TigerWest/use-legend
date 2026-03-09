@@ -20,8 +20,6 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# generated documentation (except index.md files)
-src/content/docs/utils/*.md
-!src/content/docs/utils/index.md
-src/content/docs/integrations/*.md
-!src/content/docs/integrations/index.md
+# generated documentation
+**/*.gen.md
+**/*.gen.mdx

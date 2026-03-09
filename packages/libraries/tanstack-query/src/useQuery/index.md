@@ -14,7 +14,7 @@ React hook for data fetching that bridges TanStack Query with Legend-State. Retu
 ```tsx twoslash
 // @noErrors
 import { For, Show, useObservable } from "@legendapp/state/react";
-import { useQuery } from "@usels/integrations";
+import { useQuery } from "@usels/tanstack-query";
 
 function ProductList() {
   const query = useQuery({
@@ -44,7 +44,7 @@ When an element inside `queryKey` is an `Observable`, the query automatically re
 
 ```tsx twoslash
 // @noErrors
-import { useQuery } from "@usels/integrations";
+import { useQuery } from "@usels/tanstack-query";
 import { observable } from "@legendapp/state";
 
 const id$ = observable("1");
@@ -70,7 +70,7 @@ Observable values nested inside plain objects within `queryKey` are also resolve
 
 ```tsx twoslash
 // @noErrors
-import { useQuery } from "@usels/integrations";
+import { useQuery } from "@usels/tanstack-query";
 import { observable } from "@legendapp/state";
 
 const filter$ = observable({ category: "electronics" });
@@ -90,7 +90,7 @@ Individual options like `enabled`, `staleTime`, etc. also accept `Observable` va
 
 ```tsx twoslash
 // @noErrors
-import { useQuery } from "@usels/integrations";
+import { useQuery } from "@usels/tanstack-query";
 import { observable } from "@legendapp/state";
 
 const enabled$ = observable(false);
@@ -109,7 +109,7 @@ enabled$.set(true);
 
 ```tsx twoslash
 // @noErrors
-import { useQuery } from "@usels/integrations";
+import { useQuery } from "@usels/tanstack-query";
 
 function DataPanel() {
   const query = useQuery({

@@ -9,7 +9,7 @@ export interface DocMetadata {
 
 export type SourcePackageName = 'core' | 'web' | 'native' | 'integrations' | 'tanstack-query'
 
-export type OutputSection = 'core' | 'web' | 'native' | 'integrations'
+export type OutputSection = 'core' | 'web' | 'native' | 'integrations' | 'tanstack-query'
 
 export interface OutputTarget {
   section: OutputSection

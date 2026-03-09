@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import matter from "gray-matter";
-import { PACKAGES_ROOT, SOURCE_PACKAGES } from "./config";
+import { PACKAGES_ROOT, SOURCE_PACKAGES, DOCS_DEMOS_ROOT, toGeneratedRelativeDocPath } from "./config";
 import { buildAutoSections, serializeFrontmatter } from "./markdown-sections";
 import { extractTypeDeclarations } from "./type-declarations";
 import type { GeneratedDoc } from "./types";
@@ -34,13 +34,12 @@ export async function transformPackageDoc(
 
   const sourceFile = path.relative(PACKAGES_ROOT, doc.sourcePath);
   const sourcePackageConfig = SOURCE_PACKAGES.find(pkg => pkg.name === doc.sourcePackage);
-  const sourcePackageDir = sourcePackageConfig?.dir ?? doc.sourcePackage;
-  const packageSection = sourcePackageConfig
-    ? (doc.sourcePackage === 'tanstack-query' ? 'integrations' : doc.sourcePackage)
-    : doc.sourcePackage;
+  const outputSection = sourcePackageConfig?.outputSection ?? doc.sourcePackage;
+  const slug = `${outputSection}/${doc.filename}`;
   const enhancedFrontmatter: Record<string, unknown> = {
     ...frontmatter,
-    package: packageSection,
+    slug,
+    package: outputSection,
     sourceFile,
   };
 
@@ -51,7 +50,12 @@ export async function transformPackageDoc(
     sourceFile,
   });
 
-  const demoPath = path.join(path.dirname(doc.sourcePath), "demo.tsx");
+  const sourcePackageDir = sourcePackageConfig?.dir ?? doc.sourcePackage;
+  const demoSection = sourcePackageConfig?.demoSection ?? doc.sourcePackage;
+  const relDocPath = toGeneratedRelativeDocPath(doc.sourcePath, sourcePackageDir);
+  const relDocDir = path.dirname(relDocPath);
+  const demoFileName = `${doc.filename}.tsx`;
+  const demoPath = path.join(DOCS_DEMOS_ROOT, demoSection, relDocDir, demoFileName);
   let hasDemo = false;
   try {
     await fs.access(demoPath);
@@ -63,12 +67,8 @@ export async function transformPackageDoc(
   let finalContent = `---\n${serializeFrontmatter(enhancedFrontmatter)}\n---\n`;
 
   if (hasDemo) {
-    const packageSrcDir = path.join(PACKAGES_ROOT, "packages", sourcePackageDir, "src");
-    const demoRelPath = path
-      .relative(packageSrcDir, path.dirname(demoPath))
-      .split(path.sep)
-      .join("/");
-    const demoImportPath = `@demos/${sourcePackageDir}/${demoRelPath}/demo`;
+    const demoRelDir = relDocDir === "." ? "" : relDocDir + "/";
+    const demoImportPath = `@demos/${demoSection}/${demoRelDir}${doc.filename}`;
     finalContent += `\nimport Demo from '${demoImportPath}'\n`;
   }
 

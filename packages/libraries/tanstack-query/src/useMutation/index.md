@@ -14,7 +14,7 @@ React hook for performing mutations that bridges TanStack Query with Legend-Stat
 ```tsx twoslash
 // @noErrors
 import { Show } from "@legendapp/state/react";
-import { useMutation } from "@usels/integrations";
+import { useMutation } from "@usels/tanstack-query";
 
 function CreateUser() {
   const mutation = useMutation({
@@ -50,7 +50,7 @@ function CreateUser() {
 
 ```tsx twoslash
 // @noErrors
-import { useMutation, useQueryClient } from "@usels/integrations";
+import { useMutation, useQueryClient } from "@usels/tanstack-query";
 
 function AddTodo() {
   const queryClient = useQueryClient();
@@ -73,7 +73,7 @@ function AddTodo() {
 
 ```tsx twoslash
 // @noErrors
-import { useMutation } from "@usels/integrations";
+import { useMutation } from "@usels/tanstack-query";
 
 function SubmitForm() {
   const mutation = useMutation({

@@ -25,7 +25,7 @@ export type UseMutationOptions<
  * @example
  * ```tsx
  * import { QueryClient } from '@tanstack/react-query'
- * import { QueryClientProvider, useMutation } from '@usels/integrations'
+ * import { QueryClientProvider, useMutation } from '@usels/tanstack-query'
  *
  * // QueryClient를 생성하고 Provider로 제공
  * const queryClient = new QueryClient()

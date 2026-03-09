@@ -9,7 +9,7 @@ export function toGeneratedDocs(sourceDocs: SourceDoc[]): GeneratedDoc[] {
     for (const target of doc.outputTargets) {
       const sectionDir = target.section
       const targetPath = path.join(DOCS_CONTENT_ROOT, sectionDir, target.relativeDocPath)
-      const relativePath = `/${sectionDir}/${target.relativeDocPath.replace(/\.md$/, '')}`
+      const relativePath = `/${sectionDir}/${target.relativeDocPath.replace(/\.gen\.md$/, '')}`
 
       generatedDocs.push({
         sourcePath: doc.sourcePath,

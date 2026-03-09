@@ -4,7 +4,7 @@ This directory contains scripts for managing documentation in the Astro-based do
 
 ## Overview
 
-The documentation system automatically collects Markdown files from the source packages (`@usels/core` and `@usels/integrations`) and copies them to the Astro content directory. This ensures that documentation stays close to the code while being easily accessible in the documentation site.
+The documentation system automatically collects Markdown files from the source packages (`@usels/core` and `@usels/tanstack-query`) and copies them to the Astro content directory. This ensures that documentation stays close to the code while being easily accessible in the documentation site.
 
 ## Scripts
 
