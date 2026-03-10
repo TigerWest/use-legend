@@ -1,11 +1,12 @@
 "use client";
-import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { useCallback } from "react";
 import type { MaybeElement } from "@usels/core";
 import type { DeepMaybeObservable } from "@usels/core";
+import type { ReadonlyObservable } from "@usels/core";
+import type { ConfigurableEventFilter } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
 import { useInitialPick } from "@usels/core";
+import { createFilterWrapper } from "@usels/core";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { defaultWindow } from "@usels/core/shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
@@ -14,7 +15,7 @@ export type UseMouseCoordType = "page" | "client" | "screen" | "movement";
 
 export type UseMouseSourceType = "mouse" | "touch" | null;
 
-export interface UseMouseOptions {
+export interface UseMouseOptions extends ConfigurableEventFilter {
   /** Coordinate type. Default: "page" */
   type?: UseMouseCoordType;
   /** Track touch events. Default: true */
@@ -25,19 +26,15 @@ export interface UseMouseOptions {
   target?: MaybeElement;
   /** Initial coordinate values. Default: { x: 0, y: 0 } */
   initialValue?: { x: number; y: number };
-  /** Event filter wrapper */
-  eventFilter?: (
-    handler: (e: MouseEvent | TouchEvent) => void
-  ) => (e: MouseEvent | TouchEvent) => void;
 }
 
 export interface UseMouseReturn {
   /** X coordinate */
-  x$: Observable<number>;
+  x$: ReadonlyObservable<number>;
   /** Y coordinate */
-  y$: Observable<number>;
+  y$: ReadonlyObservable<number>;
   /** Event source type: "mouse" | "touch" | null */
-  sourceType$: Observable<UseMouseSourceType>;
+  sourceType$: ReadonlyObservable<UseMouseSourceType>;
 }
 
 export function useMouse(options?: DeepMaybeObservable<UseMouseOptions>): UseMouseReturn {
@@ -72,7 +69,7 @@ export function useMouse(options?: DeepMaybeObservable<UseMouseOptions>): UseMou
     }
   };
 
-  // Extract raw target from options at mount time.
+  // Extract raw target and eventFilter from options at mount time.
   // Ref$ and Observable<OpaqueObject<Element>> are themselves reactive —
   // useEventListener handles them internally via its useObserve.
   // No 'element' hint needed; avoids lazy computed activation issues.
@@ -82,37 +79,51 @@ export function useMouse(options?: DeepMaybeObservable<UseMouseOptions>): UseMou
     return target ?? defaultWindow ?? null;
   });
 
-  // mousemove
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
-  const onMouseMove = useCallback((e: MouseEvent) => {
-    const { x, y } = extractCoords(e);
-    x$.set(x);
-    y$.set(y);
-    sourceType$.set("mouse");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Extract eventFilter from options at mount time.
+  const eventFilter = useConstant(() => {
+    if (options == null) return undefined;
+    return (options as Record<string, unknown>).eventFilter as
+      | UseMouseOptions["eventFilter"]
+      | undefined;
+  });
+
+  // mousemove — wrapped with createFilterWrapper if eventFilter is provided
+  const onMouseMove = useConstant(() => {
+    const raw = (e: MouseEvent) => {
+      const { x, y } = extractCoords(e);
+      x$.set(x);
+      y$.set(y);
+      sourceType$.set("mouse");
+    };
+    if (!eventFilter) return raw;
+    return createFilterWrapper(eventFilter, raw);
+  });
 
   useEventListener(eventTarget, "mousemove", onMouseMove, { passive: true });
 
   // touch events (conditional — always call hooks, null target to disable)
   const touchTarget: MaybeElement = touch ? eventTarget : null;
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
-  const onTouchMove = useCallback((e: TouchEvent) => {
-    if (e.touches.length === 0) return;
-    const t = e.touches[0];
-    const { x, y } = extractCoords(t);
-    x$.set(x);
-    y$.set(y);
-    sourceType$.set("touch");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const onTouchMove = useConstant(() => {
+    const raw = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      const t = e.touches[0];
+      const { x, y } = extractCoords(t);
+      x$.set(x);
+      y$.set(y);
+      sourceType$.set("touch");
+    };
+    if (!eventFilter) return raw;
+    return createFilterWrapper(eventFilter, raw);
+  });
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
-  const onTouchEnd = useCallback(() => {
+  // touchend is a reset action — not filtered
+  const onTouchEnd = useConstant(() => () => {
     if (resetOnTouchEnds) {
       x$.set(initial.x);
       y$.set(initial.y);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  });
 
   useEventListener(touchTarget, "touchstart", onTouchMove, { passive: true });
   useEventListener(touchTarget, "touchmove", onTouchMove, { passive: true });

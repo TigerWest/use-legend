@@ -3,6 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ObservableHint, observable } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
+import type { EventFilter } from "@usels/core";
 import { useMouse } from ".";
 
 // ---------------------------------------------------------------------------
@@ -287,6 +288,127 @@ describe("useMouse()", () => {
       expect(result.current.y$.get()).toBe(84);
 
       document.body.removeChild(div);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // eventFilter
+  // -------------------------------------------------------------------------
+
+  describe("eventFilter", () => {
+    it("wraps mousemove handler with eventFilter", () => {
+      let invokeCount = 0;
+      const filter: EventFilter = (invoke) => {
+        invokeCount++;
+        return invoke();
+      };
+
+      const { result } = renderHook(() => useMouse({ type: "client", eventFilter: filter }));
+
+      act(() => {
+        window.dispatchEvent(
+          new MouseEvent("mousemove", { bubbles: true, clientX: 10, clientY: 20 })
+        );
+      });
+
+      expect(invokeCount).toBe(1);
+      expect(result.current.x$.get()).toBe(10);
+      expect(result.current.y$.get()).toBe(20);
+    });
+
+    it("wraps touchmove handler with eventFilter", () => {
+      let invokeCount = 0;
+      const filter: EventFilter = (invoke) => {
+        invokeCount++;
+        return invoke();
+      };
+
+      renderHook(() => useMouse({ touch: true, eventFilter: filter }));
+
+      act(() => {
+        window.dispatchEvent(
+          createTouchEvent("touchmove", [{ pageX: 30, pageY: 40, clientX: 30, clientY: 40 }])
+        );
+      });
+
+      expect(invokeCount).toBe(1);
+    });
+
+    it("eventFilter can suppress events (throttle pattern)", () => {
+      let passthrough = false;
+      const filter: EventFilter = (invoke) => {
+        if (passthrough) return invoke();
+      };
+
+      const { result } = renderHook(() => useMouse({ type: "client", eventFilter: filter }));
+
+      // Suppressed — filter does not call invoke
+      act(() => {
+        window.dispatchEvent(
+          new MouseEvent("mousemove", { bubbles: true, clientX: 100, clientY: 200 })
+        );
+      });
+      expect(result.current.x$.get()).toBe(0);
+      expect(result.current.y$.get()).toBe(0);
+
+      // Allow passthrough
+      passthrough = true;
+      act(() => {
+        window.dispatchEvent(
+          new MouseEvent("mousemove", { bubbles: true, clientX: 50, clientY: 60 })
+        );
+      });
+      expect(result.current.x$.get()).toBe(50);
+      expect(result.current.y$.get()).toBe(60);
+    });
+
+    it("touchend is not affected by eventFilter", () => {
+      let invokeCount = 0;
+      const filter: EventFilter = (invoke) => {
+        invokeCount++;
+        return invoke();
+      };
+
+      const { result } = renderHook(() =>
+        useMouse({
+          touch: true,
+          resetOnTouchEnds: true,
+          initialValue: { x: 0, y: 0 },
+          eventFilter: filter,
+        })
+      );
+
+      // Touch move (filtered)
+      act(() => {
+        window.dispatchEvent(
+          createTouchEvent("touchmove", [{ pageX: 55, pageY: 77, clientX: 55, clientY: 77 }])
+        );
+      });
+      const countAfterMove = invokeCount;
+
+      // Touch end (not filtered — reset action)
+      act(() => {
+        window.dispatchEvent(new Event("touchend", { bubbles: true }));
+      });
+
+      // Filter should not have been called again for touchend
+      expect(invokeCount).toBe(countAfterMove);
+      // But reset should still happen
+      expect(result.current.x$.get()).toBe(0);
+      expect(result.current.y$.get()).toBe(0);
+    });
+
+    it("works without eventFilter (default behavior)", () => {
+      const { result } = renderHook(() => useMouse({ type: "client" }));
+
+      act(() => {
+        window.dispatchEvent(
+          new MouseEvent("mousemove", { bubbles: true, clientX: 42, clientY: 84 })
+        );
+      });
+
+      expect(result.current.x$.get()).toBe(42);
+      expect(result.current.y$.get()).toBe(84);
     });
   });
 

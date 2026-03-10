@@ -1,0 +1,99 @@
+"use client";
+import { useObservable } from "@legendapp/state/react";
+import { useCallback } from "react";
+import { type MaybeElement } from "@usels/core";
+import type { DeepMaybeObservable } from "@usels/core";
+import type { ReadonlyObservable } from "@usels/core";
+import { useMaybeObservable } from "@usels/core";
+import { useInitialPick } from "@usels/core";
+import { useConstant } from "@usels/core/shared/useConstant";
+import { defaultWindow } from "@usels/core/shared/configurable";
+import { useEventListener } from "@browser/useEventListener";
+
+export type UseMousePressedSourceType = "mouse" | "touch" | null;
+
+export interface UseMousePressedOptions {
+  /** Track touch events. Default: true */
+  touch?: boolean;
+  /** Event target for press detection. Default: window */
+  target?: MaybeElement;
+  /** Prevent drag — calls preventDefault on pointerdown. Default: false */
+  preventDragEvent?: boolean;
+  /** Callback fired on press */
+  onPressed?: (e: PointerEvent | TouchEvent) => void;
+  /** Callback fired on release */
+  onReleased?: (e: PointerEvent | TouchEvent) => void;
+}
+
+export interface UseMousePressedReturn {
+  /** Current pressed state */
+  pressed$: ReadonlyObservable<boolean>;
+  /** Event source type: "mouse" | "touch" | null */
+  sourceType$: ReadonlyObservable<UseMousePressedSourceType>;
+}
+
+export function useMousePressed(
+  options?: DeepMaybeObservable<UseMousePressedOptions>
+): UseMousePressedReturn {
+  const opts$ = useMaybeObservable<UseMousePressedOptions>(options, {
+    onPressed: "function",
+    onReleased: "function",
+  });
+
+  // mount-time-only
+  const { touch } = useInitialPick(opts$, { touch: true });
+
+  const pressed$ = useObservable(false);
+  const sourceType$ = useObservable<UseMousePressedSourceType>(null);
+
+  // Extract raw target from options at mount time (same pattern as useMouse)
+  const eventTarget: MaybeElement = useConstant(() => {
+    if (options == null) return defaultWindow ?? null;
+    const target = (options as Record<string, unknown>).target as MaybeElement | undefined;
+    return target ?? defaultWindow ?? null;
+  });
+
+  // --- Pointer events (mouse) ---
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
+  const onPointerDown = useCallback((e: PointerEvent) => {
+    if (opts$.preventDragEvent?.peek()) e.preventDefault();
+    pressed$.set(true);
+    sourceType$.set("mouse");
+    opts$.peek()?.onPressed?.(e);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Release always on window (even if press was on a specific element)
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
+  const onPointerUp = useCallback((e: PointerEvent) => {
+    if (!pressed$.peek()) return;
+    pressed$.set(false);
+    opts$.peek()?.onReleased?.(e);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEventListener(eventTarget, "pointerdown", onPointerDown);
+  useEventListener(defaultWindow, "pointerup", onPointerUp);
+
+  // --- Touch events ---
+  const touchTarget: MaybeElement = touch ? eventTarget : null;
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
+  const onTouchStart = useCallback((e: TouchEvent) => {
+    pressed$.set(true);
+    sourceType$.set("touch");
+    opts$.peek()?.onPressed?.(e);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
+  const onTouchEnd = useCallback((e: TouchEvent) => {
+    if (!pressed$.peek()) return;
+    pressed$.set(false);
+    opts$.peek()?.onReleased?.(e);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEventListener(touchTarget, "touchstart", onTouchStart, { passive: true });
+  useEventListener(touch ? defaultWindow : null, "touchend", onTouchEnd, { passive: true });
+  useEventListener(touch ? defaultWindow : null, "touchcancel", onTouchEnd, { passive: true });
+
+  return { pressed$, sourceType$ };
+}
