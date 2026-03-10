@@ -105,6 +105,23 @@ export function connectDevTools(
       connection.send({ type: actionType }, serializeRegistry(registry));
     };
   }
+
+  // Track state changes outside of actions (e.g. async query results)
+  const { connection } = devtools;
+  let pendingStateUpdate = false;
+  for (const [, val] of Object.entries(_store)) {
+    if (!isObservable(val)) continue;
+    const unsub = (val as { onChange(cb: () => void): () => void }).onChange(() => {
+      if (tracker?.activeAction) return;
+      if (pendingStateUpdate) return;
+      pendingStateUpdate = true;
+      queueMicrotask(() => {
+        pendingStateUpdate = false;
+        connection.send({ type: `${name}/__state` }, serializeRegistry(registry));
+      });
+    });
+    devtools!.disposers.push(unsub);
+  }
 }
 
 /**
