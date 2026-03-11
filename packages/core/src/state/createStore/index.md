@@ -84,7 +84,10 @@ const useDocStore = createStore("doc", () => {
 ### Redux DevTools integration
 
 Stores auto-connect to Redux DevTools Extension in development mode.
-Only **action functions** returned from the store are tracked — each call is logged as `storeName/actionName`. Direct observable mutations without an action function are not tracked.
+Two types of entries appear in the DevTools timeline:
+
+- **Action entries** (`storeName/actionName`) — logged when an action function returned from the store is called.
+- **State entries** (`storeName/__state`) — logged when observables change outside of any action (e.g. async query results, external mutations). Multiple synchronous changes are batched into a single entry.
 
 ```tsx twoslash
 // @noErrors
@@ -98,9 +101,37 @@ const useAppStore = createStore("app", () => {
   return { theme$, toggleTheme };
 });
 
-// DevTools shows:
-// - Initial state: { theme: "light" }
-// - On toggleTheme() call: action "app/toggleTheme"
+// DevTools timeline:
+// @@INIT        → { theme$: "light" }
+// app/toggleTheme → { theme$: "dark" }
+```
+
+State changes from async operations (e.g. fetch results, timers, WebSocket messages) that happen outside of action functions appear as `__state` entries:
+
+```tsx twoslash
+// @noErrors
+import { observable } from "@legendapp/state";
+import { createStore } from "@usels/core";
+
+const useDataStore = createStore("data", () => {
+  const items$ = observable<string[]>([]);
+  const isLoading$ = observable(false);
+
+  const fetchItems = async () => {
+    isLoading$.set(true); // sync part → "data/fetchItems"
+    const res = await fetch("/api/items");
+    const data = await res.json();
+    items$.set(data); // after await → "data/__state"
+    isLoading$.set(false);
+  };
+
+  return { items$, isLoading$, fetchItems };
+});
+
+// DevTools timeline:
+// @@INIT           → { items$: [], isLoading$: false }
+// data/fetchItems  → { items$: [], isLoading$: true }      ← sync part of action
+// data/__state     → { items$: [...], isLoading$: false }   ← after await
 ```
 
 ## StoreProvider
