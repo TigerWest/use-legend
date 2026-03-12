@@ -199,7 +199,7 @@ export function useScroll(
     element as any,
     "scroll",
     handler,
-    opts$.peek()?.eventListenerOptions ?? {
+    opts$?.eventListenerOptions ?? {
       capture: false,
       passive: true,
     }

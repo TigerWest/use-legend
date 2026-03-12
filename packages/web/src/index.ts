@@ -36,5 +36,7 @@ export * from "./sensors/useInfiniteScroll";
 export * from "./sensors/useWindowScroll";
 export * from "./sensors/useNetwork";
 export * from "./sensors/useOnline";
+export * from "./sensors/useFocus";
+export * from "./sensors/useFocusWithin";
 export * from "./browser/useLocalStorage";
 export * from "./browser/useSessionStorage";
