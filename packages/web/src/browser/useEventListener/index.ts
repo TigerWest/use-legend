@@ -57,7 +57,7 @@ export function useEventListener<E extends keyof WindowEventMap>(
   target: Window,
   event: Arrayable<E>,
   listener: Arrayable<(ev: WindowEventMap[E]) => void>,
-  options?: MaybeObservable<boolean | AddEventListenerOptions>
+  options?: MaybeObservable<boolean | undefined | AddEventListenerOptions>
 ): () => void;
 
 /**

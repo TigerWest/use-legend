@@ -5,9 +5,14 @@ import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { throttle } from "es-toolkit";
-import { type MaybeElement, getElement, peekElement } from "@usels/core";
+import {
+  type MaybeElement,
+  type DeepMaybeObservable,
+  getElement,
+  peekElement,
+  useMaybeObservable,
+} from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
-import type { MaybeObservable } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
 
 // ---------------------------------------------------------------------------
@@ -27,7 +32,7 @@ export interface UseScrollOptions {
     bottom?: number;
   };
   behavior?: ScrollBehavior;
-  eventListenerOptions?: MaybeObservable<AddEventListenerOptions>;
+  eventListenerOptions?: AddEventListenerOptions;
 }
 
 export interface ArrivedState {
@@ -106,7 +111,16 @@ function getScrollDimensions(el: HTMLElement | Document | Window | null): {
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useScroll(element: MaybeElement, options?: UseScrollOptions): UseScrollReturn {
+export function useScroll(
+  element: MaybeElement,
+  options?: DeepMaybeObservable<UseScrollOptions>
+): UseScrollReturn {
+  const opts$ = useMaybeObservable(options, {
+    onScroll: "function",
+    onStop: "function",
+    onError: "function",
+  });
+
   const initial = getScrollValues(peekElement(element));
 
   const x$ = useObservable<number>(initial.x);
@@ -132,8 +146,8 @@ export function useScroll(element: MaybeElement, options?: UseScrollOptions): Us
     isScrolling$.set(true);
     idleTimer.current = setTimeout(() => {
       isScrolling$.set(false);
-      options?.onStop?.();
-    }, options?.idle ?? 200);
+      (opts$.peek()?.onStop as (() => void) | undefined)?.();
+    }, opts$.peek()?.idle ?? 200);
   };
 
   const measure = () => {
@@ -157,7 +171,7 @@ export function useScroll(element: MaybeElement, options?: UseScrollOptions): Us
     const { scrollW, scrollH, clientW, clientH } = getScrollDimensions(el);
     const maxX = scrollW - clientW;
     const maxY = scrollH - clientH;
-    const offset = options?.offset ?? {};
+    const offset = opts$.peek()?.offset ?? {};
 
     arrivedState$.assign({
       left: newX <= (offset.left ?? 0),
@@ -170,13 +184,12 @@ export function useScroll(element: MaybeElement, options?: UseScrollOptions): Us
   };
 
   const measureRef = useLatest(measure);
-  const onScrollRef = useLatest(options?.onScroll);
 
   const handler = useConstant(() => {
-    const ms = options?.throttle ?? 0;
+    const ms = opts$.peek()?.throttle ?? 0;
     const invoke = (e: Event) => {
       measureRef.current();
-      onScrollRef.current?.(e);
+      opts$.peek()?.onScroll?.(e);
     };
     return ms > 0 ? throttle(invoke, ms) : invoke;
   });
@@ -186,7 +199,10 @@ export function useScroll(element: MaybeElement, options?: UseScrollOptions): Us
     element as any,
     "scroll",
     handler,
-    options?.eventListenerOptions ?? { capture: false, passive: true }
+    opts$.peek()?.eventListenerOptions ?? {
+      capture: false,
+      passive: true,
+    }
   );
 
   useObserve(() => {

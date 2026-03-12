@@ -26,6 +26,7 @@ export * from "./sensors/useMouse";
 export * from "./sensors/useMousePressed";
 export * from "./sensors/useScroll";
 export * from "./sensors/useScrollLock";
+export * from "./sensors/useInfiniteScroll";
 export * from "./sensors/useWindowScroll";
 export * from "./browser/useLocalStorage";
 export * from "./browser/useSessionStorage";
