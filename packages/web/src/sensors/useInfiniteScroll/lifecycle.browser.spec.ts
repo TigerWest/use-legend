@@ -3,7 +3,6 @@
  *
  * Runs in real Playwright Chromium (not jsdom).
  * Tests element mount/unmount cycles with real scroll events.
- * Type-B/C/D tests remain in index.spec.ts (jsdom).
  */
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
@@ -16,7 +15,7 @@ function makeScrollContainer(
     containerHeight?: number;
     contentHeight?: number;
   } = {}
-): HTMLDivElement {
+): { container: HTMLDivElement; content: HTMLDivElement } {
   const { containerHeight = 200, contentHeight = 800 } = opts;
 
   const container = document.createElement("div");
@@ -37,26 +36,24 @@ function makeScrollContainer(
 
   container.appendChild(content);
   document.body.appendChild(container);
-  return container;
+  return { container, content };
 }
 
 // ---------------------------------------------------------------------------
 // Setup / teardown
 // ---------------------------------------------------------------------------
 
-let containers: HTMLDivElement[] = [];
+let cleanupFns: (() => void)[] = [];
 
 beforeEach(() => {
-  containers = [];
+  cleanupFns = [];
   document.body.style.margin = "0";
   document.body.style.padding = "0";
 });
 
 afterEach(() => {
-  for (const el of containers) {
-    if (el.parentNode) document.body.removeChild(el);
-  }
-  containers = [];
+  for (const fn of cleanupFns) fn();
+  cleanupFns = [];
   document.body.style.margin = "";
   document.body.style.padding = "";
 });
@@ -71,11 +68,16 @@ describe("useInfiniteScroll() — element lifecycle (real browser)", () => {
     const target$ = observable<OpaqueObject<Element> | null>(null);
 
     const onLoadMore = vi.fn();
-    renderHook(() => useInfiniteScroll(target$ as any, onLoadMore, { direction: "bottom" }));
+    renderHook(() =>
+      useInfiniteScroll(target$ as any, onLoadMore, {
+        direction: "bottom",
+        interval: 0,
+      })
+    );
 
     // Now assign a real scrollable element
-    const container = makeScrollContainer();
-    containers.push(container);
+    const { container } = makeScrollContainer();
+    cleanupFns.push(() => document.body.removeChild(container));
 
     act(() => {
       target$.set(ObservableHint.opaque(container));
@@ -93,8 +95,8 @@ describe("useInfiniteScroll() — element lifecycle (real browser)", () => {
   });
 
   it("Ref$ element → null: stops triggering loads on scroll", async () => {
-    const container = makeScrollContainer();
-    containers.push(container);
+    const { container } = makeScrollContainer();
+    cleanupFns.push(() => document.body.removeChild(container));
 
     const target$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(container));
 
@@ -103,6 +105,7 @@ describe("useInfiniteScroll() — element lifecycle (real browser)", () => {
       useInfiniteScroll(target$ as any, onLoadMore, {
         direction: "bottom",
         immediate: false,
+        interval: 0,
       })
     );
 
@@ -133,16 +136,20 @@ describe("useInfiniteScroll() — element lifecycle (real browser)", () => {
       useInfiniteScroll(target$ as any, onLoadMore, {
         direction: "bottom",
         immediate: false,
+        interval: 0,
       })
     );
 
-    const container = makeScrollContainer();
-    containers.push(container);
+    const { container } = makeScrollContainer();
+    cleanupFns.push(() => document.body.removeChild(container));
 
     // Cycle 1: assign element
     act(() => {
       target$.set(ObservableHint.opaque(container));
     });
+
+    // Wait for IntersectionObserver to register visibility
+    await new Promise<void>((r) => setTimeout(r, 100));
 
     // Scroll to bottom — load should fire exactly once
     act(() => {
@@ -154,6 +161,9 @@ describe("useInfiniteScroll() — element lifecycle (real browser)", () => {
       timeout: 2000,
     });
 
+    // Wait for isLoading$ to clear
+    await new Promise<void>((r) => setTimeout(r, 50));
+
     // Cycle 1: remove element
     act(() => {
       target$.set(null);
@@ -164,11 +174,17 @@ describe("useInfiniteScroll() — element lifecycle (real browser)", () => {
       target$.set(ObservableHint.opaque(container));
     });
 
+    // Wait for IntersectionObserver to re-register
+    await new Promise<void>((r) => setTimeout(r, 100));
+
     // Scroll to top then back to bottom to ensure we re-trigger
     act(() => {
       container.scrollTop = 0;
       container.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
+
+    await new Promise<void>((r) => setTimeout(r, 50));
+
     act(() => {
       container.scrollTop = container.scrollHeight - container.clientHeight;
       container.dispatchEvent(new Event("scroll", { bubbles: true }));

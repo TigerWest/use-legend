@@ -103,6 +103,20 @@ const target = typeof window !== "undefined" ? document : null;
 const { y$ } = useScroll(target);
 ```
 
+### Reactive options
+
+Options can be passed as plain values, per-field `Observable`s, or a single `Observable<UseScrollOptions>`. Changes are picked up reactively.
+
+```typescript
+import { observable } from "@legendapp/state";
+
+const idle$ = observable(200);
+const { isScrolling$ } = useScroll(el$, { idle: idle$ });
+
+// Later: update idle time reactively
+idle$.set(500);
+```
+
 ## Notes
 
 **Reactive observables, not state.** All returned values (`x$`, `y$`, `isScrolling$`, `arrivedState$`, `directions$`) are Legend-State `Observable`s. Read them with `.get()` inside a reactive context (`useObserve`, etc.) to avoid unnecessary re-renders.
@@ -110,3 +124,5 @@ const { y$ } = useScroll(target);
 **`measure()` is synchronous.** It immediately reads the current scroll values from the DOM and updates all observables. Useful after programmatic scroll operations.
 
 **`arrivedState` initial values.** On mount, `top` and `left` default to `true`, and `bottom`/`right` default to `false`. After the first `measure()` call (triggered automatically on mount), all values are synced with actual DOM state.
+
+**`options` is `DeepMaybeObservable`.** Each option field can be a plain value or an `Observable`. Callback options (`onScroll`, `onStop`, `onError`) are passed as plain functions.

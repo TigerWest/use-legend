@@ -3,7 +3,7 @@ title: useInfiniteScroll
 category: sensors
 ---
 
-Triggers a load callback whenever the scroll position reaches a boundary of a scrollable element, enabling infinite scroll for lists and feeds. Supports all four scroll directions, pre-load distance, manual control, async callbacks, and a finished state to stop loading.
+Triggers a load callback whenever the scroll position reaches a boundary of a scrollable element, enabling infinite scroll for lists and feeds. Supports all four scroll directions, pre-load distance, manual control, async callbacks, and a `canLoadMore` gate function to control when loading stops.
 
 ## Demo
 
@@ -85,9 +85,52 @@ useInfiniteScroll(el$, onLoadMore, {
 });
 ```
 
+### canLoadMore
+
+Pass a `canLoadMore` function to control whether loading should trigger. When it returns `false`, the scroll listener is skipped entirely. Use this to stop loading once all pages have been fetched.
+
+```tsx twoslash
+// @noErrors
+import { useRef$ } from "@usels/core";
+import { useInfiniteScroll } from "@usels/web";
+
+function Component() {
+  const el$ = useRef$<HTMLDivElement>();
+  const [hasMore, setHasMore] = useState(true);
+
+  useInfiniteScroll(
+    el$,
+    async () => {
+      const page = await fetchNextPage();
+      if (!page.hasMore) setHasMore(false);
+    },
+    {
+      canLoadMore: () => hasMore,
+    }
+  );
+
+  return (
+    <div ref={el$} style={{ height: 300, overflowY: "auto" }}>
+      {/* list */}
+      {!hasMore && <div>No more items</div>}
+    </div>
+  );
+}
+```
+
+### Minimum load interval
+
+Use the `interval` option to set a minimum number of milliseconds between consecutive load triggers. This prevents multiple rapid-fire loads when the user scrolls quickly.
+
+```typescript
+useInfiniteScroll(el$, onLoadMore, {
+  interval: 200, // minimum 200ms between consecutive loads (default: 100)
+});
+```
+
 ### Manual load & reset
 
-`load` triggers a load imperatively; `reset` clears the `isFinished$` flag so loading can resume after it was stopped.
+`load` triggers a load imperatively; `reset` re-checks the current scroll position and triggers a load if the boundary condition is met.
 
 ```tsx twoslash
 // @noErrors
@@ -123,32 +166,4 @@ useInfiniteScroll(el$, async (direction) => {
   cursor = page.nextCursor;
   items.push(...page.data);
 });
-```
-
-### Finish condition
-
-Set `isFinished$.set(true)` inside the callback (or elsewhere) to permanently stop auto-loading. Call `reset()` to resume.
-
-```tsx twoslash
-// @noErrors
-import { useRef$ } from "@usels/core";
-import { useInfiniteScroll } from "@usels/web";
-
-function Component() {
-  const el$ = useRef$<HTMLDivElement>();
-
-  const { isFinished$ } = useInfiniteScroll(el$, async () => {
-    const page = await fetchNextPage();
-    if (!page.hasMore) {
-      isFinished$.set(true);
-    }
-  });
-
-  return (
-    <div ref={el$} style={{ height: 300, overflowY: "auto" }}>
-      {/* list */}
-      {isFinished$.get() && <div>No more items</div>}
-    </div>
-  );
-}
 ```

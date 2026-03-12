@@ -1,12 +1,13 @@
 "use client";
-import { type Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { useMaybeObservable } from "@usels/core";
+import { useMaybeObservable, peekElement } from "@usels/core";
 import type { DeepMaybeObservable, MaybeElement, ReadonlyObservable, Awaitable } from "@usels/core";
 import { useInitialPick } from "@usels/core";
 import { useLatest } from "@usels/core/shared/useLatest";
+import { isWindow } from "@usels/core/shared/index";
 import { useScroll, type UseScrollOptions } from "@sensors/useScroll";
+import { useElementVisibility } from "@elements/useElementVisibility";
 
 export type UseInfiniteScrollDirection = "top" | "bottom" | "left" | "right";
 
@@ -17,6 +18,10 @@ export interface UseInfiniteScrollOptions {
   distance?: number;
   /** Whether to auto-load on mount if content is already at boundary. Default: true */
   immediate?: boolean;
+  /** Minimum ms between consecutive load triggers. Default: 100 */
+  interval?: number;
+  /** Gate function — return false to block loading. Evaluated before each load. */
+  canLoadMore?: (el: HTMLElement) => boolean;
   /** Additional options passed to useScroll */
   scrollOptions?: UseScrollOptions;
 }
@@ -24,11 +29,9 @@ export interface UseInfiniteScrollOptions {
 export interface UseInfiniteScrollReturn {
   /** Currently loading */
   isLoading$: ReadonlyObservable<boolean>;
-  /** Finished — no more loads when true */
-  isFinished$: Observable<boolean>;
   /** Manually trigger a load */
   load: () => Promise<void>;
-  /** Reset isFinished to false */
+  /** Re-check scroll position and trigger load if needed */
   reset: () => void;
 }
 
@@ -59,39 +62,85 @@ export function useInfiniteScroll(
   });
 
   const isLoading$ = useObservable(false);
-  const isFinished$ = useObservable(false);
   const onLoadMoreRef = useLatest(onLoadMore);
 
-  const { arrivedState$ } = useScroll(element, scrollOpts$);
+  const { arrivedState$, measure } = useScroll(element, scrollOpts$);
+
+  const isVisible$ = useElementVisibility(element);
 
   const load = useCallback(async () => {
-    if (isLoading$.peek() || isFinished$.peek()) return;
+    if (isLoading$.peek()) return;
+    if (!isVisible$.peek()) return;
+
+    const opts = opts$.peek();
+    const canLoadMore = opts?.canLoadMore;
+    if (canLoadMore) {
+      const el = peekElement(element);
+      const domEl = isWindow(el) ? document.documentElement : (el as HTMLElement | null);
+      if (domEl && !canLoadMore(domEl as HTMLElement)) return;
+    }
+
     isLoading$.set(true);
     try {
-      await onLoadMoreRef.current(direction);
+      const interval = opts?.interval ?? 100;
+      await Promise.all([
+        onLoadMoreRef.current(direction),
+        new Promise((r) => setTimeout(r, interval)),
+      ]);
     } finally {
       isLoading$.set(false);
+      // schedule a re-check for auto-fill loop
+      setTimeout(() => {
+        measure();
+      }, 0);
     }
   }, []);
 
-  // auto-load when arrivedState matches direction
+  // Check if content doesn't overflow the container
+  function isNarrower(): boolean {
+    const el = peekElement(element);
+    if (!el) return false;
+    const isVertical = direction === "top" || direction === "bottom";
+    if (isWindow(el)) {
+      const docEl = document.documentElement;
+      return isVertical
+        ? docEl.scrollHeight <= window.innerHeight
+        : docEl.scrollWidth <= window.innerWidth;
+    }
+    const domEl = el as HTMLElement;
+    return isVertical
+      ? domEl.scrollHeight <= domEl.clientHeight
+      : domEl.scrollWidth <= domEl.clientWidth;
+  }
+
+  // auto-load when arrivedState matches direction or content doesn't overflow
   useObserve(() => {
+    if (!immediate && !arrivedState$.get()) return; // skip auto-fill on mount when immediate=false
+    const isVisible = isVisible$.get();
     const arrived = arrivedState$.get()[direction];
-    if (arrived && !isLoading$.peek() && !isFinished$.peek()) {
+    if (!isVisible || isLoading$.peek()) return;
+
+    const opts = opts$.peek();
+    const canLoadMore = opts?.canLoadMore;
+    if (canLoadMore) {
+      const el = peekElement(element);
+      const domEl = isWindow(el) ? document.documentElement : (el as HTMLElement | null);
+      if (domEl && !canLoadMore(domEl as HTMLElement)) return;
+    }
+
+    if (arrived || isNarrower()) {
       void load();
     }
   });
 
   const reset = useCallback(() => {
-    isFinished$.set(false);
+    setTimeout(() => {
+      measure();
+    }, 0);
   }, []);
-
-  // suppress unused variable warning for immediate (intentionally captured for future use / API completeness)
-  void immediate;
 
   return {
     isLoading$,
-    isFinished$,
     load,
     reset,
   };

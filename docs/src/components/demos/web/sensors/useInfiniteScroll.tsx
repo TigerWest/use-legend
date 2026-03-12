@@ -22,31 +22,37 @@ function makeItems(from: number, count: number): string[] {
 export default function UseInfiniteScrollDemo() {
   const el$ = useRef$<HTMLDivElement>();
   const items$ = useObservable<string[]>(makeItems(0, ITEMS_PER_PAGE));
+  const hasMore$ = useObservable(true);
 
-  const { isLoading$, isFinished$, reset } = useInfiniteScroll(el$, async () => {
-    console.log("test?");
-    await new Promise<void>((r) => setTimeout(r, 800));
-    const current = items$.peek();
-    if (current.length >= MAX_ITEMS) {
-      isFinished$.set(true);
-      return;
+  const { isLoading$, reset } = useInfiniteScroll(
+    el$,
+    async () => {
+      await new Promise<void>((r) => setTimeout(r, 800));
+      const current = items$.peek();
+      if (current.length >= MAX_ITEMS) {
+        hasMore$.set(false);
+        return;
+      }
+      const next = makeItems(current.length, Math.min(ITEMS_PER_PAGE, MAX_ITEMS - current.length));
+      items$.set([...current, ...next]);
+    },
+    {
+      canLoadMore: () => hasMore$.peek(),
     }
-    const next = makeItems(current.length, Math.min(ITEMS_PER_PAGE, MAX_ITEMS - current.length));
-    items$.set([...current, ...next]);
-  });
+  );
 
   function handleReset() {
     items$.set(makeItems(0, ITEMS_PER_PAGE));
-    isFinished$.set(false);
+    hasMore$.set(true);
     reset();
   }
 
   const statusLabel$ = useObservable(() =>
-    isFinished$.get() ? "Finished" : isLoading$.get() ? "Loading" : "Idle"
+    !hasMore$.get() ? "Finished" : isLoading$.get() ? "Loading" : "Idle"
   );
 
   const statusTone$ = useObservable(() =>
-    isFinished$.get() ? "neutral" : isLoading$.get() ? "orange" : "green"
+    !hasMore$.get() ? "neutral" : isLoading$.get() ? "orange" : "green"
   );
 
   return (
@@ -102,7 +108,7 @@ export default function UseInfiniteScrollDemo() {
             </div>
           </Show>
 
-          <Show if={isFinished$}>
+          <Show if={() => !hasMore$.get()}>
             <div
               style={{
                 padding: "12px 14px",
