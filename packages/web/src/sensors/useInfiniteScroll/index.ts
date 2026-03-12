@@ -46,7 +46,6 @@ export function useInfiniteScroll(
   });
 
   // Computed scroll options — derived reactively from opts$
-  // useScroll takes plain UseScrollOptions, so pass .peek() for now
   const scrollOpts$ = useObservable<UseScrollOptions>(() => {
     const distance = opts$.distance.get() ?? 0;
     const extra = opts$.scrollOptions.get();
@@ -63,7 +62,7 @@ export function useInfiniteScroll(
   const isFinished$ = useObservable(false);
   const onLoadMoreRef = useLatest(onLoadMore);
 
-  const { arrivedState$ } = useScroll(element, scrollOpts$.peek());
+  const { arrivedState$ } = useScroll(element, scrollOpts$);
 
   const load = useCallback(async () => {
     if (isLoading$.peek() || isFinished$.peek()) return;
