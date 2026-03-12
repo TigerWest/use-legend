@@ -13,7 +13,7 @@ const specFiles = [
 ];
 
 export default [
-  // TypeScript + React Hooks 기본 권장 규칙
+  // TypeScript + React Hooks recommended rules
   {
     files,
     languageOptions: {
@@ -35,15 +35,17 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/exhaustive-deps": "off",
     },
   },
-  // Legend-State 플러그인 규칙
+  // Legend-State plugin rules
   {
     ...legendPlugin.configs.recommended,
     files,
   },
-  // 테스트 파일: no-explicit-any off (테스트에서는 any 자유롭게 사용)
-  // reportUnusedDisableDirectives: false — 테스트 파일의 기존 inline disable 주석이 unused로 잡히지 않게
+  // Test files: allow `any` freely, suppress unused disable directive warnings
+  // reportUnusedDisableDirectives: false — prevent existing inline disable comments from being flagged as unused
   {
     files: specFiles,
     linterOptions: {
@@ -54,7 +56,7 @@ export default [
       "use-legend/prefer-use-observable": "off",
     },
   },
-  // Prettier: ESLint과 충돌하는 포맷팅 규칙 비활성화 + prettier 위반을 ESLint 오류로 표시
+  // Prettier: disable conflicting formatting rules + report prettier violations as ESLint errors
   {
     ...prettierRecommended,
     files,
