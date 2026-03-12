@@ -5,6 +5,12 @@ export * from "@usels/core";
 export * from "./browser/useEventListener";
 export * from "./browser/useMediaQuery";
 export * from "./browser/useAnimate";
+export * from "./browser/usePreferredDark";
+export * from "./browser/usePreferredColorScheme";
+export * from "./browser/usePreferredContrast";
+export * from "./browser/usePreferredReducedMotion";
+export * from "./browser/usePreferredReducedTransparency";
+export * from "./browser/usePreferredLanguages";
 
 // Elements
 export * from "./elements/useResizeObserver";
