@@ -38,5 +38,7 @@ export * from "./sensors/useNetwork";
 export * from "./sensors/useOnline";
 export * from "./sensors/useFocus";
 export * from "./sensors/useFocusWithin";
+export * from "./sensors/useOnClickOutside";
+export * from "./sensors/useOnLongPress";
 export * from "./browser/useLocalStorage";
 export * from "./browser/useSessionStorage";
