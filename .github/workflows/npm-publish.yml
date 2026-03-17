@@ -4,10 +4,11 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   publish:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -41,7 +42,9 @@ jobs:
       - name: Determine npm dist-tag
         id: dist-tag
         run: |
-          if ${{ contains(github.event.pull_request.labels.*.name, 'beta') }}; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "TAG=" >> "$GITHUB_OUTPUT"
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'beta') }}; then
             echo "TAG=--tag beta" >> "$GITHUB_OUTPUT"
           else
             echo "TAG=" >> "$GITHUB_OUTPUT"
