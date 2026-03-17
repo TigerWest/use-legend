@@ -1,6 +1,7 @@
 ---
 paths:
   - "packages/core/src/**/*.ts"
+  - "packages/web/src/**/*.ts"
   - "packages/integrations/src/**/*.ts"
 ---
 
@@ -27,14 +28,14 @@ packages/core/src/
 
 ### Core Function Rules
 
-| Rule | Description |
-|------|-------------|
-| **No React** | Never import `react` or `@legendapp/state/react` |
-| **Observable args** | Reactive parameters use `Observable<T>` (hook converts via `useMaybeObservable`) |
-| **`observe()` only** | Use `observe()` from `@legendapp/state`, not `useObserve()` |
-| **Return `Disposable`** | Every core function returns `Disposable & { ... }` — all subscriptions/timers cleaned up via `dispose()` |
-| **Observable results** | Output values are `Observable<T>` — no additional wrapping needed in hook |
-| **Plain non-reactive opts** | Mount-time-only settings (edges, maxWait) are plain values, captured in closure |
+| Rule                        | Description                                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **No React**                | Never import `react` or `@legendapp/state/react`                                                         |
+| **Observable args**         | Reactive parameters use `Observable<T>` (hook converts via `useMaybeObservable`)                         |
+| **`observe()` only**        | Use `observe()` from `@legendapp/state`, not `useObserve()`                                              |
+| **Return `Disposable`**     | Every core function returns `Disposable & { ... }` — all subscriptions/timers cleaned up via `dispose()` |
+| **Observable results**      | Output values are `Observable<T>` — no additional wrapping needed in hook                                |
+| **Plain non-reactive opts** | Mount-time-only settings (edges, maxWait) are plain values, captured in closure                          |
 
 ```ts
 import { type Observable, observe, observable } from "@legendapp/state";
@@ -43,13 +44,13 @@ import type { Disposable } from "../../types";
 function createDebounced<T>(
   source$: Observable<T>,
   delay$: Observable<number>,
-  options?: DebounceOptions         // non-reactive → plain
+  options?: DebounceOptions // non-reactive → plain
 ): Disposable & { value$: Observable<T> } {
   const value$ = observable<T>(source$.peek());
 
   const unsub = observe(() => {
-    const val = source$.get();      // reactive dep
-    const ms = delay$.get();        // reactive dep
+    const val = source$.get(); // reactive dep
+    const ms = delay$.get(); // reactive dep
     // debounce logic...
     value$.set(val);
   });
@@ -63,12 +64,12 @@ function createDebounced<T>(
 
 ### Hook Wrapper Rules
 
-| Rule | Description |
-|------|-------------|
-| **`useMaybeObservable()`** | Convert `MaybeObservable<T>` / `DeepMaybeObservable<T>` → `Observable<T>` |
-| **`useConstant(() => coreFn(...))`** | Call core function exactly once — stable across re-renders |
-| **`useUnmount(dispose)`** | Cleanup on unmount (or `useEffect(() => dispose, [dispose])`) |
-| **Preserve public API** | Return type stays the same — no breaking changes |
+| Rule                                 | Description                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| **`useMaybeObservable()`**           | Convert `MaybeObservable<T>` / `DeepMaybeObservable<T>` → `Observable<T>` |
+| **`useConstant(() => coreFn(...))`** | Call core function exactly once — stable across re-renders                |
+| **`useUnmount(dispose)`**            | Cleanup on unmount (or `useEffect(() => dispose, [dispose])`)             |
+| **Preserve public API**              | Return type stays the same — no breaking changes                          |
 
 ```ts
 import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
@@ -94,13 +95,13 @@ export function useDebounced<T>(
 
 ### Naming Convention
 
-| Layer | Pattern | Example |
-|-------|---------|---------|
-| Core function | `createName()` | `createDebounced()`, `createHistory()`, `createIntervalFn()` |
-| Core file | `core.ts` | in each hook directory |
-| Hook | `useName()` | `useDebounced()`, `useHistory()` |
-| Hook file | `index.ts` | (existing convention) |
-| Observable variable | `name$` | `value$`, `source$`, `size$` |
+| Layer               | Pattern        | Example                                                      |
+| ------------------- | -------------- | ------------------------------------------------------------ |
+| Core function       | `createName()` | `createDebounced()`, `createHistory()`, `createIntervalFn()` |
+| Core file           | `core.ts`      | in each hook directory                                       |
+| Hook                | `useName()`    | `useDebounced()`, `useHistory()`                             |
+| Hook file           | `index.ts`     | (existing convention)                                        |
+| Observable variable | `name$`        | `value$`, `source$`, `size$`                                 |
 
 ---
 
@@ -134,7 +135,7 @@ function createElementSize(target: MaybeElement): Disposable & { size$: Observab
   const size$ = observable({ width: 0, height: 0 });
 
   const unsub = observe(() => {
-    const el = getElement(target);  // reactive tracking registered
+    const el = getElement(target); // reactive tracking registered
     if (!el || !(el instanceof HTMLElement)) return;
     // ResizeObserver setup...
   });
@@ -201,6 +202,7 @@ el$.set(ObservableHint.opaque(document.querySelector("#root")));
 ```
 
 This is exactly what `useRef$` does internally:
+
 ```ts
 el$.set(node ? ObservableHint.opaque(node) : null);
 ```
@@ -292,10 +294,12 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 > **⚠️ Outer Observable — child-field mutation vs full-object replace**
 >
 > When `options` is `Observable<Options>`:
+>
 > - `options$.set({ rootMargin: "20px" })` — full replace → `opts$` recomputes → reactive ✓
 > - `options$.rootMargin.set("20px")` — child-field mutation → behavior **may vary** by Legend-State version
 >
 > Reliable workarounds when callers mutate at child-field level:
+>
 > - Pass `rootMargin` as a per-field Observable: `{ rootMargin: observable("0px") }` ✓
 > - Use full-object replace: `options$.set({ rootMargin: "20px" })` ✓
 
@@ -303,14 +307,14 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 
 Pass an optional `FieldTransformMap<T>` as the second argument to control how each field is resolved.
 
-| Hint | Behavior | Use when |
-|------|----------|----------|
-| _(omitted)_ / `'default'` | no-op — Legend-State auto-derefs + registers dep at call site | reactive plain fields (default) |
-| `'element'` | `getElement(fieldValue)` (reactive) + `ObservableHint.opaque()` | `MaybeElement` fields |
-| `'opaque'` | `get(fieldValue)` + `ObservableHint.opaque()` | non-element objects needing opaque wrapping |
-| `'plain'` | `get(fieldValue)` + `ObservableHint.plain()` | prevent nested auto-deref |
-| `'function'` | `get(fieldValue)` + `ObservableHint.function()` | callback fields |
-| `(value) => R` | custom transform function | escape hatch for complex cases |
+| Hint                      | Behavior                                                        | Use when                                    |
+| ------------------------- | --------------------------------------------------------------- | ------------------------------------------- |
+| _(omitted)_ / `'default'` | no-op — Legend-State auto-derefs + registers dep at call site   | reactive plain fields (default)             |
+| `'element'`               | `getElement(fieldValue)` (reactive) + `ObservableHint.opaque()` | `MaybeElement` fields                       |
+| `'opaque'`                | `get(fieldValue)` + `ObservableHint.opaque()`                   | non-element objects needing opaque wrapping |
+| `'plain'`                 | `get(fieldValue)` + `ObservableHint.plain()`                    | prevent nested auto-deref                   |
+| `'function'`              | `get(fieldValue)` + `ObservableHint.function()`                 | callback fields                             |
+| `(value) => R`            | custom transform function                                       | escape hatch for complex cases              |
 
 > **Note:** Object-form hints are skipped when `options` is an outer `Observable<T>`.
 > In that case, `opts$` proxies `options$` directly (preserving reference-equality tracking).
@@ -329,7 +333,7 @@ interface UseMyHookOptions {
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   const opts$ = useMaybeObservable(options, {
-    scrollTarget: 'element', // resolves Ref$/Observable<Element> reactively, wraps in opaque
+    scrollTarget: "element", // resolves Ref$/Observable<Element> reactively, wraps in opaque
   });
 
   useObserve(() => {
@@ -355,7 +359,7 @@ interface UseMyHookOptions {
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   const opts$ = useMaybeObservable(options, {
-    onStart: 'function',
+    onStart: "function",
   });
 
   // ✅ Correct — access via opts$.peek()?.fieldName
@@ -375,7 +379,7 @@ the computed Observable child fields as references.
 ```ts
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   const opts$ = useMaybeObservable(options, {
-    scrollTarget: 'element',
+    scrollTarget: "element",
   });
 
   // Pass computed Observable child fields — downstream useObserve tracks them
@@ -418,13 +422,14 @@ export function useHistory<Raw, Serialized = Raw>(
 
 `useInitialPick` is restricted to these cases:
 
-| Allowed case | Example | Why mount-time-only |
-|---|---|---|
-| Scheduler type selection | `interval: "requestAnimationFrame" \| number` | Cannot switch rAF ↔ setInterval after mount |
-| Conditional hook branching | `controls: boolean` | React rules-of-hooks — branch must not change |
-| Observable initial seed | `initialValue` | Seed is consumed once at Observable creation |
+| Allowed case               | Example                                       | Why mount-time-only                           |
+| -------------------------- | --------------------------------------------- | --------------------------------------------- |
+| Scheduler type selection   | `interval: "requestAnimationFrame" \| number` | Cannot switch rAF ↔ setInterval after mount   |
+| Conditional hook branching | `controls: boolean`                           | React rules-of-hooks — branch must not change |
+| Observable initial seed    | `initialValue`                                | Seed is consumed once at Observable creation  |
 
 **These must be reactive** (do NOT use `useInitialPick`):
+
 - Runtime-adjustable settings: `rootMargin`, `threshold`, `distance`, `offset`
 - User-togglable flags: `enabled`, `immediate`
 - Any field where post-mount changes should take effect
@@ -473,7 +478,7 @@ function useMyHook() {
   const count$ = useObservable(0); // internal: Observable<number>
 
   return {
-    count$,           // ✅ field name is also count$ — internal/external names match
+    count$, // ✅ field name is also count$ — internal/external names match
     increment: () => count$.set((v) => v + 1),
   };
 }
@@ -487,9 +492,9 @@ count$.get(); // ✅ $ suffix makes it immediately clear this is an Observable
 
 ```ts
 return {
-  count$,   // Observable — has $
-  pause,    // plain function — no $
-  resume,   // plain function — no $
+  count$, // Observable — has $
+  pause, // plain function — no $
+  resume, // plain function — no $
 };
 ```
 
@@ -540,18 +545,18 @@ function useMyHook(): { count$: Observable<number> } {
 // ✅ Good — exposed as read-only; only the hook has write access
 function useMyHook(): { count$: ReadonlyObservable<number> } {
   const count$ = useObservable(0); // internal: Observable<number> (writable)
-  return { count$ };               // external: ReadonlyObservable<number> (read-only)
+  return { count$ }; // external: ReadonlyObservable<number> (read-only)
   // call site: count$.get() ✅  count$.set() ← type error
 }
 ```
 
 ### Return type decision criteria
 
-| Scenario | Core return | Hook return |
-|---|---|---|
-| Internally managed state (timer, loop, event) | `Observable<T>` | `ReadonlyObservable<T>` |
-| Simple Observable return | `Observable<T>` | `Observable<T>` or `ReadonlyObservable<T>` |
-| Caller is intended to write directly | `Observable<T>` | `Observable<T>` |
+| Scenario                                      | Core return     | Hook return                                |
+| --------------------------------------------- | --------------- | ------------------------------------------ |
+| Internally managed state (timer, loop, event) | `Observable<T>` | `ReadonlyObservable<T>`                    |
+| Simple Observable return                      | `Observable<T>` | `Observable<T>` or `ReadonlyObservable<T>` |
+| Caller is intended to write directly          | `Observable<T>` | `Observable<T>`                            |
 
 ### Core → Hook narrowing pattern
 
@@ -605,12 +610,12 @@ export interface Disposable {
 }
 ```
 
-| Criteria | Example |
-|---|---|
-| Any `observe()` subscription | `dispose: () => unsub()` |
-| `setTimeout` / `setInterval` | `dispose: () => clearInterval(handle)` |
-| `ResizeObserver` / `MutationObserver` | `dispose: () => observer.disconnect()` |
-| Composed core functions | `dispose: () => { innerA.dispose(); innerB.dispose(); }` |
+| Criteria                              | Example                                                  |
+| ------------------------------------- | -------------------------------------------------------- |
+| Any `observe()` subscription          | `dispose: () => unsub()`                                 |
+| `setTimeout` / `setInterval`          | `dispose: () => clearInterval(handle)`                   |
+| `ResizeObserver` / `MutationObserver` | `dispose: () => observer.disconnect()`                   |
+| Composed core functions               | `dispose: () => { innerA.dispose(); innerB.dispose(); }` |
 
 ```ts
 function createMyUtil(source$: Observable<T>): Disposable & { result$: Observable<T> } {
@@ -644,19 +649,33 @@ export interface Pausable {
 }
 ```
 
-| Criteria | Core example | Hook example |
-|---|---|---|
-| setInterval / rAF-based repeating loop | `createIntervalFn()`, `createRafFn()` | `useIntervalFn`, `useRafFn` |
-| Subscription where pause/resume is meaningful | — | `useNow` |
+| Criteria                                      | Core example                          | Hook example                |
+| --------------------------------------------- | ------------------------------------- | --------------------------- |
+| setInterval / rAF-based repeating loop        | `createIntervalFn()`, `createRafFn()` | `useIntervalFn`, `useRafFn` |
+| Subscription where pause/resume is meaningful | —                                     | `useNow`                    |
 
 ```ts
 // Core — returns Disposable & Pausable
 function createPollerFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
   const isActive$ = observable(false);
-  const pause = () => { isActive$.set(false); /* clearInterval... */ };
-  const resume = () => { isActive$.set(true); /* setInterval... */ };
-  const unsub = observe(() => { /* re-setup on interval$.get() change */ });
-  return { isActive$, pause, resume, dispose: () => { pause(); unsub(); } };
+  const pause = () => {
+    isActive$.set(false); /* clearInterval... */
+  };
+  const resume = () => {
+    isActive$.set(true); /* setInterval... */
+  };
+  const unsub = observe(() => {
+    /* re-setup on interval$.get() change */
+  });
+  return {
+    isActive$,
+    pause,
+    resume,
+    dispose: () => {
+      pause();
+      unsub();
+    },
+  };
 }
 
 // Hook — strips dispose, returns Pausable
@@ -682,10 +701,10 @@ export interface Stoppable<StartFnArgs extends any[] = any[]> {
 }
 ```
 
-| Criteria | Core example | Hook example |
-|---|---|---|
-| setTimeout-based delayed execution | `timeoutFn()` | `useTimeoutFn` |
-| Async operation pending state tracking | — | custom async hooks |
+| Criteria                               | Core example  | Hook example       |
+| -------------------------------------- | ------------- | ------------------ |
+| setTimeout-based delayed execution     | `timeoutFn()` | `useTimeoutFn`     |
+| Async operation pending state tracking | —             | custom async hooks |
 
 ```ts
 function useDelayed<T extends AnyFn>(
@@ -754,13 +773,13 @@ defaultWindow.innerWidth;
 
 ### Available Constants and Interfaces
 
-| Constant | Interface | Corresponding global |
-|---|---|---|
-| `defaultWindow` | `ConfigurableWindow` | `window` |
-| `defaultDocument` | `ConfigurableDocument` | `document` |
-| — | `ConfigurableDocumentOrShadowRoot` | `document \| ShadowRoot` |
-| `defaultNavigator` | `ConfigurableNavigator` | `navigator` |
-| `defaultLocation` | `ConfigurableLocation` | `location` |
+| Constant           | Interface                          | Corresponding global     |
+| ------------------ | ---------------------------------- | ------------------------ |
+| `defaultWindow`    | `ConfigurableWindow`               | `window`                 |
+| `defaultDocument`  | `ConfigurableDocument`             | `document`               |
+| —                  | `ConfigurableDocumentOrShadowRoot` | `document \| ShadowRoot` |
+| `defaultNavigator` | `ConfigurableNavigator`            | `navigator`              |
+| `defaultLocation`  | `ConfigurableLocation`             | `location`               |
 
 ### Test/Custom Environment Support — `Configurable*` Interfaces
 
@@ -768,10 +787,7 @@ Hooks that need to inject a different `window`/`document` (e.g., iframe, Shadow 
 should mixin a `Configurable*` interface into their options.
 
 ```ts
-import {
-  ConfigurableWindow,
-  defaultWindow,
-} from "../../shared/configurable";
+import { ConfigurableWindow, defaultWindow } from "../../shared/configurable";
 
 interface UseMyHookOptions extends ConfigurableWindow {
   passive?: boolean;
@@ -795,7 +811,9 @@ Core functions have no React hooks, so early return is safe at the top level.
 Return a no-op `Disposable` with default values:
 
 ```ts
-function createMediaQuery(query$: Observable<string>): Disposable & { matches$: Observable<boolean> } {
+function createMediaQuery(
+  query$: Observable<string>
+): Disposable & { matches$: Observable<boolean> } {
   if (!defaultWindow) {
     return { matches$: observable(false), dispose: () => {} };
   }

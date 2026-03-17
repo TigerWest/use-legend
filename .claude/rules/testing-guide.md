@@ -2,6 +2,8 @@
 paths:
   - "packages/core/src/**/*.spec.ts"
   - "packages/core/src/**/*.spec.tsx"
+  - "packages/web/src/**/*.spec.tsx"
+  - "packages/web/src/**/*.spec.ts"
   - "packages/integrations/src/**/*.spec.ts"
   - "packages/integrations/src/**/*.spec.tsx"
 ---
@@ -117,16 +119,16 @@ Only for hooks that accept an element target:
 
 ### What to Include
 
-| Category                    | Examples                                                         |
-| --------------------------- | ---------------------------------------------------------------- |
-| null → element registration | `Ref$ null → element: observer starts observing`                 |
-| element → null cleanup      | `Ref$ element → null: observer is disconnected`                  |
-| Full cycle                  | `null → element → null → element: no resource leaks`             |
-| State reset                 | `values reset to defaults when element is removed`               |
-| In-progress cancellation    | `in-progress drag cancelled when element is removed`             |
-| Old element isolation       | `events on old element are not reported after target change`     |
-| Leak verification           | `addEventListener/removeEventListener call counts are symmetric` |
-| **Functional after mount**  | `dispatched event updates state after element mount`             |
+| Category                      | Examples                                                               |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| null → element registration   | `Ref$ null → element: observer starts observing`                       |
+| element → null cleanup        | `Ref$ element → null: observer is disconnected`                        |
+| Full cycle                    | `null → element → null → element: no resource leaks`                   |
+| State reset                   | `values reset to defaults when element is removed`                     |
+| In-progress cancellation      | `in-progress drag cancelled when element is removed`                   |
+| Old element isolation         | `events on old element are not reported after target change`           |
+| Leak verification             | `addEventListener/removeEventListener call counts are symmetric`       |
+| **Functional after mount**    | `dispatched event updates state after element mount`                   |
 | **Functional after re-mount** | `dispatched event updates state after null → element → null → element` |
 
 ### Test Pattern
@@ -276,14 +278,14 @@ Each browser variant follows the same structure as its JSDOM counterpart.
 
 ### Required Files by Hook Characteristics
 
-| Hook Characteristic              | Required Files                   | Optional Files                                |
-| -------------------------------- | -------------------------------- | --------------------------------------------- |
+| Hook Characteristic              | Required Files                                        | Optional Files                                |
+| -------------------------------- | ----------------------------------------------------- | --------------------------------------------- |
 | Has element target               | `index`, `rerender`, `lifecycle`, `lifecycle.browser` | `observable`, `edgeCases`, `index.browser`    |
-| No element target (timers, etc.) | `index`, `rerender`              | `observable`, `edgeCases`                     |
-| Has Observable options           | `index`                          | `observable`                                  |
-| Uses browser-only APIs           | `index`, `browser`               | `lifecycle`, `edgeCases`                      |
-| Has overloads or complex types   | `index`, `types`                 | (other files as needed)                       |
-| Thin wrapper                     | `index`                          | (most tests delegated to the underlying hook) |
+| No element target (timers, etc.) | `index`, `rerender`                                   | `observable`, `edgeCases`                     |
+| Has Observable options           | `index`                                               | `observable`                                  |
+| Uses browser-only APIs           | `index`, `browser`                                    | `lifecycle`, `edgeCases`                      |
+| Has overloads or complex types   | `index`, `types`                                      | (other files as needed)                       |
+| Thin wrapper                     | `index`                                               | (most tests delegated to the underlying hook) |
 
 ---
 

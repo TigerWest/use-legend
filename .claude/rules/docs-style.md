@@ -1,6 +1,7 @@
 ---
 paths:
   - "packages/core/src/**/*.{md,mdx}"
+  - "packages/web/src/**/*.{md,mdx}"
   - "packages/libraries/tanstack-query/src/**/*.{md,mdx}"
   - "docs/**/*.{md,mdx}"
 ---
@@ -108,14 +109,16 @@ Demo files live in `docs/src/components/demos/`, organized by package and catego
 ### File Location
 
 ```
+
 docs/src/components/demos/
-  _shared/                                ← shared demo UI components
-    index.tsx
-    HistoryList.tsx
-  core/{category}/{hookName}.tsx          ← core demos
-  web/{category}/{hookName}.tsx           ← web demos
-  tanstack-query/{hookName}.tsx           ← tanstack-query demos
-```
+\_shared/ ← shared demo UI components
+index.tsx
+HistoryList.tsx
+core/{category}/{hookName}.tsx ← core demos
+web/{category}/{hookName}.tsx ← web demos
+tanstack-query/{hookName}.tsx ← tanstack-query demos
+
+````
 
 Examples:
 
@@ -140,7 +143,7 @@ return <span>{count}</span>;
 
 // ✅ Good — call .get() directly in JSX (babel plugin auto-tracks reactivity)
 return <span>{count$.get()}</span>;
-```
+````
 
 #### Rule: No snapshot variables from `.get()`
 
@@ -169,23 +172,27 @@ return <span>{statusLabel$.get()}</span>;
 import { For, useObservable } from "@legendapp/state/react";
 
 // ❌ Bad — .get().map() re-renders entire list on any item change
-{query.data.get()?.map((item) => <span key={item.id}>{item.name}</span>)}
+{
+  query.data.get()?.map((item) => <span key={item.id}>{item.name}</span>);
+}
 
 // ❌ Bad — .map() on observable array without For
-{items$.map((item$) => <span key={item$.id.get()}>{item$.name.get()}</span>)}
+{
+  items$.map((item$) => <span key={item$.id.get()}>{item$.name.get()}</span>);
+}
 
 // ✅ Good — For tracks each item individually
-<For each={items$}>{(item$) => <span>{item$.name.get()}</span>}</For>
+<For each={items$}>{(item$) => <span>{item$.name.get()}</span>}</For>;
 
 // ✅ Good — derive a non-undefined array when the source can be undefined
 const items$ = useObservable(() => query.data.get() ?? []);
-<For each={items$}>{(item$) => <span>{item$.name.get()}</span>}</For>
+<For each={items$}>{(item$) => <span>{item$.name.get()}</span>}</For>;
 
 // ✅ Good — flatten paginated data into a derived observable
 const allItems$ = useObservable(() =>
   (query.data.get()?.pages ?? []).flatMap((page) => page.items)
 );
-<For each={allItems$}>{(item$) => <div>{item$.name.get()}</div>}</For>
+<For each={allItems$}>{(item$) => <div>{item$.name.get()}</div>}</For>;
 ```
 
 > **Note:** Plain (non-observable) arrays can still use `.map()` as usual. This rule only applies to observable arrays (variables ending with `$`).
@@ -234,7 +241,9 @@ export default function Demo() {
       >
         <input className={demoClasses.input} />
         <div className={demoClasses.actionRow}>
-          <ActionButton onClick={handler} tone="accent" grow>Click</ActionButton>
+          <ActionButton onClick={handler} tone="accent" grow>
+            Click
+          </ActionButton>
         </div>
       </DemoPanel>
     </DemoShell>
