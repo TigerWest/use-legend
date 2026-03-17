@@ -55,21 +55,19 @@ export function useMousePressed(
 
   // --- Pointer events (mouse) ---
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
   const onPointerDown = useCallback((e: PointerEvent) => {
     if (opts$.preventDragEvent?.peek()) e.preventDefault();
     pressed$.set(true);
     sourceType$.set("mouse");
     opts$.peek()?.onPressed?.(e);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Release always on window (even if press was on a specific element)
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
   const onPointerUp = useCallback((e: PointerEvent) => {
     if (!pressed$.peek()) return;
     pressed$.set(false);
     opts$.peek()?.onReleased?.(e);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEventListener(eventTarget, "pointerdown", onPointerDown);
   useEventListener(defaultWindow, "pointerup", onPointerUp);
@@ -77,19 +75,17 @@ export function useMousePressed(
   // --- Touch events ---
   const touchTarget: MaybeElement = touch ? eventTarget : null;
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
   const onTouchStart = useCallback((e: TouchEvent) => {
     pressed$.set(true);
     sourceType$.set("touch");
     opts$.peek()?.onPressed?.(e);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .set() does not create reactive subscription, empty deps [] is intentional
   const onTouchEnd = useCallback((e: TouchEvent) => {
     if (!pressed$.peek()) return;
     pressed$.set(false);
     opts$.peek()?.onReleased?.(e);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEventListener(touchTarget, "touchstart", onTouchStart, { passive: true });
   useEventListener(touch ? defaultWindow : null, "touchend", onTouchEnd, { passive: true });
