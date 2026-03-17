@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "docs:dev": "pnpm --filter docs dev",
-    "build": "pnpm --filter './packages/**' --filter './packages/libraries/**' build",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' pnpm --filter './packages/**' --filter './packages/libraries/**' build",
     "build:docs": "pnpm --filter docs build",
     "dev": "pnpm -r dev",
     "prepare": "husky",
