@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "docs:dev": "pnpm --filter docs dev",
-    "build": "pnpm -r build",
-    "build:packages": "pnpm --filter './packages/**' --filter './packages/libraries/**' build",
+    "build": "pnpm --filter './packages/**' --filter './packages/libraries/**' build",
+    "build:docs": "pnpm --filter docs build",
     "dev": "pnpm -r dev",
     "prepare": "husky",
     "test": "vitest run && pnpm test:browser",

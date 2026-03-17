@@ -30,7 +30,7 @@ jobs:
         run: pnpm exec playwright install --with-deps
 
       - name: Build packages
-        run: pnpm build:packages
+        run: pnpm build
 
       - name: Lint
         run: pnpm lint
