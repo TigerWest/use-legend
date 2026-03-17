@@ -62,7 +62,6 @@ export interface UseOnLongPressOptions {
  * @param options - Configuration options
  * @returns A stop function that removes all event listeners and clears timers
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function useOnLongPress(
   target: MaybeElement,
   handler: (evt: PointerEvent) => void,

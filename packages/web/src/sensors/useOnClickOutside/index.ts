@@ -89,7 +89,6 @@ export function useOnClickOutside<T extends OnClickOutsideOptions<true>>(
 // Implementation
 // ---------------------------------------------------------------------------
 
-/*@__NO_SIDE_EFFECTS__*/
 export function useOnClickOutside(
   target: MaybeElement,
   handler: OnClickOutsideHandler<OnClickOutsideOptions<boolean>>,
