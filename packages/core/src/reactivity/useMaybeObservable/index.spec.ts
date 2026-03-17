@@ -97,7 +97,9 @@ describe("useMaybeObservable() — function-form transform", () => {
     const options$ = observable<SimpleOpts>({ val: "a" });
     const { result } = renderHook(() =>
       useMaybeObservable<SimpleOpts>(options$, (raw) => {
-        const v = isObservable(raw) ? (raw as typeof options$).get() : raw;
+        const v = isObservable(raw)
+          ? (raw as typeof options$).get()
+          : (raw as SimpleOpts | undefined);
         return v ? { val: v.val + "!" } : undefined;
       })
     );
@@ -569,7 +571,9 @@ describe("useMaybeObservable() — linked option (bidirectional)", () => {
     const { result } = renderHook(() =>
       useMaybeObservable<SimpleOpts>(source$, {
         transform: (raw) => {
-          const v = isObservable(raw) ? (raw as typeof source$).get() : raw;
+          const v = isObservable(raw)
+            ? (raw as typeof source$).get()
+            : (raw as SimpleOpts | undefined);
           return v ? { val: v.val + "!" } : undefined;
         },
         linked: true,
@@ -583,7 +587,9 @@ describe("useMaybeObservable() — linked option (bidirectional)", () => {
     const { result } = renderHook(() =>
       useMaybeObservable<SimpleOpts>(source$, {
         transform: (raw) => {
-          const v = isObservable(raw) ? (raw as typeof source$).get() : raw;
+          const v = isObservable(raw)
+            ? (raw as typeof source$).get()
+            : (raw as SimpleOpts | undefined);
           return v ? { val: v.val + "!" } : undefined;
         },
         linked: true,

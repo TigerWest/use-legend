@@ -21,7 +21,7 @@ export type ReadonlyObservable<T> = ImmutableObservableBase<T>;
  * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional permissive default matching VueUse's MaybeRef<any> pattern
-export type MaybeObservable<T = any> = T | Observable<T>;
+export type MaybeObservable<T = any> = T | Observable<T> | ReadonlyObservable<T>;
 
 /**
  * Either the whole `T` can be an Observable, OR each individual property of `T` can be an Observable.
@@ -41,6 +41,7 @@ export type MaybeObservable<T = any> = T | Observable<T>;
 export type DeepMaybeObservable<T> =
   | T
   | Observable<T>
+  | ReadonlyObservable<T>
   | {
       [K in keyof T]?: MaybeObservable<NonNullable<T[K]>>;
     };

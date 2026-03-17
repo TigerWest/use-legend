@@ -162,7 +162,6 @@ export function useMaybeObservable<T>(
   }
 
   const optionsRef = useLatest(options);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const depKey = useMemo(() => Symbol(), [options]);
   const compute = (): T | undefined => {
     if (typeof transform === "function") {
