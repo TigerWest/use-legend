@@ -109,7 +109,6 @@ export function useDraggable(
   const pressedDelta = useRef<Position | null>(null);
 
   // pointerdown on handle (or target)
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onPointerDown = useCallback((e: PointerEvent) => {
     if (opts$.disabled.peek()) return;
 
@@ -136,10 +135,9 @@ export function useDraggable(
       y: e.clientY - state$.y.peek(),
     };
     state$.isDragging.set(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // pointermove on window — tracks drag even outside element bounds
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onPointerMove = useCallback((e: PointerEvent) => {
     if (!pressedDelta.current) return;
     if (opts$.preventDefault.peek()) e.preventDefault();
@@ -174,17 +172,16 @@ export function useDraggable(
 
     state$.assign({ x, y });
     opts$.peek()?.onMove?.({ x, y }, e);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // pointerup on window
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onPointerUp = useCallback((e: PointerEvent) => {
     if (!pressedDelta.current) return;
     pressedDelta.current = null;
     const pos: Position = { x: state$.x.peek(), y: state$.y.peek() };
     state$.isDragging.set(false);
     opts$.peek()?.onEnd?.(pos, e);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Determine pointerdown target: handle if specified (mount-time), otherwise target.
   // Pass MaybeElement directly so useEventListener's isRef$ branch fires correctly

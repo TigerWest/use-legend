@@ -76,7 +76,6 @@ export function useElementBounding(
   const unmountedRef = useRef(false);
   const rafRef = useRef<number | null>(null);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const recalculate = useCallback(() => {
     const el = peekElement(target) as Element | null;
     if (!el || !(el instanceof Element)) {
@@ -94,9 +93,8 @@ export function useElementBounding(
       width: rect.width,
       height: rect.height,
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const update = useCallback(() => {
     if (opts$.useCssTransforms.peek() !== false) {
       rafRef.current = requestAnimationFrame(() => {
@@ -105,7 +103,7 @@ export function useElementBounding(
     } else {
       recalculate();
     }
-  }, [recalculate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [recalculate]);
 
   // Observe size changes
   useResizeObserver(target, update);

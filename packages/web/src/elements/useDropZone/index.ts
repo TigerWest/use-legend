@@ -65,7 +65,6 @@ export function useDropZone(
   // Plain React ref for counter — access via .current
   const counter = useRef(0);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek() does not create reactive subscription, empty deps [] is intentional
   const isValidDrop = useCallback((event: DragEvent): boolean => {
     const items = event.dataTransfer?.items;
     if (!items) return false;
@@ -87,17 +86,15 @@ export function useDropZone(
       return dataTypes.some((t) => types.includes(t));
     }
     return true;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.get() does not create reactive subscription, empty deps [] is intentional
   const getFiles = useCallback((event: DragEvent): File[] | null => {
     const fileList = Array.from(event.dataTransfer?.files ?? []);
     if (!fileList.length) return null;
     const multiple = opts$.multiple?.get();
     return multiple === false ? [fileList[0]] : fileList;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDragEnter = useCallback((e: DragEvent) => {
     e.preventDefault();
     counter.current++;
@@ -109,18 +106,16 @@ export function useDropZone(
     } else {
       e.dataTransfer!.dropEffect = "none";
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDragLeave = useCallback((e: DragEvent) => {
     counter.current = Math.max(0, counter.current - 1);
     if (counter.current === 0) {
       isOver$.set(false);
       opts$.peek()?.onLeave?.(null, e);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDragOver = useCallback((e: DragEvent) => {
     e.preventDefault();
     if (isValidDrop(e)) {
@@ -129,9 +124,8 @@ export function useDropZone(
     } else {
       e.dataTransfer!.dropEffect = "none";
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Legend-State: .peek()/.set() does not create reactive subscription, empty deps [] is intentional
   const onDrop = useCallback((e: DragEvent) => {
     e.preventDefault();
     counter.current = 0;
@@ -144,7 +138,7 @@ export function useDropZone(
       files$.set(null);
       opts$.peek()?.onDrop?.(null, e);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEventListener(target, "dragenter", onDragEnter);
   useEventListener(target, "dragleave", onDragLeave);

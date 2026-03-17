@@ -86,7 +86,7 @@ export function useRef$<T extends Element = Element>(externalRef?: Ref<T> | null
           peek: () => el$.peek(),
         }
       ) as Ref$<T>,
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    []
   );
 }
 
