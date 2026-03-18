@@ -4,10 +4,9 @@ import { ActionButton, DemoPanel, DemoShell, StatCard, StatusBadge } from "../..
 export default function Demo() {
   const {
     isSupported$,
-    requirePermission$,
-    permissionGranted$,
+    needsPermission$,
     hasRealData$,
-    ensurePermissions,
+    ensurePermission,
     isAbsolute$,
     alpha$,
     beta$,
@@ -34,9 +33,9 @@ export default function Demo() {
           </div>
         }
       >
-        {requirePermission$.get() && !permissionGranted$.get() && (
+        {needsPermission$.get() && (
           <div className="mb-3">
-            <ActionButton onClick={ensurePermissions} tone="accent">
+            <ActionButton onClick={ensurePermission} tone="accent">
               Request Permission
             </ActionButton>
           </div>

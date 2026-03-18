@@ -1,6 +1,6 @@
 "use client";
-import type { ReadonlyObservable } from "@usels/core";
-import { useSupported } from "@usels/core";
+import type { ReadonlyObservable, PermissionAware } from "@usels/core";
+import { useSupported, usePermissionAware } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
 import { defaultWindow } from "@usels/core/shared/configurable";
@@ -10,13 +10,9 @@ interface DeviceMotionEventiOS {
   requestPermission: () => Promise<"granted" | "denied">;
 }
 
-export interface UseDeviceMotionReturn {
+export interface UseDeviceMotionReturn extends PermissionAware {
   /** Whether the DeviceMotionEvent API is supported */
   isSupported$: ReadonlyObservable<boolean>;
-  /** Whether the device requires explicit permission (iOS 13+) */
-  requirePermission$: ReadonlyObservable<boolean>;
-  /** Whether motion permission has been granted */
-  permissionGranted$: ReadonlyObservable<boolean>;
   /**
    * Whether the device has real motion sensor hardware.
    * `isSupported` only checks API availability — desktop browsers expose the API
@@ -25,8 +21,6 @@ export interface UseDeviceMotionReturn {
    * one of acceleration or rotationRate has a non-null value.
    */
   hasRealData$: ReadonlyObservable<boolean>;
-  /** Request permission on iOS 13+. Must be called from a user gesture handler. */
-  ensurePermissions: () => Promise<void>;
   /** Linear acceleration of the device (without gravity), in m/s² */
   acceleration$: ReadonlyObservable<{ x: number | null; y: number | null; z: number | null }>;
   /** Linear acceleration of the device (including gravity), in m/s² */
@@ -50,12 +44,22 @@ export function useDeviceMotion(): UseDeviceMotionReturn {
   const isSupported$ = useSupported(() => !!defaultWindow && "DeviceMotionEvent" in defaultWindow);
 
   // useSupported evaluates after mount (via isMounted check), so this is SSR/hydration safe
-  const requirePermission$ = useSupported(
+  const isRequired$ = useSupported(
     () =>
       typeof (DeviceMotionEvent as unknown as DeviceMotionEventiOS).requestPermission === "function"
   );
 
-  const permissionGranted$ = useObservable<boolean>(false);
+  const { permissionState$, permissionGranted$, needsPermission$, ensurePermission } =
+    usePermissionAware({
+      isSupported$,
+      isRequired$,
+      requestPermission: async () => {
+        const result = await (
+          DeviceMotionEvent as unknown as DeviceMotionEventiOS
+        ).requestPermission();
+        return result === "granted";
+      },
+    });
 
   const acceleration$ = useObservable<{ x: number | null; y: number | null; z: number | null }>({
     x: null,
@@ -78,20 +82,9 @@ export function useDeviceMotion(): UseDeviceMotionReturn {
   const interval$ = useObservable<number>(0);
   const hasRealData$ = useObservable<boolean>(false);
 
-  const ensurePermissions = async (): Promise<void> => {
-    if (!requirePermission$.get()) {
-      permissionGranted$.set(true);
-      return;
-    }
-
-    const result = await (DeviceMotionEvent as unknown as DeviceMotionEventiOS).requestPermission();
-
-    permissionGranted$.set(result === "granted");
-  };
-
   // Always attach the listener. On non-iOS it fires immediately.
   // On iOS, events are not dispatched until permission is granted,
-  // so the listener is harmless until ensurePermissions() is called.
+  // so the listener is harmless until ensurePermission() is called.
   useEventListener("devicemotion", (event: DeviceMotionEvent) => {
     batch(() => {
       const acc = event.acceleration;
@@ -129,10 +122,11 @@ export function useDeviceMotion(): UseDeviceMotionReturn {
 
   return {
     isSupported$,
-    requirePermission$,
+    permissionState$,
     permissionGranted$,
+    needsPermission$,
+    ensurePermission,
     hasRealData$,
-    ensurePermissions,
     acceleration$,
     accelerationIncludingGravity$,
     rotationRate$,

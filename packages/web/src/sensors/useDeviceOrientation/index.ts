@@ -1,6 +1,6 @@
 "use client";
-import type { ReadonlyObservable } from "@usels/core";
-import { useSupported } from "@usels/core";
+import type { ReadonlyObservable, PermissionAware } from "@usels/core";
+import { useSupported, usePermissionAware } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
 import { defaultWindow } from "@usels/core/shared/configurable";
@@ -10,13 +10,9 @@ interface DeviceOrientationEventiOS {
   requestPermission: () => Promise<"granted" | "denied">;
 }
 
-export interface UseDeviceOrientationReturn {
+export interface UseDeviceOrientationReturn extends PermissionAware {
   /** Whether the DeviceOrientationEvent API is supported */
   isSupported$: ReadonlyObservable<boolean>;
-  /** Whether iOS permission is required (DeviceOrientationEvent.requestPermission exists) */
-  requirePermission$: ReadonlyObservable<boolean>;
-  /** Whether orientation permission has been granted */
-  permissionGranted$: ReadonlyObservable<boolean>;
   /**
    * Whether the device has real orientation sensor hardware.
    * `isSupported` only checks API availability — desktop browsers expose the API
@@ -32,8 +28,6 @@ export interface UseDeviceOrientationReturn {
   beta$: ReadonlyObservable<number | null>;
   /** Rotation around the y-axis in degrees (-90–90) */
   gamma$: ReadonlyObservable<number | null>;
-  /** Request iOS permission for DeviceOrientationEvent (no-op on non-iOS) */
-  ensurePermissions: () => Promise<void>;
 }
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -42,12 +36,25 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
     () => !!defaultWindow && "DeviceOrientationEvent" in defaultWindow
   );
 
-  const requirePermission$ = useSupported(
+  // useSupported evaluates after mount (via isMounted check), so this is SSR/hydration safe
+  const isRequired$ = useSupported(
     () =>
       typeof (DeviceOrientationEvent as unknown as DeviceOrientationEventiOS).requestPermission ===
       "function"
   );
-  const permissionGranted$ = useObservable<boolean>(false);
+
+  const { permissionState$, permissionGranted$, needsPermission$, ensurePermission } =
+    usePermissionAware({
+      isSupported$,
+      isRequired$,
+      requestPermission: async () => {
+        const result = await (
+          DeviceOrientationEvent as unknown as DeviceOrientationEventiOS
+        ).requestPermission();
+        return result === "granted";
+      },
+    });
+
   const hasRealData$ = useObservable<boolean>(false);
   const isAbsolute$ = useObservable<boolean>(false);
   const alpha$ = useObservable<number | null>(null);
@@ -66,26 +73,16 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
     });
   });
 
-  async function ensurePermissions(): Promise<void> {
-    if (!requirePermission$.get()) {
-      permissionGranted$.set(true);
-      return;
-    }
-    const result = await (
-      DeviceOrientationEvent as unknown as DeviceOrientationEventiOS
-    ).requestPermission();
-    permissionGranted$.set(result === "granted");
-  }
-
   return {
     isSupported$,
-    requirePermission$,
+    permissionState$,
     permissionGranted$,
+    needsPermission$,
+    ensurePermission,
     hasRealData$,
     isAbsolute$,
     alpha$,
     beta$,
     gamma$,
-    ensurePermissions,
   };
 }
