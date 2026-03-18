@@ -90,6 +90,33 @@ export interface Stoppable<StartFnArgs extends any[] = any[]> {
   start: (...args: StartFnArgs) => void;
 }
 
+export interface Supportable {
+  readonly isSupported$: ReadonlyObservable<boolean>;
+}
+
+/**
+ * Native browser PermissionState — re-exported so consumers don't need DOM lib types directly.
+ * - `"prompt"`      : user hasn't decided yet; calling the API will show a permission dialog
+ * - `"granted"`     : user allowed; API is usable without a dialog
+ * - `"denied"`      : user blocked; API calls will fail and no dialog will appear
+ * - `"unsupported"` : the API is not supported in the current environment
+ */
+export type PermissionState = "denied" | "granted" | "prompt" | "unsupported";
+
+export interface PermissionAware {
+  /** Current permission state. `"unsupported"` = API not available in this environment. Never undefined. */
+  readonly permissionState$: ReadonlyObservable<PermissionState>;
+  /** `true` only when permissionState$ is `"granted"` */
+  readonly permissionGranted$: ReadonlyObservable<boolean>;
+  /** `true` when permissionState$ is `"prompt"` or `"denied"`. `"unsupported"` → false. */
+  readonly needsPermission$: ReadonlyObservable<boolean>;
+  /**
+   * Request permission. No-op if unsupported or already granted.
+   * If requestPermission throws, the error is propagated (state unchanged).
+   */
+  ensurePermission: () => Promise<void>;
+}
+
 // ---------------------------------------------------------------------------
 // Module augmentation: allow ReadonlyObservable in Legend-State React components
 // ---------------------------------------------------------------------------

@@ -3,6 +3,7 @@ export * from "./types";
 export * from "@utilities/get";
 export * from "@utilities/peek";
 export * from "@utilities/useSupported";
+export * from "@utilities/usePermissionAware";
 export * from "@utilities/useWhenMounted";
 export * from "@utilities/useDebounceFn";
 export * from "@utilities/useThrottleFn";
