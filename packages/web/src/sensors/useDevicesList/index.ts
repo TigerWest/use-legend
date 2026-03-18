@@ -1,5 +1,5 @@
 "use client";
-import type { DeepMaybeObservable, ReadonlyObservable } from "@usels/core";
+import type { DeepMaybeObservable, ReadonlyObservable, Supportable } from "@usels/core";
 import { useMaybeObservable, useInitialPick, useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
@@ -15,9 +15,7 @@ export interface UseDevicesListOptions {
   onUpdated?: (devices: MediaDeviceInfo[]) => void;
 }
 
-export interface UseDevicesListReturn {
-  /** Whether the MediaDevices API is supported */
-  isSupported$: ReadonlyObservable<boolean>;
+export interface UseDevicesListReturn extends Supportable {
   /** All enumerated media devices */
   devices$: ReadonlyObservable<MediaDeviceInfo[]>;
   /** Video input devices (cameras) */

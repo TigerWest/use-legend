@@ -1,9 +1,8 @@
-import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
-import { MaybeElement } from "@usels/core";
+import { MaybeElement, type Supportable } from "@usels/core";
 
 export { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
 
@@ -11,8 +10,7 @@ export interface UseResizeObserverOptions {
   box?: "content-box" | "border-box" | "device-pixel-content-box";
 }
 
-export interface UseResizeObserverReturn {
-  isSupported$: Observable<boolean>;
+export interface UseResizeObserverReturn extends Supportable {
   stop: () => void;
 }
 

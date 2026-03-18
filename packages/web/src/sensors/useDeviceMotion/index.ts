@@ -1,5 +1,5 @@
 "use client";
-import type { ReadonlyObservable, PermissionAware } from "@usels/core";
+import type { ReadonlyObservable, PermissionAware, Supportable } from "@usels/core";
 import { useSupported, usePermissionAware } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
@@ -10,9 +10,7 @@ interface DeviceMotionEventiOS {
   requestPermission: () => Promise<"granted" | "denied">;
 }
 
-export interface UseDeviceMotionReturn extends PermissionAware {
-  /** Whether the DeviceMotionEvent API is supported */
-  isSupported$: ReadonlyObservable<boolean>;
+export interface UseDeviceMotionReturn extends Supportable, PermissionAware {
   /**
    * Whether the device has real motion sensor hardware.
    * `isSupported` only checks API availability — desktop browsers expose the API

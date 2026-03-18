@@ -1,6 +1,5 @@
 "use client";
-import type { ReadonlyObservable } from "@usels/core";
-import type { Pausable } from "@usels/core";
+import type { ReadonlyObservable, Pausable, Supportable } from "@usels/core";
 import type { DeepMaybeObservable } from "@usels/core";
 import { useSupported, useMaybeObservable } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
@@ -17,12 +16,11 @@ export interface UseElementByPointOptions<M extends boolean = false> {
   multiple?: M;
 }
 
-export type UseElementByPointReturn<M extends boolean = false> = Pausable & {
-  /** Whether elementFromPoint is supported */
-  isSupported$: ReadonlyObservable<boolean>;
-  /** Element(s) at the specified point */
-  element$: ReadonlyObservable<M extends true ? Element[] : Element | null>;
-};
+export type UseElementByPointReturn<M extends boolean = false> = Pausable &
+  Supportable & {
+    /** Element(s) at the specified point */
+    element$: ReadonlyObservable<M extends true ? Element[] : Element | null>;
+  };
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useElementByPoint<M extends boolean = false>(

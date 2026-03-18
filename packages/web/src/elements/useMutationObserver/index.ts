@@ -1,14 +1,12 @@
-import type { Observable } from "@legendapp/state";
 import { useObservable, useMount, useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
-import type { MaybeElement } from "@usels/core";
+import type { MaybeElement, Supportable } from "@usels/core";
 import { normalizeTargets } from "@elements/useResizeObserver";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentional alias to allow future extension without breaking API
 export interface UseMutationObserverOptions extends MutationObserverInit {}
 
-export interface UseMutationObserverReturn {
-  isSupported$: Observable<boolean>;
+export interface UseMutationObserverReturn extends Supportable {
   stop: () => void;
   resume: () => void;
   takeRecords: () => MutationRecord[];

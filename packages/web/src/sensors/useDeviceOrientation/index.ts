@@ -1,5 +1,5 @@
 "use client";
-import type { ReadonlyObservable, PermissionAware } from "@usels/core";
+import type { ReadonlyObservable, PermissionAware, Supportable } from "@usels/core";
 import { useSupported, usePermissionAware } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
@@ -10,9 +10,7 @@ interface DeviceOrientationEventiOS {
   requestPermission: () => Promise<"granted" | "denied">;
 }
 
-export interface UseDeviceOrientationReturn extends PermissionAware {
-  /** Whether the DeviceOrientationEvent API is supported */
-  isSupported$: ReadonlyObservable<boolean>;
+export interface UseDeviceOrientationReturn extends Supportable, PermissionAware {
   /**
    * Whether the device has real orientation sensor hardware.
    * `isSupported` only checks API availability — desktop browsers expose the API

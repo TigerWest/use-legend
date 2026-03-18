@@ -12,6 +12,7 @@ import {
   useRafFn,
   get,
   type ReadonlyObservable,
+  type Supportable,
   type Fn,
   type MaybeObservable,
   type DeepMaybeObservable,
@@ -40,9 +41,7 @@ export interface UseAnimateOptions extends KeyframeAnimationOptions, Configurabl
 
 export type UseAnimateKeyframes = MaybeObservable<Keyframe[] | PropertyIndexedKeyframes | null>;
 
-export interface UseAnimateReturn {
-  /** Web Animations API support flag. */
-  isSupported$: ReadonlyObservable<boolean>;
+export interface UseAnimateReturn extends Supportable {
   /** Current Animation instance. */
   animate$: ReadonlyObservable<Animation | null>;
 
