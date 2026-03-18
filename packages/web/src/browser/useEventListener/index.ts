@@ -107,7 +107,21 @@ export function useEventListener<EventType = Event>(
  * Register using addEventListener on mounted, and removeEventListener
  * automatically on unmounted.
  *
- * Overload 6: Generic `EventTarget` fallback.
+ * Overload 6: Combined `MaybeElement | EventTarget` — handles union types where
+ * the target may be either a reactive MaybeElement or a raw EventTarget.
+ */
+export function useEventListener<EventType = Event>(
+  target: MaybeElement | EventTarget | null | undefined,
+  event: Arrayable<string>,
+  listener: Arrayable<GeneralEventListener<EventType>>,
+  options?: MaybeObservable<boolean | AddEventListenerOptions>
+): () => void;
+
+/**
+ * Register using addEventListener on mounted, and removeEventListener
+ * automatically on unmounted.
+ *
+ * Overload 7: Generic `EventTarget` fallback.
  */
 export function useEventListener<EventType = Event>(
   target: EventTarget | null | undefined,

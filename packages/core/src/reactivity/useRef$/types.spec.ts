@@ -14,8 +14,8 @@ describe("useRef$() — types", () => {
   // -------------------------------------------------------------------------
 
   describe("generic inference", () => {
-    it("generic T defaults to Element when no type param", () => {
-      expectTypeOf<typeof useRef$>().returns.toEqualTypeOf<Ref$<Element>>();
+    it("generic T defaults to unknown when no type param", () => {
+      expectTypeOf<typeof useRef$>().returns.toEqualTypeOf<Ref$<unknown>>();
     });
 
     it("generic T is inferred as HTMLDivElement when explicitly provided", () => {

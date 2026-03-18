@@ -6,6 +6,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 
 const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
 import { useEventListener } from ".";
+import { useRef$ } from "@usels/core";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -281,6 +282,178 @@ describe("useEventListener() — Arrayable targets / events / listeners", () => 
 
     expect(removeA).toHaveBeenCalledTimes(1);
     expect(removeB).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// useEventListener — generic EventTarget (non-Element)
+// ---------------------------------------------------------------------------
+
+describe("useEventListener() — generic EventTarget target", () => {
+  describe("plain EventTarget", () => {
+    it("registers listener on a raw EventTarget instance", () => {
+      const target = new EventTarget();
+      const addSpy = vi.spyOn(target, "addEventListener");
+      const listener = vi.fn();
+
+      renderHook(() => useEventListener(target, "custom", listener));
+
+      expect(addSpy).toHaveBeenCalledWith("custom", expect.any(Function), undefined);
+    });
+
+    it("invokes listener when event fires on raw EventTarget", () => {
+      const target = new EventTarget();
+      const listener = vi.fn();
+
+      renderHook(() => useEventListener(target, "custom", listener));
+
+      act(() => {
+        target.dispatchEvent(new Event("custom"));
+      });
+
+      expect(listener).toHaveBeenCalledOnce();
+    });
+
+    it("removes listener from raw EventTarget on unmount", async () => {
+      const target = new EventTarget();
+      const removeSpy = vi.spyOn(target, "removeEventListener");
+      const listener = vi.fn();
+      const { unmount } = renderHook(() => useEventListener(target, "custom", listener));
+
+      unmount();
+      await Promise.resolve();
+
+      expect(removeSpy).toHaveBeenCalledWith("custom", expect.any(Function), undefined);
+    });
+
+    it("does not invoke listener after unmount", async () => {
+      const target = new EventTarget();
+      const listener = vi.fn();
+      const { unmount } = renderHook(() => useEventListener(target, "custom", listener));
+
+      unmount();
+      await Promise.resolve();
+      act(() => {
+        target.dispatchEvent(new Event("custom"));
+      });
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Ref$ wrapping OpaqueObject<EventTarget>", () => {
+    it("registers listener when Ref$ is set to an OpaqueObject<EventTarget>", () => {
+      const target = new EventTarget();
+      const addSpy = vi.spyOn(target, "addEventListener");
+      const listener = vi.fn();
+
+      const { result } = renderHook(() => {
+        const ref$ = useRef$<EventTarget>();
+        useEventListener(ref$, "custom", listener);
+        return ref$;
+      });
+
+      act(() => {
+        result.current(ObservableHint.opaque(target) as any);
+      });
+
+      expect(addSpy).toHaveBeenCalledWith("custom", expect.any(Function), undefined);
+    });
+
+    it("invokes listener when event fires via Ref$<EventTarget>", () => {
+      const target = new EventTarget();
+      const listener = vi.fn();
+
+      const { result } = renderHook(() => {
+        const ref$ = useRef$<EventTarget>();
+        useEventListener(ref$, "custom", listener);
+        return ref$;
+      });
+
+      act(() => {
+        result.current(ObservableHint.opaque(target) as any);
+      });
+      act(() => {
+        target.dispatchEvent(new Event("custom"));
+      });
+
+      expect(listener).toHaveBeenCalledOnce();
+    });
+
+    it("removes listener when Ref$ is set to null", async () => {
+      const target = new EventTarget();
+      const removeSpy = vi.spyOn(target, "removeEventListener");
+      const listener = vi.fn();
+
+      const { result } = renderHook(() => {
+        const ref$ = useRef$<EventTarget>();
+        useEventListener(ref$, "custom", listener);
+        return ref$;
+      });
+
+      act(() => {
+        result.current(ObservableHint.opaque(target) as any);
+      });
+      act(() => {
+        result.current(null);
+      });
+      await Promise.resolve();
+
+      expect(removeSpy).toHaveBeenCalledWith("custom", expect.any(Function), undefined);
+    });
+  });
+
+  describe("Observable<OpaqueObject<EventTarget>>", () => {
+    it("registers listener when Observable is set to an OpaqueObject<EventTarget>", () => {
+      const target = new EventTarget();
+      const addSpy = vi.spyOn(target, "addEventListener");
+      const listener = vi.fn();
+      const target$ = observable<OpaqueObject<EventTarget> | null>(null);
+
+      renderHook(() => useEventListener(target$ as any, "custom", listener));
+
+      act(() => {
+        target$.set(ObservableHint.opaque(target) as any);
+      });
+
+      expect(addSpy).toHaveBeenCalledWith("custom", expect.any(Function), undefined);
+    });
+
+    it("invokes listener when event fires via Observable<OpaqueObject<EventTarget>>", () => {
+      const target = new EventTarget();
+      const listener = vi.fn();
+      const target$ = observable<OpaqueObject<EventTarget> | null>(null);
+
+      renderHook(() => useEventListener(target$ as any, "custom", listener));
+
+      act(() => {
+        target$.set(ObservableHint.opaque(target) as any);
+      });
+      act(() => {
+        target.dispatchEvent(new Event("custom"));
+      });
+
+      expect(listener).toHaveBeenCalledOnce();
+    });
+
+    it("removes listener when Observable is set back to null", async () => {
+      const target = new EventTarget();
+      const removeSpy = vi.spyOn(target, "removeEventListener");
+      const listener = vi.fn();
+      const target$ = observable<OpaqueObject<EventTarget> | null>(null);
+
+      renderHook(() => useEventListener(target$ as any, "custom", listener));
+
+      act(() => {
+        target$.set(ObservableHint.opaque(target) as any);
+      });
+      act(() => {
+        target$.set(null);
+      });
+      await Promise.resolve();
+
+      expect(removeSpy).toHaveBeenCalledWith("custom", expect.any(Function), undefined);
+    });
   });
 });
 

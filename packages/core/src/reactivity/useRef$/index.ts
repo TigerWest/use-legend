@@ -61,7 +61,8 @@ export type MaybeElement =
  * return <div ref={el$} />;
  * ```
  */
-export function useRef$<T extends Element = Element>(externalRef?: Ref<T> | null): Ref$<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useRef$<T = any>(externalRef?: Ref<T> | null): Ref$<T> {
   const el$ = useObservable<OpaqueObject<T> | null>(null);
 
   // store externalRef — simple assignment each render, no new closure

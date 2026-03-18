@@ -3,6 +3,7 @@ import { describe, it, expectTypeOf } from "vitest";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useEventListener, type GeneralEventListener } from ".";
+import type { MaybeElement } from "@usels/core";
 
 describe("useEventListener() — types", () => {
   // ---------------------------------------------------------------------------
@@ -131,6 +132,19 @@ describe("useEventListener() — types", () => {
       expectTypeOf<typeof useEventListener>().toBeCallableWith("click", vi.fn(), {
         passive: true,
       });
+    });
+
+    it("accepts MaybeElement | EventTarget union as target", () => {
+      // Regression: MaybeElement | EventTarget union must resolve to an overload
+      // without a type error, even though neither Overload 4 nor Overload 6 alone
+      // accepts the full union.
+      const target = null as unknown as MaybeElement | EventTarget;
+      expectTypeOf<typeof useEventListener>().toBeCallableWith(target, "click", vi.fn());
+    });
+
+    it("accepts MaybeElement | EventTarget | null union as target", () => {
+      const target = null as unknown as MaybeElement | EventTarget | null;
+      expectTypeOf<typeof useEventListener>().toBeCallableWith(target, "click", vi.fn());
     });
   });
 });

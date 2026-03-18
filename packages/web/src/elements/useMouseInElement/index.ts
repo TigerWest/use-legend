@@ -1,7 +1,6 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { isWindow } from "@usels/core/shared/index";
 import { defaultWindow, defaultDocument } from "@usels/core/shared/configurable";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 import { type MaybeElement, peekElement } from "@usels/core";
@@ -40,9 +39,6 @@ export interface UseMouseInElementReturn {
   /** Stop all observers and event listeners */
   stop: () => void;
 }
-
-// isWindow(window) returns false in SSR (typeof window === "undefined"), true in browser.
-const win = defaultWindow;
 
 /**
  * Tracks whether the mouse cursor is inside a DOM element and calculates
@@ -138,10 +134,7 @@ export function useMouseInElement(
     [update]
   );
 
-  // Always call hooks unconditionally — Rules of Hooks.
-  // null target → useEventListener registers no listener (no-op).
-  // peek() — evaluated once at render time, no reactive subscription needed.
-  const stopMouse = useEventListener(isWindow(win) ? win : null, "mousemove", onMouseMove, {
+  const stopMouse = useEventListener(defaultWindow, "mousemove", onMouseMove, {
     passive: true,
   });
 
@@ -151,13 +144,13 @@ export function useMouseInElement(
   );
 
   const stopScroll = useEventListener(
-    isWindow(win) && opts$.windowScroll.peek() !== false ? win : null,
+    defaultWindow && opts$.windowScroll.peek() !== false ? defaultWindow : null,
     "scroll",
     update,
     { passive: true }
   );
   const stopResize = useEventListener(
-    isWindow(win) && opts$.windowResize.peek() !== false ? win : null,
+    defaultWindow && opts$.windowResize.peek() !== false ? defaultWindow : null,
     "resize",
     update,
     { passive: true }
