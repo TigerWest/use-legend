@@ -28,7 +28,7 @@ export default function Demo() {
           />
         }
       >
-        <div className="grid h-48 place-items-center rounded-2xl border border-[var(--sl-color-hairline-light)] bg-black">
+        <div className="grid aspect-video w-full place-items-center rounded-2xl border border-[var(--sl-color-hairline-light)] bg-black">
           {stream$.get() ? (
             <video
               autoPlay

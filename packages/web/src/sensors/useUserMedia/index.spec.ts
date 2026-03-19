@@ -121,7 +121,7 @@ describe("useUserMedia()", () => {
       const { result } = renderHook(() => useUserMedia());
 
       await act(async () => {
-        await result.current.start();
+        await expect(result.current.start()).rejects.toThrow("Permission denied");
       });
 
       expect(result.current.stream$.get()).toBeNull();
