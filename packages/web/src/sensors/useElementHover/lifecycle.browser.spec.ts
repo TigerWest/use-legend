@@ -4,7 +4,7 @@
  * Runs in real Playwright Chromium (not jsdom).
  * Tests element lifecycle with real DOM events and no mocking.
  */
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -74,13 +74,27 @@ describe("useElementHover() — element lifecycle (real browser)", () => {
       });
       expect(result.current.isHovered$.get()).toBe(true);
 
+      // Reset to false via mouseleave so we can detect if mouseenter fires after null
+      act(() => {
+        el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+      });
+      expect(result.current.isHovered$.get()).toBe(false);
+
+      const removeSpy = vi.spyOn(el, "removeEventListener");
       act(() => result.current.el$(null));
-      await act(flush);
+      // Wait until the mouseenter listener is specifically removed
+      await waitFor(() =>
+        expect(removeSpy).toHaveBeenCalledWith(
+          "mouseenter",
+          expect.any(Function),
+          expect.anything()
+        )
+      );
 
       act(() => {
         el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
       });
-      // State should not have changed — listeners removed
+      // State should remain false — listener was removed, event ignored
       expect(result.current.isHovered$.get()).toBe(false);
     });
 
@@ -180,10 +194,25 @@ describe("useElementHover() — element lifecycle (real browser)", () => {
       });
       expect(result.current.get()).toBe(true);
 
+      // Reset to false via mouseleave so we can detect if mouseenter fires after null
+      act(() => {
+        el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+      });
+      expect(result.current.get()).toBe(false);
+
+      const removeSpy = vi.spyOn(el, "removeEventListener");
       await act(async () => {
         target$.set(null);
         await flush();
       });
+      // Wait until the mouseenter listener is specifically removed
+      await waitFor(() =>
+        expect(removeSpy).toHaveBeenCalledWith(
+          "mouseenter",
+          expect.any(Function),
+          expect.anything()
+        )
+      );
 
       // mouseenter on old element should have no effect
       act(() => {

@@ -2,10 +2,10 @@
 import type { ReadonlyObservable, DeepMaybeObservable } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
-import { useUnmount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { type MaybeElement } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
+import { useUnmount } from "@usels/core/shared/useUnmount";
 
 export interface UseElementHoverOptions {
   /** Delay in ms before entering hover state */
