@@ -1,5 +1,5 @@
 "use client";
-import type { ReadonlyObservable } from "@usels/core";
+import type { ReadonlyObservable, Supportable } from "@usels/core";
 import { useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
@@ -18,9 +18,7 @@ export type NetworkType =
 
 export type NetworkEffectiveType = "slow-2g" | "2g" | "3g" | "4g";
 
-export interface UseNetworkReturn {
-  /** Whether the Network Information API (`navigator.connection`) is supported */
-  isSupported$: ReadonlyObservable<boolean>;
+export interface UseNetworkReturn extends Supportable {
   /** Whether the browser is online */
   isOnline$: ReadonlyObservable<boolean>;
   /** Timestamp of last offline transition */
