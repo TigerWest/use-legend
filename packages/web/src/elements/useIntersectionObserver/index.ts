@@ -7,7 +7,7 @@ import {
   type MaybeObservable,
 } from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
-import type { MaybeElement, ReadonlyObservable, Supportable } from "@usels/core";
+import type { MaybeElement, Supportable, Pausable } from "@usels/core";
 import { normalizeTargets } from "@elements/useResizeObserver";
 
 export interface UseIntersectionObserverOptions {
@@ -21,11 +21,9 @@ export interface UseIntersectionObserverOptions {
   threshold?: number | number[];
 }
 
-export interface UseIntersectionObserverReturn extends Supportable {
-  isActive$: ReadonlyObservable<boolean>;
+export interface UseIntersectionObserverReturn extends Supportable, Pausable {
   stop: () => void;
-  pause: () => void;
-  resume: () => void;
+  // isActive$, pause, resume → Pausable
 }
 
 /**
