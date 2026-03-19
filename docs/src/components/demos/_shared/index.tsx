@@ -107,15 +107,15 @@ export function DemoPanel({
         toneClasses[tone].surface
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <div className={cx("h-1 w-10 rounded-full", toneClasses[tone].fill)} />
+      <div className="space-y-1">
+        <div className={cx("h-1 w-10 rounded-full", toneClasses[tone].fill)} />
+        <div className="flex items-center justify-between gap-3">
           <div className="m-0 text-[14px] font-bold text-[var(--sl-color-text)]">{title}</div>
-          {description ? (
-            <p className="m-0 text-[12px] leading-5 text-[var(--sl-color-gray-3)]">{description}</p>
-          ) : null}
+          {aside}
         </div>
-        {aside}
+        {description ? (
+          <p className="m-0 text-[12px] leading-5 text-[var(--sl-color-gray-3)]">{description}</p>
+        ) : null}
       </div>
       {children}
     </div>
