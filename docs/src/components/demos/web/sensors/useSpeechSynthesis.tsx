@@ -1,9 +1,8 @@
 import { useSpeechSynthesis } from "@usels/web";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge } from "../../_shared";
-import { Memo } from "@legendapp/state/react";
 
 export default function Demo() {
-  const { isSupported$, isPlaying$, status$, speak, stop } = useSpeechSynthesis("Hello World", {
+  const { isSupported$, isPlaying$, status$, toggle } = useSpeechSynthesis("Hello World", {
     lang: "en-GB",
     pitch: 1.2,
     rate: 0.9,
@@ -35,11 +34,12 @@ export default function Demo() {
           </span>
         </div>
         <div className="mt-3 flex gap-2">
-          <ActionButton onClick={speak} tone="accent" grow>
-            Speak
-          </ActionButton>
-          <ActionButton onClick={stop} tone="neutral" grow>
-            Stop
+          <ActionButton
+            onClick={() => toggle()}
+            tone={isPlaying$.get() ? "neutral" : "accent"}
+            grow
+          >
+            {isPlaying$.get() ? "Stop" : "Speak"}
           </ActionButton>
         </div>
       </DemoPanel>

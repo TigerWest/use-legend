@@ -11,6 +11,8 @@ export * from "./browser/usePreferredContrast";
 export * from "./browser/usePreferredReducedMotion";
 export * from "./browser/usePreferredReducedTransparency";
 export * from "./browser/usePreferredLanguages";
+export * from "./browser/useLocalStorage";
+export * from "./browser/useSessionStorage";
 
 // Elements
 export * from "./elements/useResizeObserver";
@@ -51,20 +53,20 @@ export * from "./sensors/useIdle";
 export * from "./sensors/useGeolocation";
 export * from "./sensors/useBattery";
 export * from "./sensors/useUserMedia";
+
+export * from "./sensors/useTextSelection";
+export * from "./sensors/usePageLeave";
+export * from "./sensors/useNavigatorLanguage";
+export * from "./sensors/useSpeechRecognition";
+export * from "./sensors/useSpeechSynthesis";
+export * from "./sensors/useOnElementRemoval";
+
 // export * from "./sensors/useKeyModifier";
-// export * from "./sensors/useNavigatorLanguage";
-// export * from "./sensors/usePageLeave";
 // export * from "./sensors/usePointer";
 // export * from "./sensors/usePointerLock";
-// export * from "./sensors/useTextSelection";
-// export * from "./sensors/useSpeechRecognition";
 // export * from "./sensors/useOnKeyStroke";
 // export * from "./sensors/useOnStartTyping";
-// export * from "./sensors/useOnElementRemoval";
 // export * from "./sensors/useParallax";
 // export * from "./sensors/usePointerSwipe";
 // export * from "./sensors/useSwipe";
 // export * from "./sensors/useMagicKeys";
-// export * from "./sensors/useSpeechSynthesis";
-export * from "./browser/useLocalStorage";
-export * from "./browser/useSessionStorage";
