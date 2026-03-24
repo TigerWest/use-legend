@@ -5,9 +5,15 @@ import { useSupported, useMaybeObservable } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { ObservableHint } from "@legendapp/state";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultDocument, defaultWindow } from "@shared/configurable";
+import {
+  type ConfigurableWindow,
+  type ConfigurableDocument,
+  defaultDocument,
+} from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
-export interface UseElementByPointOptions<M extends boolean = false> {
+export interface UseElementByPointOptions<M extends boolean = false>
+  extends ConfigurableWindow, ConfigurableDocument {
   /** X coordinate */
   x: number;
   /** Y coordinate */
@@ -27,11 +33,13 @@ export function useElementByPoint<M extends boolean = false>(
   options: DeepMaybeObservable<UseElementByPointOptions<M>>
 ): UseElementByPointReturn<M> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const opts$ = useMaybeObservable(options) as any;
+  const opts$ = useMaybeObservable(options, { window: "element", document: "element" }) as any;
+  const window$ = useResolvedWindow(opts$.window);
 
-  const isSupported$ = useSupported(
-    () => !!defaultDocument && "elementFromPoint" in defaultDocument
-  );
+  // Document: explicit options.document or derive from resolved window
+  const doc = opts$.document?.peek() ?? defaultDocument;
+
+  const isSupported$ = useSupported(() => !!doc && "elementFromPoint" in doc);
 
   const multiple = useConstant(() => !!opts$.multiple?.peek());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,7 +55,8 @@ export function useElementByPoint<M extends boolean = false>(
   });
 
   useMount(() => {
-    if (!defaultDocument || !defaultWindow) return;
+    const win = window$.peek();
+    if (!doc || !win) return;
 
     let rafId: number | undefined;
 
@@ -56,26 +65,29 @@ export function useElementByPoint<M extends boolean = false>(
         const cx = opts$.x.get() as number;
         const cy = opts$.y.get() as number;
         if (multiple) {
-          const newElements = defaultDocument!.elementsFromPoint(cx, cy);
+          const newElements = doc.elementsFromPoint(cx, cy);
           const prev = element$.peek() as Element[];
-          if (newElements.length !== prev.length || newElements.some((el, i) => el !== prev[i])) {
+          if (
+            newElements.length !== prev.length ||
+            newElements.some((el: Element, i: number) => el !== prev[i])
+          ) {
             element$.set(ObservableHint.opaque(newElements));
           }
         } else {
-          const el = defaultDocument!.elementFromPoint(cx, cy);
+          const el = doc.elementFromPoint(cx, cy);
           if (el !== element$.peek()) {
             element$.set(el ? ObservableHint.opaque(el) : null);
           }
         }
       }
-      rafId = defaultWindow!.requestAnimationFrame(loop);
+      rafId = win.requestAnimationFrame(loop);
     };
 
-    rafId = defaultWindow!.requestAnimationFrame(loop);
+    rafId = win.requestAnimationFrame(loop);
 
     return () => {
       if (rafId !== undefined) {
-        defaultWindow!.cancelAnimationFrame(rafId);
+        win.cancelAnimationFrame(rafId);
       }
     };
   });

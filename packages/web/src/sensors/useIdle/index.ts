@@ -2,8 +2,10 @@
 import type { ReadonlyObservable, DeepMaybeObservable } from "@usels/core";
 import { useMaybeObservable, useInitialPick, useTimeoutFn } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
+import { type OpaqueObject, ObservableHint } from "@legendapp/state";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useEventListener } from "../../browser/useEventListener";
 
 const DEFAULT_EVENTS = [
@@ -16,7 +18,7 @@ const DEFAULT_EVENTS = [
 ] as const;
 const ONE_MINUTE = 60_000;
 
-export interface UseIdleOptions {
+export interface UseIdleOptions extends ConfigurableWindow {
   /** Timeout in ms before idle state (default: 60000) */
   timeout?: number;
   /** Events to listen for activity (default: mousemove, mousedown, resize, keydown, touchstart, wheel) */
@@ -38,7 +40,12 @@ export interface UseIdleReturn {
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useIdle(options?: DeepMaybeObservable<UseIdleOptions>): UseIdleReturn {
-  const opts$ = useMaybeObservable(options);
+  const opts$ = useMaybeObservable(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
+  const doc$ = useObservable<OpaqueObject<Document> | null>(() => {
+    const doc = window$.get()?.document;
+    return doc ? ObservableHint.opaque(doc) : null;
+  });
 
   const { events, initialState, listenForVisibilityChange } = useInitialPick(opts$, {
     events: DEFAULT_EVENTS as unknown as string[],
@@ -64,14 +71,14 @@ export function useIdle(options?: DeepMaybeObservable<UseIdleOptions>): UseIdleR
   });
 
   const onVisibilityChange = useConstant(() => () => {
-    if (!defaultWindow!.document.hidden) {
+    if (!window$.peek()?.document.hidden) {
       onActivity();
     }
   });
 
-  useEventListener(defaultWindow, events as string[], onActivity, { passive: true });
+  useEventListener(window$, events as string[], onActivity, { passive: true });
   useEventListener(
-    listenForVisibilityChange ? defaultWindow?.document : null,
+    listenForVisibilityChange ? doc$ : null,
     "visibilitychange",
     onVisibilityChange,
     { passive: true }

@@ -3,7 +3,7 @@ import type { ReadonlyObservable, Supportable } from "@usels/core";
 import { useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
-import { defaultNavigator } from "@shared/configurable";
+import { type ConfigurableNavigator, defaultNavigator } from "@shared/configurable";
 
 interface BatteryManager extends EventTarget {
   charging: boolean;
@@ -15,6 +15,8 @@ interface BatteryManager extends EventTarget {
 type NavigatorWithBattery = Navigator & {
   getBattery: () => Promise<BatteryManager>;
 };
+
+export type UseBatteryOptions = ConfigurableNavigator;
 
 export interface UseBatteryReturn extends Supportable {
   /** Whether the battery is charging */
@@ -28,12 +30,12 @@ export interface UseBatteryReturn extends Supportable {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-export function useBattery(): UseBatteryReturn {
+export function useBattery(options?: UseBatteryOptions): UseBatteryReturn {
+  const nav = options?.navigator ?? defaultNavigator;
+
   const isSupported$ = useSupported(
     () =>
-      !!defaultNavigator &&
-      "getBattery" in defaultNavigator &&
-      typeof (defaultNavigator as NavigatorWithBattery).getBattery === "function"
+      !!nav && "getBattery" in nav && typeof (nav as NavigatorWithBattery).getBattery === "function"
   );
 
   const charging$ = useObservable(false);
@@ -58,7 +60,7 @@ export function useBattery(): UseBatteryReturn {
       });
     };
 
-    (defaultNavigator as NavigatorWithBattery).getBattery().then((_battery) => {
+    (nav as NavigatorWithBattery).getBattery().then((_battery) => {
       if (disposed) return;
       battery = _battery;
       updateBatteryInfo();

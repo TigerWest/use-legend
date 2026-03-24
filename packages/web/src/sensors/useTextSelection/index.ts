@@ -1,14 +1,19 @@
 "use client";
 import type { ReadonlyObservable, MaybeObservable } from "@usels/core";
-import { useDebounceFn, useThrottleFn } from "@usels/core";
+import { useDebounceFn, useThrottleFn, useMaybeObservable } from "@usels/core";
 import type { OpaqueObject } from "@legendapp/state";
 import { ObservableHint, batch } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultDocument, defaultWindow } from "@shared/configurable";
+import {
+  type ConfigurableWindow,
+  type ConfigurableDocument,
+  defaultDocument,
+} from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useEventListener } from "@browser/useEventListener";
 
-export interface UseTextSelectionOptions {
+export interface UseTextSelectionOptions extends ConfigurableWindow, ConfigurableDocument {
   /** Throttle selectionchange handler in ms. Mutually exclusive with debounce. */
   throttle?: MaybeObservable<number>;
   /** Debounce selectionchange handler in ms. Mutually exclusive with throttle. */
@@ -38,6 +43,20 @@ function opaqueArray<T>(arr: T[]): OpaqueObject<{ items: T[] }> {
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useTextSelection(options?: UseTextSelectionOptions): UseTextSelectionReturn {
+  const opts$ = useMaybeObservable<UseTextSelectionOptions>(options, {
+    window: "element",
+    document: "element",
+  });
+  const window$ = useResolvedWindow(opts$.window);
+
+  // Document: use explicit options.document if provided, otherwise derive from resolved window
+  const doc$ = useObservable<OpaqueObject<Document> | null>(() => {
+    const explicitDoc = opts$.document?.get();
+    if (explicitDoc) return ObservableHint.opaque(explicitDoc);
+    const doc = window$.get()?.document ?? defaultDocument;
+    return doc ? ObservableHint.opaque(doc) : null;
+  });
+
   const text$ = useObservable("");
   const rangesBox$ = useObservable<OpaqueObject<{ items: Range[] }>>(
     ObservableHint.opaque({ items: [] }) as OpaqueObject<{ items: Range[] }>
@@ -45,8 +64,9 @@ export function useTextSelection(options?: UseTextSelectionOptions): UseTextSele
   const selection$ = useObservable<OpaqueObject<Selection> | null>(null);
 
   const invoke = useConstant(() => () => {
-    if (!defaultWindow) return;
-    const sel = defaultWindow.getSelection();
+    const win = window$.peek();
+    if (!win) return;
+    const sel = win.getSelection();
     if (sel) {
       const r = getRangesFromSelection(sel);
       batch(() => {
@@ -76,7 +96,8 @@ export function useTextSelection(options?: UseTextSelectionOptions): UseTextSele
         : invoke
   );
 
-  useEventListener(defaultDocument, "selectionchange", onSelectionChange, { passive: true });
+  // Reactive: doc$ re-registers listener when document changes
+  useEventListener(doc$, "selectionchange", onSelectionChange, { passive: true });
 
   // Lazy computed — getBoundingClientRect is only called when rects$ is accessed
   const rects$ = useObservable<DOMRect[]>(() =>

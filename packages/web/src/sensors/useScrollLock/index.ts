@@ -1,11 +1,15 @@
 "use client";
 import { useObservable, useObserve } from "@legendapp/state/react";
 import type { Observable } from "@legendapp/state";
+import { ObservableHint } from "@legendapp/state";
+import type { OpaqueObject } from "@legendapp/state";
 import { useCallback, useRef } from "react";
 import { type MaybeElement, getElement } from "@usels/core";
 import { useUnmount } from "@usels/core/shared/index";
 import type { MaybeObservable } from "@usels/core";
-import { defaultDocument, defaultWindow } from "@shared/configurable";
+import { useMaybeObservable } from "@usels/core";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useEventListener } from "@browser/useEventListener";
 
 // ---------------------------------------------------------------------------
@@ -27,9 +31,9 @@ export interface UseScrollLockReturn {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getScrollbarWidth(): number {
-  if (!defaultDocument || !defaultWindow) return 0;
-  return defaultWindow.innerWidth - defaultDocument.documentElement.clientWidth;
+function getScrollbarWidth(win: Window | null | undefined): number {
+  if (!win) return 0;
+  return win.innerWidth - win.document.documentElement.clientWidth;
 }
 
 function resolveInitialValue(initialState?: MaybeObservable<boolean>): boolean {
@@ -47,12 +51,20 @@ function resolveInitialValue(initialState?: MaybeObservable<boolean>): boolean {
 
 export function useScrollLock(
   element?: MaybeElement,
-  initialState?: MaybeObservable<boolean>
+  initialState?: MaybeObservable<boolean>,
+  options?: ConfigurableWindow
 ): UseScrollLockReturn {
   const isLocked$ = useObservable<boolean>(resolveInitialValue(initialState));
   const savedOverflow = useRef<string>("");
   const savedPaddingRight = useRef<string>("");
   const lockedElement = useRef<HTMLElement | null>(null);
+
+  const windowOpts$ = useMaybeObservable<ConfigurableWindow>(options, { window: "element" });
+  const window$ = useResolvedWindow(windowOpts$.window);
+  const doc$ = useObservable<OpaqueObject<Document> | null>(() => {
+    const doc = window$.get()?.document;
+    return doc ? ObservableHint.opaque(doc) : null;
+  });
 
   const applyLock = useCallback((el: HTMLElement) => {
     if (lockedElement.current === el) return;
@@ -64,7 +76,7 @@ export function useScrollLock(
     savedOverflow.current = el.style.overflow;
     savedPaddingRight.current = el.style.paddingRight;
 
-    const scrollbarWidth = getScrollbarWidth();
+    const scrollbarWidth = getScrollbarWidth(window$.peek());
     el.style.overflow = "hidden";
     if (scrollbarWidth > 0) {
       el.style.paddingRight = `${scrollbarWidth}px`;
@@ -95,7 +107,7 @@ export function useScrollLock(
   useObserve(() => {
     const el = getElement(element) as HTMLElement | null;
     const hasExplicitElement = element != null;
-    const target = hasExplicitElement ? el : (el ?? defaultDocument?.body ?? null);
+    const target = hasExplicitElement ? el : (el ?? window$.peek()?.document.body ?? null);
     const locked = isLocked$.get();
 
     if (locked && target) {
@@ -110,7 +122,8 @@ export function useScrollLock(
     if (isLocked$.peek()) e.preventDefault();
   }, []);
 
-  useEventListener(element ?? defaultDocument, "touchmove", onTouchMove, { passive: false });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useEventListener(element ?? (doc$ as any), "touchmove", onTouchMove, { passive: false });
 
   useUnmount(() => {
     removeLock();

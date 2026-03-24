@@ -1,14 +1,17 @@
 "use client";
 import { useCallback, useRef } from "react";
 import type { Fn } from "@usels/core";
-import { peekElement, type MaybeElement } from "@usels/core";
+import { peekElement, useMaybeObservable, type MaybeElement } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { useLatest } from "@usels/core/shared/useLatest";
-import { defaultWindow, defaultDocument } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { isIOS, noop } from "@usels/core/shared/utils";
 
-export interface OnClickOutsideOptions<Controls extends boolean = false> {
+export interface OnClickOutsideOptions<
+  Controls extends boolean = false,
+> extends ConfigurableWindow {
   /**
    * List of elements or CSS selectors that should not trigger the handler.
    */
@@ -108,16 +111,23 @@ export function useOnClickOutside(
   // cancel() sets this — prevents the next click even if pointerdown resets shouldListen
   const cancelledRef = useRef(false);
 
+  const windowOpts$ = useMaybeObservable<ConfigurableWindow>(
+    { window: options.window },
+    { window: "element" }
+  );
+  const window$ = useResolvedWindow(windowOpts$.window);
+
   // iOS workaround — passive click listeners on body children
   // https://github.com/vueuse/vueuse/issues/1520
   useConstant(() => {
-    if (defaultWindow && isIOS && !_iOSWorkaround) {
+    const win = window$.peek();
+    if (win && isIOS && !_iOSWorkaround) {
       _iOSWorkaround = true;
       const listenerOptions = { passive: true };
-      Array.from(defaultWindow.document.body.children).forEach((el) =>
+      Array.from(win.document.body.children).forEach((el) =>
         el.addEventListener("click", noop, listenerOptions)
       );
-      defaultWindow.document.documentElement.addEventListener("click", noop, listenerOptions);
+      win.document.documentElement.addEventListener("click", noop, listenerOptions);
     }
   });
 
@@ -126,9 +136,9 @@ export function useOnClickOutside(
     if (!list?.length) return false;
     return list.some((item) => {
       if (typeof item === "string") {
-        return Array.from(
-          (defaultWindow?.document ?? defaultDocument)?.querySelectorAll(item) ?? []
-        ).some((el) => el === event.target || event.composedPath().includes(el));
+        return Array.from(window$.peek()?.document?.querySelectorAll(item) ?? []).some(
+          (el) => el === event.target || event.composedPath().includes(el)
+        );
       }
       const el = peekElement(item);
       return (
@@ -165,7 +175,7 @@ export function useOnClickOutside(
   // Main click listener
   // eslint-disable-next-line react-hooks/refs -- collecting cleanup thunks, not render state
   cleanups.current[0] = useEventListener(
-    defaultWindow,
+    window$,
     "click",
     useCallback((event: PointerEvent) => {
       if (!isProcessingRef.current) {
@@ -182,7 +192,7 @@ export function useOnClickOutside(
   // Pointerdown — track whether the click started inside
   // eslint-disable-next-line react-hooks/refs -- collecting cleanup thunks, not render state
   cleanups.current[1] = useEventListener(
-    defaultWindow,
+    window$,
     "pointerdown",
     useCallback((e: PointerEvent) => {
       const el = peekElement(target);
@@ -195,17 +205,18 @@ export function useOnClickOutside(
   // Iframe blur detection — always registered, guards internally via detectIframeRef
   // eslint-disable-next-line react-hooks/refs -- collecting cleanup thunks, not render state
   cleanups.current[2] = useEventListener(
-    defaultWindow,
+    window$,
     "blur",
     useCallback((event: FocusEvent) => {
       if (!detectIframeRef.current) return;
       setTimeout(() => {
-        if (!defaultWindow) return;
+        const win = window$.peek();
+        if (!win) return;
         const el = peekElement(target);
         if (
-          defaultWindow.document.activeElement?.tagName === "IFRAME" &&
+          win.document.activeElement?.tagName === "IFRAME" &&
           el instanceof Element &&
-          !el.contains(defaultWindow.document.activeElement)
+          !el.contains(win.document.activeElement)
         ) {
           handlerRef.current(event as PointerEvent);
         }

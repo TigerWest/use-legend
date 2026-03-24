@@ -1,14 +1,17 @@
 "use client";
 import type { ReadonlyObservable, PermissionAware, Supportable } from "@usels/core";
-import { useSupported, usePermissionAware } from "@usels/core";
+import { useSupported, usePermissionAware, useMaybeObservable } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 interface DeviceMotionEventiOS {
   requestPermission: () => Promise<"granted" | "denied">;
 }
+
+export type UseDeviceMotionOptions = ConfigurableWindow;
 
 export interface UseDeviceMotionReturn extends Supportable, PermissionAware {
   /**
@@ -38,8 +41,11 @@ export interface UseDeviceMotionReturn extends Supportable, PermissionAware {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-export function useDeviceMotion(): UseDeviceMotionReturn {
-  const isSupported$ = useSupported(() => !!defaultWindow && "DeviceMotionEvent" in defaultWindow);
+export function useDeviceMotion(options?: UseDeviceMotionOptions): UseDeviceMotionReturn {
+  const opts$ = useMaybeObservable<UseDeviceMotionOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
+
+  const isSupported$ = useSupported(() => !!window$.get() && "DeviceMotionEvent" in window$.get()!);
 
   // useSupported evaluates after mount (via isMounted check), so this is SSR/hydration safe
   const isRequired$ = useSupported(
@@ -83,7 +89,7 @@ export function useDeviceMotion(): UseDeviceMotionReturn {
   // Always attach the listener. On non-iOS it fires immediately.
   // On iOS, events are not dispatched until permission is granted,
   // so the listener is harmless until ensurePermission() is called.
-  useEventListener("devicemotion", (event: DeviceMotionEvent) => {
+  useEventListener(window$, "devicemotion", (event: DeviceMotionEvent) => {
     batch(() => {
       const acc = event.acceleration;
       acceleration$.set({

@@ -1,24 +1,38 @@
 "use client";
 import type { ReadonlyObservable } from "@usels/core";
+import { useMaybeObservable } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultNavigator, defaultWindow } from "@shared/configurable";
+import {
+  type ConfigurableWindow,
+  type ConfigurableNavigator,
+  defaultNavigator,
+} from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
+
+export interface UsePreferredLanguagesOptions extends ConfigurableWindow, ConfigurableNavigator {}
 
 export type UsePreferredLanguagesReturn = ReadonlyObservable<readonly string[]>;
 
 /*@__NO_SIDE_EFFECTS__*/
-export function usePreferredLanguages(): UsePreferredLanguagesReturn {
+export function usePreferredLanguages(
+  options?: UsePreferredLanguagesOptions
+): UsePreferredLanguagesReturn {
+  const opts$ = useMaybeObservable<UsePreferredLanguagesOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
+  const nav = options?.navigator ?? defaultNavigator;
+
   const languages$ = useObservable<readonly string[]>([]);
 
   useMount(() => {
-    languages$.set(defaultNavigator?.languages ?? ["en"]);
+    languages$.set(nav?.languages ?? ["en"]);
   });
 
   useEventListener(
-    defaultWindow,
+    window$,
     "languagechange",
     () => {
-      languages$.set(defaultNavigator?.languages ?? ["en"]);
+      languages$.set(nav?.languages ?? ["en"]);
     },
     { passive: true }
   );

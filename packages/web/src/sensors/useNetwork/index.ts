@@ -1,10 +1,15 @@
 "use client";
 import type { ReadonlyObservable, Supportable } from "@usels/core";
-import { useSupported } from "@usels/core";
+import { useSupported, useMaybeObservable } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow, defaultNavigator } from "@shared/configurable";
+import {
+  type ConfigurableWindow,
+  type ConfigurableNavigator,
+  defaultNavigator,
+} from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 export type NetworkType =
   | "bluetooth"
@@ -17,6 +22,8 @@ export type NetworkType =
   | "unknown";
 
 export type NetworkEffectiveType = "slow-2g" | "2g" | "3g" | "4g";
+
+export interface UseNetworkOptions extends ConfigurableWindow, ConfigurableNavigator {}
 
 export interface UseNetworkReturn extends Supportable {
   /** Whether the browser is online */
@@ -49,8 +56,12 @@ interface NetworkInformation extends EventTarget {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-export function useNetwork(): UseNetworkReturn {
-  const isSupported$ = useSupported(() => !!defaultNavigator && "connection" in defaultNavigator);
+export function useNetwork(options?: UseNetworkOptions): UseNetworkReturn {
+  const networkOpts$ = useMaybeObservable<UseNetworkOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(networkOpts$.window);
+  const nav = options?.navigator ?? defaultNavigator;
+
+  const isSupported$ = useSupported(() => !!nav && "connection" in nav);
 
   const isOnline$ = useObservable(true);
   const offlineAt$ = useObservable<number | undefined>(undefined);
@@ -63,8 +74,8 @@ export function useNetwork(): UseNetworkReturn {
   const type$ = useObservable<NetworkType>("unknown");
 
   const updateConnectionInfo = useConstant(() => () => {
-    if (!defaultNavigator || !("connection" in defaultNavigator)) return;
-    const conn = (defaultNavigator as { connection?: NetworkInformation }).connection;
+    if (!nav || !("connection" in nav)) return;
+    const conn = (nav as { connection?: NetworkInformation }).connection;
     if (!conn) return;
     downlink$.set(conn.downlink);
     downlinkMax$.set(conn.downlinkMax);
@@ -75,14 +86,14 @@ export function useNetwork(): UseNetworkReturn {
   });
 
   useMount(() => {
-    if (!defaultWindow) return;
-    isOnline$.set(defaultNavigator?.onLine ?? true);
+    if (!window$.peek()) return;
+    isOnline$.set(nav?.onLine ?? true);
     updateConnectionInfo();
 
     // connection "change" event — manual registration since connection is not window/document
     const conn =
-      isSupported$.peek() && defaultNavigator
-        ? ((defaultNavigator as { connection?: NetworkInformation }).connection ?? null)
+      isSupported$.peek() && nav
+        ? ((nav as { connection?: NetworkInformation }).connection ?? null)
         : null;
     if (conn) {
       conn.addEventListener("change", updateConnectionInfo);
@@ -95,6 +106,7 @@ export function useNetwork(): UseNetworkReturn {
   });
 
   useEventListener(
+    window$,
     "online",
     () => {
       isOnline$.set(true);
@@ -106,6 +118,7 @@ export function useNetwork(): UseNetworkReturn {
   );
 
   useEventListener(
+    window$,
     "offline",
     () => {
       isOnline$.set(false);

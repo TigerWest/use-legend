@@ -1,23 +1,20 @@
 "use client";
 import type { DeepMaybeObservable, MaybeElement } from "@usels/core";
 import { getElement, useMaybeObservable } from "@usels/core";
-import { defaultDocument } from "@shared/configurable";
+import { type ConfigurableDocumentOrShadowRoot, defaultDocument } from "@shared/configurable";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
 
-export interface UseOnElementRemovalOptions {
-  /** Document or ShadowRoot to observe. Default: document */
-  root?: Document | ShadowRoot;
-}
+export type UseOnElementRemovalOptions = ConfigurableDocumentOrShadowRoot;
 
 export function useOnElementRemoval(
   target: MaybeElement,
   callback: (mutations: MutationRecord[]) => void,
   options?: DeepMaybeObservable<UseOnElementRemovalOptions>
 ): void {
-  const opts$ = useMaybeObservable(options);
+  const opts$ = useMaybeObservable(options, { document: "element" });
   const callbackRef = useLatest(callback);
   const elRef = useRef<ReturnType<typeof getElement>>(null);
 
@@ -26,7 +23,7 @@ export function useOnElementRemoval(
     if (el) elRef.current = el;
   });
 
-  const root = (opts$.root.peek() ?? defaultDocument) as MaybeElement;
+  const root = (opts$.document?.peek() ?? defaultDocument) as MaybeElement;
 
   useMutationObserver(
     root,

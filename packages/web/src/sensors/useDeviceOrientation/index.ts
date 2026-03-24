@@ -1,14 +1,17 @@
 "use client";
 import type { ReadonlyObservable, PermissionAware, Supportable } from "@usels/core";
-import { useSupported, usePermissionAware } from "@usels/core";
+import { useSupported, usePermissionAware, useMaybeObservable } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 interface DeviceOrientationEventiOS {
   requestPermission: () => Promise<"granted" | "denied">;
 }
+
+export type UseDeviceOrientationOptions = ConfigurableWindow;
 
 export interface UseDeviceOrientationReturn extends Supportable, PermissionAware {
   /**
@@ -29,9 +32,14 @@ export interface UseDeviceOrientationReturn extends Supportable, PermissionAware
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-export function useDeviceOrientation(): UseDeviceOrientationReturn {
+export function useDeviceOrientation(
+  options?: UseDeviceOrientationOptions
+): UseDeviceOrientationReturn {
+  const opts$ = useMaybeObservable<UseDeviceOrientationOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
+
   const isSupported$ = useSupported(
-    () => !!defaultWindow && "DeviceOrientationEvent" in defaultWindow
+    () => !!window$.get() && "DeviceOrientationEvent" in window$.get()!
   );
 
   // useSupported evaluates after mount (via isMounted check), so this is SSR/hydration safe
@@ -59,7 +67,7 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
   const beta$ = useObservable<number | null>(null);
   const gamma$ = useObservable<number | null>(null);
 
-  useEventListener("deviceorientation", (event: DeviceOrientationEvent) => {
+  useEventListener(window$, "deviceorientation", (event: DeviceOrientationEvent) => {
     batch(() => {
       isAbsolute$.set(event.absolute);
       alpha$.set(event.alpha);

@@ -5,9 +5,9 @@ import { useObservable, useMount } from "@legendapp/state/react";
 import { ObservableHint, batch } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultNavigator } from "@shared/configurable";
+import { type ConfigurableNavigator, defaultNavigator } from "@shared/configurable";
 
-export interface UseDisplayMediaOptions {
+export interface UseDisplayMediaOptions extends ConfigurableNavigator {
   /** Video constraint. Default: true */
   video?: boolean | MediaTrackConstraints;
   /** Audio constraint. Default: false */
@@ -31,11 +31,12 @@ export interface UseDisplayMediaReturn extends Supportable {
 export function useDisplayMedia(
   options?: DeepMaybeObservable<UseDisplayMediaOptions>
 ): UseDisplayMediaReturn {
-  const opts$ = useMaybeObservable(options);
+  const opts$ = useMaybeObservable(options, { navigator: "element" });
+  const nav = opts$.peek()?.navigator ?? defaultNavigator;
 
   const { immediate } = useInitialPick(opts$, { immediate: false });
 
-  const isSupported$ = useSupported(() => !!defaultNavigator?.mediaDevices?.getDisplayMedia);
+  const isSupported$ = useSupported(() => !!nav?.mediaDevices?.getDisplayMedia);
 
   const stream$ = useObservable<OpaqueObject<MediaStream> | null>(null);
   const enabled$ = useObservable(false);
@@ -52,7 +53,7 @@ export function useDisplayMedia(
   });
 
   const _start = useConstant(() => async (): Promise<MediaStream> => {
-    if (!isSupported$.peek() || !defaultNavigator?.mediaDevices?.getDisplayMedia) {
+    if (!isSupported$.peek() || !nav?.mediaDevices?.getDisplayMedia) {
       throw new Error("getDisplayMedia is not supported");
     }
     const existing = stream$.peek();
@@ -64,7 +65,7 @@ export function useDisplayMedia(
       const video = opts$.peek()?.video ?? true;
       const audio = opts$.peek()?.audio ?? false;
 
-      const mediaStream = await defaultNavigator.mediaDevices.getDisplayMedia({
+      const mediaStream = await nav.mediaDevices.getDisplayMedia({
         video,
         audio,
       });

@@ -4,9 +4,9 @@ import type { ReadonlyObservable, DeepMaybeObservable, Supportable, Pausable } f
 import { useObservable, useMount } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultNavigator } from "@shared/configurable";
+import { type ConfigurableNavigator, defaultNavigator } from "@shared/configurable";
 
-export interface UseGeolocationOptions {
+export interface UseGeolocationOptions extends ConfigurableNavigator {
   /** Use high accuracy mode */
   enableHighAccuracy?: boolean;
   /** Maximum age of a cached position in ms */
@@ -41,10 +41,11 @@ export interface UseGeolocationReturn extends Supportable, Pausable {
 export function useGeolocation(
   options?: DeepMaybeObservable<UseGeolocationOptions>
 ): UseGeolocationReturn {
-  const opts$ = useMaybeObservable(options);
+  const opts$ = useMaybeObservable(options, { navigator: "element" });
   const { immediate } = useInitialPick(opts$, { immediate: true });
+  const nav = opts$.peek()?.navigator ?? defaultNavigator;
 
-  const isSupported$ = useSupported(() => !!defaultNavigator && "geolocation" in defaultNavigator);
+  const isSupported$ = useSupported(() => !!nav && "geolocation" in nav);
 
   const coords$ = useObservable<UseGeolocationCoords>({
     accuracy: 0,
@@ -63,17 +64,17 @@ export function useGeolocation(
   const state = useConstant(() => ({ watcherId: undefined as number | undefined }));
 
   const pause = useConstant(() => () => {
-    if (state.watcherId !== undefined && defaultNavigator?.geolocation) {
-      defaultNavigator.geolocation.clearWatch(state.watcherId);
+    if (state.watcherId !== undefined && nav?.geolocation) {
+      nav.geolocation.clearWatch(state.watcherId);
       state.watcherId = undefined;
     }
     isActive$.set(false);
   });
 
   const resume = useConstant(() => () => {
-    if (!isSupported$.peek() || !defaultNavigator) return;
+    if (!isSupported$.peek() || !nav) return;
     pause();
-    state.watcherId = defaultNavigator.geolocation.watchPosition(
+    state.watcherId = nav.geolocation.watchPosition(
       (position) => {
         batch(() => {
           locatedAt$.set(position.timestamp);
