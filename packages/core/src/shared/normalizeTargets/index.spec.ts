@@ -73,4 +73,12 @@ describe("normalizeTargets()", () => {
     const elements = normalizeTargets([result.current as Ref$<Element>, obs, wrapEl(p)]);
     expect(elements).toEqual([div, span, p]);
   });
+
+  it("passes through Document as-is", () => {
+    expect(normalizeTargets(document)).toEqual([document]);
+  });
+
+  it("passes through Window as-is", () => {
+    expect(normalizeTargets(window)).toEqual([window]);
+  });
 });

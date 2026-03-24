@@ -81,7 +81,7 @@ export function useIntersectionObserver(
             return isWindow(el as unknown) ? null : el;
           })();
 
-    const targets = normalizeTargets(target);
+    const targets = normalizeTargets(target).filter((el): el is Element => el instanceof Element);
     if (!targets.length) return;
 
     observerRef.current = new IntersectionObserver(callback, {

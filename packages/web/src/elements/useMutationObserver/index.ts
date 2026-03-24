@@ -37,7 +37,7 @@ export function useMutationObserver(
 
     observerRef.current = new MutationObserver(callback);
     uniqueTargets.forEach((el) => {
-      observerRef.current!.observe(el, options);
+      observerRef.current!.observe(el as Node, options);
     });
   };
 

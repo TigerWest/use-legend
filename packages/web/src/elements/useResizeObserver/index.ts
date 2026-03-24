@@ -58,7 +58,7 @@ export function useResizeObserver(
     if (!isSupported$.peek()) return;
     cleanup();
 
-    const targets = normalizeTargets(target);
+    const targets = normalizeTargets(target).filter((el): el is Element => el instanceof Element);
     if (!targets.length) return;
 
     observerRef.current = new ResizeObserver((...args) => callbackRef.current(...args));

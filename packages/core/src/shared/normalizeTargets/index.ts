@@ -1,26 +1,23 @@
 import { getElement, type MaybeElement } from "@reactivity/useRef$";
+import { toArray } from "@shared/utils";
+
+export type NormalizedTarget = Element | Document | Window;
 
 /**
- * Normalizes one or more observable-element targets into a plain Element[].
+ * Normalizes one or more observable-element targets into a plain array.
  *
  * - `Ref$<T>` — calls `.get()` and unwraps the OpaqueObject via `.valueOf()`
  * - `Observable<OpaqueObject<Element> | null>` — calls `.get()` and unwraps via `.valueOf()`
- * - `Document` / `Window` — filtered out (not an Element, handled by callers)
+ * - `Document` / `Window` — passed through as-is
  * - `null` — filtered out
  *
  * When called inside `useObserve`, reading `.get()` registers observable
  * dependencies so the observer re-fires when a tracked target changes.
- *
- * Currently shared by useResizeObserver.
- * useIntersectionObserver, useMutationObserver will use this once implemented.
  */
-export function normalizeTargets(target?: MaybeElement | MaybeElement[]): Element[] {
+export function normalizeTargets(target?: MaybeElement | MaybeElement[]): NormalizedTarget[] {
   if (target == null) return [];
-  const arr = Array.isArray(target) ? target : [target];
+  const arr = toArray(target);
   return arr
-    .map((t) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return getElement(t) as any;
-    })
-    .filter((el): el is Element => el != null);
+    .map((t) => getElement(t) as NormalizedTarget | null)
+    .filter((el): el is NormalizedTarget => el != null);
 }
