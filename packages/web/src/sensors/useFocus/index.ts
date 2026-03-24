@@ -9,9 +9,10 @@ import {
   type MaybeElement,
 } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
-export interface UseFocusOptions {
+export interface UseFocusOptions extends ConfigurableWindow {
   /** Auto-focus the element on mount. Default: false */
   initialValue?: boolean;
   /** Replicate :focus-visible behavior. Default: false */
@@ -45,14 +46,15 @@ export function useFocus(
   target: MaybeElement,
   options?: DeepMaybeObservable<UseFocusOptions>
 ): UseFocusReturn {
-  const opts$ = useMaybeObservable<UseFocusOptions>(options);
+  const opts$ = useMaybeObservable<UseFocusOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
 
   const focused$ = useObservable<boolean>(false);
 
   // --- Event handlers ---
 
   const onFocus = useCallback(() => {
-    if (!defaultWindow) return;
+    if (!window$.peek()) return;
     const focusVisible = opts$.peek()?.focusVisible ?? false;
     if (focusVisible) {
       // Only set focused if the element matches :focus-visible
@@ -82,12 +84,12 @@ export function useFocus(
 
     if (isFocused) {
       // Only call focus if the element is not already the active element
-      if (defaultWindow && defaultWindow.document.activeElement !== el) {
+      if (window$.peek() && window$.peek()!.document.activeElement !== el) {
         el.focus({ preventScroll: opts$.peek()?.preventScroll ?? false });
       }
     } else {
       // Only call blur if the element is currently the active element
-      if (defaultWindow && defaultWindow.document.activeElement === el) {
+      if (window$.peek() && window$.peek()!.document.activeElement === el) {
         el.blur();
       }
     }

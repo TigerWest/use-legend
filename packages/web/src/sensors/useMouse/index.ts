@@ -8,14 +8,15 @@ import { useMaybeObservable } from "@usels/core";
 import { useInitialPick } from "@usels/core";
 import { createFilterWrapper } from "@usels/core";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow, defaultWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useEventListener } from "@browser/useEventListener";
 
 export type UseMouseCoordType = "page" | "client" | "screen" | "movement";
 
 export type UseMouseSourceType = "mouse" | "touch" | null;
 
-export interface UseMouseOptions extends ConfigurableEventFilter {
+export interface UseMouseOptions extends ConfigurableEventFilter, ConfigurableWindow {
   /** Coordinate type. Default: "page" */
   type?: UseMouseCoordType;
   /** Track touch events. Default: true */
@@ -38,7 +39,9 @@ export interface UseMouseReturn {
 }
 
 export function useMouse(options?: DeepMaybeObservable<UseMouseOptions>): UseMouseReturn {
-  const opts$ = useMaybeObservable<UseMouseOptions>(options);
+  const opts$ = useMaybeObservable<UseMouseOptions>(options, { window: "element" });
+
+  const window$ = useResolvedWindow(opts$.window);
 
   // mount-time-only
   const { type, touch, resetOnTouchEnds } = useInitialPick(opts$, {
@@ -74,9 +77,9 @@ export function useMouse(options?: DeepMaybeObservable<UseMouseOptions>): UseMou
   // useEventListener handles them internally via its useObserve.
   // No 'element' hint needed; avoids lazy computed activation issues.
   const eventTarget: MaybeElement = useConstant(() => {
-    if (options == null) return defaultWindow ?? null;
+    if (options == null) return (window$.peek() ?? defaultWindow ?? null) as MaybeElement;
     const target = (options as Record<string, unknown>).target as MaybeElement | undefined;
-    return target ?? defaultWindow ?? null;
+    return target ?? ((window$.peek() ?? defaultWindow ?? null) as MaybeElement);
   });
 
   // Extract eventFilter from options at mount time.

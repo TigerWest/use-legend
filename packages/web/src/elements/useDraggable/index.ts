@@ -5,14 +5,15 @@ import { useCallback, useRef } from "react";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 import { type MaybeElement, peekElement } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 export interface Position {
   x: number;
   y: number;
 }
 
-export interface UseDraggableOptions {
+export interface UseDraggableOptions extends ConfigurableWindow {
   /** Only start drag if pointerdown target exactly matches the element. Default: false */
   exact?: boolean;
   /** Call preventDefault on pointer events. Default: false */
@@ -85,7 +86,10 @@ export function useDraggable(
     onStart: "function",
     onMove: "function",
     onEnd: "function",
+    window: "element",
   });
+
+  const window$ = useResolvedWindow(opts$.window);
 
   // State: Rule 3 — initialValue is peek (mount-time only)
   const initial = opts$.initialValue.peek() ?? { x: 0, y: 0 };
@@ -162,11 +166,12 @@ export function useDraggable(
     }
 
     // viewport restriction
-    if (opts$.restrictInView.peek() && defaultWindow) {
+    const win = window$.peek();
+    if (opts$.restrictInView.peek() && win) {
       const elRect = (peekElement(target) as HTMLElement)?.getBoundingClientRect();
       if (elRect) {
-        x = Math.max(0, Math.min(x, defaultWindow.innerWidth - elRect.width));
-        y = Math.max(0, Math.min(y, defaultWindow.innerHeight - elRect.height));
+        x = Math.max(0, Math.min(x, win.innerWidth - elRect.width));
+        y = Math.max(0, Math.min(y, win.innerHeight - elRect.height));
       }
     }
 
@@ -195,9 +200,9 @@ export function useDraggable(
     capture: opts$.capture.peek() ?? false,
   });
 
-  useEventListener(defaultWindow, "pointermove", onPointerMove);
+  useEventListener(window$, "pointermove", onPointerMove);
 
-  useEventListener(defaultWindow, "pointerup", onPointerUp);
+  useEventListener(window$, "pointerup", onPointerUp);
 
   return {
     x$: state$.x,

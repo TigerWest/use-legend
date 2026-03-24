@@ -6,11 +6,11 @@ import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
 import { useResizeObserver } from "@elements/useResizeObserver";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useEventListener } from "@browser/useEventListener";
-import { isWindow } from "@usels/core/shared/index";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 
-export interface UseElementBoundingOptions {
+export interface UseElementBoundingOptions extends ConfigurableWindow {
   /** Reset all values to 0 when element unmounts. Default: true */
   reset?: boolean;
   /** Re-calculate on window resize. Default: true */
@@ -46,9 +46,6 @@ const ZERO = {
   height: 0,
 };
 
-// isWindow(window) returns false in SSR (typeof window === "undefined"), true in browser.
-const win = defaultWindow;
-
 /**
  * Tracks the bounding rect of a DOM element (x, y, top, right, bottom, left, width, height).
  * Observes ResizeObserver, MutationObserver (style/class changes), window scroll, and resize.
@@ -68,7 +65,8 @@ export function useElementBounding(
   target: MaybeElement,
   options?: DeepMaybeObservable<UseElementBoundingOptions>
 ): UseElementBoundingReturn {
-  const opts$ = useMaybeObservable<UseElementBoundingOptions>(options);
+  const opts$ = useMaybeObservable<UseElementBoundingOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
 
   const bounding$ = useObservable({ ...ZERO });
 
@@ -115,20 +113,13 @@ export function useElementBounding(
   });
 
   // Observe window scroll / resize (always call hooks unconditionally — Rules of Hooks)
-  // isWindow(win) is false in SSR, so target becomes null outside the browser.
   // peek() — evaluated once at render time, no reactive subscription needed.
-  useEventListener(
-    isWindow(win) && opts$.windowScroll.peek() !== false ? win : null,
-    "scroll",
-    update,
-    { passive: true }
-  );
-  useEventListener(
-    isWindow(win) && opts$.windowResize.peek() !== false ? win : null,
-    "resize",
-    update,
-    { passive: true }
-  );
+  useEventListener(opts$.windowScroll.peek() !== false ? window$ : null, "scroll", update, {
+    passive: true,
+  });
+  useEventListener(opts$.windowResize.peek() !== false ? window$ : null, "resize", update, {
+    passive: true,
+  });
 
   useObserveEffect(() => {
     normalizeTargets(target); // register reactive dep

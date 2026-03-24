@@ -1,14 +1,16 @@
-import type { Observable } from "@legendapp/state";
+import type { Observable, OpaqueObject } from "@legendapp/state";
+import { ObservableHint } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { defaultWindow, defaultDocument } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 import { type MaybeElement, peekElement } from "@usels/core";
 import { useResizeObserver } from "@elements/useResizeObserver";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useEventListener } from "@browser/useEventListener";
 
-export interface UseMouseInElementOptions {
+export interface UseMouseInElementOptions extends ConfigurableWindow {
   /** Also update elementX/Y when mouse is outside the element. Default: true */
   handleOutside?: boolean;
   /** Re-calculate on window scroll. Default: true */
@@ -62,7 +64,12 @@ export function useMouseInElement(
   target: MaybeElement,
   options?: DeepMaybeObservable<UseMouseInElementOptions>
 ): UseMouseInElementReturn {
-  const opts$ = useMaybeObservable<UseMouseInElementOptions>(options);
+  const opts$ = useMaybeObservable<UseMouseInElementOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
+  const doc$ = useObservable<OpaqueObject<Document> | null>(() => {
+    const doc = window$.get()?.document;
+    return doc ? ObservableHint.opaque(doc) : null;
+  });
 
   // Global mouse coordinates (exposed in return)
   const mouse$ = useObservable({ x: 0, y: 0 });
@@ -98,8 +105,8 @@ export function useMouseInElement(
         state$.assign({
           elementX: mx - rect.left,
           elementY: my - rect.top,
-          elementPositionX: rect.left + (defaultWindow?.scrollX ?? 0),
-          elementPositionY: rect.top + (defaultWindow?.scrollY ?? 0),
+          elementPositionX: rect.left + (window$.peek()?.scrollX ?? 0),
+          elementPositionY: rect.top + (window$.peek()?.scrollY ?? 0),
           elementWidth: rect.width,
           elementHeight: rect.height,
           isOutside: false,
@@ -116,8 +123,8 @@ export function useMouseInElement(
         state$.assign({
           elementX: mx - rect.left,
           elementY: my - rect.top,
-          elementPositionX: rect.left + (defaultWindow?.scrollX ?? 0),
-          elementPositionY: rect.top + (defaultWindow?.scrollY ?? 0),
+          elementPositionX: rect.left + (window$.peek()?.scrollX ?? 0),
+          elementPositionY: rect.top + (window$.peek()?.scrollY ?? 0),
           elementWidth: rect.width,
           elementHeight: rect.height,
         });
@@ -134,23 +141,21 @@ export function useMouseInElement(
     [update]
   );
 
-  const stopMouse = useEventListener(defaultWindow, "mousemove", onMouseMove, {
+  const stopMouse = useEventListener(window$, "mousemove", onMouseMove, {
     passive: true,
   });
 
   // document mouseleave → force isOutside = true
-  const stopLeave = useEventListener(defaultDocument, "mouseleave", () =>
-    state$.isOutside.set(true)
-  );
+  const stopLeave = useEventListener(doc$, "mouseleave", () => state$.isOutside.set(true));
 
   const stopScroll = useEventListener(
-    defaultWindow && opts$.windowScroll.peek() !== false ? defaultWindow : null,
+    opts$.windowScroll.peek() !== false ? window$ : null,
     "scroll",
     update,
     { passive: true }
   );
   const stopResize = useEventListener(
-    defaultWindow && opts$.windowResize.peek() !== false ? defaultWindow : null,
+    opts$.windowResize.peek() !== false ? window$ : null,
     "resize",
     update,
     { passive: true }

@@ -7,12 +7,13 @@ import type { ReadonlyObservable } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
 import { useInitialPick } from "@usels/core";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow, defaultWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useEventListener } from "@browser/useEventListener";
 
 export type UseMousePressedSourceType = "mouse" | "touch" | null;
 
-export interface UseMousePressedOptions {
+export interface UseMousePressedOptions extends ConfigurableWindow {
   /** Track touch events. Default: true */
   touch?: boolean;
   /** Event target for press detection. Default: window */
@@ -38,7 +39,10 @@ export function useMousePressed(
   const opts$ = useMaybeObservable<UseMousePressedOptions>(options, {
     onPressed: "function",
     onReleased: "function",
+    window: "element",
   });
+
+  const window$ = useResolvedWindow(opts$.window);
 
   // mount-time-only
   const { touch } = useInitialPick(opts$, { touch: true });
@@ -48,9 +52,10 @@ export function useMousePressed(
 
   // Extract raw target from options at mount time (same pattern as useMouse)
   const eventTarget: MaybeElement = useConstant(() => {
-    if (options == null) return defaultWindow ?? null;
+    const win = (window$.peek() ?? defaultWindow ?? null) as MaybeElement;
+    if (options == null) return win;
     const target = (options as Record<string, unknown>).target as MaybeElement | undefined;
-    return target ?? defaultWindow ?? null;
+    return target ?? win;
   });
 
   // --- Pointer events (mouse) ---
@@ -70,7 +75,7 @@ export function useMousePressed(
   }, []);
 
   useEventListener(eventTarget, "pointerdown", onPointerDown);
-  useEventListener(defaultWindow, "pointerup", onPointerUp);
+  useEventListener(window$, "pointerup", onPointerUp);
 
   // --- Touch events ---
   const touchTarget: MaybeElement = touch ? eventTarget : null;
@@ -88,8 +93,12 @@ export function useMousePressed(
   }, []);
 
   useEventListener(touchTarget, "touchstart", onTouchStart, { passive: true });
-  useEventListener(touch ? defaultWindow : null, "touchend", onTouchEnd, { passive: true });
-  useEventListener(touch ? defaultWindow : null, "touchcancel", onTouchEnd, { passive: true });
+  useEventListener(touch ? window$ : null, "touchend", onTouchEnd, {
+    passive: true,
+  });
+  useEventListener(touch ? window$ : null, "touchcancel", onTouchEnd, {
+    passive: true,
+  });
 
   return { pressed$, sourceType$ };
 }

@@ -1,5 +1,10 @@
 "use client";
-import { isObservable, type Observable } from "@legendapp/state";
+import {
+  isObservable,
+  type Observable,
+  type ObservablePrimitive,
+  type OpaqueObject,
+} from "@legendapp/state";
 import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
@@ -54,7 +59,7 @@ export function useEventListener<E extends keyof WindowEventMap>(
  * Overload 2: Explicit `Window` target.
  */
 export function useEventListener<E extends keyof WindowEventMap>(
-  target: Window,
+  target: Window | Observable<OpaqueObject<Window> | null>,
   event: Arrayable<E>,
   listener: Arrayable<(ev: WindowEventMap[E]) => void>,
   options?: MaybeObservable<boolean | undefined | AddEventListenerOptions>
@@ -64,10 +69,10 @@ export function useEventListener<E extends keyof WindowEventMap>(
  * Register using addEventListener on mounted, and removeEventListener
  * automatically on unmounted.
  *
- * Overload 3: Explicit `Document` target.
+ * Overload 3: Explicit or reactive `Document` target.
  */
 export function useEventListener<E extends keyof DocumentEventMap>(
-  target: Document,
+  target: Document | Observable<OpaqueObject<Document> | null>,
   event: Arrayable<E>,
   listener: Arrayable<(ev: DocumentEventMap[E]) => void>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>
@@ -97,7 +102,7 @@ export function useEventListener<E extends keyof HTMLElementEventMap>(
  * The observer re-fires whenever the observable value changes.
  */
 export function useEventListener<EventType = Event>(
-  target: Observable<unknown>,
+  target: Observable<unknown> | ObservablePrimitive<unknown> | null | undefined,
   event: Arrayable<string>,
   listener: Arrayable<GeneralEventListener<EventType>>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>

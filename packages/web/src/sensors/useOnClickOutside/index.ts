@@ -5,7 +5,7 @@ import { peekElement, type MaybeElement } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { useLatest } from "@usels/core/shared/useLatest";
-import { defaultWindow } from "@shared/configurable";
+import { defaultWindow, defaultDocument } from "@shared/configurable";
 import { isIOS, noop } from "@usels/core/shared/utils";
 
 export interface OnClickOutsideOptions<Controls extends boolean = false> {
@@ -126,9 +126,9 @@ export function useOnClickOutside(
     if (!list?.length) return false;
     return list.some((item) => {
       if (typeof item === "string") {
-        return Array.from((defaultWindow?.document ?? document).querySelectorAll(item)).some(
-          (el) => el === event.target || event.composedPath().includes(el)
-        );
+        return Array.from(
+          (defaultWindow?.document ?? defaultDocument)?.querySelectorAll(item) ?? []
+        ).some((el) => el === event.target || event.composedPath().includes(el));
       }
       const el = peekElement(item);
       return (

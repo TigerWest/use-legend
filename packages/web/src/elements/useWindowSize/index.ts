@@ -4,9 +4,10 @@ import { useObservable, useMount, useObserveEffect } from "@legendapp/state/reac
 import { useEventListener } from "@browser/useEventListener";
 import { useMediaQuery } from "@browser/useMediaQuery";
 import { useMaybeObservable, useWhenMounted, type DeepMaybeObservable } from "@usels/core";
-import { defaultWindow, defaultDocument } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
-export interface UseWindowSizeOptions {
+export interface UseWindowSizeOptions extends ConfigurableWindow {
   initialWidth?: number;
   initialHeight?: number;
   listenOrientation?: boolean;
@@ -24,7 +25,9 @@ export function useWindowSize(
   options?: DeepMaybeObservable<UseWindowSizeOptions>
 ): UseWindowSizeReturn {
   // Standard Pattern: normalize DeepMaybeObservable<Options> into a stable computed Observable.
-  const opts$ = useMaybeObservable<UseWindowSizeOptions>(options);
+  const opts$ = useMaybeObservable<UseWindowSizeOptions>(options, { window: "element" });
+
+  const window$ = useResolvedWindow(opts$.window);
 
   const size$ = useObservable({
     width: opts$.initialWidth.peek() ?? 0,
@@ -32,7 +35,7 @@ export function useWindowSize(
   });
 
   const update = () => {
-    const win = defaultWindow;
+    const win = window$.peek();
     if (!win) return;
 
     const type = opts$.type.peek() ?? "inner";
@@ -58,8 +61,8 @@ export function useWindowSize(
         width = win.innerWidth;
         height = win.innerHeight;
       } else {
-        width = defaultDocument!.documentElement.clientWidth;
-        height = defaultDocument!.documentElement.clientHeight;
+        width = win.document.documentElement.clientWidth;
+        height = win.document.documentElement.clientHeight;
       }
     }
 
@@ -68,11 +71,11 @@ export function useWindowSize(
 
   useMount(update);
 
-  useEventListener("resize", update, { passive: true });
+  useEventListener(window$, "resize", update, { passive: true });
 
   const vp$ = useWhenMounted(() => {
     if (opts$.type.peek() !== "visual") return null;
-    const vp = defaultWindow?.visualViewport;
+    const vp = window$.get()?.visualViewport;
     return vp != null ? ObservableHint.opaque(vp) : null;
   });
 

@@ -14,13 +14,14 @@ import {
 } from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultDocument, defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export interface UseScrollOptions {
+export interface UseScrollOptions extends ConfigurableWindow {
   throttle?: number;
   idle?: number;
   onScroll?: (e: Event) => void;
@@ -77,18 +78,22 @@ function getScrollValues(el: HTMLElement | Document | Window | null): {
   return { x: el.scrollLeft, y: el.scrollTop };
 }
 
-function getScrollDimensions(el: HTMLElement | Document | Window | null): {
+function getScrollDimensions(
+  el: HTMLElement | Document | Window | null,
+  win: Window | null | undefined
+): {
   scrollW: number;
   scrollH: number;
   clientW: number;
   clientH: number;
 } {
   if (!el || isWindow(el)) {
+    const doc = win?.document;
     return {
-      scrollW: defaultDocument?.documentElement.scrollWidth ?? 0,
-      scrollH: defaultDocument?.documentElement.scrollHeight ?? 0,
-      clientW: defaultWindow?.innerWidth ?? 0,
-      clientH: defaultWindow?.innerHeight ?? 0,
+      scrollW: doc?.documentElement.scrollWidth ?? 0,
+      scrollH: doc?.documentElement.scrollHeight ?? 0,
+      clientW: win?.innerWidth ?? 0,
+      clientH: win?.innerHeight ?? 0,
     };
   }
   if (el instanceof Document) {
@@ -120,7 +125,10 @@ export function useScroll(
     onScroll: "function",
     onStop: "function",
     onError: "function",
+    window: "element",
   });
+
+  const window$ = useResolvedWindow(opts$.window);
 
   const initial = getScrollValues(peekElement(element));
 
@@ -169,7 +177,7 @@ export function useScroll(
     x$.set(newX);
     y$.set(newY);
 
-    const { scrollW, scrollH, clientW, clientH } = getScrollDimensions(el);
+    const { scrollW, scrollH, clientW, clientH } = getScrollDimensions(el, window$.peek());
     const maxX = scrollW - clientW;
     const maxY = scrollH - clientH;
     const offset = opts$.peek()?.offset ?? {};

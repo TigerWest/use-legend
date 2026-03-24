@@ -1,9 +1,16 @@
 "use client";
 import { ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
-import { get, useSupported, type MaybeObservable, useWhenMounted } from "@usels/core";
+import {
+  get,
+  useMaybeObservable,
+  useSupported,
+  type MaybeObservable,
+  useWhenMounted,
+} from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultWindow } from "@shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 // ---------------------------------------------------------------------------
 // Local helpers
@@ -37,7 +44,7 @@ export function evaluateSSRQuery(query: string, ssrWidth: number): boolean {
 // Types
 // ---------------------------------------------------------------------------
 
-export interface UseMediaQueryOptions {
+export interface UseMediaQueryOptions extends ConfigurableWindow {
   ssrWidth?: number;
 }
 
@@ -54,20 +61,22 @@ export function useMediaQuery(
 ): UseMediaQueryReturn {
   const { ssrWidth } = options;
 
-  const isSupported$ = useSupported(
-    () =>
-      !!defaultWindow &&
-      "matchMedia" in defaultWindow &&
-      typeof defaultWindow.matchMedia === "function"
-  );
+  const opts$ = useMaybeObservable<UseMediaQueryOptions>(options, { window: "element" });
+  const window$ = useResolvedWindow(opts$.window);
+
+  const isSupported$ = useSupported(() => {
+    const win = window$.get();
+    return !!win && "matchMedia" in win && typeof win.matchMedia === "function";
+  });
 
   const matches$ = useObservable(() =>
     typeof ssrWidth === "number" ? evaluateSSRQuery(get(query), ssrWidth) : false
   );
 
-  const mql$ = useWhenMounted(() =>
-    isSupported$.get() ? ObservableHint.opaque(defaultWindow!.matchMedia(get(query))) : null
-  );
+  const mql$ = useWhenMounted(() => {
+    const win = window$.get();
+    return isSupported$.get() && win ? ObservableHint.opaque(win.matchMedia(get(query))) : null;
+  });
   useObserve(() => {
     const mql = mql$.get();
     if (!mql) {
