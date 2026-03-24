@@ -5,6 +5,7 @@ import { useCallback, useRef } from "react";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 import { type MaybeElement } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
+import { defaultNavigator } from "@shared/configurable";
 
 export interface UseDropZoneOptions {
   dataTypes?: string[] | ((types: readonly string[]) => boolean);
@@ -71,8 +72,7 @@ export function useDropZone(
 
     // Safari detection: UA contains 'Safari' but not 'Chrome' (SSR guard required)
     const isSafari =
-      typeof navigator !== "undefined" &&
-      /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      defaultNavigator != null && /^((?!chrome|android).)*safari/i.test(defaultNavigator.userAgent);
     if (isSafari) return true;
 
     // 'get.function' hint fields: access via opts$.peek()?.fieldName pattern

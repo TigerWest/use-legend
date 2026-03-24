@@ -14,6 +14,7 @@ import {
 } from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
 import { useEventListener } from "@browser/useEventListener";
+import { defaultDocument, defaultWindow } from "@shared/configurable";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -84,10 +85,10 @@ function getScrollDimensions(el: HTMLElement | Document | Window | null): {
 } {
   if (!el || isWindow(el)) {
     return {
-      scrollW: document.documentElement.scrollWidth,
-      scrollH: document.documentElement.scrollHeight,
-      clientW: window.innerWidth,
-      clientH: window.innerHeight,
+      scrollW: defaultDocument?.documentElement.scrollWidth ?? 0,
+      scrollH: defaultDocument?.documentElement.scrollHeight ?? 0,
+      clientW: defaultWindow?.innerWidth ?? 0,
+      clientH: defaultWindow?.innerHeight ?? 0,
     };
   }
   if (el instanceof Document) {

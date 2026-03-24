@@ -162,11 +162,11 @@ export function useDraggable(
     }
 
     // viewport restriction
-    if (opts$.restrictInView.peek()) {
+    if (opts$.restrictInView.peek() && defaultWindow) {
       const elRect = (peekElement(target) as HTMLElement)?.getBoundingClientRect();
       if (elRect) {
-        x = Math.max(0, Math.min(x, window.innerWidth - elRect.width));
-        y = Math.max(0, Math.min(y, window.innerHeight - elRect.height));
+        x = Math.max(0, Math.min(x, defaultWindow.innerWidth - elRect.width));
+        y = Math.max(0, Math.min(y, defaultWindow.innerHeight - elRect.height));
       }
     }
 

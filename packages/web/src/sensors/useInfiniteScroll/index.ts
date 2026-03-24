@@ -6,6 +6,7 @@ import type { DeepMaybeObservable, MaybeElement, ReadonlyObservable, Awaitable }
 import { useInitialPick } from "@usels/core";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { isWindow } from "@usels/core/shared/index";
+import { defaultDocument, defaultWindow } from "@shared/configurable";
 import { useScroll, type UseScrollOptions } from "@sensors/useScroll";
 import { useElementVisibility } from "@elements/useElementVisibility";
 
@@ -76,7 +77,9 @@ export function useInfiniteScroll(
     const canLoadMore = opts?.canLoadMore;
     if (canLoadMore) {
       const el = peekElement(element);
-      const domEl = isWindow(el) ? document.documentElement : (el as HTMLElement | null);
+      const domEl = isWindow(el)
+        ? (defaultDocument?.documentElement ?? null)
+        : (el as HTMLElement | null);
       if (domEl && !canLoadMore(domEl as HTMLElement)) return;
     }
 
@@ -102,10 +105,11 @@ export function useInfiniteScroll(
     if (!el) return false;
     const isVertical = direction === "top" || direction === "bottom";
     if (isWindow(el)) {
-      const docEl = document.documentElement;
+      const docEl = defaultDocument?.documentElement;
+      if (!docEl || !defaultWindow) return false;
       return isVertical
-        ? docEl.scrollHeight <= window.innerHeight
-        : docEl.scrollWidth <= window.innerWidth;
+        ? docEl.scrollHeight <= defaultWindow.innerHeight
+        : docEl.scrollWidth <= defaultWindow.innerWidth;
     }
     const domEl = el as HTMLElement;
     return isVertical
@@ -124,7 +128,9 @@ export function useInfiniteScroll(
     const canLoadMore = opts?.canLoadMore;
     if (canLoadMore) {
       const el = peekElement(element);
-      const domEl = isWindow(el) ? document.documentElement : (el as HTMLElement | null);
+      const domEl = isWindow(el)
+        ? (defaultDocument?.documentElement ?? null)
+        : (el as HTMLElement | null);
       if (domEl && !canLoadMore(domEl as HTMLElement)) return;
     }
 

@@ -98,8 +98,8 @@ export function useMouseInElement(
         state$.assign({
           elementX: mx - rect.left,
           elementY: my - rect.top,
-          elementPositionX: rect.left + window.scrollX,
-          elementPositionY: rect.top + window.scrollY,
+          elementPositionX: rect.left + (defaultWindow?.scrollX ?? 0),
+          elementPositionY: rect.top + (defaultWindow?.scrollY ?? 0),
           elementWidth: rect.width,
           elementHeight: rect.height,
           isOutside: false,
@@ -116,8 +116,8 @@ export function useMouseInElement(
         state$.assign({
           elementX: mx - rect.left,
           elementY: my - rect.top,
-          elementPositionX: rect.left + window.scrollX,
-          elementPositionY: rect.top + window.scrollY,
+          elementPositionX: rect.left + (defaultWindow?.scrollX ?? 0),
+          elementPositionY: rect.top + (defaultWindow?.scrollY ?? 0),
           elementWidth: rect.width,
           elementHeight: rect.height,
         });
