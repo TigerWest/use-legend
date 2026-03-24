@@ -4,7 +4,6 @@ import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
 import { type MaybeElement, getElement, peekElement } from "@usels/core";
-import { useConstant } from "@usels/core/shared/useConstant";
 import {
   useMaybeObservable,
   useInitialPick,
@@ -18,7 +17,8 @@ import {
   type DeepMaybeObservable,
 } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultWindow, type ConfigurableWindow } from "@usels/core/shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -99,7 +99,7 @@ export function useAnimate(
 
   const opts$ = useMaybeObservable(
     isNumberOpts ? undefined : (options as DeepMaybeObservable<UseAnimateOptions> | undefined),
-    { onReady: "function", onError: "function" }
+    { onReady: "function", onError: "function", window: "element" }
   );
 
   // Mount-time-only fields (Rule 3)
@@ -114,14 +114,16 @@ export function useAnimate(
     persist: false,
     playbackRate: 1,
   });
-  const _window = useConstant(() => opts$.window.peek()) ?? defaultWindow;
+  const window$ = useResolvedWindow(opts$.window);
 
   const fireError = (e: unknown) => (opts$.peek()?.onError ?? console.error)(e);
 
   // ── Core state ──
   const isSupported$ = useSupported(
     () =>
-      !!_window && typeof Element !== "undefined" && typeof Element.prototype.animate === "function"
+      !!window$.peek() &&
+      typeof Element !== "undefined" &&
+      typeof Element.prototype.animate === "function"
   );
 
   const animRef = useRef<Animation | undefined>(undefined);
@@ -262,7 +264,7 @@ export function useAnimate(
     // Guard against reverse bursts in the same frame.
     if (reverseLocked.current) return;
     reverseLocked.current = true;
-    const raf = _window?.requestAnimationFrame ?? requestAnimationFrame;
+    const raf = window$.peek()?.requestAnimationFrame ?? requestAnimationFrame;
     raf(() => {
       reverseLocked.current = false;
     });

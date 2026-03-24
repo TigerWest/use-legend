@@ -2,7 +2,7 @@
 import type { ReadonlyObservable } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultNavigator, defaultWindow } from "@usels/core/shared/configurable";
+import { defaultNavigator, defaultWindow } from "@shared/configurable";
 
 export type UsePreferredLanguagesReturn = ReadonlyObservable<readonly string[]>;
 

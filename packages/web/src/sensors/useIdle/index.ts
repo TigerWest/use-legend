@@ -3,7 +3,7 @@ import type { ReadonlyObservable, DeepMaybeObservable } from "@usels/core";
 import { useMaybeObservable, useInitialPick, useTimeoutFn } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 import { useEventListener } from "../../browser/useEventListener";
 
 const DEFAULT_EVENTS = [

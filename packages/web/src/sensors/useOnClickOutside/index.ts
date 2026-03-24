@@ -5,7 +5,7 @@ import { peekElement, type MaybeElement } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { useLatest } from "@usels/core/shared/useLatest";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 import { isIOS, noop } from "@usels/core/shared/utils";
 
 export interface OnClickOutsideOptions<Controls extends boolean = false> {

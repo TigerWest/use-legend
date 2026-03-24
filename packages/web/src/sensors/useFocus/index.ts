@@ -9,7 +9,7 @@ import {
   type MaybeElement,
 } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 
 export interface UseFocusOptions {
   /** Auto-focus the element on mount. Default: false */

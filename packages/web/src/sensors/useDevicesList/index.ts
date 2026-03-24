@@ -3,7 +3,7 @@ import type { DeepMaybeObservable, ReadonlyObservable, Supportable } from "@usel
 import { useMaybeObservable, useInitialPick, useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultNavigator } from "@usels/core/shared/configurable";
+import { defaultNavigator } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 export interface UseDevicesListOptions {

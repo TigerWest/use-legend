@@ -4,7 +4,8 @@ import { useMaybeObservable, useSupported } from "@usels/core";
 import { batch } from "@legendapp/state";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow, type ConfigurableWindow } from "@usels/core/shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 // Web Speech API types not yet in TypeScript's standard DOM lib
 interface SpeechRecognitionEvent {
@@ -70,14 +71,14 @@ export function useSpeechRecognition(
   options?: DeepMaybeObservable<UseSpeechRecognitionOptions>
 ): UseSpeechRecognitionReturn {
   const opts$ = useMaybeObservable(options, {
-    window: "opaque",
+    window: "element",
   });
 
-  const _window = useConstant(() => opts$.window.peek()) ?? defaultWindow;
+  const window$ = useResolvedWindow(opts$.window);
 
   const SpeechRecognitionAPI = useConstant<SpeechRecognitionConstructor | undefined>(() => {
-    if (!_window) return undefined;
-    const win = _window as WindowWithSpeechRecognition;
+    if (!window$.peek()) return undefined;
+    const win = window$.peek() as WindowWithSpeechRecognition;
     return win.SpeechRecognition ?? win.webkitSpeechRecognition;
   });
 

@@ -3,7 +3,7 @@ import type { ReadonlyObservable, Supportable } from "@usels/core";
 import { useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow, defaultNavigator } from "@usels/core/shared/configurable";
+import { defaultWindow, defaultNavigator } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 export type NetworkType =

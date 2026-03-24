@@ -3,7 +3,7 @@ import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useMount } from "@legendapp/state/react";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultDocument } from "@usels/core/shared/configurable";
+import { defaultDocument } from "@shared/configurable";
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useWindowFocus(): Observable<boolean> {

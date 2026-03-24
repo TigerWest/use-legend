@@ -8,7 +8,7 @@ import { isRef$, type MaybeElement } from "@usels/core";
 import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
 import { get, type Arrayable, type MaybeObservable } from "@usels/core";
 import { toArray } from "@usels/core/shared/utils";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 
 /**
  * Returns true if the value looks like an event name argument (string or

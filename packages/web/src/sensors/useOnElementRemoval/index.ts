@@ -1,7 +1,7 @@
 "use client";
 import type { DeepMaybeObservable, MaybeElement } from "@usels/core";
 import { getElement, useMaybeObservable } from "@usels/core";
-import { defaultDocument } from "@usels/core/shared/configurable";
+import { defaultDocument } from "@shared/configurable";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useObserve } from "@legendapp/state/react";

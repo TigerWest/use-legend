@@ -9,7 +9,8 @@ import { useMaybeObservable, useSupported } from "@usels/core";
 import { batch } from "@legendapp/state";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow, type ConfigurableWindow } from "@usels/core/shared/configurable";
+import { type ConfigurableWindow } from "@shared/configurable";
+import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
 export type UseSpeechSynthesisStatus = "init" | "play" | "pause" | "end";
 
@@ -55,12 +56,14 @@ export function useSpeechSynthesis(
   const text$ = useMaybeObservable(text);
   const opts$ = useMaybeObservable(options, {
     voice: "opaque",
-    window: "opaque",
+    window: "element",
   });
 
-  const _window = useConstant(() => opts$.window.peek()) ?? defaultWindow;
+  const window$ = useResolvedWindow(opts$.window);
 
-  const isSupported$ = useSupported(() => !!(_window && "speechSynthesis" in _window));
+  const isSupported$ = useSupported(
+    () => !!(window$.peek() && "speechSynthesis" in window$.peek()!)
+  );
 
   const isPlaying$ = useObservable(false);
   const status$ = useObservable<UseSpeechSynthesisStatus>("init");
@@ -71,17 +74,19 @@ export function useSpeechSynthesis(
   }));
 
   const stop = useConstant(() => () => {
-    if (_window) {
-      _window.speechSynthesis.cancel();
+    const win = window$.peek();
+    if (win) {
+      win.speechSynthesis.cancel();
     }
     isPlaying$.set(false);
   });
 
   const speak = useConstant(() => () => {
-    if (!_window || !isSupported$.peek()) return;
+    const win = window$.peek();
+    if (!win || !isSupported$.peek()) return;
 
     // Cancel any ongoing speech before starting
-    _window.speechSynthesis.cancel();
+    win.speechSynthesis.cancel();
 
     const currentText = text$.peek() ?? "";
     const utterance = new SpeechSynthesisUtterance(currentText);
@@ -135,7 +140,7 @@ export function useSpeechSynthesis(
     };
 
     utteranceRef.current = utterance;
-    _window.speechSynthesis.speak(utterance);
+    win.speechSynthesis.speak(utterance);
   });
 
   const toggle = useConstant(() => (value?: boolean) => {

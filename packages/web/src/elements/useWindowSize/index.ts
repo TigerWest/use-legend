@@ -4,7 +4,7 @@ import { useObservable, useMount, useObserveEffect } from "@legendapp/state/reac
 import { useEventListener } from "@browser/useEventListener";
 import { useMediaQuery } from "@browser/useMediaQuery";
 import { useMaybeObservable, useWhenMounted, type DeepMaybeObservable } from "@usels/core";
-import { defaultWindow, defaultDocument } from "@usels/core/shared/configurable";
+import { defaultWindow, defaultDocument } from "@shared/configurable";
 
 export interface UseWindowSizeOptions {
   initialWidth?: number;

@@ -5,7 +5,7 @@ import { useSupported, useMaybeObservable } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { ObservableHint } from "@legendapp/state";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultDocument, defaultWindow } from "@usels/core/shared/configurable";
+import { defaultDocument, defaultWindow } from "@shared/configurable";
 
 export interface UseElementByPointOptions<M extends boolean = false> {
   /** X coordinate */

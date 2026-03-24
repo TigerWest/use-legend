@@ -2,7 +2,7 @@
 import type { ReadonlyObservable, Supportable } from "@usels/core";
 import { useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
-import { defaultNavigator, defaultWindow } from "@usels/core/shared/configurable";
+import { defaultNavigator, defaultWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 export interface UseNavigatorLanguageReturn extends Supportable {

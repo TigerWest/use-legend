@@ -3,7 +3,7 @@ import { ObservableHint, type Observable } from "@legendapp/state";
 import { useObservable, useObserve } from "@legendapp/state/react";
 import { get, useSupported, type MaybeObservable, useWhenMounted } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 
 // ---------------------------------------------------------------------------
 // Local helpers

@@ -4,7 +4,7 @@ import type { ReadonlyObservable, DeepMaybeObservable, Supportable, Pausable } f
 import { useObservable, useMount } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultNavigator } from "@usels/core/shared/configurable";
+import { defaultNavigator } from "@shared/configurable";
 
 export interface UseGeolocationOptions {
   /** Use high accuracy mode */

@@ -5,7 +5,7 @@ import { useCallback, useRef } from "react";
 import { type MaybeElement, getElement } from "@usels/core";
 import { useUnmount } from "@usels/core/shared/index";
 import type { MaybeObservable } from "@usels/core";
-import { defaultDocument, defaultWindow } from "@usels/core/shared/configurable";
+import { defaultDocument, defaultWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 // ---------------------------------------------------------------------------

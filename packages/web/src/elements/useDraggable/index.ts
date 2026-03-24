@@ -5,7 +5,7 @@ import { useCallback, useRef } from "react";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 import { type MaybeElement, peekElement } from "@usels/core";
 import { useEventListener } from "@browser/useEventListener";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 
 export interface Position {
   x: number;

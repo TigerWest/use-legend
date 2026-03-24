@@ -2,7 +2,7 @@
 import type { ReadonlyObservable } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultDocument, defaultWindow } from "@usels/core/shared/configurable";
+import { defaultDocument, defaultWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 /*@__NO_SIDE_EFFECTS__*/

@@ -1,7 +1,7 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { defaultWindow, defaultDocument } from "@usels/core/shared/configurable";
+import { defaultWindow, defaultDocument } from "@shared/configurable";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 import { type MaybeElement, peekElement } from "@usels/core";
 import { useResizeObserver } from "@elements/useResizeObserver";

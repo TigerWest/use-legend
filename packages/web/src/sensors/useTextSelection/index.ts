@@ -5,7 +5,7 @@ import type { OpaqueObject } from "@legendapp/state";
 import { ObservableHint, batch } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultDocument, defaultWindow } from "@usels/core/shared/configurable";
+import { defaultDocument, defaultWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 export interface UseTextSelectionOptions {

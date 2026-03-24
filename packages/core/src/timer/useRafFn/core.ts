@@ -1,7 +1,7 @@
 import { observable } from "@legendapp/state";
 import type { Disposable, MaybeObservable, Pausable } from "../../types";
 import { peek } from "@utilities/peek";
-import { defaultWindow } from "@shared/configurable";
+import { isClient } from "@shared/utils";
 
 export interface RafFnCallbackArguments {
   /** Time in ms since the previous frame. 0 on the first frame after resume(). */
@@ -35,9 +35,9 @@ export function createRafFn(
   const fpsLimit = options?.fpsLimit ?? null;
 
   const requestFrame = (cb: FrameRequestCallback) =>
-    (defaultWindow?.requestAnimationFrame ?? requestAnimationFrame)(cb);
+    (isClient ? window.requestAnimationFrame.bind(window) : requestAnimationFrame)(cb);
   const cancelFrame = (id: number) =>
-    (defaultWindow?.cancelAnimationFrame ?? cancelAnimationFrame)(id);
+    (isClient ? window.cancelAnimationFrame.bind(window) : cancelAnimationFrame)(id);
 
   const pause = () => {
     if (isActive$.peek()) isActive$.set(false);
@@ -83,7 +83,7 @@ export function createRafFn(
   };
 
   const resume = () => {
-    if (!defaultWindow) return;
+    if (!isClient) return;
     if (isActive$.peek()) return;
     if (rafHandle !== undefined) {
       cancelFrame(rafHandle);

@@ -3,7 +3,7 @@ import type { ReadonlyObservable, PermissionAware, Supportable } from "@usels/co
 import { useSupported, usePermissionAware } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 interface DeviceOrientationEventiOS {

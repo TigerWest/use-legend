@@ -3,7 +3,7 @@ import type { ReadonlyObservable, Supportable } from "@usels/core";
 import { useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
 import { batch } from "@legendapp/state";
-import { defaultNavigator } from "@usels/core/shared/configurable";
+import { defaultNavigator } from "@shared/configurable";
 
 interface BatteryManager extends EventTarget {
   charging: boolean;

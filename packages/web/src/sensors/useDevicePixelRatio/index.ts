@@ -2,7 +2,7 @@
 import type { ReadonlyObservable, Supportable } from "@usels/core";
 import { useSupported } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 
 export interface UseDevicePixelRatioReturn extends Supportable {
   /** Current device pixel ratio */

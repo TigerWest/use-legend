@@ -7,7 +7,7 @@ import { useResizeObserver } from "@elements/useResizeObserver";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useEventListener } from "@browser/useEventListener";
 import { isWindow } from "@usels/core/shared/index";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
 
 export interface UseElementBoundingOptions {

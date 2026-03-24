@@ -8,7 +8,7 @@ import { useMaybeObservable } from "@usels/core";
 import { useInitialPick } from "@usels/core";
 import { createFilterWrapper } from "@usels/core";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { defaultWindow } from "@usels/core/shared/configurable";
+import { defaultWindow } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 
 export type UseMouseCoordType = "page" | "client" | "screen" | "movement";
