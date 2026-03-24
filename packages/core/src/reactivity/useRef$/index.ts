@@ -10,6 +10,8 @@ export type Ref$<T> = ((node: T | null) => void) & {
   get(): OpaqueObject<T> | null;
   /** returns element without registering tracking */
   peek(): OpaqueObject<T> | null;
+  /** returns element without tracking — useRef-compatible read */
+  readonly current: OpaqueObject<T> | null;
 };
 
 /**
@@ -68,27 +70,24 @@ export function useRef$<T = any>(externalRef?: Ref<T> | null): Ref$<T> {
   // store externalRef — simple assignment each render, no new closure
   const extRef = useLatest(externalRef);
 
-  return useMemo(
-    () =>
-      Object.assign(
-        // eslint-disable-next-line react-hooks/refs -- callback ref captures extRef; read happens at call time, not during render
-        (node: T | null) => {
-          const ext = extRef.current;
-          if (typeof ext === "function") {
-            ext(node);
-          } else if (ext != null && "current" in ext) {
-            (ext as RefObject<T | null>).current = node;
-          }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- useObservable return type is overly complex; .set() exists at runtime
-          (el$ as any).set(node ? ObservableHint.opaque(node) : null);
-        },
-        {
-          get: () => el$.get(),
-          peek: () => el$.peek(),
-        }
-      ) as Ref$<T>,
-    []
-  );
+  return useMemo(() => {
+    const fn = (node: T | null) => {
+      const ext = extRef.current;
+      if (typeof ext === "function") {
+        ext(node);
+      } else if (ext != null && "current" in ext) {
+        (ext as RefObject<T | null>).current = node;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- useObservable return type is overly complex; .set() exists at runtime
+      (el$ as any).set(node ? ObservableHint.opaque(node) : null);
+    };
+    // eslint-disable-next-line react-hooks/refs -- fn is not a React ref; closures capture el$ observable, not extRef.current
+    Object.assign(fn, { get: () => el$.get(), peek: () => el$.peek() });
+    // Object.assign copies getter values as static data — defineProperty preserves the getter
+    // eslint-disable-next-line react-hooks/refs -- same as above
+    Object.defineProperty(fn, "current", { get: () => el$.peek(), enumerable: true });
+    return fn as Ref$<T>;
+  }, []);
 }
 
 /** Type guard for Ref$ — distinguishes it from Observable and raw values */
@@ -97,7 +96,7 @@ export function isRef$(v: unknown): v is Ref$<Element> {
 }
 
 /** Unwraps MaybeElement with tracking (use inside useObserve) */
-export function getElement(v: MaybeElement): HTMLElement | Document | Window | null {
+export function getElement(v: MaybeElement): Element | Document | Window | null {
   if (v == null) return null;
   if (isRef$(v)) {
     const raw = v.get();

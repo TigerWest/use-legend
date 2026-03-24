@@ -41,6 +41,51 @@ describe("useRef$()", () => {
     expect(typeof result.current.peek).toBe("function");
   });
 
+  it("current is null initially", () => {
+    const { result } = renderHook(() => useRef$<HTMLDivElement>());
+    expect(result.current.current).toBe(null);
+  });
+
+  it("current returns element after assignment", () => {
+    const { result } = renderHook(() => useRef$<HTMLDivElement>());
+    const div = document.createElement("div");
+
+    act(() => result.current(div));
+
+    expect(result.current.current).toBe(div);
+  });
+
+  it("current resets to null after called with null", () => {
+    const { result } = renderHook(() => useRef$<HTMLDivElement>());
+    const div = document.createElement("div");
+
+    act(() => result.current(div));
+    act(() => result.current(null));
+
+    expect(result.current.current).toBe(null);
+  });
+
+  it("current does not register tracking (peek behavior)", () => {
+    const observeSpy = vi.fn();
+
+    const { result } = renderHook(() => {
+      const el$ = useRef$<HTMLDivElement>();
+      useObserve(() => {
+        void el$.current; // access via .current — should NOT register tracking
+        observeSpy();
+      });
+      return el$;
+    });
+
+    expect(observeSpy).toHaveBeenCalledTimes(1);
+
+    const div = document.createElement("div");
+    act(() => result.current(div));
+
+    // should NOT re-run because .current doesn't track
+    expect(observeSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("calls externalRef first then updates observable", () => {
     const callOrder: string[] = [];
     const externalRef = vi.fn((_node: HTMLDivElement | null) => {

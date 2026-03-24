@@ -94,5 +94,11 @@ describe("useRef$() — types", () => {
         ReturnType<Ref$<HTMLDivElement>["peek"]>
       >().toEqualTypeOf<OpaqueObject<HTMLDivElement> | null>();
     });
+
+    it("current is readonly and returns OpaqueObject<T> or null", () => {
+      expectTypeOf<
+        Ref$<HTMLDivElement>["current"]
+      >().toEqualTypeOf<OpaqueObject<HTMLDivElement> | null>();
+    });
   });
 });
