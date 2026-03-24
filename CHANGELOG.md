@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.0 (2026-03-24)
+
+
+
 ## v0.6.0 (2026-03-18)
 
 **Full Changelog**: https://github.com/TigerWest/use-legend/compare/v0.5.2...v0.6.0
