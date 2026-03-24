@@ -1,6 +1,6 @@
 "use client";
 import type { ReadonlyObservable } from "@usels/core";
-import { useObservable } from "@legendapp/state/react";
+import { useObservable, useMount } from "@legendapp/state/react";
 import { useEventListener } from "@browser/useEventListener";
 import { defaultNavigator, defaultWindow } from "@usels/core/shared/configurable";
 
@@ -8,7 +8,11 @@ export type UsePreferredLanguagesReturn = ReadonlyObservable<readonly string[]>;
 
 /*@__NO_SIDE_EFFECTS__*/
 export function usePreferredLanguages(): UsePreferredLanguagesReturn {
-  const languages$ = useObservable<readonly string[]>(defaultNavigator?.languages ?? ["en"]);
+  const languages$ = useObservable<readonly string[]>([]);
+
+  useMount(() => {
+    languages$.set(defaultNavigator?.languages ?? ["en"]);
+  });
 
   useEventListener(
     defaultWindow,
