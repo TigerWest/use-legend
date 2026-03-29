@@ -18,20 +18,8 @@ export interface ConfigurableWindow {
   window?: WindowSource;
 }
 
-export interface ConfigurableDocument {
-  document?: Document;
-}
-
 export interface ConfigurableDocumentOrShadowRoot {
   document?: DocumentOrShadowRoot;
-}
-
-export interface ConfigurableNavigator {
-  navigator?: Navigator;
-}
-
-export interface ConfigurableLocation {
-  location?: Location;
 }
 
 export const defaultWindow = /* #__PURE__ */ isClient ? window : undefined;

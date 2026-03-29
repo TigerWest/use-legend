@@ -5,15 +5,11 @@ import type { OpaqueObject } from "@legendapp/state";
 import { ObservableHint, batch } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import {
-  type ConfigurableWindow,
-  type ConfigurableDocument,
-  defaultDocument,
-} from "@shared/configurable";
+import { type ConfigurableWindow, defaultDocument } from "@shared/configurable";
 import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useEventListener } from "@browser/useEventListener";
 
-export interface UseTextSelectionOptions extends ConfigurableWindow, ConfigurableDocument {
+export interface UseTextSelectionOptions extends ConfigurableWindow {
   /** Throttle selectionchange handler in ms. Mutually exclusive with debounce. */
   throttle?: MaybeObservable<number>;
   /** Debounce selectionchange handler in ms. Mutually exclusive with throttle. */
@@ -45,14 +41,11 @@ function opaqueArray<T>(arr: T[]): OpaqueObject<{ items: T[] }> {
 export function useTextSelection(options?: UseTextSelectionOptions): UseTextSelectionReturn {
   const opts$ = useMaybeObservable<UseTextSelectionOptions>(options, {
     window: "element",
-    document: "element",
   });
   const window$ = useResolvedWindow(opts$.window);
 
-  // Document: use explicit options.document if provided, otherwise derive from resolved window
+  // Document: derive from resolved window, falling back to defaultDocument
   const doc$ = useObservable<OpaqueObject<Document> | null>(() => {
-    const explicitDoc = opts$.document?.get();
-    if (explicitDoc) return ObservableHint.opaque(explicitDoc);
     const doc = window$.get()?.document ?? defaultDocument;
     return doc ? ObservableHint.opaque(doc) : null;
   });

@@ -2,11 +2,7 @@
 import type { ReadonlyObservable, Supportable } from "@usels/core";
 import { useSupported, useMaybeObservable } from "@usels/core";
 import { useObservable, useMount } from "@legendapp/state/react";
-import {
-  type ConfigurableNavigator,
-  type ConfigurableWindow,
-  defaultNavigator,
-} from "@shared/configurable";
+import { type ConfigurableWindow, defaultNavigator } from "@shared/configurable";
 import { useEventListener } from "@browser/useEventListener";
 import { useResolvedWindow } from "../../internal/useResolvedWindow";
 
@@ -15,7 +11,8 @@ export interface UseNavigatorLanguageReturn extends Supportable {
   language$: ReadonlyObservable<string | undefined>;
 }
 
-export interface UseNavigatorLanguageOptions extends ConfigurableNavigator, ConfigurableWindow {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UseNavigatorLanguageOptions extends ConfigurableWindow {}
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useNavigatorLanguage(
@@ -23,15 +20,13 @@ export function useNavigatorLanguage(
 ): UseNavigatorLanguageReturn {
   const opts$ = useMaybeObservable<UseNavigatorLanguageOptions>(options, { window: "element" });
   const window$ = useResolvedWindow(opts$.window);
-  const nav = options?.navigator ?? defaultNavigator;
-
   const isSupported$ = useSupported(() => !!defaultNavigator && "language" in defaultNavigator);
 
   const language$ = useObservable<string | undefined>();
 
   useMount(() => {
-    if (nav) {
-      language$.set(nav.language);
+    if (defaultNavigator) {
+      language$.set(defaultNavigator.language);
     }
   });
 
@@ -39,8 +34,8 @@ export function useNavigatorLanguage(
     window$,
     "languagechange",
     () => {
-      if (nav) {
-        language$.set(nav.language);
+      if (defaultNavigator) {
+        language$.set(defaultNavigator.language);
       }
     },
     { passive: true }

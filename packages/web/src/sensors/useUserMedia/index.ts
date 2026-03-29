@@ -5,9 +5,9 @@ import { useObservable, useMount } from "@legendapp/state/react";
 import { ObservableHint, batch } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { type ConfigurableNavigator, defaultNavigator } from "@shared/configurable";
+import { defaultNavigator } from "@shared/configurable";
 
-export interface UseUserMediaOptions extends ConfigurableNavigator {
+export interface UseUserMediaOptions {
   /** Media constraints for getUserMedia. Default: { audio: false, video: true } */
   constraints?: MediaStreamConstraints;
   /** Auto-start stream on mount. Default: false */
@@ -31,12 +31,11 @@ export interface UseUserMediaReturn extends Supportable {
 export function useUserMedia(
   options?: DeepMaybeObservable<UseUserMediaOptions>
 ): UseUserMediaReturn {
-  const opts$ = useMaybeObservable(options, { navigator: "element" });
-  const nav = opts$.peek()?.navigator ?? defaultNavigator;
+  const opts$ = useMaybeObservable(options);
 
   const { immediate } = useInitialPick(opts$, { immediate: false });
 
-  const isSupported$ = useSupported(() => !!nav?.mediaDevices?.getUserMedia);
+  const isSupported$ = useSupported(() => !!defaultNavigator?.mediaDevices?.getUserMedia);
 
   const stream$ = useObservable<OpaqueObject<MediaStream> | null>(null);
   const enabled$ = useObservable(false);
@@ -53,7 +52,7 @@ export function useUserMedia(
   });
 
   const _start = useConstant(() => async (): Promise<MediaStream> => {
-    if (!isSupported$.peek() || !nav?.mediaDevices?.getUserMedia) {
+    if (!isSupported$.peek() || !defaultNavigator?.mediaDevices?.getUserMedia) {
       throw new Error("getUserMedia is not supported");
     }
 
@@ -61,7 +60,7 @@ export function useUserMedia(
 
     try {
       const constraints = opts$.peek()?.constraints ?? { audio: false, video: true };
-      const mediaStream = await nav.mediaDevices.getUserMedia(constraints);
+      const mediaStream = await defaultNavigator!.mediaDevices.getUserMedia(constraints);
       batch(() => {
         stream$.set(ObservableHint.opaque(mediaStream));
         enabled$.set(true);
