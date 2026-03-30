@@ -61,12 +61,12 @@ export * from "./sensors/useSpeechRecognition";
 export * from "./sensors/useSpeechSynthesis";
 export * from "./sensors/useOnElementRemoval";
 
-// export * from "./sensors/useKeyModifier";
+export * from "./sensors/useMagicKeys";
+export * from "./sensors/useKeyModifier";
+export * from "./sensors/useOnKeyStroke";
+export * from "./sensors/useOnStartTyping";
 // export * from "./sensors/usePointer";
 // export * from "./sensors/usePointerLock";
-// export * from "./sensors/useOnKeyStroke";
-// export * from "./sensors/useOnStartTyping";
 // export * from "./sensors/useParallax";
 // export * from "./sensors/usePointerSwipe";
 // export * from "./sensors/useSwipe";
-// export * from "./sensors/useMagicKeys";
