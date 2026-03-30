@@ -13,6 +13,7 @@ export * from "./browser/usePreferredReducedTransparency";
 export * from "./browser/usePreferredLanguages";
 export * from "./browser/useLocalStorage";
 export * from "./browser/useSessionStorage";
+export * from "./browser/useScreenOrientation";
 
 // Elements
 export * from "./elements/useResizeObserver";
@@ -65,8 +66,8 @@ export * from "./sensors/useMagicKeys";
 export * from "./sensors/useKeyModifier";
 export * from "./sensors/useOnKeyStroke";
 export * from "./sensors/useOnStartTyping";
-// export * from "./sensors/usePointer";
-// export * from "./sensors/usePointerLock";
-// export * from "./sensors/useParallax";
-// export * from "./sensors/usePointerSwipe";
-// export * from "./sensors/useSwipe";
+export * from "./sensors/usePointer";
+export * from "./sensors/usePointerLock";
+export * from "./sensors/useParallax";
+export * from "./sensors/usePointerSwipe";
+export * from "./sensors/useSwipe";
