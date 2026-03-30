@@ -1,6 +1,6 @@
 {
   "name": "@usels/integrations",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Lightweight single-hook integrations for Legend-State",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
