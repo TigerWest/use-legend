@@ -43,11 +43,8 @@ export function useScreenOrientation(
     return !!win && "orientation" in win.screen;
   });
 
-  const screenOrientation = window$.peek()?.screen?.orientation;
-  const orientation$ = useObservable<OrientationType | undefined>(
-    screenOrientation?.type as OrientationType | undefined
-  );
-  const angle$ = useObservable<number>(screenOrientation?.angle ?? 0);
+  const orientation$ = useObservable<OrientationType | undefined>(undefined);
+  const angle$ = useObservable<number>(0);
 
   useMount(() => {
     const win = window$.peek();
@@ -61,6 +58,7 @@ export function useScreenOrientation(
       });
     };
 
+    update();
     orientation.addEventListener("change", update);
     return () => orientation.removeEventListener("change", update);
   });
