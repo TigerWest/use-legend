@@ -43,7 +43,10 @@ export default defineConfig({
     plugins: [tailwindcss(), autoWrap({ allGet: true })],
     resolve: {
       alias: [
-        { find: "@demos", replacement: fileURLToPath(new URL("./src/components/demos", import.meta.url)) },
+        {
+          find: "@demos",
+          replacement: fileURLToPath(new URL("./src/components/demos", import.meta.url)),
+        },
       ],
     },
   },
@@ -135,6 +138,7 @@ export default defineConfig({
           items: [
             { label: "State", autogenerate: { directory: "core/state" } },
             { label: "Reactivity", autogenerate: { directory: "core/reactivity" } },
+            { label: "Observe", autogenerate: { directory: "core/observe" } },
             { label: "Sync", autogenerate: { directory: "core/sync" } },
             { label: "Timer", autogenerate: { directory: "core/timer" } },
             { label: "Utilities", autogenerate: { directory: "core/utilities" } },

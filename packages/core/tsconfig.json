@@ -15,7 +15,8 @@
       "@timer/*": ["timer/*"],
       "@utilities/*": ["utilities/*"],
       "@components/*": ["components/*"],
-      "@sync/*": ["sync/*"]
+      "@sync/*": ["sync/*"],
+      "@observe/*": ["observe/*"]
     }
   }
 }

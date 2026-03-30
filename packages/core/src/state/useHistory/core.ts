@@ -1,7 +1,7 @@
 import { type Observable, observe, batch as legendBatch } from "@legendapp/state";
 import type { Disposable, Fn, ReadonlyObservable } from "../../types";
 import type { EventFilter } from "@shared/filters";
-import { pausableFilter } from "@shared/filters";
+import { createPausableFilter } from "@utilities/usePausableFilter";
 import { noop } from "@shared/utils";
 import {
   createManualHistory,
@@ -59,7 +59,7 @@ export function createHistory<Raw, Serialized = Raw>(
   const manual = createManualHistory<Raw, Serialized>(source$, options);
 
   // Pausable filter — composes with optional eventFilter (throttle/debounce)
-  const pausable = pausableFilter(options?.eventFilter);
+  const pausable = createPausableFilter(options?.eventFilter);
   const shouldCommitFn = options?.shouldCommit;
 
   // Flag to prevent circular auto-commit during undo/redo/transaction
