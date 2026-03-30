@@ -1,6 +1,8 @@
 ---
 title: useGeolocation
 category: Sensors
+sidebar:
+  order: 10
 ---
 
 Reactively tracks the user's geographic position using the Geolocation API. Wraps `navigator.geolocation.watchPosition` with observable state and pause/resume controls.

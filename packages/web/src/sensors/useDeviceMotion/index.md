@@ -1,6 +1,8 @@
 ---
 title: useDeviceMotion
 category: Sensors
+sidebar:
+  order: 7
 ---
 
 Reactive [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent). Provides reactive access to device acceleration and rotation rate data.

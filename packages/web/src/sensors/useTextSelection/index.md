@@ -1,6 +1,8 @@
 ---
 title: useTextSelection
 category: Sensors
+sidebar:
+  order: 6
 ---
 
 Reactively tracks the current text selection on the page. Listens to the `selectionchange` event and exposes the selected text, ranges, and bounding rectangles as observables.

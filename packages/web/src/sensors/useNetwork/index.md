@@ -1,6 +1,8 @@
 ---
 title: useNetwork
 category: Sensors
+sidebar:
+  order: 8
 ---
 
 Reactive network status tracking. Provides online/offline state via `navigator.onLine` and detailed connection metadata via the Network Information API as Observables.

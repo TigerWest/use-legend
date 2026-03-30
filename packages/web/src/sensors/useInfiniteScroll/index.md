@@ -1,6 +1,8 @@
 ---
 title: useInfiniteScroll
 category: sensors
+sidebar:
+  order: 4
 ---
 
 Triggers a load callback whenever the scroll position reaches a boundary of a scrollable element, enabling infinite scroll for lists and feeds. Supports all four scroll directions, pre-load distance, manual control, async callbacks, and a `canLoadMore` gate function to control when loading stops.

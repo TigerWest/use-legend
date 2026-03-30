@@ -1,6 +1,8 @@
 ---
 title: useKeyModifier
 category: Sensors
+sidebar:
+  order: 1
 ---
 
 Reactively tracks the state of a keyboard modifier key (Shift, Control, Alt, CapsLock, etc.) using `event.getModifierState()`. Updates on keyboard and mouse events.

@@ -1,6 +1,8 @@
 ---
 title: useOnClickOutside
 category: sensors
+sidebar:
+  order: 2
 ---
 
 Listen for clicks outside of a target element.

@@ -1,6 +1,8 @@
 ---
 title: useMouse
 category: Sensors
+sidebar:
+  order: 2
 ---
 
 Tracks the mouse/pointer cursor position reactively. Supports multiple coordinate systems (`page`, `client`, `screen`, `movement`) and optional touch event tracking.

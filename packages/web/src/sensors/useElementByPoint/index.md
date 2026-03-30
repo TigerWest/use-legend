@@ -1,6 +1,8 @@
 ---
 title: useElementByPoint
 category: Sensors
+sidebar:
+  order: 2
 ---
 
 Reactively tracks the DOM element at specified x/y coordinates using `document.elementFromPoint()`. Uses `requestAnimationFrame` for continuous polling and supports both single and multiple element detection modes. Includes pausable controls.

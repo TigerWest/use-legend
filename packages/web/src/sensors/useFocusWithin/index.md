@@ -1,6 +1,8 @@
 ---
 title: useFocusWithin
 category: sensors
+sidebar:
+  order: 5
 ---
 
 Reactive utility that tracks whether focus is within a container element or any of its descendants.

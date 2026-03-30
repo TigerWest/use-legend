@@ -1,6 +1,8 @@
 ---
 title: useOnLongPress
 category: Sensors
+sidebar:
+  order: 2
 ---
 
 Detect long press gestures on an element. Fires a handler after a configurable delay, with support for distance thresholds, event modifiers, and a release callback.

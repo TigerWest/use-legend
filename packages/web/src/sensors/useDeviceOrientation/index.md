@@ -1,6 +1,8 @@
 ---
 title: useDeviceOrientation
 category: Sensors
+sidebar:
+  order: 7
 ---
 
 Tracks the physical orientation of the device using the `deviceorientation` window event, exposing reactive observables for all orientation angles.

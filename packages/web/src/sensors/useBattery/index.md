@@ -1,6 +1,8 @@
 ---
 title: useBattery
 category: Sensors
+sidebar:
+  order: 10
 ---
 
 Reactive wrapper around the [Battery Status API](https://developer.mozilla.org/en-US/docs/Web/API/Battery_Status_API). Provides real-time battery charging status and level information.

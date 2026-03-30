@@ -1,6 +1,8 @@
 ---
 title: useFocus
 category: sensors
+sidebar:
+  order: 5
 ---
 
 Reactive utility that tracks whether a DOM element has focus,

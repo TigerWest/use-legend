@@ -1,6 +1,8 @@
 ---
 title: useDevicesList
 category: Sensors
+sidebar:
+  order: 7
 ---
 
 Reactively enumerates media input/output devices via the `MediaDevices` API. Provides filtered lists for video inputs (cameras), audio inputs (microphones), and audio outputs (speakers). Automatically updates when devices are connected or disconnected.

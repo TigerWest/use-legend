@@ -1,6 +1,8 @@
 ---
 title: useSpeechSynthesis
 category: Sensors
+sidebar:
+  order: 9
 ---
 
 Reactive wrapper around the [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) API. Provides speak/stop/toggle controls with real-time status tracking.

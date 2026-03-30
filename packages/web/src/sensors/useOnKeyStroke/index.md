@@ -1,6 +1,8 @@
 ---
 title: useOnKeyStroke
 category: Sensors
+sidebar:
+  order: 1
 ---
 
 Listen for keyboard key strokes with key filtering support.

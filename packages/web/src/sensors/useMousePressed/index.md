@@ -1,6 +1,8 @@
 ---
 title: useMousePressed
 category: Sensors
+sidebar:
+  order: 2
 ---
 
 Tracks mouse/touch press state reactively. Returns an observable boolean for the pressed state and the source type that triggered it.
