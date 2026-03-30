@@ -21,7 +21,6 @@ function useCounterSetup(props: { initial: number }) {
 }
 
 const [CounterProvider, useCounter] = createProvider(useCounterSetup);
-//     ^?
 
 // In your app
 function App() {
