@@ -46,6 +46,7 @@ export * from "@observe/useObserveDebounced";
 export * from "@observe/useObserveThrottled";
 export * from "@observe/useObservePausable";
 export * from "@observe/useObserveIgnorable";
+export * from "@observe/useObserveTriggerable";
 export * from "@observe/useWatch";
 export * from "@observe/useWhenever";
 
