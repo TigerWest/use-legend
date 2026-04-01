@@ -1,5 +1,6 @@
 import { useRef$ } from "@usels/core";
 import { useMouseInElement } from "@usels/web";
+import { DemoPanel, DemoShell, StatCard, demoClasses } from "../../_shared";
 
 export default function UseMouseInElementDemo() {
   const el$ = useRef$<HTMLDivElement>();
@@ -14,73 +15,60 @@ export default function UseMouseInElementDemo() {
   } = useMouseInElement(el$);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      {/* Stats readout */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "6px",
-          fontFamily: "monospace",
-          fontSize: "13px",
-          padding: "10px 14px",
-          background: "var(--sl-color-gray-6, #f1f5f9)",
-          borderRadius: "6px",
-        }}
+    <DemoShell eyebrow="Elements">
+      <DemoPanel
+        title="Mouse in Element"
+        description="Move your mouse over the box to track position."
       >
-        {(
-          [
-            ["elementX", `${Math.round(elementX$.get())}px`],
-            ["elementY", `${Math.round(elementY$.get())}px`],
-            ["isOutside", String(isOutside$.get())],
-            ["width", `${Math.round(elementWidth$.get())}px`],
-            ["height", `${Math.round(elementHeight$.get())}px`],
-            ["x (global)", `${Math.round(x$.get())}px`],
-          ] as [string, string][]
-        ).map(([label, val]) => (
-          <span key={label}>
-            {label}: <strong>{val}</strong>
-          </span>
-        ))}
-      </div>
-
-      {/* Hover target with tracking dot */}
-      <div
-        ref={el$}
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "160px",
-          border: "1px solid var(--sl-color-gray-5, #cbd5e1)",
-          borderRadius: "6px",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          userSelect: "none",
-          fontFamily: "monospace",
-          fontSize: "13px",
-          color: "var(--sl-color-gray-3, #94a3b8)",
-          cursor: "crosshair",
-        }}
-      >
-        move your mouse here
+        <div className={demoClasses.statsGrid}>
+          <StatCard label="elementX" value={`${Math.round(elementX$.get())}px`} />
+          <StatCard label="elementY" value={`${Math.round(elementY$.get())}px`} />
+          <StatCard
+            label="isOutside"
+            value={String(isOutside$.get())}
+            tone={isOutside$.get() ? "orange" : "green"}
+          />
+          <StatCard label="width" value={`${Math.round(elementWidth$.get())}px`} />
+          <StatCard label="height" value={`${Math.round(elementHeight$.get())}px`} />
+          <StatCard label="x (global)" value={`${Math.round(x$.get())}px`} />
+        </div>
         <div
+          ref={el$}
           style={{
-            position: "absolute",
-            left: elementX$.get(),
-            top: elementY$.get(),
-            width: "10px",
-            height: "10px",
-            borderRadius: "50%",
-            background: "var(--sl-color-accent, #818cf8)",
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "none",
-            opacity: isOutside$.get() ? 0 : 1,
-            transition: "opacity 0.15s",
+            position: "relative",
+            width: "100%",
+            height: "160px",
+            border: "1px solid var(--sl-color-hairline-light)",
+            borderRadius: "6px",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            userSelect: "none",
+            fontFamily: "monospace",
+            fontSize: "13px",
+            color: "var(--sl-color-gray-3)",
+            cursor: "crosshair",
           }}
-        />
-      </div>
-    </div>
+        >
+          move your mouse here
+          <div
+            style={{
+              position: "absolute",
+              left: elementX$.get(),
+              top: elementY$.get(),
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              background: "var(--sl-color-accent)",
+              transform: "translate(-50%, -50%)",
+              pointerEvents: "none",
+              opacity: isOutside$.get() ? 0 : 1,
+              transition: "opacity 0.15s",
+            }}
+          />
+        </div>
+      </DemoPanel>
+    </DemoShell>
   );
 }

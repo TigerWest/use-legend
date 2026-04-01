@@ -1,6 +1,7 @@
+import { useObservable } from "@legendapp/state/react";
 import { useRef$ } from "@usels/core";
 import { useResizeObserver } from "@usels/web";
-import { useObservable } from "@legendapp/state/react";
+import { DemoPanel, DemoShell, StatCard, demoClasses } from "../../_shared";
 
 export default function UseResizeObserverDemo() {
   const el$ = useRef$<HTMLTextAreaElement>();
@@ -8,49 +9,36 @@ export default function UseResizeObserverDemo() {
 
   useResizeObserver(el$, (entries) => {
     const { width, height } = entries[0].contentRect;
-
-    size$.assign({
-      width: Math.round(width),
-      height: Math.round(height),
-    });
+    size$.assign({ width: Math.round(width), height: Math.round(height) });
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      <div
-        style={{
-          display: "flex",
-          gap: "24px",
-          fontFamily: "monospace",
-          fontSize: "14px",
-          padding: "8px 12px",
-          background: "var(--sl-color-gray-6, #f1f5f9)",
-          borderRadius: "6px",
-        }}
+    <DemoShell eyebrow="Elements">
+      <DemoPanel
+        title="Resize Observer"
+        description="Resize the textarea to see width & height update."
       >
-        <span>
-          width: <strong>{size$.width.get()}px</strong>
-        </span>
-        <span>
-          height: <strong>{size$.height.get()}px</strong>
-        </span>
-      </div>
-      <textarea
-        ref={el$}
-        defaultValue="resize this textarea"
-        style={{
-          resize: "both",
-          overflow: "auto",
-          width: "300px",
-          height: "120px",
-          padding: "10px",
-          border: "1px solid var(--sl-color-gray-5, #cbd5e1)",
-          borderRadius: "6px",
-          fontFamily: "inherit",
-          fontSize: "14px",
-          lineHeight: "1.5",
-        }}
-      />
-    </div>
+        <div className={demoClasses.statsGrid}>
+          <StatCard label="width" value={`${size$.width.get()}px`} />
+          <StatCard label="height" value={`${size$.height.get()}px`} />
+        </div>
+        <textarea
+          ref={el$}
+          defaultValue="resize this textarea"
+          style={{
+            resize: "both",
+            overflow: "auto",
+            width: "300px",
+            height: "120px",
+            padding: "10px",
+            border: "1px solid var(--sl-color-hairline-light)",
+            borderRadius: "6px",
+            fontFamily: "inherit",
+            fontSize: "14px",
+            lineHeight: "1.5",
+          }}
+        />
+      </DemoPanel>
+    </DemoShell>
   );
 }

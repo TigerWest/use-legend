@@ -1,11 +1,10 @@
 import { ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
-import { Computed, useObservable } from "@legendapp/state/react";
-import { useEventListener } from "@usels/web";
-import { useParentElement } from "@usels/web";
+import { useObservable } from "@legendapp/state/react";
+import { useEventListener, useParentElement } from "@usels/web";
+import { DemoPanel, DemoShell } from "../../_shared";
 
-// HARD CODE OFFSET
-const OFFSET_Y = -15;
+const OFFSET_Y = 0;
 
 function overlayStyle(rect: DOMRect | null, color: string): React.CSSProperties {
   if (!rect || rect.width === 0) return { display: "none" };
@@ -48,61 +47,28 @@ export default function UseParentElementDemo() {
   );
 
   return (
-    <div
-      style={{
-        fontFamily: "monospace",
-        fontSize: "13px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "4px",
-        padding: "4px 0",
-      }}
-    >
-      <p
-        style={{
-          margin: 0,
-          color: "var(--sl-color-gray-3, #94a3b8)",
-          fontSize: "12px",
-        }}
+    <DemoShell eyebrow="Elements">
+      <DemoPanel
+        title="Parent Element"
+        description="Move your mouse over the page to highlight elements."
       >
-        Move your mouse over the page to highlight elements.
-      </p>
-
-      <Computed>
-        {() => {
-          const el = element$.get() as HTMLElement | null;
-          const parent = parent$.get() as HTMLElement | null;
-          return (
-            <div style={{ display: "flex", gap: "24px" }}>
-              <span>
-                current:{" "}
-                <strong style={{ color: "#a5a5a5" }}>
-                  {el ? `<${el.tagName.toLowerCase()}>` : "—"}
-                </strong>
-              </span>
-              <span>
-                parent:{" "}
-                <strong style={{ color: "#3eaf7c" }}>
-                  {parent ? `<${parent.tagName.toLowerCase()}>` : "—"}
-                </strong>
-              </span>
-            </div>
-          );
-        }}
-      </Computed>
-
-      <Computed>
-        {() => {
-          const el = element$.get() as HTMLElement | null;
-          const parent = parent$.get() as HTMLElement | null;
-          return (
-            <>
-              <div style={overlayStyle(el?.getBoundingClientRect() ?? null, "#a5a5a528")} />
-              <div style={overlayStyle(parent?.getBoundingClientRect() ?? null, "#3eaf7c28")} />
-            </>
-          );
-        }}
-      </Computed>
-    </div>
+        <div className="flex gap-6 font-mono text-[13px]">
+          <span>
+            current:{" "}
+            <strong style={{ color: "#a5a5a5" }}>
+              {element$.get() ? `<${element$.get()?.tagName.toLowerCase()}>` : "—"}
+            </strong>
+          </span>
+          <span>
+            parent:{" "}
+            <strong style={{ color: "#3eaf7c" }}>
+              {parent$.get() ? `<${parent$.get()?.tagName.toLowerCase()}>` : "—"}
+            </strong>
+          </span>
+        </div>
+        <div style={overlayStyle(element$.get()?.getBoundingClientRect() ?? null, "#a5a5a528")} />
+        <div style={overlayStyle(parent$.get()?.getBoundingClientRect() ?? null, "#3eaf7c28")} />
+      </DemoPanel>
+    </DemoShell>
   );
 }

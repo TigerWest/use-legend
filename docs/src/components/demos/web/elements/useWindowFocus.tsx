@@ -1,71 +1,28 @@
 import { useWindowFocus } from "@usels/web";
-
-const dot: React.CSSProperties = {
-  display: "inline-block",
-  width: "8px",
-  height: "8px",
-  borderRadius: "50%",
-  marginRight: "6px",
-  verticalAlign: "middle",
-};
+import { DemoPanel, DemoShell, StatusBadge } from "../../_shared";
 
 export default function UseWindowFocusDemo() {
   const focused$ = useWindowFocus();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        fontFamily: "monospace",
-        fontSize: "13px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "10px 14px",
-          borderRadius: "6px",
-          border: `1px solid ${focused$.get() ? "var(--sl-color-green, #22c55e)" : "var(--sl-color-gray-4, #94a3b8)"}`,
-          background: focused$.get()
-            ? "var(--sl-color-green-low, #f0fdf4)"
-            : "var(--sl-color-gray-6, #f8fafc)",
-          transition: "border-color 0.2s, background 0.2s",
-        }}
+    <DemoShell eyebrow="Elements">
+      <DemoPanel
+        title="Window Focus"
+        description="Click outside this window or switch tabs to see the value change."
+        aside={
+          <StatusBadge
+            label={focused$.get() ? "focused" : "blurred"}
+            tone={focused$.get() ? "green" : "neutral"}
+          />
+        }
       >
-        <span
-          style={{
-            ...dot,
-            background: focused$.get()
-              ? "var(--sl-color-green, #22c55e)"
-              : "var(--sl-color-gray-4, #94a3b8)",
-          }}
-        />
-        <span>
+        <div className="font-mono text-[13px] text-(--sl-color-gray-2)">
           focused$.get() ={" "}
-          <strong
-            style={{
-              color: focused$.get()
-                ? "var(--sl-color-green, #22c55e)"
-                : "var(--sl-color-gray-3, #64748b)",
-            }}
-          >
+          <strong className={focused$.get() ? "text-(--sl-color-green)" : ""}>
             {String(focused$.get())}
           </strong>
-        </span>
-      </div>
-
-      <p
-        style={{
-          margin: 0,
-          fontSize: "11px",
-          color: "var(--sl-color-gray-3, #94a3b8)",
-        }}
-      >
-        Click outside this window or switch tabs to see the value change.
-      </p>
-    </div>
+        </div>
+      </DemoPanel>
+    </DemoShell>
   );
 }
