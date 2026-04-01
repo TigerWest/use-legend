@@ -31,6 +31,12 @@ describe("useWatch() — types", () => {
       expectTypeOf<Effector<W>>().toEqualTypeOf<(value: number) => void>();
     });
 
+    it("reactive selector () => obs$.get() → infers return type", () => {
+      const source$ = observable("hello");
+      type W = () => ReturnType<typeof source$.get>;
+      expectTypeOf<Effector<W>>().toEqualTypeOf<(value: string) => void>();
+    });
+
     it("Observable selector → (value: T) => void", () => {
       const a$ = observable(42);
       type W = typeof a$;

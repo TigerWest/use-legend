@@ -25,9 +25,11 @@ export type WatchSource = ObservableArray | Selector<any>;
  */
 export type Effector<W extends WatchSource> = W extends readonly AnyObservable[]
   ? (values: [...{ [K in keyof W]: ObservableValue<W[K]> }]) => void
-  : W extends Selector<infer T>
-    ? (value: T) => void
-    : never;
+  : W extends () => infer R
+    ? (value: R) => void
+    : W extends Selector<infer T>
+      ? (value: T) => void
+      : never;
 
 /** Normalizes any WatchSource to a plain selector function `() => T`. */
 export function toSelector<T>(source: WatchSource): () => T {
