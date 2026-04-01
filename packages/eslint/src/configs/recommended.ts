@@ -15,7 +15,7 @@ export const recommended: TSESLint.FlatConfig.Config = {
     "use-legend/hook-return-naming": "warn",
     "use-legend/no-enable-api": "warn",
     "use-legend/no-reactive-hoc": "warn",
-    "use-legend/prefer-show-for-conditional": "warn",
+    "use-legend/prefer-show-for-conditional": "off",
     "use-legend/prefer-for-component": "warn",
     "use-legend/prefer-use-observable": "warn",
     "use-legend/prefer-use-observe": "warn",
