@@ -103,6 +103,18 @@ export function useDebounced<T>(
 | Hook file           | `index.ts`     | (existing convention)                                        |
 | Observable variable | `name$`        | `value$`, `source$`, `size$`                                 |
 
+#### Exception: `observe` category
+
+Core functions in the `observe` category use `observe*` naming instead of `create*`.
+These functions are also exported as public framework-agnostic API, making the `observe` verb more natural.
+
+| Core file | Core function | Hook |
+|-----------|---------------|------|
+| `observe/useWatch/core.ts` | `watch()` | `useWatch()` |
+| `observe/useObserveWithFilter/core.ts` | `observeWithFilter()` | `useObserveWithFilter()` |
+| `observe/useObserveDebounced/core.ts` | `observeDebounced()` | `useObserveDebounced()` |
+| `observe/useObserveThrottled/core.ts` | `observeThrottled()` | `useObserveThrottled()` |
+
 ---
 
 ## Rule 1 — Element Parameters: Use `useRef$` and `MaybeElement`
