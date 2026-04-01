@@ -45,6 +45,7 @@ export * from "@observe/useObserveWithFilter";
 export * from "@observe/useObserveDebounced";
 export * from "@observe/useObserveThrottled";
 export * from "@observe/useWatch";
+export * from "@observe/useWhenever";
 
 export * from "@sync/useStorage";
 export * from "@sync/useRemote";
