@@ -19,7 +19,7 @@ export type UseWatchOptions = WatchOptions;
  *
  * @param selector - Observable, array of Observables, or reactive read function.
  * @param effect   - Side-effect callback.
- * @param options  - `immediate` (fire on mount), `flush` (batch timing).
+ * @param options  - `immediate` (fire on mount), `schedule` (batch timing).
  *
  * @example
  * ```tsx twoslash
@@ -50,14 +50,16 @@ export function useWatch<T extends WatchSource>(
   const selectorRef = useLatest(selector);
   const effectRef = useLatest(effect);
 
-  const { dispose } = useConstant(() =>
-    watch(
-      () => toSelector(selectorRef.current as WatchSource)(),
+  const { dispose } = useConstant(() => {
+    // Stable selector fn closed over selectorRef — avoids re-creating a wrapper on every observe tick
+    const selectorFn = () => toSelector(selectorRef.current as WatchSource)();
+    return watch(
+      selectorFn,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (value) => (effectRef.current as (v: any) => void)(value),
       options
-    )
-  );
+    );
+  });
 
   useUnmount(dispose);
 }

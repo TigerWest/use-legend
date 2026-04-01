@@ -48,8 +48,9 @@ export function toSelector<T>(source: WatchSource): () => T {
 export interface WatchOptions {
   /** Fire effect on mount when `true`. Default `false` (lazy). */
   immediate?: boolean;
-  /** Batch timing. `'pre'` runs synchronously; `'post'` runs after batch. */
-  flush?: "pre" | "post";
+  /** Notification scheduling relative to batch.
+   * `'sync'` fires immediately inside a batch; `'deferred'` waits until the batch ends. */
+  schedule?: "sync" | "deferred";
 }
 
 export function watch<T extends WatchSource>(
@@ -57,8 +58,11 @@ export function watch<T extends WatchSource>(
   effect: Effector<T>,
   options: WatchOptions = {}
 ): Disposable {
-  const { immediate = false, flush } = options;
-  const observeImmediate = flush === "pre" ? true : flush === "post" ? false : undefined;
+  const { immediate = false, schedule } = options;
+  // schedule: 'sync'     → Legend-State immediate: true  (fires synchronously inside batch)
+  // schedule: 'deferred' → Legend-State immediate: false (fires after batch ends)
+  // schedule: undefined  → passes undefined to observe() (Legend-State default batching)
+  const observeImmediate = schedule === "sync" ? true : schedule === "deferred" ? false : undefined;
 
   const selectorFn = toSelector(selector);
   let skipFirst = !immediate;

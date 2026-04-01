@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable } from "@legendapp/state";
+import { observable, batch } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
-import { useWatch } from ".";
+import { useWatch, watch } from ".";
 
 describe("useWatch()", () => {
   describe("lazy behavior — does not fire on mount", () => {
@@ -143,65 +143,19 @@ describe("useWatch()", () => {
       expect(effect).toHaveBeenLastCalledWith(1);
     });
 
-    describe("flush", () => {
-      it("flush: 'pre' — does not fire on mount (still lazy)", () => {
+    describe("schedule", () => {
+      it("schedule: 'sync' — does not fire on mount (still lazy)", () => {
         const count$ = observable(0);
         const effect = vi.fn();
-        renderHook(() => useWatch(count$, effect, { flush: "pre" }));
+        renderHook(() => useWatch(count$, effect, { schedule: "sync" }));
         expect(effect).not.toHaveBeenCalled();
       });
 
-      it("flush: 'post' — does not fire on mount (still lazy)", () => {
+      it("schedule: 'deferred' — does not fire on mount (still lazy)", () => {
         const count$ = observable(0);
         const effect = vi.fn();
-        renderHook(() => useWatch(count$, effect, { flush: "post" }));
+        renderHook(() => useWatch(count$, effect, { schedule: "deferred" }));
         expect(effect).not.toHaveBeenCalled();
-      });
-
-      it("flush: 'pre' — fires effect synchronously when observable changes", () => {
-        const count$ = observable(0);
-        const calls: number[] = [];
-        renderHook(() => useWatch(count$, (v) => calls.push(v), { flush: "pre" }));
-
-        count$.set(1);
-        // flush: 'pre' maps to Legend-State immediate: true — fires without waiting for batch
-        expect(calls).toEqual([1]);
-      });
-
-      it("flush: 'pre' — passes correct value", () => {
-        const count$ = observable(0);
-        const effect = vi.fn();
-        renderHook(() => useWatch(count$, effect, { flush: "pre" }));
-
-        act(() => {
-          count$.set(42);
-        });
-
-        expect(effect).toHaveBeenCalledWith(42);
-      });
-
-      it("flush: 'post' — fires effect after batch", () => {
-        const count$ = observable(0);
-        const effect = vi.fn();
-        renderHook(() => useWatch(count$, effect, { flush: "post" }));
-
-        act(() => {
-          count$.set(1);
-        });
-
-        expect(effect).toHaveBeenCalledTimes(1);
-        expect(effect).toHaveBeenCalledWith(1);
-      });
-
-      it("flush: 'pre' with immediate: true — fires on mount and on change", () => {
-        const count$ = observable(0);
-        const effect = vi.fn();
-        renderHook(() => useWatch(count$, effect, { immediate: true, flush: "pre" }));
-        expect(effect).toHaveBeenCalledTimes(1);
-
-        count$.set(1);
-        expect(effect).toHaveBeenCalledTimes(2);
-        expect(effect).toHaveBeenLastCalledWith(1);
       });
     });
   });
@@ -258,5 +212,68 @@ describe("useWatch()", () => {
         });
       }).not.toThrow();
     });
+  });
+});
+
+describe("watch() — core schedule behavior", () => {
+  it("schedule: 'sync' — fires synchronously inside batch (before endBatch)", () => {
+    const count$ = observable(0);
+    const calls: number[] = [];
+    const { dispose } = watch(count$, (v) => calls.push(v), { schedule: "sync" });
+
+    batch(() => {
+      count$.set(1);
+      // immediate: true — fires within the batch callback, not deferred
+      expect(calls).toEqual([1]);
+      count$.set(2);
+      expect(calls).toEqual([1, 2]);
+    });
+
+    dispose();
+  });
+
+  it("schedule: 'deferred' — defers until batch ends", () => {
+    const count$ = observable(0);
+    const calls: number[] = [];
+    const { dispose } = watch(count$, (v) => calls.push(v), { schedule: "deferred" });
+
+    batch(() => {
+      count$.set(1);
+      expect(calls).toEqual([]); // not fired yet — deferred until batch ends
+      count$.set(2);
+      expect(calls).toEqual([]); // still deferred
+    });
+
+    // batch completed — deferred observer fires once with latest value
+    expect(calls).toEqual([2]);
+    dispose();
+  });
+
+  it("schedule: 'sync' with immediate: true — fires on subscribe and synchronously inside batch", () => {
+    const count$ = observable(0);
+    const calls: number[] = [];
+    const { dispose } = watch(count$, (v) => calls.push(v), { immediate: true, schedule: "sync" });
+
+    expect(calls).toEqual([0]); // fires on subscribe
+
+    batch(() => {
+      count$.set(5);
+      expect(calls).toEqual([0, 5]); // synchronous inside batch
+    });
+
+    dispose();
+  });
+
+  it("dispose — stops receiving updates", () => {
+    const count$ = observable(0);
+    const effect = vi.fn();
+    const { dispose } = watch(count$, effect);
+
+    dispose();
+    batch(() => {
+      count$.set(1);
+    });
+
+    expect(effect).not.toHaveBeenCalled();
   });
 });

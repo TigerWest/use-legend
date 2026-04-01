@@ -5,9 +5,9 @@ sidebar:
   order: 0
 ---
 
-Runs a reactive effect that skips the initial run on mount by default (lazy mode).
-Pass `immediate: true` to also fire on mount (eager mode).
-The selector always tracks dependencies; the effect is suppressed on the first call unless `immediate: true`.
+Runs a reactive effect that skips the first effect execution by default (lazy mode).
+Pass `immediate: true` to execute the effect immediately on setup (eager mode).
+The selector always tracks dependencies; the effect is suppressed on the initial call unless `immediate: true`.
 
 Selector supports three forms:
 
@@ -24,7 +24,7 @@ import { observable } from "@legendapp/state";
 
 const query$ = observable("");
 
-// ✅ Lazy (default) — runs only when query$ changes after mount
+// ✅ Lazy (default) — runs only when query$ changes
 useWatch(query$, (value) => {
   console.log("search:", value);
 });
@@ -32,7 +32,7 @@ useWatch(query$, (value) => {
 
 ### Eager mode (`immediate: true`)
 
-Pass `immediate: true` to also fire the effect on mount, in addition to subsequent changes.
+Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
 ```tsx twoslash
 // @noErrors
@@ -41,7 +41,7 @@ import { observable } from "@legendapp/state";
 
 const query$ = observable("");
 
-// ✅ Also fires on mount with the initial value
+// ✅ Also executes the effect immediately with the initial value
 useWatch(
   query$,
   (value) => {
@@ -88,14 +88,14 @@ useWatch(
 );
 ```
 
-### Batch timing (`flush`)
+### Batch scheduling (`schedule`)
 
-The `flush` option controls when the effect runs relative to Legend-State's batch cycle.
+The `schedule` option controls when the effect runs relative to Legend-State's batch cycle.
 
-- `flush: 'pre'` — runs synchronously (within the same batch), equivalent to passing `{ immediate: true }` to Legend-State's `observe()`
-- `flush: 'post'` — runs after the batch (default Legend-State behavior)
-- omitted — uses Legend-State's default (no `immediate` option passed)
+- `schedule: 'sync'` — runs synchronously inside the batch (equivalent to Legend-State `immediate: true`)
+- `schedule: 'deferred'` — runs after the batch ends (equivalent to Legend-State `immediate: false`)
+- omitted — uses Legend-State's default batching
 
 ```typescript
-useWatch(count$, (v) => console.log(v), { flush: "pre" });
+useWatch(count$, (v) => console.log(v), { schedule: "sync" });
 ```
