@@ -9,7 +9,7 @@ import { createFilterWrapper, debounceFilter, type DebounceFilterOptions } from 
  *
  * @param source$ - Observable source value to debounce.
  * @param delay$ - Observable debounce delay in milliseconds.
- * @param options - `edges` for leading/trailing control; `maxWait` to cap maximum delay.
+ * @param options - `maxWait` to cap maximum delay.
  * @returns Disposable with an Observable reflecting the debounced value.
  */
 export function createDebounced<T>(

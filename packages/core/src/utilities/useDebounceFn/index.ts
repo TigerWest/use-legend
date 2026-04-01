@@ -12,7 +12,7 @@ export { createDebounceFn } from "./core";
  *
  * @param fn - The function to debounce.
  * @param ms - Debounce delay in milliseconds. Accepts a plain number or an Observable<number>.
- * @param options - `edges` for leading/trailing control; `maxWait` to cap maximum delay.
+ * @param options - `maxWait` to cap maximum delay.
  * @returns A debounced version of `fn` that returns a Promise resolving with the original return value.
  *
  * @example

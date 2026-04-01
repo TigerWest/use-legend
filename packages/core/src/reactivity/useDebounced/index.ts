@@ -16,7 +16,7 @@ export { createDebounced } from "./core";
  *
  * @param value - Source value to debounce. Accepts a plain value or an Observable.
  * @param ms - Debounce delay in milliseconds. Accepts a plain number or an Observable<number>.
- * @param options - `edges` for leading/trailing control; `maxWait` to cap maximum delay.
+ * @param options - `maxWait` to cap maximum delay.
  * @returns A ReadonlyObservable that reflects the debounced source value.
  *
  * @example

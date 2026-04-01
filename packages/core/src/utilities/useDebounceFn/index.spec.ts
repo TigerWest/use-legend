@@ -100,59 +100,6 @@ describe("useDebounceFn()", () => {
   // ---------------------------------------------------------------------------
 
   describe("options", () => {
-    it("edges: ['leading'] — fires immediately on first call", async () => {
-      const fn = vi.fn().mockReturnValue("lead");
-      const { result } = renderHook(() => useDebounceFn(fn, 100, { edges: ["leading"] }));
-
-      let promise: Promise<string>;
-      act(() => {
-        promise = result.current() as Promise<string>;
-      });
-
-      // leading: fn fires immediately, before timer
-      expect(fn).toHaveBeenCalledOnce();
-      await expect(promise!).resolves.toBe("lead");
-
-      // subsequent rapid calls within window are suppressed (trailing disabled)
-      act(() => {
-        result.current();
-        result.current();
-      });
-
-      act(() => {
-        vi.advanceTimersByTime(100);
-      });
-
-      expect(fn).toHaveBeenCalledOnce();
-    });
-
-    it("edges: ['leading', 'trailing'] — fires on both edges", async () => {
-      const fn = vi.fn().mockReturnValue("both");
-      const { result } = renderHook(() =>
-        useDebounceFn(fn, 100, { edges: ["leading", "trailing"] })
-      );
-
-      // leading fires immediately
-      act(() => {
-        result.current();
-      });
-
-      expect(fn).toHaveBeenCalledTimes(1);
-
-      // rapid calls within window
-      act(() => {
-        result.current();
-        result.current();
-      });
-
-      act(() => {
-        vi.advanceTimersByTime(100);
-      });
-
-      // trailing fires after delay
-      expect(fn).toHaveBeenCalledTimes(2);
-    });
-
     it("maxWait — forces execution after maxWait ms even with continuous calls", async () => {
       const fn = vi.fn();
       const { result } = renderHook(() => useDebounceFn(fn, 300, { maxWait: 500 }));

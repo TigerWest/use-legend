@@ -114,24 +114,6 @@ describe("useDebounced()", () => {
   });
 
   describe("options", () => {
-    it("edges: ['leading'] — updates immediately on source change after debounce window expires", () => {
-      const source$ = observable("hello");
-      const { result } = renderHook(() => useDebounced(source$, 300, { edges: ["leading"] }));
-
-      // The initial useObserve call consumes the leading slot.
-      // Let the debounce window expire so the leading slot resets.
-      act(() => {
-        vi.advanceTimersByTime(300);
-      });
-
-      // Now the next source change fires immediately (new leading edge)
-      act(() => {
-        source$.set("updated");
-      });
-
-      expect(result.current.get()).toBe("updated");
-    });
-
     it("maxWait — forces update after maxWait ms even with continuous source changes", () => {
       const source$ = observable("hello");
       const { result } = renderHook(() => useDebounced(source$, 300, { maxWait: 500 }));

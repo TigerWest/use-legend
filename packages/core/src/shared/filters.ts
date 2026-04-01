@@ -20,13 +20,7 @@ export interface ConfigurableEventFilter {
   eventFilter?: EventFilter;
 }
 
-/**
- * Controls which edges trigger the debounced invocation.
- * Maps directly to es-toolkit's `DebounceOptions.edges`.
- * Defaults to `["trailing"]` when omitted.
- */
 export interface DebounceFilterOptions {
-  edges?: Array<"leading" | "trailing">;
   /**
    * Maximum time in milliseconds to wait before forcing invocation,
    * regardless of how frequently the debounced function is called.
@@ -86,7 +80,7 @@ export const bypassFilter: EventFilter = (invoke) => invoke();
  * matching VueUse's `rejectOnCancel: false` semantics.
  *
  * @param ms - Debounce delay in milliseconds. Accepts a plain number or an Observable<number>.
- * @param options - `edges` for leading/trailing control; `maxWait` to cap maximum delay.
+ * @param options - `maxWait` to cap maximum delay.
  *
  * @remarks
  * **React usage:** This filter holds mutable closure state (`debouncedFn`, timers).
@@ -140,7 +134,7 @@ export function debounceFilter(
     // Rebuild debounced wrapper if duration changed (Observable ms support)
     if (duration !== currentMs || !debouncedFn) {
       debouncedFn?.cancel();
-      debouncedFn = debounce(execute, duration, { edges: options.edges });
+      debouncedFn = debounce(execute, duration);
       currentMs = duration;
     }
 

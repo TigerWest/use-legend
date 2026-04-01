@@ -122,23 +122,6 @@ describe("debounceFilter", () => {
     await expect(p3).resolves.toBe("final");
   });
 
-  it("edges: ['leading'] — fires on first call, not after delay", async () => {
-    const fn = vi.fn().mockReturnValue("lead");
-    const wrapped = createFilterWrapper(debounceFilter(100, { edges: ["leading"] }), fn);
-
-    const p = wrapped();
-    // leading: fires immediately on first call
-    expect(fn).toHaveBeenCalledOnce();
-    await expect(p).resolves.toBe("lead");
-
-    // subsequent rapid calls within window are suppressed
-    wrapped();
-    wrapped();
-    await vi.advanceTimersByTimeAsync(100);
-    // trailing is disabled — fn still called only once
-    expect(fn).toHaveBeenCalledOnce();
-  });
-
   it("maxWait: forces execution after maxWait ms even if calls keep coming", async () => {
     const fn = vi.fn().mockReturnValue("forced");
     const wrapped = createFilterWrapper(debounceFilter(300, { maxWait: 500 }), fn);

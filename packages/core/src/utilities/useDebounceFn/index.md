@@ -47,19 +47,3 @@ const debouncedFn = useDebounceFn(
   { maxWait: 1000 }
 );
 ```
-
-With leading edge:
-
-```tsx twoslash
-// @noErrors
-import { useDebounceFn } from "@usels/core";
-
-// Fires immediately on first call, ignores subsequent calls within delay
-const debouncedFn = useDebounceFn(
-  () => {
-    // ...
-  },
-  300,
-  { edges: ["leading"] }
-);
-```

@@ -11,7 +11,7 @@ import { createFilterWrapper, debounceFilter, type DebounceFilterOptions } from 
  * @param fn - The function to debounce (should be stable or a forwarder).
  * @param ms - Debounce delay in milliseconds. Accepts a plain number or an
  *             Observable<number> — debounceFilter reads it reactively on each call.
- * @param options - `edges` for leading/trailing control; `maxWait` to cap maximum delay.
+ * @param options - `maxWait` to cap maximum delay.
  */
 export function createDebounceFn<T extends AnyFn>(
   fn: T,
