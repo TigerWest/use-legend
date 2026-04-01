@@ -2,10 +2,9 @@
 import { useConstant } from "@shared/useConstant";
 import { useLatest } from "@shared/useLatest";
 import { useUnmount } from "@shared/useUnmount";
-import { type Observable } from "@legendapp/state";
-import { watch, type WatchOptions, type WatchSource, type Effector } from "./core";
+import { watch, toSelector, type WatchOptions, type WatchSource, type Effector } from "./core";
 
-export { watch, toSelector, type WatchOptions, type WatchSource, type Effector } from "./core";
+export { watch, type WatchOptions, type WatchSource, type Effector } from "./core";
 
 export type UseWatchOptions = WatchOptions;
 
@@ -20,7 +19,7 @@ export type UseWatchOptions = WatchOptions;
  *
  * @param selector - Observable, array of Observables, or reactive read function.
  * @param effect   - Side-effect callback.
- * @param options  - `immediate` (fire on mount?), `flush` (batch timing).
+ * @param options  - `immediate` (fire on mount), `flush` (batch timing).
  *
  * @example
  * ```tsx twoslash
@@ -53,12 +52,7 @@ export function useWatch<T extends WatchSource>(
 
   const { dispose } = useConstant(() =>
     watch(
-      () => {
-        const sel = selectorRef.current as WatchSource;
-        if (Array.isArray(sel)) return sel.map((obs) => obs.get());
-        if (typeof sel === "function") return (sel as () => unknown)();
-        return (sel as Observable<unknown>).get();
-      },
+      () => toSelector(selectorRef.current as WatchSource)(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (value) => (effectRef.current as (v: any) => void)(value),
       options
