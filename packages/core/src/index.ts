@@ -44,6 +44,7 @@ export * from "@timer/useCountdown";
 export * from "@observe/useObserveWithFilter";
 export * from "@observe/useObserveDebounced";
 export * from "@observe/useObserveThrottled";
+export * from "@observe/useObservePausable";
 export * from "@observe/useWatch";
 export * from "@observe/useWhenever";
 

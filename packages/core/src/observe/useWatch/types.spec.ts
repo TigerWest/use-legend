@@ -83,26 +83,32 @@ describe("useWatch() — types", () => {
     it("array selector → effect receives tuple", () => {
       const a$ = observable(1);
       const b$ = observable("hello");
-      useWatch([a$, b$] as const, (values) => {
-        expectTypeOf(values).toEqualTypeOf<[number, string]>();
-      });
+      const useCheck = () =>
+        useWatch([a$, b$] as const, (values) => {
+          expectTypeOf(values).toEqualTypeOf<[number, string]>();
+        });
+      void useCheck;
     });
 
     it("function selector → effect receives return value", () => {
       const count$ = observable(0);
-      useWatch(
-        () => count$.get(),
-        (value) => {
-          expectTypeOf(value).toEqualTypeOf<number>();
-        }
-      );
+      const useCheck = () =>
+        useWatch(
+          () => count$.get(),
+          (value) => {
+            expectTypeOf(value).toEqualTypeOf<number>();
+          }
+        );
+      void useCheck;
     });
 
     it("single Observable selector → effect receives value", () => {
       const flag$ = observable(false);
-      useWatch(flag$, (value) => {
-        expectTypeOf(value).toEqualTypeOf<boolean>();
-      });
+      const useCheck = () =>
+        useWatch(flag$, (value) => {
+          expectTypeOf(value).toEqualTypeOf<boolean>();
+        });
+      void useCheck;
     });
   });
 });
