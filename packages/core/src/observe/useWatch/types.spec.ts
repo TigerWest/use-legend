@@ -53,6 +53,14 @@ describe("useWatch() — types", () => {
       });
     });
 
+    it("mixed array [() => T, Observable<U>] → effect receives [T, U]", () => {
+      const a$ = observable(1);
+      const b$ = observable("hello");
+      watch([() => a$.get(), b$] as const, (values) => {
+        expectTypeOf(values).toEqualTypeOf<[number, string]>();
+      });
+    });
+
     it("function selector → effect receives return value", () => {
       const count$ = observable(0);
       watch(
