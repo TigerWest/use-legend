@@ -33,7 +33,7 @@ function CameraFeed() {
 
 ### Auto-start on mount
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useUserMedia } from "@usels/web";
 
@@ -51,7 +51,7 @@ function AutoCamera() {
 
 ### Audio-only capture
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useUserMedia } from "@usels/web";
 

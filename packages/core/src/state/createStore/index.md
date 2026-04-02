@@ -42,7 +42,7 @@ function Counter() {
 
 Stores can call other store hooks inside their setup function to share state.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { createStore } from "@usels/core";
@@ -64,7 +64,7 @@ const useCountStore = createStore("count", () => {
 
 Core functions like `observe()` work inside store setup because they are not React hooks.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable, observe } from "@legendapp/state";
 import { createStore } from "@usels/core";
@@ -89,7 +89,7 @@ Two types of entries appear in the DevTools timeline:
 - **Action entries** (`storeName/actionName`) — logged when an action function returned from the store is called.
 - **State entries** (`storeName/__state`) — logged when observables change outside of any action (e.g. async query results, external mutations). Multiple synchronous changes are batched into a single entry.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { createStore } from "@usels/core";
@@ -108,7 +108,7 @@ const useAppStore = createStore("app", () => {
 
 State changes from async operations (e.g. fetch results, timers, WebSocket messages) that happen outside of action functions appear as `__state` entries:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { createStore } from "@usels/core";
@@ -139,7 +139,7 @@ const useDataStore = createStore("data", () => {
 `StoreProvider` is required. It isolates stores per provider instance for SSR safety.
 Stores are lazily initialized on first hook call and cached within the provider.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { createStore, StoreProvider } from "@usels/core";
 

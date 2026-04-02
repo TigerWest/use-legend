@@ -27,7 +27,7 @@ useWhenever(isReady$, (value) => {
 
 Pass `immediate: true` to also fire on setup if the value is already truthy.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useWhenever } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -47,7 +47,7 @@ useWhenever(
 
 Dispose the watcher automatically after the first truthy invocation.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useWhenever } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -68,7 +68,7 @@ useWhenever(
 
 Use a function to derive a truthy/falsy value from one or more observables.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useWhenever } from "@usels/core";
 import { observable } from "@legendapp/state";

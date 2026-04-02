@@ -35,7 +35,7 @@ function LocationTracker() {
 
 ### Deferred Start
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useGeolocation } from "@usels/web";
 

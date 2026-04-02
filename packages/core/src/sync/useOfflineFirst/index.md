@@ -53,7 +53,7 @@ function Component() {
 
 ### Custom retry
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useOfflineFirst } from "@usels/core";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";

@@ -23,7 +23,7 @@ const { isActive, pause, resume } = useRafFn(({ delta, timestamp }) => {
 
 ### FPS limit
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRafFn } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -35,7 +35,7 @@ useRafFn(({ delta }) => {}, { fpsLimit: fps$ });
 
 ### Run once
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRafFn } from "@usels/core";
 
@@ -74,7 +74,7 @@ To stop the loop, use `pause()` instead of setting `fpsLimit` to a non-positive 
 
 Pass an `Observable` when you need to change the fps cap at runtime. A plain `number` is captured at mount time and **will not update** if the component re-renders with a new value (stale closure):
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRafFn } from "@usels/core";
 import { observable } from "@legendapp/state";

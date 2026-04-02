@@ -22,7 +22,7 @@ const throttled$ = useThrottled(source$, 300);
 
 With reactive delay:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useThrottled } from "@usels/core";
@@ -35,7 +35,7 @@ const throttled$ = useThrottled(source$, delay$);
 
 ### Leading edge only
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useThrottled } from "@usels/core";
@@ -47,7 +47,7 @@ const throttled$ = useThrottled(source$, 300, { edges: ["leading"] });
 
 ### Trailing edge only
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useThrottled } from "@usels/core";

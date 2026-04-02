@@ -24,7 +24,7 @@ reset();
 
 ### Observable default value
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useManualReset } from "@usels/core";
@@ -41,7 +41,7 @@ reset();
 
 ### Form reset pattern
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useManualReset } from "@usels/core";
 

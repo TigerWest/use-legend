@@ -21,7 +21,7 @@ const ready$ = useTimeout(1000);
 
 ### With callback
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeout } from "@usels/core";
 
@@ -32,7 +32,7 @@ useTimeout(500, {
 
 ### With stop/start controls
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeout } from "@usels/core";
 
@@ -44,7 +44,7 @@ start(); // restart the timer
 
 ### Manual start (`immediate: false`)
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeout } from "@usels/core";
 

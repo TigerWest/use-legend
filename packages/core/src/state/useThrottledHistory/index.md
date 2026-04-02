@@ -25,7 +25,7 @@ const { undo, redo, canUndo$ } = useThrottledHistory(slider$, { throttle: 300 })
 
 By default both leading and trailing edges fire. Disable either to customize behavior.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useThrottledHistory } from "@usels/core";
@@ -42,7 +42,7 @@ const { undo } = useThrottledHistory(value$, {
 
 ### Combined with capacity
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useThrottledHistory } from "@usels/core";

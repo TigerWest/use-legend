@@ -20,7 +20,7 @@ const fps = useFps();
 
 ### Custom sampling rate
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useFps } from "@usels/core";
 

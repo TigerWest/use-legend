@@ -35,7 +35,7 @@ function Component() {
 
 ### Async plugin (IndexedDB)
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useStorage } from "@usels/core";
 import { ObservablePersistIndexedDB } from "@legendapp/state/persist-plugins/indexeddb";

@@ -31,7 +31,7 @@ function MyDropZone() {
 
 ### Filter by file type
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, useDropZone } from "@usels/core";
 

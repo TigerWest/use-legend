@@ -21,7 +21,7 @@ message$.set("Saved!");
 // After 2 seconds, message$.get() returns "" automatically
 ```
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useAutoReset } from "@usels/core";
@@ -37,7 +37,7 @@ status$.set("loading");
 
 ### Boolean flag auto-reset
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useAutoReset } from "@usels/core";
 

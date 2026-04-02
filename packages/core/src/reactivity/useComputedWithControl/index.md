@@ -24,7 +24,7 @@ const { value$, trigger } = useComputedWithControl(counter$, (count) => count * 
 
 ### Manual trigger
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useComputedWithControl } from "@usels/core";
@@ -40,7 +40,7 @@ trigger();
 
 ### Previous value (incremental computation)
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useComputedWithControl } from "@usels/core";
@@ -52,7 +52,7 @@ const { value$ } = useComputedWithControl(event$, (eventValue, prev) => (prev ??
 
 ### Array source
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useComputedWithControl } from "@usels/core";

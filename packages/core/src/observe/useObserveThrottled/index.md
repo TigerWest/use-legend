@@ -30,7 +30,7 @@ useObserveThrottled(
 
 Control whether the effect fires at the leading edge (immediately on first change) or trailing edge (after the throttle window expires). By default, only the trailing edge fires.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveThrottled } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -60,7 +60,7 @@ useObserveThrottled(
 
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveThrottled } from "@usels/core";
 import { observable } from "@legendapp/state";

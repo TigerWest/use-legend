@@ -30,7 +30,7 @@ useObserveDebounced(
 
 Use `maxWait` to guarantee the effect fires at least once, even if the source keeps changing continuously. The effect will fire after `maxWait` milliseconds regardless of activity.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveDebounced } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -50,7 +50,7 @@ useObserveDebounced(
 
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveDebounced } from "@usels/core";
 import { observable } from "@legendapp/state";

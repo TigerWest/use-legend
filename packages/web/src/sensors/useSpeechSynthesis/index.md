@@ -31,7 +31,7 @@ function TextToSpeech() {
 
 ### With voice options
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useSpeechSynthesis } from "@usels/web";
 
@@ -54,7 +54,7 @@ function CustomVoice() {
 
 The `text` parameter accepts `MaybeObservable<string>`, and options accept `DeepMaybeObservable`. Changes take effect on the next `speak()` call.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";

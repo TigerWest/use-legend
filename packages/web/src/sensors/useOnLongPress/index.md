@@ -29,7 +29,7 @@ function Component() {
 
 ### Custom delay
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useOnLongPress } from "@usels/web";
@@ -43,7 +43,7 @@ useOnLongPress(el$, () => {}, { delay: 1000 }); // 1 second
 
 Cancel the long press when the pointer moves too far from the initial position. Default is `10px`. Set to `false` to disable.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useOnLongPress } from "@usels/web";
@@ -61,7 +61,7 @@ useOnLongPress(el$, () => {}, { distanceThreshold: false });
 
 `onMouseUp` is called when the pointer is released, providing duration, distance, and whether a long press was detected.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useOnLongPress } from "@usels/web";
@@ -81,7 +81,7 @@ useOnLongPress(el$, () => {}, {
 
 ### Event modifiers
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useOnLongPress } from "@usels/web";
@@ -103,7 +103,7 @@ useOnLongPress(el$, () => {}, {
 
 `useOnLongPress` returns a stop function to manually remove all listeners and clear timers.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useOnLongPress } from "@usels/web";

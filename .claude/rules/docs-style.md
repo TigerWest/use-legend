@@ -67,15 +67,20 @@ If there is a demonstrable example, write a demo.tsx and import it to enable int
 
 You may include multiple code examples and descriptions based on the code.
 
-**When writing code blocks in `## Usage`, must use TwoSlash for type hover support:**
+**TwoSlash is only used for the first code block in `## Usage` (for type hover support). All subsequent blocks use plain `tsx`:**
 
 ```tsx twoslash
 // @noErrors
 import { useSomething } from "@usels/core";
-// hover shows inferred types
+// First usage block — hover shows inferred types
 ```
 
 > Use the `/twoslash-docs` skill for full TwoSlash syntax guide and rules.
+
+```tsx
+// All subsequent usage blocks — plain tsx (no twoslash)
+// This keeps docs build/dev performance fast
+```
 
 ```typescript
 // Plain typescript (no hover) — use for short option-only snippets

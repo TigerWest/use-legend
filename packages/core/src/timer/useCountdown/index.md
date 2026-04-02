@@ -22,7 +22,7 @@ const { remaining$ } = useCountdown(60);
 
 ### With callbacks
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useCountdown } from "@usels/core";
 
@@ -34,7 +34,7 @@ const { remaining$ } = useCountdown(10, {
 
 ### Custom interval
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useCountdown } from "@usels/core";
 
@@ -44,7 +44,7 @@ const { remaining$ } = useCountdown(30, { interval: 500 });
 
 ### Manual start
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useCountdown } from "@usels/core";
 
@@ -55,7 +55,7 @@ const { remaining$, start } = useCountdown(10, { immediate: false });
 
 ### Reset / Stop / Start controls
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useCountdown } from "@usels/core";
 

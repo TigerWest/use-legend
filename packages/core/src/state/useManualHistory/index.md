@@ -30,7 +30,7 @@ redo(); // counter$ → 2
 
 ### capacity — limit history size
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useManualHistory } from "@usels/core";
@@ -45,7 +45,7 @@ const { commit, undo } = useManualHistory(value$, { capacity: 10 });
 
 Use `dump` and `parse` to store a compact or transformed representation instead of raw value clones.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useManualHistory } from "@usels/core";
@@ -68,7 +68,7 @@ undo(); // restored to ["a", "b", "c"]
 
 `reset()` restores the source to the last committed value without touching the undo/redo stacks.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useManualHistory } from "@usels/core";
@@ -83,7 +83,7 @@ reset(); // text$ → "saved" (stacks unchanged)
 
 ### clear — wipe all history
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useManualHistory } from "@usels/core";

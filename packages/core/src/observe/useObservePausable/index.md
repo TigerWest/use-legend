@@ -34,7 +34,7 @@ resume();
 
 Use `initialState: 'paused'` to start with the effect suppressed. Call `resume()` whenever you're ready to begin reacting.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservePausable } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -57,7 +57,7 @@ resume();
 
 `isActive$` is an Observable — use it directly in JSX for reactive UI.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservePausable } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -85,7 +85,7 @@ function MyComponent() {
 
 Pass `immediate: true` to execute the effect immediately on setup.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservePausable } from "@usels/core";
 import { observable } from "@legendapp/state";

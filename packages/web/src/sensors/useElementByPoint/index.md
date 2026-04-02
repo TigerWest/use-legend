@@ -35,7 +35,7 @@ function ElementTracker() {
 
 ### Multiple Elements
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useElementByPoint } from "@usels/web";
 

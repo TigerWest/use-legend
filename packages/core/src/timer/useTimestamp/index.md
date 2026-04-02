@@ -20,7 +20,7 @@ const ts = useTimestamp();
 
 ### With offset
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimestamp } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -32,7 +32,7 @@ const ts = useTimestamp({ offset: offset$ });
 
 ### With callback
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimestamp } from "@usels/core";
 
@@ -45,7 +45,7 @@ const ts = useTimestamp({
 
 ### With pause/resume controls
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimestamp } from "@usels/core";
 

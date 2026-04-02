@@ -25,7 +25,7 @@ const { isActive, pause, resume } = useIntervalFn(() => {
 
 ### `immediateCallback`
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useIntervalFn } from "@usels/core";
 
@@ -35,7 +35,7 @@ useIntervalFn(() => fetchData(), 5000, { immediateCallback: true });
 
 ### Reactive interval
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useIntervalFn } from "@usels/core";
 import { observable } from "@legendapp/state";

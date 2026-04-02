@@ -33,7 +33,7 @@ function PointerTracker() {
 
 ### Filter by pointer type
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { usePointer } from "@usels/web";
 
@@ -52,7 +52,7 @@ function PenOnly() {
 
 ### Custom target
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { usePointer } from "@usels/web";
 import { useRef$ } from "@usels/core";

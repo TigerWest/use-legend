@@ -36,7 +36,7 @@ ignoreUpdates(() => {
 
 The primary use case is preventing a reactive feedback loop when syncing two observables.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveIgnorable, useWatch } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -67,7 +67,7 @@ useWatch(
 
 `isIgnoring$` is an Observable that reflects whether an `ignoreUpdates` call is currently active.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveIgnorable } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -95,7 +95,7 @@ function MyComponent() {
 
 Pass `immediate: true` to execute the effect immediately on setup.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveIgnorable } from "@usels/core";
 import { observable } from "@legendapp/state";

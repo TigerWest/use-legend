@@ -20,7 +20,7 @@ const counter = useInterval(1000);
 
 ### With callback
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useInterval } from "@usels/core";
 
@@ -31,7 +31,7 @@ useInterval(1000, {
 
 ### With pause/resume/reset controls
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useInterval } from "@usels/core";
 
@@ -46,7 +46,7 @@ reset(); // counter → 0
 
 ### Manual start (`immediate: false`)
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useInterval } from "@usels/core";
 
@@ -60,7 +60,7 @@ resume(); // start manually
 
 ### Reactive interval
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useInterval } from "@usels/core";
 import { observable } from "@legendapp/state";

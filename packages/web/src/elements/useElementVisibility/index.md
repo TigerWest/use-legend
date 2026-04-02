@@ -26,7 +26,7 @@ function Component() {
 
 ### With initial value
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementVisibility } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
@@ -38,7 +38,7 @@ const isVisible$ = useElementVisibility(el$, { initialValue: true });
 
 Use `once: true` to automatically stop observing after the element becomes visible for the first time:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementVisibility } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
@@ -50,7 +50,7 @@ const isVisible$ = useElementVisibility(el$, { once: true });
 
 Pass a `scrollTarget` to observe intersection within a scrollable container instead of the viewport:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementVisibility } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
@@ -61,7 +61,7 @@ const isVisible$ = useElementVisibility(el$, { scrollTarget: container$ });
 
 ### Threshold and rootMargin
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementVisibility } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
@@ -76,7 +76,7 @@ const isVisible$ = useElementVisibility(el$, {
 
 All options accept `Observable<T>` for reactive control:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { useRef$, Ref$, useElementVisibility } from "@usels/core";

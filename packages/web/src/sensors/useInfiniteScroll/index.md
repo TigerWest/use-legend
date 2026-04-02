@@ -48,7 +48,7 @@ Use the `direction` option to trigger loading from any edge. Certain directions 
 | `left`             | `display: flex; flex-direction: row-reverse;`    |
 | `right`            | `display: flex;`                                 |
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useInfiniteScroll } from "@usels/web";
@@ -91,7 +91,7 @@ useInfiniteScroll(el$, onLoadMore, {
 
 Pass a `canLoadMore` function to control whether loading should trigger. When it returns `false`, the scroll listener is skipped entirely. Use this to stop loading once all pages have been fetched.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useInfiniteScroll } from "@usels/web";
@@ -134,7 +134,7 @@ useInfiniteScroll(el$, onLoadMore, {
 
 `load` triggers a load imperatively; `reset` re-checks the current scroll position and triggers a load if the boundary condition is met.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useInfiniteScroll } from "@usels/web";

@@ -45,7 +45,7 @@ const { elementX$, elementY$ } = useMouseInElement(el$, {
 
 ### Stop all observers manually
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useMouseInElement } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
@@ -60,7 +60,7 @@ stop();
 
 The raw `clientX` / `clientY` values are also exposed as `x$` and `y$`.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useMouseInElement } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;

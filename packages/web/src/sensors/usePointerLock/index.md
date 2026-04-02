@@ -31,7 +31,7 @@ function PointerLockDemo() {
 
 ### Lock with a specific element
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { usePointerLock } from "@usels/web";
 import { useRef$ } from "@usels/core";

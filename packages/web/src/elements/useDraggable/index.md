@@ -40,7 +40,7 @@ const { y$ } = useDraggable(el$, { axis: "y" }); // vertical only
 
 Attach drag to a specific handle element instead of the whole target.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, useDraggable } from "@usels/core";
 

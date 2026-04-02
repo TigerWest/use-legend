@@ -24,7 +24,7 @@ count$.get(); // 10
 
 ### Skipping onChange during internal updates
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useSilentObservable } from "@usels/core";
 
@@ -42,7 +42,7 @@ position$.set({ x: 100, y: 200 });
 Legend-State provides a `setSilently` utility function that works on any Observable.
 If you only need a one-off silent update without a dedicated hook, you can use it directly.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable, setSilently } from "@legendapp/state";
 

@@ -25,7 +25,7 @@ const { undo, redo, canUndo$ } = useDebouncedHistory(search$, { debounce: 500 })
 
 Even if the user keeps typing, a snapshot is forced after `maxWait` ms.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useDebouncedHistory } from "@usels/core";
@@ -41,7 +41,7 @@ const { undo, redo } = useDebouncedHistory(text$, {
 
 ### Combined with capacity
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useDebouncedHistory } from "@usels/core";

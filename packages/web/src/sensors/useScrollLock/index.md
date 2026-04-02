@@ -31,7 +31,7 @@ function Component() {
 
 By default, scroll lock is applied to `document.body`. Pass any element via the first argument to scope locking to that element.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useScrollLock } from "@usels/web";
@@ -53,7 +53,7 @@ function Component() {
 
 Pass `true` as the second argument to start with scrolling locked on mount.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useScrollLock } from "@usels/web";
 // ---cut---
@@ -65,7 +65,7 @@ const { isLocked$, unlock } = useScrollLock(undefined, true);
 
 Pass an Observable as `initialState` to seed the lock state reactively.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { useScrollLock } from "@usels/web";

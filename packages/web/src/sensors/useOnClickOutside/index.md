@@ -39,7 +39,7 @@ function Dropdown() {
 
 Pass CSS selectors or element refs to the `ignore` option to exclude certain elements from triggering the handler.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useOnClickOutside } from "@usels/web";

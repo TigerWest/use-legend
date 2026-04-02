@@ -47,7 +47,7 @@ function MyComponent() {
 
 Array, object, or Observable keyframes are all supported.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useAnimate } from "@usels/core";
@@ -92,7 +92,7 @@ useAnimate(el$, keyframes, {
 
 ### Delaying Start
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useAnimate } from "@usels/core";

@@ -24,7 +24,7 @@ function Component() {
 
 ### SSR with ssrWidth
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { usePreferredDark } from "@usels/web";
 

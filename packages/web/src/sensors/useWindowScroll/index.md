@@ -31,7 +31,7 @@ function Component() {
 
 ### Back-to-top button
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useWindowScroll } from "@usels/core";
 

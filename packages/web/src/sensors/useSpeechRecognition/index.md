@@ -32,7 +32,7 @@ function SpeechToText() {
 
 ### With options
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useSpeechRecognition } from "@usels/web";
 
@@ -56,7 +56,7 @@ function KoreanSpeech() {
 
 Options accept `DeepMaybeObservable`. Each field can be a plain value or an `Observable`. Changes take effect on the next `start()` call.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { useSpeechRecognition } from "@usels/web";

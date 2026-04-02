@@ -25,7 +25,7 @@ lastChanged$.get(); // 1715000000000 (Date.now() at time of change)
 
 ### initialValue — custom initial timestamp
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useLastChanged } from "@usels/core";
@@ -38,7 +38,7 @@ const lastChanged$ = useLastChanged(count$, Date.now());
 
 ### Core function — framework-agnostic usage
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { createLastChanged } from "@usels/core";

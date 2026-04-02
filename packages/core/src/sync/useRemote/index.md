@@ -44,7 +44,7 @@ function Component() {
 
 ### Read & write
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRemote } from "@usels/core";
 

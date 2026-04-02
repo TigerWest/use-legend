@@ -26,7 +26,7 @@ function Component() {
 
 Use `onChange` on the returned Observable to react to network status changes.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMount } from "@legendapp/state/react";
 import { useOnline } from "@usels/web";

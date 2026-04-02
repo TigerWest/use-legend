@@ -42,7 +42,7 @@ function Child() {
 By default, calling `useContext` outside a Provider throws.
 Set `strict: false` to return `undefined` instead.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { createProvider } from "@usels/core";
 
@@ -58,7 +58,7 @@ function Child() {
 
 ### Custom displayName
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { createProvider } from "@usels/core";

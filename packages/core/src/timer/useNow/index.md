@@ -20,7 +20,7 @@ const now = useNow();
 
 ### Interval-based (battery friendly)
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useNow } from "@usels/core";
 
@@ -29,7 +29,7 @@ const now = useNow({ interval: 1000 }); // updates every second
 
 ### With pause/resume controls
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useNow } from "@usels/core";
 

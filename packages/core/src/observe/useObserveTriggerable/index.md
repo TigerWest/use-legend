@@ -41,7 +41,7 @@ ignoreUpdates(() => {
 
 `trigger()` executes the effect immediately with the current selector value. Useful for initializing side effects on demand or re-running a sync after an ignored update.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveTriggerable } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -68,7 +68,7 @@ function MyComponent() {
 
 The same `ignoreUpdates` pattern as `useObserveIgnorable` — prevents circular reactive updates when syncing two observables.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveTriggerable, useWatch } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -99,7 +99,7 @@ useWatch(
 
 Pass `immediate: true` to execute the effect on setup.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveTriggerable } from "@usels/core";
 import { observable } from "@legendapp/state";

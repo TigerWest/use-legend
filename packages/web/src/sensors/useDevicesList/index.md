@@ -43,7 +43,7 @@ function DevicesDisplay() {
 
 ### Requesting Permissions on Mount
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useDevicesList } from "@usels/web";
 

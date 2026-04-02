@@ -36,7 +36,7 @@ function ParallaxCard() {
 
 ### With custom adjust functions
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useParallax } from "@usels/web";
 import { useRef$ } from "@usels/core";

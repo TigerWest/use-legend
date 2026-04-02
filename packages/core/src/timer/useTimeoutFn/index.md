@@ -26,7 +26,7 @@ const { isPending$, start, stop } = useTimeoutFn(() => {
 
 ### Manual start (`immediate: false`)
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeoutFn } from "@usels/core";
 
@@ -38,7 +38,7 @@ start();
 
 ### Reactive interval (`MaybeObservable`)
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeoutFn } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -50,7 +50,7 @@ const { start } = useTimeoutFn(() => {}, delay$);
 
 ### `immediateCallback`
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeoutFn } from "@usels/core";
 

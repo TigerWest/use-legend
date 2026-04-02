@@ -35,7 +35,7 @@ function MyForm() {
 
 Use `focused$` to conditionally apply styles when any descendant has focus.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useFocusWithin } from "@usels/web";

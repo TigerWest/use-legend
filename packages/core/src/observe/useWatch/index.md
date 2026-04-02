@@ -34,7 +34,7 @@ useWatch(query$, (value) => {
 
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useWatch } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -55,7 +55,7 @@ useWatch(
 
 Watch multiple sources at once. The effect receives a tuple of current values.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useWatch } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -72,7 +72,7 @@ useWatch([query$, page$], ([query, page]) => {
 
 Use a function to compute a derived value. The function runs on every dep change to maintain tracking; the effect receives the computed result.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useWatch } from "@usels/core";
 import { observable } from "@legendapp/state";

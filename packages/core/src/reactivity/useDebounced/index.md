@@ -19,7 +19,7 @@ const debounced$ = useDebounced(source$, 300);
 // debounced$.get() updates 300ms after source$ stops changing
 ```
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useDebounced } from "@usels/core";
@@ -29,7 +29,7 @@ const debounced$ = useDebounced(source$, 300, { maxWait: 1000 });
 // Forces update every 1000ms even with continuous source changes
 ```
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useDebounced } from "@usels/core";

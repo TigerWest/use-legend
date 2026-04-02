@@ -30,7 +30,7 @@ function Component() {
 
 The `type` option selects which coordinate system to use. It is read only at mount time.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMouse } from "@usels/web";
 // ---cut---
@@ -51,7 +51,7 @@ const { x$: mx$, y$: my$ } = useMouse({ type: "movement" });
 
 Touch tracking is enabled by default. Use `touch: false` to disable it, or `resetOnTouchEnds: true` to reset coordinates back to the initial value when the finger lifts.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMouse } from "@usels/web";
 // ---cut---
@@ -66,7 +66,7 @@ const { x$: rx$, y$: ry$ } = useMouse({ resetOnTouchEnds: true });
 
 By default events are listened on `window`. Pass any element (or an `Observable` wrapping one) via `target` to scope tracking to that element.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useMouse } from "@usels/web";
@@ -87,7 +87,7 @@ function Component() {
 
 Use `useMouse` for global coordinates while `useMouseInElement` provides element-relative coordinates at the same time.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useMouse, useMouseInElement } from "@usels/web";

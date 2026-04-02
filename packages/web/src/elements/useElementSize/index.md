@@ -29,7 +29,7 @@ function Component() {
 
 ### Custom initial size
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementSize } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
@@ -39,7 +39,7 @@ const { width$, height$ } = useElementSize(el$, { width: 320, height: 240 });
 
 ### With `border-box`
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementSize } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
@@ -49,7 +49,7 @@ const { width$, height$ } = useElementSize(el$, undefined, { box: "border-box" }
 
 ### Stopping observation manually
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementSize } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;

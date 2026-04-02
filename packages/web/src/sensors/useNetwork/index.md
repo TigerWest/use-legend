@@ -26,7 +26,7 @@ function Component() {
 
 Check whether the browser is currently online or offline with `isOnline$`. The value updates automatically on `online` and `offline` window events.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useNetwork } from "@usels/web";
 
@@ -47,7 +47,7 @@ function Component() {
 
 The Network Information API (`navigator.connection`) exposes detailed bandwidth and connection metadata. Check `isSupported$` before relying on these values — they are `undefined` in unsupported browsers.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useNetwork } from "@usels/web";
 
@@ -74,7 +74,7 @@ function Component() {
 
 Use `onChange` on `isOnline$` to react whenever the network status changes.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMount } from "@legendapp/state/react";
 import { useNetwork } from "@usels/web";

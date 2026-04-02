@@ -33,7 +33,7 @@ function SelectionTracker() {
 
 ### Highlight selected area
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTextSelection } from "@usels/web";
 

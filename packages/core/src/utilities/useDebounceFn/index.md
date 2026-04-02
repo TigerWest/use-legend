@@ -20,7 +20,7 @@ const debouncedFn = useDebounceFn((value: string) => {
 
 With reactive delay:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useDebounceFn } from "@usels/core";
@@ -34,7 +34,7 @@ const debouncedFn = useDebounceFn(() => {
 
 With `maxWait`:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useDebounceFn } from "@usels/core";
 

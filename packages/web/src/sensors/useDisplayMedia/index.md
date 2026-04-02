@@ -31,7 +31,7 @@ function ScreenShare() {
 
 ### With audio capture
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useDisplayMedia } from "@usels/web";
 

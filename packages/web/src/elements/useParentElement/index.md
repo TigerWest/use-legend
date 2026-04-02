@@ -27,7 +27,7 @@ function Component() {
 
 Use inside an `observer` component to reactively render based on the parent:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, useParentElement } from "@usels/core";
 import { observer } from "@legendapp/state/react";
@@ -42,7 +42,7 @@ const Component = observer(() => {
 
 ### With an Observable target
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { observable } from "@legendapp/state";
 import { useParentElement } from "@usels/core";
@@ -56,7 +56,7 @@ function Component() {
 
 ### With a plain element
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useParentElement } from "@usels/core";
 

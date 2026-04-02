@@ -21,7 +21,7 @@ const throttledFn = useThrottleFn((value: string) => {
 
 With reactive delay:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useThrottleFn } from "@usels/core";
@@ -35,7 +35,7 @@ const throttledFn = useThrottleFn(() => {
 
 ### Leading edge only
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useThrottleFn } from "@usels/core";
 
@@ -51,7 +51,7 @@ const throttledFn = useThrottleFn(
 
 ### Trailing edge only
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useThrottleFn } from "@usels/core";
 

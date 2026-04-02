@@ -29,7 +29,7 @@ function Component() {
 
 ### Manual update
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$, Ref$, useElementBounding } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;

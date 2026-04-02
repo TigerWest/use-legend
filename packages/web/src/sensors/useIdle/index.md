@@ -30,7 +30,7 @@ function IdleTracker() {
 
 ### Custom Events
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useIdle } from "@usels/web";
 

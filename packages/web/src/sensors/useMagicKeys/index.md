@@ -37,7 +37,7 @@ function KeyboardDemo() {
 
 Since JavaScript destructuring cannot use `+` or bracket notation, append `$` to key names and use `_` instead of `+` for combos:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMagicKeys } from "@usels/web";
 

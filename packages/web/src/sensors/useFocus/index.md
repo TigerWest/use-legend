@@ -36,7 +36,7 @@ function Component() {
 
 Set `initialValue: true` to automatically focus the element when the component mounts.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useFocus } from "@usels/web";
@@ -54,7 +54,7 @@ When `focusVisible: true`, only tracks focus that would show a visible focus ind
 (matching the CSS `:focus-visible` pseudo-class). Mouse clicks won't trigger `focused$`,
 but keyboard navigation (Tab) will.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useFocus } from "@usels/web";

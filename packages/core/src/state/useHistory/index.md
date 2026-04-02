@@ -25,7 +25,7 @@ redo(); // text$ → "world"
 
 ### pause / resume — stop and restart auto-tracking
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useHistory } from "@usels/core";
@@ -48,7 +48,7 @@ resume(true);
 Multiple changes inside `transaction()` are recorded as a single undo step.
 Call the provided `cancel()` to abort the commit entirely.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useHistory } from "@usels/core";
@@ -70,7 +70,7 @@ undo(); // value$ → 0 (single step back)
 
 Return `false` from `shouldCommit` to skip recording specific values.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useHistory } from "@usels/core";
@@ -85,7 +85,7 @@ const { undo } = useHistory(count$, {
 
 ### capacity — limit undo depth
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useHistory } from "@usels/core";
@@ -98,7 +98,7 @@ const { undo, redo } = useHistory(text$, { capacity: 50 });
 
 ### dispose — permanently stop tracking
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useHistory } from "@usels/core";

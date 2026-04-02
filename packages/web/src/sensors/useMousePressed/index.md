@@ -30,7 +30,7 @@ function Component() {
 
 By default events are listened on `window`. Pass any element via `target` to scope tracking to that element.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useMousePressed } from "@usels/web";
@@ -51,7 +51,7 @@ function Component() {
 
 Touch tracking is enabled by default. Use `touch: false` to disable it.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMousePressed } from "@usels/web";
 // ---cut---
@@ -63,7 +63,7 @@ const { pressed$ } = useMousePressed({ touch: false });
 
 Use `onPressed` and `onReleased` callbacks to react to press events without subscribing to observables.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMousePressed } from "@usels/web";
 // ---cut---
@@ -77,7 +77,7 @@ const { pressed$ } = useMousePressed({
 
 Set `preventDragEvent: true` to prevent the default drag behavior while pressing.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useMousePressed } from "@usels/web";
 // ---cut---
@@ -88,7 +88,7 @@ const { pressed$ } = useMousePressed({ preventDragEvent: true });
 
 Use `useMousePressed` alongside `useMouse` to track both cursor position and press state simultaneously.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useRef$ } from "@usels/core";
 import { useMouse, useMousePressed } from "@usels/web";

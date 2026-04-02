@@ -31,7 +31,7 @@ useObserveWithFilter(
 
 Control when the effect fires by pausing and resuming the filter. The selector continues tracking changes in the background.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveWithFilter, createPausableFilter } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -58,7 +58,7 @@ resume();
 
 Use a debounce filter to only execute the effect after the source stops changing for a specified duration.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveWithFilter, createDebounceFilter } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -78,7 +78,7 @@ useObserveWithFilter(
 
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useObserveWithFilter, createPausableFilter } from "@usels/core";
 import { observable } from "@legendapp/state";

@@ -26,7 +26,7 @@ function HoverTracker() {
 
 ### With Delay
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useElementHover } from "@usels/web";
 import { useRef$ } from "@usels/core";

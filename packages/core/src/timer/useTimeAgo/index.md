@@ -24,7 +24,7 @@ const timeAgo = useTimeAgo(new Date("2024-01-01"));
 
 ### Reactive `time`
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 import { observable } from "@legendapp/state";
@@ -37,7 +37,7 @@ time$.set(new Date("2020-01-01")); // → "about 4 years ago"
 
 ### With pause/resume controls
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 
@@ -48,7 +48,7 @@ const { timeAgo$, isActive$, pause, resume } = useTimeAgo(new Date(), {
 
 ### Custom update interval
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 
@@ -61,7 +61,7 @@ const timeAgo = useTimeAgo(new Date(), { updateInterval: 10_000 });
 When `showSecond: true`, times under 1 minute are shown in detail (maps to date-fns `includeSeconds`).
 When `showSecond: false` (default), times within 45 s show `"just now"`.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 
@@ -71,7 +71,7 @@ const timeAgo = useTimeAgo(new Date(Date.now() - 30_000), { showSecond: true });
 
 ### Limit with `max`
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 
@@ -86,7 +86,7 @@ const timeAgo = useTimeAgo(new Date("2020-01-01"), {
 
 Pass any [date-fns locale](https://date-fns.org/docs/Locale) to the `locale` option.
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 import { ko } from "date-fns/locale";
@@ -95,7 +95,7 @@ const timeAgo = useTimeAgo(new Date(), { locale: ko });
 // → "방금 전"
 ```
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { useTimeAgo } from "@usels/core";
 import { ja } from "date-fns/locale";
@@ -106,7 +106,7 @@ const timeAgo = useTimeAgo(new Date("2024-01-01"), { locale: ja });
 
 You can also use `formatTimeAgo` with a locale:
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { formatTimeAgo } from "@usels/core";
 import { fr } from "date-fns/locale";
@@ -117,7 +117,7 @@ const str = formatTimeAgo(new Date("2024-01-01"), { locale: fr }, new Date("2024
 
 ## `formatTimeAgo` — pure function
 
-```tsx twoslash
+```tsx
 // @noErrors
 import { formatTimeAgo } from "@usels/core";
 
