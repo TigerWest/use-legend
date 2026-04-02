@@ -106,6 +106,7 @@ export default defineConfig({
           : [],
       },
       components: {
+        Hero: "./src/components/overrides/Hero.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
         MarkdownContent: "./src/components/overrides/MarkdownContent.astro",

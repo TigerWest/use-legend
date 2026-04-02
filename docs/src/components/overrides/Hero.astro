@@ -1,0 +1,94 @@
+---
+import { Code } from "astro/components";
+import { LinkButton } from "@astrojs/starlight/components";
+import TimerWidget from "../demos/CounterDemo";
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, actions = [] } = data.hero || {};
+
+const code = `import { useInterval } from '@usels/core'
+
+function Timer() {
+  const count$ = useInterval(1000)
+  const renders = useRef(0);
+  renders.current += 1;
+
+  return (
+    <div>
+      <div>{count$.get()}s</div>
+      <div>renders: {renders.current}</div>
+    </div>
+  )
+}`;
+---
+
+<div
+  class="grid items-center gap-16 pb-4 min-[50rem]:grid-cols-[5fr_5fr] min-[50rem]:gap-[4%] min-[50rem]:py-[clamp(2.5rem,calc(1rem+10vmin),10rem)]"
+>
+  <!-- Right column: code block + live widget overlay -->
+  <div class="not-content order-2 w-[min(95%,25rem)] mx-auto min-[50rem]:w-full">
+    <div class="relative rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] demo-wrapper">
+      <Code
+        code={code}
+        lang="tsx"
+        theme="dracula"
+        class="px-7 p-10 sm:px-10 text-xs rounded-md md:text-sm"
+      />
+      <div class="absolute -top-12 right-0 sm:-top-16 sm:-right-4">
+        <TimerWidget client:load />
+      </div>
+    </div>
+  </div>
+
+  <!-- Left column: title / tagline / actions -->
+  <div
+    class="flex flex-col gap-[clamp(1.5rem,calc(1.5rem+1vw),2rem)] text-center min-[50rem]:text-start"
+  >
+    <div class="flex flex-col gap-4 items-center [&>*]:max-w-[50ch] min-[50rem]:items-start">
+      <h1
+        id="_top"
+        data-page-title
+        set:html={title}
+        class="text-[clamp(var(--sl-text-3xl),calc(0.25rem+5vw),var(--sl-text-6xl))] leading-[var(--sl-line-height-headings)] font-semibold text-[var(--sl-color-white)]"
+      />
+      {
+        tagline && (
+          <div
+            class="text-[clamp(var(--sl-text-base),calc(0.0625rem+2vw),var(--sl-text-xl))] text-[var(--sl-color-gray-2)]"
+            set:html={tagline}
+          />
+        )
+      }
+    </div>
+    {
+      actions.length > 0 && (
+        <div class="flex gap-x-8 gap-y-4 flex-wrap justify-center min-[50rem]:justify-start">
+          {actions.map(
+            ({ attrs: { class: className, ...attrs } = {}, icon, link: href, text, variant }) => (
+              <LinkButton {href} {variant} icon={icon?.name} class:list={[className]} {...attrs}>
+                {text}
+                {icon?.html && <Fragment set:html={icon.html} />}
+              </LinkButton>
+            )
+          )}
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  @layer starlight.core {
+    /* strip expressive-code chrome to look embedded */
+    .demo-wrapper :global(.expressive-code) {
+      --ec-brdRad: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .demo-wrapper :global(.expressive-code pre) {
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+    }
+  }
+</style>
