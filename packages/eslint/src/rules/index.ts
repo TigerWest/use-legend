@@ -8,6 +8,7 @@ import { preferShowForConditional } from "./prefer-show-for-conditional";
 import { preferForComponent } from "./prefer-for-component";
 import { preferUseObservable } from "./prefer-use-observable";
 import { preferUseObserve } from "./prefer-use-observe";
+import { noGetInNonReactive } from "./no-get-in-non-reactive";
 
 export const rules: Record<string, TSESLint.RuleModule<string, unknown[]>> = {
   "observable-naming": observableNaming,
@@ -19,4 +20,5 @@ export const rules: Record<string, TSESLint.RuleModule<string, unknown[]>> = {
   "prefer-for-component": preferForComponent,
   "prefer-use-observable": preferUseObservable,
   "prefer-use-observe": preferUseObserve,
+  "no-get-in-non-reactive": noGetInNonReactive,
 };

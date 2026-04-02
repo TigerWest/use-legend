@@ -19,5 +19,6 @@ export const recommended: TSESLint.FlatConfig.Config = {
     "use-legend/prefer-for-component": "warn",
     "use-legend/prefer-use-observable": "warn",
     "use-legend/prefer-use-observe": "warn",
+    "use-legend/no-get-in-non-reactive": "warn",
   },
 };

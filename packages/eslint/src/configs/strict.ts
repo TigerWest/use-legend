@@ -1,7 +1,6 @@
 import type { TSESLint } from "@typescript-eslint/utils";
 
-// Strict config — all Phase 1 + Phase 2 rules at error severity
-// Phase 3 rules (no-get-in-non-reactive, no-peek-in-reactive) will be added after implementation.
+// Strict config — all rules at error severity
 // Usage in eslint.config.js:
 //   import legendPlugin from '@usels/eslint-plugin';
 //   export default [legendPlugin.configs.strict];
@@ -16,5 +15,6 @@ export const strict: TSESLint.FlatConfig.Config = {
     "use-legend/prefer-for-component": "error",
     "use-legend/prefer-use-observable": "error",
     "use-legend/prefer-use-observe": "error",
+    "use-legend/no-get-in-non-reactive": "error",
   },
 };
