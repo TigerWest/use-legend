@@ -28,12 +28,7 @@ function Timer() {
   <!-- Right column: code block + live widget overlay -->
   <div class="not-content order-2 w-[min(95%,25rem)] mx-auto min-[50rem]:w-full">
     <div class="relative rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] demo-wrapper">
-      <Code
-        code={code}
-        lang="tsx"
-        theme="dracula"
-        class="px-7 p-10 sm:px-10 text-xs rounded-md md:text-sm"
-      />
+      <Code code={code} lang="tsx" class="px-7 p-10 sm:px-10 text-xs rounded-md md:text-sm" />
       <div class="absolute -top-12 right-0 sm:-top-16 sm:-right-4">
         <TimerWidget client:load />
       </div>
