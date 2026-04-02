@@ -848,3 +848,68 @@ const resume = () => {
   rafHandle.current = requestAnimationFrame(loop);
 };
 ```
+
+---
+
+## Rule 8 — Computed Values in Components: Don't Store `.get()` in Plain Variables
+
+The project uses `@usels/vite-plugin-legend-memo` (babel plugin). This plugin **automatically wraps JSX expressions in reactive tracking**, so calling `.get()` inline in JSX is safe and reactive — no manual `<Memo>` wrapper needed.
+
+The real anti-pattern is storing `.get()` in a plain `const` and reusing that variable. The snapshot loses reactivity; changes to the Observable won't trigger re-renders.
+
+### ❌ Anti-pattern — Snapshot stored in plain variable
+
+```tsx
+function MyComponent() {
+  const isActive = isActive$.get(); // snapshot! won't re-render on change
+  return <div>{isActive ? "active" : "inactive"}</div>;
+}
+```
+
+```ts
+function useMyHook() {
+  const value = someObs$.get(); // snapshot in hook body — reactive updates invisible
+  doSomething(value);
+}
+```
+
+### ✅ Correct patterns
+
+**Direct render in JSX — call `.get()` inline (babel auto-tracks)**
+
+```tsx
+function MyComponent() {
+  return <div>{isActive$.get() ? "active" : "inactive"}</div>;
+}
+```
+
+**Derived state → `useObservable`**
+
+```tsx
+function MyComponent() {
+  const derived$ = useObservable(() => someObs$.get()); // reactive computed
+  return <div>{derived$.get()}</div>;
+}
+```
+
+**Reactive side-effect → `useObserve`**
+
+```tsx
+function MyComponent() {
+  useObserve(() => {
+    const value = someObs$.get(); // reactive dep registered
+    doSomething(value);
+  });
+}
+```
+
+### Decision table
+
+| Goal | Pattern |
+| --------------------------------- | -------------------------------------- |
+| Render reactive value in JSX | `<div>{obs$.get()}</div>` — inline, babel tracks it |
+| Derive a new Observable from existing ones | `useObservable(() => a$.get() + b$.get())` |
+| React to changes as a side-effect | `useObserve(() => { ... obs$.get() ... })` |
+| Read once at mount (non-reactive) | `obs$.peek()` — makes intent explicit |
+
+> **Key rule:** Call `.get()` inline in JSX or inside reactive contexts (`useObservable`, `useObserve`). Never store `.get()` in a plain variable and reuse it — that's a snapshot. Use `.peek()` only when a one-time mount-time read is intentional.
