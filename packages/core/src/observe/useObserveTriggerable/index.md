@@ -1,9 +1,8 @@
 ---
 title: useObserveTriggerable
+description: "Runs a reactive effect with a manual `trigger()` method and an `ignoreUpdates` escape hatch."
 category: Observe
 ---
-
-Runs a reactive effect with a manual `trigger()` method and an `ignoreUpdates` escape hatch.
 
 Built on `useObserveIgnorable` — lazy by default (`immediate: false`). `trigger()` immediately executes the effect with the current selector value, using `ignoreUpdates` internally so the manual call does not cause a reactive re-trigger.
 

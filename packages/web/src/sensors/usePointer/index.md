@@ -1,11 +1,10 @@
 ---
 title: usePointer
+description: "Reactive pointer state tracking. Monitors `pointerdown`, `pointermove`, `pointerup`, and `pointerleave` events, exposing position, pressure, tilt, dimensions, twist, pointer type, and inside state as observables."
 category: Sensors
 sidebar:
   order: 3
 ---
-
-Reactive pointer state tracking. Monitors `pointerdown`, `pointermove`, `pointerup`, and `pointerleave` events, exposing position, pressure, tilt, dimensions, twist, pointer type, and inside state as observables.
 
 ## Demo
 

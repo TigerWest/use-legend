@@ -1,11 +1,10 @@
 ---
 title: createStore
+description: "Lazily-initialized store with `StoreProvider`, inter-store dependencies, and Redux DevTools action tracking in development."
 category: State
 sidebar:
   order: 0
 ---
-
-Lazily-initialized store with `StoreProvider`, inter-store dependencies, and Redux DevTools action tracking in development.
 
 ## Demo
 

@@ -1,9 +1,8 @@
 ---
 title: usePreferredColorScheme
+description: "Reactive color scheme preference. Returns a `ReadonlyObservable` tracking the user's preferred color scheme (`'dark'`, `'light'`, or `'no-preference'`) via `prefers-color-scheme` media queries."
 category: browser
 ---
-
-Reactive color scheme preference. Returns a `ReadonlyObservable` tracking the user's preferred color scheme (`'dark'`, `'light'`, or `'no-preference'`) via `prefers-color-scheme` media queries.
 
 ## Demo
 

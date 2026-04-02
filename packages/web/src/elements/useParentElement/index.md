@@ -1,11 +1,8 @@
 ---
 title: useParentElement
+description: "Returns the `parentElement` of a target DOM node as a reactive `Observable`. Re-evaluates whenever the target `Ref or `Observable` changes. Targets can be `Ref, `MaybeElement`, or a plain `Element`."
 category: elements
 ---
-
-Returns the `parentElement` of a target DOM node as a reactive `Observable`.
-Re-evaluates whenever the target `Ref$` or `Observable` changes.
-Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
 
 ## Demo
 

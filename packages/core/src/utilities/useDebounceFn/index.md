@@ -1,9 +1,8 @@
 ---
 title: useDebounceFn
+description: "Debounce execution of a function."
 category: Utilities
 ---
-
-Debounce execution of a function.
 
 ## Demo
 

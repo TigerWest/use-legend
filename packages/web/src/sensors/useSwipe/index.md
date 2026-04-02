@@ -1,11 +1,10 @@
 ---
 title: useSwipe
+description: "Reactive swipe detection based on TouchEvents. Detects swipe direction and length."
 category: Sensors
 sidebar:
   order: 3
 ---
-
-Reactive swipe detection based on TouchEvents. Detects swipe direction and length.
 
 ## Demo
 

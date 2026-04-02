@@ -1,9 +1,8 @@
 ---
 title: useObservePausable
+description: "Runs a reactive effect with built-in pause/resume controls. Built on `useObserveWithFilter`. The selector always tracks dependencies; only the effect execution is gated by the active state."
 category: Observe
 ---
-
-Runs a reactive effect with built-in pause/resume controls. Built on `useObserveWithFilter`. The selector always tracks dependencies; only the effect execution is gated by the active state.
 
 ## Demo
 

@@ -1,11 +1,8 @@
 ---
 title: useDocumentVisibility
+description: "Tracks the browser tab's visibility state (`'visible'` or `'hidden'`) as a reactive `Observable<DocumentVisibilityState>`. Updates automatically when the user switches tabs or minimizes the window. SSR-safe: returns `'visible'` when `document` is not available."
 category: elements
 ---
-
-Tracks the browser tab's visibility state (`'visible'` or `'hidden'`) as a reactive `Observable<DocumentVisibilityState>`.
-Updates automatically when the user switches tabs or minimizes the window.
-SSR-safe: returns `'visible'` when `document` is not available.
 
 ## Demo
 

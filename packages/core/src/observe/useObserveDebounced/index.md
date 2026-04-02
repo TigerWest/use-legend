@@ -1,11 +1,10 @@
 ---
 title: useObserveDebounced
+description: "Runs a reactive effect debounced — fires only after `ms` milliseconds of inactivity. Built on `useObserveWithFilter`. The selector always tracks dependencies; only the effect is debounced."
 category: Observe
 sidebar:
   order: 1
 ---
-
-Runs a reactive effect debounced — fires only after `ms` milliseconds of inactivity. Built on `useObserveWithFilter`. The selector always tracks dependencies; only the effect is debounced.
 
 ## Usage
 

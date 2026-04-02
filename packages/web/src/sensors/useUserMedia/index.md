@@ -1,11 +1,10 @@
 ---
 title: useUserMedia
+description: "Reactive wrapper around the [MediaDevices.getUserMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) API. Provides start/stop/restart controls and exposes the media stream as an observable."
 category: Sensors
 sidebar:
   order: 9
 ---
-
-Reactive wrapper around the [MediaDevices.getUserMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) API. Provides start/stop/restart controls and exposes the media stream as an observable.
 
 ## Demo
 

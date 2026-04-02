@@ -1,11 +1,10 @@
 ---
 title: useOnline
+description: "Reactive online state. A thin wrapper around [`useNetwork`](/web/sensors/useNetwork) that returns only the `isOnline Observable."
 category: Sensors
 sidebar:
   order: 8
 ---
-
-Reactive online state. A thin wrapper around [`useNetwork`](/web/sensors/useNetwork) that returns only the `isOnline$` Observable.
 
 ## Demo
 

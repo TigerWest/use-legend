@@ -1,9 +1,8 @@
 ---
 title: useScreenOrientation
+description: "Reactive wrapper for the [Screen Orientation API](https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation). Tracks the current screen orientation type and angle, and provides methods to lock and unlock orientation."
 category: browser
 ---
-
-Reactive wrapper for the [Screen Orientation API](https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation). Tracks the current screen orientation type and angle, and provides methods to lock and unlock orientation.
 
 ## Demo
 

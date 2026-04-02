@@ -1,11 +1,10 @@
 ---
 title: useElementHover
+description: "Reactively tracks whether a DOM element is being hovered. Supports optional enter/leave delays for debounced hover behavior."
 category: Sensors
 sidebar:
   order: 2
 ---
-
-Reactively tracks whether a DOM element is being hovered. Supports optional enter/leave delays for debounced hover behavior.
 
 ## Demo
 

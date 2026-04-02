@@ -43,7 +43,15 @@ export function serializeFrontmatter(frontmatter: Record<string, unknown>): stri
     }
 
     if (typeof value === 'string') {
-      lines.push(`${key}: ${value}`)
+      lines.push(`${key}: "${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
+      continue
+    }
+
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      lines.push(`${key}:`)
+      for (const [nestedKey, nestedValue] of Object.entries(value as Record<string, unknown>)) {
+        lines.push(`  ${nestedKey}: ${nestedValue}`)
+      }
       continue
     }
 

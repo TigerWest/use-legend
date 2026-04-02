@@ -1,10 +1,8 @@
 ---
 title: useManualHistory
+description: 'A hook for manually managing Observable change history. It only records a snapshot when `commit()` is called, and allows navigating previous states via `undo`/`redo`. Useful when auto-tracking is not needed, or when you want to record history only on explicit "save" actions.'
 category: Reactivity
 ---
-
-A hook for manually managing Observable change history. It only records a snapshot when `commit()` is called, and allows navigating previous states via `undo`/`redo`.
-Useful when auto-tracking is not needed, or when you want to record history only on explicit "save" actions.
 
 ## Demo
 

@@ -1,13 +1,10 @@
 ---
 title: useWatch
+description: "Runs a reactive effect that skips the first effect execution by default (lazy mode). Pass `immediate: true` to execute the effect immediately on setup (eager mode). The selector always tracks dependencies; the effect is suppressed on the initial call unless `immediate: true`."
 category: Observe
 sidebar:
   order: 0
 ---
-
-Runs a reactive effect that skips the first effect execution by default (lazy mode).
-Pass `immediate: true` to execute the effect immediately on setup (eager mode).
-The selector always tracks dependencies; the effect is suppressed on the initial call unless `immediate: true`.
 
 Selector supports three forms:
 

@@ -1,11 +1,10 @@
 ---
 title: useScrollLock
+description: "Lock and unlock scrolling on a target element or `document.body`. Useful for modals, drawers, and overlays that need to prevent background scrolling."
 category: Sensors
 sidebar:
   order: 4
 ---
-
-Lock and unlock scrolling on a target element or `document.body`. Useful for modals, drawers, and overlays that need to prevent background scrolling.
 
 ## Demo
 

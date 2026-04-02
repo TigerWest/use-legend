@@ -1,11 +1,10 @@
 ---
 title: useIdle
+description: "Tracks whether the user is inactive (idle). Monitors user interaction events like mouse movement, keyboard input, touch, and window resize. After a configurable timeout with no activity, the idle state becomes true."
 category: Sensors
 sidebar:
   order: 10
 ---
-
-Tracks whether the user is inactive (idle). Monitors user interaction events like mouse movement, keyboard input, touch, and window resize. After a configurable timeout with no activity, the idle state becomes true.
 
 ## Demo
 

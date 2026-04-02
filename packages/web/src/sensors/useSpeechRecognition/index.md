@@ -1,11 +1,10 @@
 ---
 title: useSpeechRecognition
+description: "Reactive wrapper around the [Web Speech Recognition API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition). Provides start/stop/toggle controls with real-time transcript and status tracking."
 category: Sensors
 sidebar:
   order: 9
 ---
-
-Reactive wrapper around the [Web Speech Recognition API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition). Provides start/stop/toggle controls with real-time transcript and status tracking.
 
 ## Demo
 

@@ -1,11 +1,8 @@
 ---
 title: useMouseInElement
+description: "Tracks the mouse cursor position relative to a DOM element and reports whether the cursor is inside or outside it. Observes `mousemove`, `document` `mouseleave`, [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver), [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) (`style`/`class` attribute changes), and `window` `scroll`/`resize` events to keep values accurate as the element moves or resizes. All return values are reactive `Observable<number | boolean>`."
 category: elements
 ---
-
-Tracks the mouse cursor position relative to a DOM element and reports whether the cursor is inside or outside it.
-Observes `mousemove`, `document` `mouseleave`, [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver), [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) (`style`/`class` attribute changes), and `window` `scroll`/`resize` events to keep values accurate as the element moves or resizes.
-All return values are reactive `Observable<number | boolean>`.
 
 ## Demo
 

@@ -1,9 +1,8 @@
 ---
 title: useRemote
+description: "Reactive remote data binding powered by Legend-State's [sync engine](https://legendapp.com/open-source/state/v3/sync/persist-sync/)."
 category: sync
 ---
-
-Reactive remote data binding powered by Legend-State's [sync engine](https://legendapp.com/open-source/state/v3/sync/persist-sync/).
 
 Creates an `Observable<T>` that fetches from and optionally pushes to a remote source. No local persistence — data lives only in memory. Returns decomposed state including loading and error observables.
 

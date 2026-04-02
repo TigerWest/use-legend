@@ -1,11 +1,10 @@
 ---
 title: useParallax
+description: "Create parallax effects easily. Uses `useDeviceOrientation` on mobile devices and falls back to mouse position on desktop."
 category: Sensors
 sidebar:
   order: 3
 ---
-
-Create parallax effects easily. Uses `useDeviceOrientation` on mobile devices and falls back to mouse position on desktop.
 
 ## Demo
 

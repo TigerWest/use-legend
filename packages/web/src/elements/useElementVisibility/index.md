@@ -1,12 +1,8 @@
 ---
 title: useElementVisibility
+description: "Tracks whether a DOM element is visible within the viewport (or a specified scroll container). Returns a reactive `Observable<boolean>` that updates automatically via the [IntersectionObserver API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)."
 category: elements
 ---
-
-Tracks whether a DOM element is visible within the viewport (or a specified scroll container).
-Returns a reactive `Observable<boolean>` that updates automatically via the [IntersectionObserver API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API).
-
-All option values accept either a plain value or an `Observable<T>`.
 
 ## Demo
 

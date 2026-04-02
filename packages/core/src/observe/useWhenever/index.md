@@ -1,12 +1,10 @@
 ---
 title: useWhenever
+description: "Shorthand for watching a source and running an effect only when the value is truthy. Built on `watch` — lazy by default (`immediate: false`)."
 category: Observe
 sidebar:
   order: 5
 ---
-
-Shorthand for watching a source and running an effect only when the value is truthy.
-Built on `watch` — lazy by default (`immediate: false`).
 
 ## Usage
 

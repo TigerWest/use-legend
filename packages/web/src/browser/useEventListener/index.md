@@ -1,11 +1,8 @@
 ---
 title: useEventListener
+description: "Registers an event listener with `addEventListener` on mount and automatically removes it with `removeEventListener` on unmount. Targets can be `Ref, `MaybeElement`, a plain `Element`, `Window`, or `Document`. The listener is always called with the latest closure value — state changes never cause stale callbacks."
 category: browser
 ---
-
-Registers an event listener with `addEventListener` on mount and automatically removes it with `removeEventListener` on unmount.
-Targets can be `Ref$`, `MaybeElement`, a plain `Element`, `Window`, or `Document`.
-The listener is always called with the latest closure value — state changes never cause stale callbacks.
 
 ## Usage
 

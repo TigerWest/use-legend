@@ -1,11 +1,10 @@
 ---
 title: useRef$
+description: "An observable element ref hook that serves as a drop-in replacement for `useRef`. Works with callback ref composition and `forwardRef` patterns. The element is wrapped with `opaqueObject` to prevent legendapp/state from deeply observing DOM properties."
 category: reactivity
 sidebar:
   order: 0
 ---
-
-An observable element ref hook that serves as a drop-in replacement for `useRef`. Works with callback ref composition and `forwardRef` patterns. The element is wrapped with `opaqueObject` to prevent legendapp/state from deeply observing DOM properties.
 
 ## Usage
 

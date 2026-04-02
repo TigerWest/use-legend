@@ -1,11 +1,10 @@
 ---
 title: useWindowScroll
+description: "Tracks the window scroll position, direction, arrived state, and scrolling status as reactive `Observable` values. A convenience wrapper around `useScroll(window)`."
 category: sensors
 sidebar:
   order: 4
 ---
-
-Tracks the window scroll position, direction, arrived state, and scrolling status as reactive `Observable` values. A convenience wrapper around `useScroll(window)`.
 
 ## Demo
 

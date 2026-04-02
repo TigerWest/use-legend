@@ -1,9 +1,8 @@
 ---
 title: usePreferredLanguages
+description: "Reactive browser languages. Returns a `ReadonlyObservable<readonly string[]>` tracking the user's preferred languages via `navigator.languages`, updating on the `languagechange` event."
 category: browser
 ---
-
-Reactive browser languages. Returns a `ReadonlyObservable<readonly string[]>` tracking the user's preferred languages via `navigator.languages`, updating on the `languagechange` event.
 
 ## Demo
 

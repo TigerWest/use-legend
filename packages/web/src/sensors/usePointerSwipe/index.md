@@ -1,11 +1,10 @@
 ---
 title: usePointerSwipe
+description: "Reactive swipe detection based on PointerEvents. Detects swipe direction and distance."
 category: Sensors
 sidebar:
   order: 3
 ---
-
-Reactive swipe detection based on PointerEvents. Detects swipe direction and distance.
 
 ## Demo
 

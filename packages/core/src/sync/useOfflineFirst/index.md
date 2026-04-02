@@ -1,9 +1,8 @@
 ---
 title: useOfflineFirst
+description: "Reactive offline-first data binding powered by Legend-State's [sync engine](https://legendapp.com/open-source/state/v3/sync/persist-sync/)."
 category: sync
 ---
-
-Reactive offline-first data binding powered by Legend-State's [sync engine](https://legendapp.com/open-source/state/v3/sync/persist-sync/).
 
 Combines remote sync with local persistence and automatic retry. Data is available immediately from local cache, then updated from the remote source. Failed remote operations are persisted locally and retried automatically.
 

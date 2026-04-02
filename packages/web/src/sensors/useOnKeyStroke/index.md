@@ -1,11 +1,10 @@
 ---
 title: useOnKeyStroke
+description: "Listen for keyboard key strokes with key filtering support."
 category: Sensors
 sidebar:
   order: 1
 ---
-
-Listen for keyboard key strokes with key filtering support.
 
 ## Demo
 

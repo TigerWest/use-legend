@@ -1,10 +1,8 @@
 ---
 title: useResizeObserver
+description: "Observes one or more elements for size changes using the [ResizeObserver API](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver). Targets can be `Ref, `MaybeElement`, or a plain `Element`."
 category: elements
 ---
-
-Observes one or more elements for size changes using the [ResizeObserver API](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver).
-Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
 
 ## Demo
 

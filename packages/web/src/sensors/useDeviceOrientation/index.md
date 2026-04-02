@@ -1,11 +1,10 @@
 ---
 title: useDeviceOrientation
+description: "Tracks the physical orientation of the device using the `deviceorientation` window event, exposing reactive observables for all orientation angles."
 category: Sensors
 sidebar:
   order: 7
 ---
-
-Tracks the physical orientation of the device using the `deviceorientation` window event, exposing reactive observables for all orientation angles.
 
 ## Demo
 

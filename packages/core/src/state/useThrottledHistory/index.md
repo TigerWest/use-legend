@@ -1,10 +1,8 @@
 ---
 title: useThrottledHistory
+description: "A hook that tracks Observable change history with throttle. A thin wrapper around `useHistory` with `throttleFilter` applied — for rapidly changing values like sliders or drag interactions, it records snapshots at fixed intervals instead of on every change."
 category: Reactivity
 ---
-
-A hook that tracks Observable change history with throttle.
-A thin wrapper around `useHistory` with `throttleFilter` applied — for rapidly changing values like sliders or drag interactions, it records snapshots at fixed intervals instead of on every change.
 
 ## Demo
 

@@ -1,11 +1,10 @@
 ---
 title: useObserveWithFilter
+description: "Runs a reactive effect gated by an EventFilter. The selector always tracks dependencies on every change; only the effect execution is controlled by the filter."
 category: Observe
 sidebar:
   order: 3
 ---
-
-Runs a reactive effect gated by an EventFilter. The selector always tracks dependencies on every change; only the effect execution is controlled by the filter.
 
 ## Usage
 

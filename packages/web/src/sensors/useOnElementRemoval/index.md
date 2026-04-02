@@ -1,11 +1,10 @@
 ---
 title: useOnElementRemoval
+description: "Fires a callback when the target element or any ancestor containing it is removed from the DOM. Uses [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) internally."
 category: Sensors
 sidebar:
   order: 6
 ---
-
-Fires a callback when the target element or any ancestor containing it is removed from the DOM. Uses [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) internally.
 
 ## Demo
 

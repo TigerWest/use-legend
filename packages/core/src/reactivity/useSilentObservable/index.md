@@ -1,9 +1,8 @@
 ---
 title: useSilentObservable
+description: "Observable augmented with a `silentSet` method that updates the value immediately without triggering listeners or re-renders."
 category: Reactivity
 ---
-
-Observable augmented with a `silentSet` method that updates the value immediately without triggering listeners or re-renders.
 
 ## Usage
 

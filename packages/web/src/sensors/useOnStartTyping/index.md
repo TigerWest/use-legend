@@ -1,11 +1,10 @@
 ---
 title: useOnStartTyping
+description: "Fires a callback when the user starts typing on non-editable elements. Useful for implementing search-on-type or keyboard shortcut activation."
 category: Sensors
 sidebar:
   order: 1
 ---
-
-Fires a callback when the user starts typing on non-editable elements. Useful for implementing search-on-type or keyboard shortcut activation.
 
 ## Demo
 

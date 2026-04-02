@@ -1,11 +1,10 @@
 ---
 title: useTextSelection
+description: "Reactively tracks the current text selection on the page. Listens to the `selectionchange` event and exposes the selected text, ranges, and bounding rectangles as observables."
 category: Sensors
 sidebar:
   order: 6
 ---
-
-Reactively tracks the current text selection on the page. Listens to the `selectionchange` event and exposes the selected text, ranges, and bounding rectangles as observables.
 
 `rects$` is computed lazily — `getBoundingClientRect()` is only called when `rects$` is actually accessed, avoiding unnecessary reflows when bounding rectangles are not needed.
 

@@ -1,11 +1,8 @@
 ---
 title: useMutationObserver
+description: "Reactive wrapper around the [MutationObserver API](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver). Observes one or more DOM nodes for mutations — attribute changes, child additions/removals, and text content changes. Targets can be `Ref, `MaybeElement`, or a plain `Element`."
 category: elements
 ---
-
-Reactive wrapper around the [MutationObserver API](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver).
-Observes one or more DOM nodes for mutations — attribute changes, child additions/removals, and text content changes.
-Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
 
 ## Demo
 

@@ -1,0 +1,11 @@
+---
+import Default from '@astrojs/starlight/components/MarkdownContent.astro'
+
+const { description } = Astro.locals.starlightRoute.entry.data
+---
+
+<Default>
+{description && <p class="page-description">{description}</p>}
+<slot />
+</Default>
+

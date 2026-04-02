@@ -108,6 +108,7 @@ export default defineConfig({
       components: {
         PageTitle: "./src/components/overrides/PageTitle.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
+        MarkdownContent: "./src/components/overrides/MarkdownContent.astro",
       },
       sidebar: [
         {

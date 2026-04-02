@@ -1,9 +1,8 @@
 ---
 title: useDebounced
+description: "Debounce an Observable value. Creates a read-only Observable that updates only after the source value stops changing for the specified delay."
 category: Reactivity
 ---
-
-Debounce an Observable value. Creates a read-only Observable that updates only after the source value stops changing for the specified delay.
 
 ## Demo
 

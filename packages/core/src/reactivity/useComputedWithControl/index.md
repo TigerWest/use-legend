@@ -1,11 +1,8 @@
 ---
 title: useComputedWithControl
+description: "Computed Observable with explicit source control and manual trigger. Only recomputes when the declared source changes, providing fine-grained control over when expensive computations run."
 category: Reactivity
 ---
-
-Computed Observable with explicit source control and manual trigger.
-Only recomputes when the declared source changes, providing fine-grained control
-over when expensive computations run.
 
 ## Demo
 

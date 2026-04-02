@@ -1,12 +1,10 @@
 ---
 title: useOnClickOutside
+description: "Listen for clicks outside of a target element. Useful for closing modals, dropdowns, and popovers when the user clicks elsewhere."
 category: sensors
 sidebar:
   order: 2
 ---
-
-Listen for clicks outside of a target element.
-Useful for closing modals, dropdowns, and popovers when the user clicks elsewhere.
 
 ## Demo
 

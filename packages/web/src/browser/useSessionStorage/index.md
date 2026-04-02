@@ -1,11 +1,8 @@
 ---
 title: useSessionStorage
+description: "Reactive `sessionStorage` binding. Thin wrapper around `useStorage` with `ObservablePersistSessionStorage` as the persist plugin. Values persist only for the current browser session."
 category: browser
 ---
-
-Reactive `sessionStorage` binding. Thin wrapper around `useStorage` with `ObservablePersistSessionStorage` as the persist plugin. Values persist only for the current browser session.
-
-See [useStorage](../useStorage/) for details and [Legend-State persist & sync](https://legendapp.com/open-source/state/v3/sync/persist-sync/) for advanced options.
 
 ## Demo
 

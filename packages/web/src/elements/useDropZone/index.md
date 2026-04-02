@@ -1,9 +1,8 @@
 ---
 title: useDropZone
+description: "Turns any element into a file drop zone. Tracks drag-over state and validates file types before accepting drops."
 category: elements
 ---
-
-Turns any element into a file drop zone. Tracks drag-over state and validates file types before accepting drops.
 
 ## Demo
 

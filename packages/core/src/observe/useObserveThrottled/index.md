@@ -1,11 +1,10 @@
 ---
 title: useObserveThrottled
+description: "Runs a reactive effect throttled — fires at most once per `ms` milliseconds. Built on `useObserveWithFilter`. The selector always tracks dependencies; only the effect is throttled."
 category: Observe
 sidebar:
   order: 2
 ---
-
-Runs a reactive effect throttled — fires at most once per `ms` milliseconds. Built on `useObserveWithFilter`. The selector always tracks dependencies; only the effect is throttled.
 
 ## Usage
 

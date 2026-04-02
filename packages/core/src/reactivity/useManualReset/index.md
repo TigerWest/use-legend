@@ -1,10 +1,8 @@
 ---
 title: useManualReset
+description: "Observable with a manual `reset()` function that restores the value to its default. Unlike `useAutoReset`, the value is only reset when you explicitly call `reset()`."
 category: Reactivity
 ---
-
-Observable with a manual `reset()` function that restores the value to its default.
-Unlike `useAutoReset`, the value is only reset when you explicitly call `reset()`.
 
 ## Demo
 

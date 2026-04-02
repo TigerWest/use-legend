@@ -1,9 +1,8 @@
 ---
 title: useLastChanged
+description: "A hook that tracks when a source Observable last changed. Returns a read-only Observable containing the `Date.now()` timestamp of the most recent change, or `null` if the source has not changed yet."
 category: Reactivity
 ---
-
-A hook that tracks when a source Observable last changed. Returns a read-only Observable containing the `Date.now()` timestamp of the most recent change, or `null` if the source has not changed yet.
 
 ## Demo
 

@@ -1,10 +1,8 @@
 ---
 title: useDebouncedHistory
+description: 'A hook that tracks Observable change history with debounce. A thin wrapper around `useHistory` with `debounceFilter` applied — it only records history after typing has stopped. Ideal for text inputs or search fields where you want to snapshot only when a burst of changes has "settled".'
 category: Reactivity
 ---
-
-A hook that tracks Observable change history with debounce.
-A thin wrapper around `useHistory` with `debounceFilter` applied — it only records history after typing has stopped. Ideal for text inputs or search fields where you want to snapshot only when a burst of changes has "settled".
 
 ## Demo
 

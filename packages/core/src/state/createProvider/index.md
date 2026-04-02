@@ -1,10 +1,8 @@
 ---
 title: createProvider
+description: "Collapses React Context + Provider component + useContext hook into a single call. Eliminates boilerplate when sharing hook state via React Context."
 category: State
 ---
-
-Collapses React Context + Provider component + useContext hook into a single call.
-Eliminates boilerplate when sharing hook state via React Context.
 
 ## Usage
 

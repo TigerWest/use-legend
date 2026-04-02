@@ -1,9 +1,8 @@
 ---
 title: useAnimate
+description: "Reactive [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) wrapper. Drives `element.animate()` with Observable-based reactive state for `playState`, `currentTime`, `playbackRate`, and `pending`."
 category: browser
 ---
-
-Reactive [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) wrapper. Drives `element.animate()` with Observable-based reactive state for `playState`, `currentTime`, `playbackRate`, and `pending`.
 
 ## Demo
 

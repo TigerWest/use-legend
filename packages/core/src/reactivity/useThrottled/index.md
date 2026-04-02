@@ -1,10 +1,8 @@
 ---
 title: useThrottled
+description: "Throttle an Observable value. Creates a read-only Observable that updates at most once per interval when the source value changes."
 category: Reactivity
 ---
-
-Throttle an Observable value. Creates a read-only Observable that updates
-at most once per interval when the source value changes.
 
 ## Demo
 

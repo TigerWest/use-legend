@@ -1,11 +1,10 @@
 ---
 title: useDisplayMedia
+description: 'Reactive wrapper around the [MediaDevices.getDisplayMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) API for screen sharing. Provides start/stop controls and automatically handles the browser''s "Stop sharing" button.'
 category: Sensors
 sidebar:
   order: 9
 ---
-
-Reactive wrapper around the [MediaDevices.getDisplayMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) API for screen sharing. Provides start/stop controls and automatically handles the browser's "Stop sharing" button.
 
 ## Demo
 

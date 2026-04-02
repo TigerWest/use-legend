@@ -1,9 +1,8 @@
 ---
 title: useStorage
+description: "Reactive storage binding powered by Legend-State's [persist & sync](https://legendapp.com/open-source/state/v3/sync/persist-sync/) engine."
 category: sync
 ---
-
-Reactive storage binding powered by Legend-State's [persist & sync](https://legendapp.com/open-source/state/v3/sync/persist-sync/) engine.
 
 Creates an `Observable<T>` that automatically persists to a storage backend. The `plugin` option is required — use `useLocalStorage` or `useSessionStorage` from `@usels/web` for convenience wrappers with pre-configured plugins.
 

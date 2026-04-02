@@ -1,10 +1,8 @@
 ---
 title: useHistory
+description: "A hook that automatically tracks changes to an Observable and manages undo/redo history. Records a snapshot automatically whenever the source Observable changes. Built on top of `useManualHistory`, with additional support for auto-commit, pause/resume, and transaction."
 category: Reactivity
 ---
-
-A hook that automatically tracks changes to an Observable and manages undo/redo history.
-Records a snapshot automatically whenever the source Observable changes. Built on top of `useManualHistory`, with additional support for auto-commit, pause/resume, and transaction.
 
 ## Demo
 

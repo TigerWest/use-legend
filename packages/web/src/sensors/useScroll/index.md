@@ -1,11 +1,10 @@
 ---
 title: useScroll
+description: "Tracks the scroll position, scroll direction, arrived state (top/bottom/left/right), and scrolling status of any scrollable target — `HTMLElement`, `Document`, or `Window` — as reactive `Observable` values."
 category: sensors
 sidebar:
   order: 4
 ---
-
-Tracks the scroll position, scroll direction, arrived state (top/bottom/left/right), and scrolling status of any scrollable target — `HTMLElement`, `Document`, or `Window` — as reactive `Observable` values.
 
 ## Demo
 

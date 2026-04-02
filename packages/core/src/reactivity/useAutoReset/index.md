@@ -1,11 +1,8 @@
 ---
 title: useAutoReset
+description: "Observable that automatically resets to a default value after a specified delay. Useful for temporary state like toast messages, form feedback, or UI status indicators. Each time the value changes, the reset timer restarts."
 category: Reactivity
 ---
-
-Observable that automatically resets to a default value after a specified delay.
-Useful for temporary state like toast messages, form feedback, or UI status indicators.
-Each time the value changes, the reset timer restarts.
 
 ## Demo
 

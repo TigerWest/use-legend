@@ -1,9 +1,8 @@
 ---
 title: useDraggable
+description: "Makes any element draggable using Pointer Events. Returns Observable values for position (`x, `y), drag state (`isDragging), and a ready-to-use CSS style string (`style)."
 category: elements
 ---
-
-Makes any element draggable using Pointer Events. Returns Observable values for position (`x$`, `y$`), drag state (`isDragging$`), and a ready-to-use CSS style string (`style$`).
 
 ## Demo
 

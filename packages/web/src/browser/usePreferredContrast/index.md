@@ -1,9 +1,8 @@
 ---
 title: usePreferredContrast
+description: "Reactive contrast preference. Returns a `ReadonlyObservable` tracking the user's preferred contrast level (`'more'`, `'less'`, `'custom'`, or `'no-preference'`) via `prefers-contrast` media queries."
 category: browser
 ---
-
-Reactive contrast preference. Returns a `ReadonlyObservable` tracking the user's preferred contrast level (`'more'`, `'less'`, `'custom'`, or `'no-preference'`) via `prefers-contrast` media queries.
 
 ## Demo
 

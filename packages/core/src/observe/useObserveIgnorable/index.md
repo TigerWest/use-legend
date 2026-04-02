@@ -1,9 +1,8 @@
 ---
 title: useObserveIgnorable
+description: "Runs a reactive effect with an `ignoreUpdates` escape hatch. Changes made inside `ignoreUpdates(updater)` do not trigger the effect. Useful for breaking circular update cycles in two-way bindings."
 category: Observe
 ---
-
-Runs a reactive effect with an `ignoreUpdates` escape hatch. Changes made inside `ignoreUpdates(updater)` do not trigger the effect. Useful for breaking circular update cycles in two-way bindings.
 
 ## Demo
 

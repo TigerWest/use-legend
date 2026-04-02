@@ -1,11 +1,10 @@
 ---
 title: useMagicKeys
+description: "Reactive key-press state — access any key as a `ReadonlyObservable<boolean>` that is `true` while the key is held down."
 category: Sensors
 sidebar:
   order: 1
 ---
-
-Reactive key-press state — access any key as a `ReadonlyObservable<boolean>` that is `true` while the key is held down.
 
 ## Demo
 

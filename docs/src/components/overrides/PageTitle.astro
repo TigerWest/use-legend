@@ -1,9 +1,7 @@
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro'
-import type { Props } from '@astrojs/starlight/props'
 
-const { entry } = Astro.props
-const { category, lastChanged, contributors } = entry?.data ?? {}
+const { category, lastChanged, contributors } = Astro.locals.starlightRoute.entry.data
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()

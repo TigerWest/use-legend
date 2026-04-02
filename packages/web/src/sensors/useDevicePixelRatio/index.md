@@ -1,11 +1,10 @@
 ---
 title: useDevicePixelRatio
+description: "Reactively tracks `window.devicePixelRatio` using a `matchMedia` listener. Automatically updates when the display's pixel density changes (e.g., moving a window between monitors with different DPI, or browser zoom level changes)."
 category: Sensors
 sidebar:
   order: 7
 ---
-
-Reactively tracks `window.devicePixelRatio` using a `matchMedia` listener. Automatically updates when the display's pixel density changes (e.g., moving a window between monitors with different DPI, or browser zoom level changes).
 
 ## Demo
 
