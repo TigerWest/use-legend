@@ -1,0 +1,23 @@
+{
+  "name": "usels-skills",
+  "owner": {
+    "name": "use-legend",
+    "url": "https://github.com/tigerwest/lsa-utils"
+  },
+  "plugins": [
+    {
+      "name": "use-legend-hooks",
+      "source": "./",
+      "description": "A skill for using use-legend hooks (@usels/core, @usels/web) — Observable-native React utility hooks built on Legend-State. References for 105+ hooks.",
+      "keywords": [
+        "use-legend",
+        "legend-state",
+        "react",
+        "observable",
+        "hooks",
+        "fine-grained-reactivity"
+      ],
+      "skills": ["./skills/use-legend-hooks"]
+    }
+  ]
+}

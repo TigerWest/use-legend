@@ -1,0 +1,18 @@
+{
+  "name": "@usels/skills",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "AI skill reference files for use-legend hooks (@usels/core, @usels/web)",
+  "scripts": {
+    "build": "tsx build.ts",
+    "clean": "rm -rf skills/use-legend-hooks/references skills/use-legend-hooks/SKILL.md",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "gray-matter": "^4.0.3",
+    "tsx": "^4.0.0",
+    "typescript": "^5.3.3"
+  }
+}
