@@ -1,11 +1,12 @@
 ---
-import Default from '@astrojs/starlight/components/MarkdownContent.astro'
+import Default from "@astrojs/starlight/components/MarkdownContent.astro";
+import { marked } from "marked";
 
-const { description, sourceFile } = Astro.locals.starlightRoute.entry.data
+const { description, sourceFile } = Astro.locals.starlightRoute.entry.data;
 ---
 
-<Default>
-{description && sourceFile && <p class="page-description">{description}</p>}
-<slot />
-</Default>
-
+<Default
+  >{
+    description && sourceFile && <p set:html={marked.parse(description)} class="page-description" />
+  }<slot /></Default
+>
