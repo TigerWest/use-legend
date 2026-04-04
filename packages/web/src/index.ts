@@ -16,7 +16,7 @@ export * from "./browser/usePreferredLanguages";
 export * from "./browser/useLocalStorage";
 export * from "./browser/useSessionStorage";
 export * from "./browser/useScreenOrientation";
-// export * from "./browser/useCssVar";
+export * from "./browser/useCssVar";
 
 // Elements
 export * from "./elements/useResizeObserver";
