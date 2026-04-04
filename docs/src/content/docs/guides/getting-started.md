@@ -9,7 +9,7 @@ description: Install use-legend and explore observable-native React hooks built 
 
 ```bash
 # Web + required peer deps
-npm install @usels/web@beta @legendapp/state react
+npm install @usels/web @legendapp/state@beta react
 
 
 # Auto Memo transform plugin (recommended)

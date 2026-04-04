@@ -10,10 +10,10 @@ export * from "@utilities/useThrottleFn";
 export * from "@utilities/usePausableFilter";
 
 export * from "@reactivity/useRef$";
-
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/useInitialPick";
 export * from "@reactivity/useSilentObservable";
+export * from "@reactivity/useOpaque";
 export * from "@reactivity/useAutoReset";
 export * from "@reactivity/useManualReset";
 export * from "@reactivity/useDebounced";
