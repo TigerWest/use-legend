@@ -278,14 +278,19 @@ Each browser variant follows the same structure as its JSDOM counterpart.
 
 ### Required Files by Hook Characteristics
 
+> **⚠️ Multiple characteristics can apply at once.** Check every matching row and union the required files.
+> Example: a hook with no element target that uses browser-only APIs still requires `index.browser.spec.ts`.
+
 | Hook Characteristic              | Required Files                                        | Optional Files                                |
 | -------------------------------- | ----------------------------------------------------- | --------------------------------------------- |
 | Has element target               | `index`, `rerender`, `lifecycle`, `lifecycle.browser` | `observable`, `edgeCases`, `index.browser`    |
 | No element target (timers, etc.) | `index`, `rerender`                                   | `observable`, `edgeCases`                     |
 | Has Observable options           | `index`                                               | `observable`                                  |
-| Uses browser-only APIs           | `index`, `browser`                                    | `lifecycle`, `edgeCases`                      |
+| **Uses browser-only APIs** (`document`, `window`, DOM manipulation, etc.) | **`index`, `index.browser`** | `lifecycle`, `edgeCases` |
 | Has overloads or complex types   | `index`, `types`                                      | (other files as needed)                       |
 | Thin wrapper                     | `index`                                               | (most tests delegated to the underlying hook) |
+
+> **Every hook under `packages/web/src/browser/` uses browser-only APIs — `index.browser.spec.ts` is always required.**
 
 ---
 

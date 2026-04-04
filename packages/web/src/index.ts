@@ -18,6 +18,7 @@ export * from "./browser/useSessionStorage";
 export * from "./browser/useScreenOrientation";
 export * from "./browser/useCssVar";
 export * from "./browser/useScriptTag";
+export * from "./browser/useStyleTag";
 
 // Elements
 export * from "./elements/useResizeObserver";
