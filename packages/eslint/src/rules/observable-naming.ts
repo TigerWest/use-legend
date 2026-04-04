@@ -30,8 +30,6 @@ interface Options {
 const USELS_IGNORES: string[] = [
   "get",
   "peek",
-  "getElement",
-  "peekElement",
   "isRef$",
   "useInitialPick",
   "useDebounceFn",

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expectTypeOf } from "vitest";
 import type { Ref, RefObject } from "react";
-import type { OpaqueObject } from "@legendapp/state";
 import { type Ref$, useRef$ } from ".";
 
 // ---------------------------------------------------------------------------
@@ -83,22 +82,20 @@ describe("useRef$() — types", () => {
       expectTypeOf<Ref$<HTMLDivElement>["peek"]>().toBeFunction();
     });
 
-    it("get() returns OpaqueObject<T> or null", () => {
+    it("get() returns T or null (auto-unwrapped)", () => {
       expectTypeOf<
         ReturnType<Ref$<HTMLDivElement>["get"]>
-      >().toEqualTypeOf<OpaqueObject<HTMLDivElement> | null>();
+      >().toEqualTypeOf<HTMLDivElement | null>();
     });
 
-    it("peek() returns OpaqueObject<T> or null", () => {
+    it("peek() returns T or null (auto-unwrapped)", () => {
       expectTypeOf<
         ReturnType<Ref$<HTMLDivElement>["peek"]>
-      >().toEqualTypeOf<OpaqueObject<HTMLDivElement> | null>();
+      >().toEqualTypeOf<HTMLDivElement | null>();
     });
 
-    it("current is readonly and returns OpaqueObject<T> or null", () => {
-      expectTypeOf<
-        Ref$<HTMLDivElement>["current"]
-      >().toEqualTypeOf<OpaqueObject<HTMLDivElement> | null>();
+    it("current returns T or null (auto-unwrapped)", () => {
+      expectTypeOf<Ref$<HTMLDivElement>["current"]>().toEqualTypeOf<HTMLDivElement | null>();
     });
   });
 });

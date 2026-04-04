@@ -18,6 +18,7 @@ import { MaybeObservable } from "../../types";
  * const obsValue = get(observable(42)) // 42
  * ```
  */
+export function get<T>(v: { get(): T }): T;
 export function get<T>(maybeObservable: MaybeObservable<T>): T;
 export function get<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 

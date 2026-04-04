@@ -4,7 +4,8 @@ import type { Observable } from "@legendapp/state";
 import { ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { useCallback, useRef } from "react";
-import { type MaybeElement, getElement } from "@usels/core";
+import { get } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useUnmount } from "@usels/core/shared/index";
 import type { MaybeObservable } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
@@ -50,7 +51,7 @@ function resolveInitialValue(initialState?: MaybeObservable<boolean>): boolean {
 // ---------------------------------------------------------------------------
 
 export function useScrollLock(
-  element?: MaybeElement,
+  element?: MaybeEventTarget<HTMLElement>,
   initialState?: MaybeObservable<boolean>,
   options?: ConfigurableWindow
 ): UseScrollLockReturn {
@@ -105,7 +106,7 @@ export function useScrollLock(
 
   // React to isLocked$ changes and element lifecycle
   useObserve(() => {
-    const el = getElement(element) as HTMLElement | null;
+    const el = get(element);
     const hasExplicitElement = element != null;
     const target = hasExplicitElement ? el : (el ?? window$.peek()?.document.body ?? null);
     const locked = isLocked$.get();

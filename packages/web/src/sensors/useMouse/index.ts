@@ -1,12 +1,12 @@
 "use client";
 import { useObservable } from "@legendapp/state/react";
-import type { MaybeElement } from "@usels/core";
 import type { DeepMaybeObservable } from "@usels/core";
 import type { ReadonlyObservable } from "@usels/core";
 import type { ConfigurableEventFilter } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
 import { useInitialPick } from "@usels/core";
 import { createFilterWrapper } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { type ConfigurableWindow, defaultWindow } from "@shared/configurable";
 import { useResolvedWindow } from "../../internal/useResolvedWindow";
@@ -24,7 +24,7 @@ export interface UseMouseOptions extends ConfigurableEventFilter, ConfigurableWi
   /** Reset coordinates on touchend. Default: false */
   resetOnTouchEnds?: boolean;
   /** Event target. Default: window */
-  target?: MaybeElement;
+  target?: MaybeEventTarget;
   /** Initial coordinate values. Default: { x: 0, y: 0 } */
   initialValue?: { x: number; y: number };
 }
@@ -76,10 +76,10 @@ export function useMouse(options?: DeepMaybeObservable<UseMouseOptions>): UseMou
   // Ref$ and Observable<OpaqueObject<Element>> are themselves reactive —
   // useEventListener handles them internally via its useObserve.
   // No 'element' hint needed; avoids lazy computed activation issues.
-  const eventTarget: MaybeElement = useConstant(() => {
-    if (options == null) return (window$.peek() ?? defaultWindow ?? null) as MaybeElement;
-    const target = (options as Record<string, unknown>).target as MaybeElement | undefined;
-    return target ?? ((window$.peek() ?? defaultWindow ?? null) as MaybeElement);
+  const eventTarget: MaybeEventTarget = useConstant(() => {
+    if (options == null) return (window$.peek() ?? defaultWindow ?? null) as MaybeEventTarget;
+    const target = (options as Record<string, unknown>).target as MaybeEventTarget | undefined;
+    return target ?? ((window$.peek() ?? defaultWindow ?? null) as MaybeEventTarget);
   });
 
   // Extract eventFilter from options at mount time.
@@ -105,7 +105,7 @@ export function useMouse(options?: DeepMaybeObservable<UseMouseOptions>): UseMou
   useEventListener(eventTarget, "mousemove", onMouseMove, { passive: true });
 
   // touch events (conditional — always call hooks, null target to disable)
-  const touchTarget: MaybeElement = touch ? eventTarget : null;
+  const touchTarget: MaybeEventTarget = touch ? eventTarget : null;
 
   const onTouchMove = useConstant(() => {
     const raw = (e: TouchEvent) => {

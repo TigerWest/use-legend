@@ -1,10 +1,11 @@
 "use client";
 import { ObservableHint, type Observable } from "@legendapp/state";
-import { useObservable, useObserve } from "@legendapp/state/react";
+import { useObservable } from "@legendapp/state/react";
 import {
   get,
   useMaybeObservable,
   useSupported,
+  useWhenever,
   type MaybeObservable,
   useWhenMounted,
 } from "@usels/core";
@@ -74,16 +75,16 @@ export function useMediaQuery(
   );
 
   const mql$ = useWhenMounted(() => {
-    const win = window$.get();
+    const win = window$.get() as Window | null;
     return isSupported$.get() && win ? ObservableHint.opaque(win.matchMedia(get(query))) : null;
   });
-  useObserve(() => {
-    const mql = mql$.get();
-    if (!mql) {
-      return;
-    }
-    matches$.set(mql.matches.valueOf());
-  });
+  useWhenever(
+    mql$,
+    (mql) => {
+      matches$.set(mql.matches.valueOf());
+    },
+    { immediate: true }
+  );
 
   useEventListener(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MediaQueryList is EventTarget but not Element; cast required for MaybeElement compatibility

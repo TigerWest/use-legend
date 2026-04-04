@@ -1,6 +1,7 @@
 "use client";
-import type { ReadonlyObservable, DeepMaybeObservable, MaybeElement } from "@usels/core";
+import type { ReadonlyObservable, DeepMaybeObservable } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { batch } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
@@ -12,7 +13,7 @@ export type UsePointerType = "mouse" | "touch" | "pen";
 
 export interface UsePointerOptions extends ConfigurableWindow {
   /** Target element to listen on. Default: window */
-  target?: MaybeElement;
+  target?: MaybeEventTarget;
   /** Pointer types to listen for. Default: all types */
   pointerTypes?: UsePointerType[];
 }
@@ -61,12 +62,12 @@ export function usePointer(options?: DeepMaybeObservable<UsePointerOptions>): Us
   const pointerType$ = useObservable<UsePointerType | null>(null);
   const isInside$ = useObservable(false);
 
-  const eventTarget: MaybeElement = useConstant(() => {
+  const eventTarget: MaybeEventTarget = useConstant(() => {
     const hasTarget = options != null && "target" in (options as object);
     if (hasTarget) {
-      return opts$.target as unknown as MaybeElement;
+      return opts$.target as unknown as MaybeEventTarget;
     }
-    return (window$ ?? defaultWindow ?? null) as unknown as MaybeElement;
+    return (window$ ?? defaultWindow ?? null) as unknown as MaybeEventTarget;
   });
 
   const handler = useConstant(() => (e: PointerEvent) => {

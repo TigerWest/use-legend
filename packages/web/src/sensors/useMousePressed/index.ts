@@ -1,9 +1,9 @@
 "use client";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { type MaybeElement } from "@usels/core";
 import type { DeepMaybeObservable } from "@usels/core";
 import type { ReadonlyObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useMaybeObservable } from "@usels/core";
 import { useInitialPick } from "@usels/core";
 import { useConstant } from "@usels/core/shared/useConstant";
@@ -17,7 +17,7 @@ export interface UseMousePressedOptions extends ConfigurableWindow {
   /** Track touch events. Default: true */
   touch?: boolean;
   /** Event target for press detection. Default: window */
-  target?: MaybeElement;
+  target?: MaybeEventTarget;
   /** Prevent drag — calls preventDefault on pointerdown. Default: false */
   preventDragEvent?: boolean;
   /** Callback fired on press */
@@ -51,10 +51,10 @@ export function useMousePressed(
   const sourceType$ = useObservable<UseMousePressedSourceType>(null);
 
   // Extract raw target from options at mount time (same pattern as useMouse)
-  const eventTarget: MaybeElement = useConstant(() => {
-    const win = (window$.peek() ?? defaultWindow ?? null) as MaybeElement;
+  const eventTarget: MaybeEventTarget = useConstant(() => {
+    const win = (window$.peek() ?? defaultWindow ?? null) as MaybeEventTarget;
     if (options == null) return win;
-    const target = (options as Record<string, unknown>).target as MaybeElement | undefined;
+    const target = (options as Record<string, unknown>).target as MaybeEventTarget | undefined;
     return target ?? win;
   });
 
@@ -78,7 +78,7 @@ export function useMousePressed(
   useEventListener(window$, "pointerup", onPointerUp);
 
   // --- Touch events ---
-  const touchTarget: MaybeElement = touch ? eventTarget : null;
+  const touchTarget: MaybeEventTarget = touch ? eventTarget : null;
 
   const onTouchStart = useCallback((e: TouchEvent) => {
     pressed$.set(true);

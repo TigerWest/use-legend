@@ -3,7 +3,7 @@ import { describe, it, expectTypeOf } from "vitest";
 import { observable, ObservableHint } from "@legendapp/state";
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useRef$ } from "@usels/core";
-import type { MaybeElement } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useResizeObserver, type UseResizeObserverReturn, type UseResizeObserverOptions } from ".";
 
 describe("useResizeObserver() — types", () => {
@@ -41,7 +41,7 @@ describe("useResizeObserver() — types", () => {
       const t1$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(div));
       const t2$ = observable<OpaqueObject<Element> | null>(ObservableHint.opaque(span));
       expectTypeOf<typeof useResizeObserver>().toBeCallableWith(
-        [t1$, t2$] as MaybeElement[],
+        [t1$, t2$] as MaybeEventTarget[],
         vi.fn()
       );
     });

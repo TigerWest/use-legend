@@ -5,13 +5,8 @@ import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { throttle } from "es-toolkit";
-import {
-  type MaybeElement,
-  type DeepMaybeObservable,
-  getElement,
-  peekElement,
-  useMaybeObservable,
-} from "@usels/core";
+import { type DeepMaybeObservable, get, peek, useMaybeObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { isWindow } from "@usels/core/shared/index";
 import { useEventListener } from "@browser/useEventListener";
 import { type ConfigurableWindow } from "@shared/configurable";
@@ -64,7 +59,7 @@ export interface UseScrollReturn {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getScrollValues(el: HTMLElement | Document | Window | null): {
+function getScrollValues(el: Element | Document | Window | null): {
   x: number;
   y: number;
 } {
@@ -79,7 +74,7 @@ function getScrollValues(el: HTMLElement | Document | Window | null): {
 }
 
 function getScrollDimensions(
-  el: HTMLElement | Document | Window | null,
+  el: Element | Document | Window | null,
   win: Window | null | undefined
 ): {
   scrollW: number;
@@ -118,7 +113,7 @@ function getScrollDimensions(
 // ---------------------------------------------------------------------------
 
 export function useScroll(
-  element: MaybeElement,
+  element: MaybeEventTarget<Element | Document | Window>,
   options?: DeepMaybeObservable<UseScrollOptions>
 ): UseScrollReturn {
   const opts$ = useMaybeObservable(options, {
@@ -130,7 +125,7 @@ export function useScroll(
 
   const window$ = useResolvedWindow(opts$.window);
 
-  const initial = getScrollValues(peekElement(element));
+  const initial = getScrollValues(peek(element) ?? null);
 
   const x$ = useObservable<number>(initial.x);
   const y$ = useObservable<number>(initial.y);
@@ -160,7 +155,7 @@ export function useScroll(
   };
 
   const measure = () => {
-    const el = peekElement(element);
+    const el = peek(element);
     if (!el) return;
 
     const prevX = x$.peek();
@@ -204,18 +199,17 @@ export function useScroll(
   });
 
   useEventListener(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MaybeElement matches Overload 4 but TypeScript cannot resolve it through the union without a cast
-    element as any,
+    element as MaybeEventTarget,
     "scroll",
     handler,
-    opts$?.eventListenerOptions ?? {
+    opts$.peek()?.eventListenerOptions ?? {
       capture: false,
       passive: true,
     }
   );
 
   useObserve(() => {
-    const el = getElement(element);
+    const el = get(element);
     if (!el) {
       // Element removed — reset scroll state and clear idle timer
       if (idleTimer.current) {

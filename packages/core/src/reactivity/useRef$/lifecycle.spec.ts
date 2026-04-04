@@ -3,7 +3,8 @@ import { render, renderHook, act } from "@testing-library/react";
 import { useObserve } from "@legendapp/state/react";
 import { createElement } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { getElement, useRef$ } from ".";
+import { get } from "@utilities/get";
+import { useRef$ } from ".";
 
 // ---------------------------------------------------------------------------
 // useRef$() — element lifecycle
@@ -26,7 +27,7 @@ describe("useRef$() — element lifecycle", () => {
       const { result } = renderHook(() => {
         const el$ = useRef$<HTMLDivElement>();
         useObserve(() => {
-          getElement(el$);
+          get(el$);
           observeSpy();
         });
         return el$;
@@ -130,9 +131,8 @@ describe("useRef$() — element lifecycle", () => {
       const { result } = renderHook(() => {
         const el$ = useRef$<HTMLDivElement>();
         useObserve(() => {
-          const raw = el$.get();
-          // valueOf() unwraps the OpaqueObject — null stays null
-          values.push(raw ? (raw.valueOf() as HTMLDivElement) : null);
+          // el$.get() auto-unwraps — returns T | null directly
+          values.push(el$.get());
         });
         return el$;
       });

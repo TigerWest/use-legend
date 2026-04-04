@@ -1,6 +1,7 @@
 "use client";
-import type { ReadonlyObservable, MaybeElement, DeepMaybeObservable } from "@usels/core";
+import type { ReadonlyObservable, DeepMaybeObservable } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { batch } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
@@ -41,7 +42,7 @@ export interface UseSwipeReturn {
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useSwipe(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseSwipeOptions>
 ): UseSwipeReturn {
   const opts$ = useMaybeObservable(options, {

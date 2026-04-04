@@ -7,14 +7,15 @@ import {
   type MaybeObservable,
 } from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
-import type { MaybeElement, Supportable, Pausable } from "@usels/core";
-import { normalizeTargets } from "@elements/useResizeObserver";
+import type { Supportable, Pausable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
+import { normalizeTargets } from "@shared/normalizeTargets";
 
 export interface UseIntersectionObserverOptions {
   /** Whether to start observing immediately on mount. Default: true */
   immediate?: boolean;
   /** The element or document used as the viewport. Default: browser viewport */
-  root?: MaybeElement;
+  root?: MaybeEventTarget;
   /** Margin around the root. Accepts CSS-style values. Default: "0px" */
   rootMargin?: string;
   /** Threshold(s) at which to trigger the callback. Default: 0 */
@@ -49,7 +50,7 @@ export interface UseIntersectionObserverReturn extends Supportable, Pausable {
  * ```
  */
 export function useIntersectionObserver(
-  target: MaybeElement | MaybeElement[],
+  target: MaybeEventTarget | MaybeEventTarget[],
   callback: IntersectionObserverCallback,
   options?: DeepMaybeObservable<UseIntersectionObserverOptions>
 ): UseIntersectionObserverReturn {

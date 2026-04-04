@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { observable, ObservableHint } from "@legendapp/state";
-import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect } from "vitest";
-import { useRef$ } from "@reactivity/useRef$";
-import type { Ref$ } from "@reactivity/useRef$";
+import { useRef$, type Ref$ } from "@usels/core";
+import { createOpaque } from "@usels/core/reactivity/useOpaque/core";
+import type { MaybeEventTarget } from "../../types";
 import { normalizeTargets } from ".";
 
-const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element): MaybeEventTarget =>
+  createOpaque<Element>(el) as unknown as MaybeEventTarget;
 
 describe("normalizeTargets()", () => {
   it("returns empty array for null plain value", () => {
@@ -39,7 +39,7 @@ describe("normalizeTargets()", () => {
   });
 
   it("filters out Observable<null>", () => {
-    const obs$ = observable<ReturnType<typeof ObservableHint.opaque<Element>> | null>(null);
+    const obs$ = createOpaque<Element>();
     expect(normalizeTargets(obs$)).toEqual([]);
   });
 
@@ -70,7 +70,7 @@ describe("normalizeTargets()", () => {
 
     const obs = wrapEl(span);
 
-    const elements = normalizeTargets([result.current as Ref$<Element>, obs, wrapEl(p)]);
+    const elements = normalizeTargets([result.current, obs, wrapEl(p)]);
     expect(elements).toEqual([div, span, p]);
   });
 

@@ -1,10 +1,11 @@
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { ObservableHint } from "@legendapp/state";
 import { useMount, useObservable, useObserve } from "@legendapp/state/react";
-import { getElement, type MaybeElement } from "@usels/core";
+import { get } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 
 export function useParentElement(
-  element?: MaybeElement
+  element?: MaybeEventTarget
 ): Observable<OpaqueObject<HTMLElement | SVGElement> | null> {
   const parent$ = useObservable<OpaqueObject<HTMLElement | SVGElement> | null>(null);
 
@@ -15,7 +16,7 @@ export function useParentElement(
    */
   const update = () => {
     if (!element) return;
-    const el = getElement(element as MaybeElement);
+    const el = get(element);
     // Document / Window 는 parentElement 프로퍼티가 없으므로 null → SSR-safe
     const parent = (el as HTMLElement | null)?.parentElement ?? null;
     parent$.set(

@@ -1,5 +1,6 @@
 "use client";
-import type { ReadonlyObservable, MaybeElement, DeepMaybeObservable } from "@usels/core";
+import type { ReadonlyObservable, DeepMaybeObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useMaybeObservable } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { useDeviceOrientation } from "../useDeviceOrientation";
@@ -32,7 +33,7 @@ const identity = (i: number) => i;
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useParallax(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseParallaxOptions>
 ): UseParallaxReturn {
   const opts$ = useMaybeObservable(options, {

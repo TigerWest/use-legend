@@ -2,12 +2,8 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserve, useMount } from "@legendapp/state/react";
 import { useCallback } from "react";
-import {
-  useMaybeObservable,
-  peekElement,
-  type DeepMaybeObservable,
-  type MaybeElement,
-} from "@usels/core";
+import { useMaybeObservable, peek, type DeepMaybeObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useEventListener } from "@browser/useEventListener";
 import { type ConfigurableWindow } from "@shared/configurable";
 import { useResolvedWindow } from "../../internal/useResolvedWindow";
@@ -43,7 +39,7 @@ export interface UseFocusReturn {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function useFocus(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseFocusOptions>
 ): UseFocusReturn {
   const opts$ = useMaybeObservable<UseFocusOptions>(options, { window: "element" });
@@ -58,7 +54,7 @@ export function useFocus(
     const focusVisible = opts$.peek()?.focusVisible ?? false;
     if (focusVisible) {
       // Only set focused if the element matches :focus-visible
-      const el = peekElement(target);
+      const el = peek(target);
       if (!el || !(el instanceof Element) || !el.matches(":focus-visible")) return;
     }
     // Avoid redundant set
@@ -79,7 +75,7 @@ export function useFocus(
   // --- Two-way binding: focused$ changes → focus/blur the element ---
   useObserve(() => {
     const isFocused = focused$.get();
-    const el = peekElement(target);
+    const el = peek(target);
     if (!el || !(el instanceof HTMLElement)) return;
 
     if (isFocused) {
@@ -98,7 +94,7 @@ export function useFocus(
   // --- Auto-focus on mount ---
   useMount(() => {
     if (opts$.peek()?.initialValue) {
-      const el = peekElement(target);
+      const el = peek(target);
       if (el instanceof HTMLElement) {
         el.focus({ preventScroll: opts$.peek()?.preventScroll ?? false });
       }

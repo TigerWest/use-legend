@@ -1,8 +1,9 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
 import { useCallback, useRef } from "react";
-import { type MaybeElement, peekElement } from "@usels/core";
-import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
+import { peek } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
+import { normalizeTargets } from "@shared/normalizeTargets";
 import { useResizeObserver } from "@elements/useResizeObserver";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useEventListener } from "@browser/useEventListener";
@@ -62,7 +63,7 @@ const ZERO = {
  * ```
  */
 export function useElementBounding(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseElementBoundingOptions>
 ): UseElementBoundingReturn {
   const opts$ = useMaybeObservable<UseElementBoundingOptions>(options, { window: "element" });
@@ -75,7 +76,7 @@ export function useElementBounding(
   const rafRef = useRef<number | null>(null);
 
   const recalculate = useCallback(() => {
-    const el = peekElement(target) as Element | null;
+    const el = peek(target) as Element | null;
     if (!el || !(el instanceof Element)) {
       if (opts$.reset.peek() !== false) bounding$.assign({ ...ZERO });
       return;

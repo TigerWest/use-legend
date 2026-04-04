@@ -9,12 +9,16 @@ import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useInfiniteScroll } from ".";
+import type { MaybeEventTarget } from "../../types";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element) =>
+  observable<OpaqueObject<Element> | null>(
+    ObservableHint.opaque(el)
+  ) as unknown as MaybeEventTarget<Element>;
 
 /** Create a scrollable container with a tall inner content element. */
 function makeScrollContainer(

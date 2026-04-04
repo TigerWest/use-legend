@@ -3,7 +3,8 @@ import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback, useRef } from "react";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
-import { type MaybeElement, peekElement } from "@usels/core";
+import { peek } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useEventListener } from "@browser/useEventListener";
 import { type ConfigurableWindow } from "@shared/configurable";
 import { useResolvedWindow } from "../../internal/useResolvedWindow";
@@ -23,9 +24,9 @@ export interface UseDraggableOptions extends ConfigurableWindow {
   /** Use capture phase for pointerdown. Default: false */
   capture?: boolean;
   /** Restrict drag to a specific handle element */
-  handle?: MaybeElement;
+  handle?: MaybeEventTarget;
   /** Clamp drag position inside this container element */
-  containerElement?: MaybeElement;
+  containerElement?: MaybeEventTarget;
   /** Initial position. Read once at mount time. Default: { x: 0, y: 0 } */
   initialValue?: Position;
   /** Called on drag start. Return false to cancel. */
@@ -74,12 +75,12 @@ export interface UseDraggableReturn {
  * ```
  */
 export function useDraggable(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseDraggableOptions>
 ): UseDraggableReturn {
   // Normalize options — per-field resolution hints
   const opts$ = useMaybeObservable<UseDraggableOptions>(options, {
-    // MaybeElement fields: reactive + OpaqueObject wrapping
+    // MaybeEventTarget fields: reactive + OpaqueObject wrapping
     handle: "element",
     containerElement: "element",
     // callback fields: function hint to prevent deep observation
@@ -116,7 +117,7 @@ export function useDraggable(
   const onPointerDown = useCallback((e: PointerEvent) => {
     if (opts$.disabled.peek()) return;
 
-    const el = peekElement(target) as HTMLElement | null;
+    const el = peek(target) as HTMLElement | null;
     if (!el) return;
     if (opts$.exact.peek() && e.target !== el) return;
 
@@ -158,7 +159,7 @@ export function useDraggable(
     const container = opts$.containerElement.peek() as HTMLElement | null;
     if (container) {
       const containerRect = container.getBoundingClientRect();
-      const elRect = (peekElement(target) as HTMLElement)?.getBoundingClientRect();
+      const elRect = (peek(target) as HTMLElement)?.getBoundingClientRect();
       if (elRect) {
         x = Math.max(containerRect.left, Math.min(x, containerRect.right - elRect.width));
         y = Math.max(containerRect.top, Math.min(y, containerRect.bottom - elRect.height));
@@ -168,7 +169,7 @@ export function useDraggable(
     // viewport restriction
     const win = window$.peek();
     if (opts$.restrictInView.peek() && win) {
-      const elRect = (peekElement(target) as HTMLElement)?.getBoundingClientRect();
+      const elRect = peek(target as HTMLElement)?.getBoundingClientRect();
       if (elRect) {
         x = Math.max(0, Math.min(x, win.innerWidth - elRect.width));
         y = Math.max(0, Math.min(y, win.innerHeight - elRect.height));
@@ -189,11 +190,11 @@ export function useDraggable(
   }, []);
 
   // Determine pointerdown target: handle if specified (mount-time), otherwise target.
-  // Pass MaybeElement directly so useEventListener's isRef$ branch fires correctly
+  // Pass MaybeEventTarget directly so useEventListener's isRef$ branch fires correctly
   // for Ref$ targets. Wrapping Ref$ inside an Observable causes useEventListener to
   // call .get() and receive the Ref$ function, which has no addEventListener.
-  const pointerdownTarget: MaybeElement =
-    opts$.handle.peek() != null ? (opts$.handle as unknown as MaybeElement) : target;
+  const pointerdownTarget: MaybeEventTarget =
+    opts$.handle.peek() != null ? (opts$.handle as unknown as MaybeEventTarget) : target;
 
   // Register pointerdown on handle (or target), pointermove/up on window
   useEventListener(pointerdownTarget, "pointerdown", onPointerDown, {

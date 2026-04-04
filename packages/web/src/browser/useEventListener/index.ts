@@ -9,8 +9,9 @@ import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/stat
 import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { isRef$, type MaybeElement } from "@usels/core";
-import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
+import { isRef$, type ReadonlyObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
+import { normalizeTargets } from "@shared/normalizeTargets";
 import { get, type Arrayable, type MaybeObservable } from "@usels/core";
 import { toArray } from "@usels/core/shared/utils";
 import { defaultWindow } from "@shared/configurable";
@@ -82,12 +83,12 @@ export function useEventListener<E extends keyof DocumentEventMap>(
  * Register using addEventListener on mounted, and removeEventListener
  * automatically on unmounted.
  *
- * Overload 4: `MaybeElement` target — supports Ref$, Observable<OpaqueObject<Element>>,
+ * Overload 4: `MaybeEventTarget` target — supports Ref$, Observable<OpaqueObject<Element>>,
  * Document, Window, or an array of those (Legend-State reactive).
  * Raw HTMLElement is excluded — use Ref$ or Observable<OpaqueObject<Element>> instead.
  */
 export function useEventListener<E extends keyof HTMLElementEventMap>(
-  target: MaybeElement | MaybeElement[] | null | undefined,
+  target: MaybeEventTarget | MaybeEventTarget[] | null | undefined,
   event: Arrayable<E>,
   listener: Arrayable<(ev: HTMLElementEventMap[E]) => void>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>
@@ -102,7 +103,12 @@ export function useEventListener<E extends keyof HTMLElementEventMap>(
  * The observer re-fires whenever the observable value changes.
  */
 export function useEventListener<EventType = Event>(
-  target: Observable<unknown> | ObservablePrimitive<unknown> | null | undefined,
+  target:
+    | Observable<unknown>
+    | ObservablePrimitive<unknown>
+    | ReadonlyObservable<unknown>
+    | null
+    | undefined,
   event: Arrayable<string>,
   listener: Arrayable<GeneralEventListener<EventType>>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>
@@ -112,11 +118,11 @@ export function useEventListener<EventType = Event>(
  * Register using addEventListener on mounted, and removeEventListener
  * automatically on unmounted.
  *
- * Overload 6: Combined `MaybeElement | EventTarget` — handles union types where
- * the target may be either a reactive MaybeElement or a raw EventTarget.
+ * Overload 6: Combined `MaybeEventTarget | EventTarget` — handles union types where
+ * the target may be either a reactive MaybeEventTarget or a raw EventTarget.
  */
 export function useEventListener<EventType = Event>(
-  target: MaybeElement | EventTarget | null | undefined,
+  target: MaybeEventTarget | EventTarget | null | undefined,
   event: Arrayable<string>,
   listener: Arrayable<GeneralEventListener<EventType>>,
   options?: MaybeObservable<boolean | AddEventListenerOptions>
@@ -195,7 +201,7 @@ export function useEventListener(...args: any[]): () => void {
         if (item == null) return [];
         // Ref$ references — normalizeTargets handles OpaqueObject.valueOf() unwrapping.
         if (isRef$(item)) {
-          return normalizeTargets([item as MaybeElement]) as EventTarget[];
+          return normalizeTargets([item as unknown as MaybeEventTarget]) as EventTarget[];
         }
         // Observable targets — .get() unwraps and registers reactive dependency.
         // Supports Element, Document, MediaQueryList, or any EventTarget.

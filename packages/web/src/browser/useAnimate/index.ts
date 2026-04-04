@@ -3,13 +3,13 @@ import { batch, ObservableHint } from "@legendapp/state";
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { useMount, useObservable, useObserve, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
-import { type MaybeElement, getElement, peekElement } from "@usels/core";
+import { get, peek } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import {
   useMaybeObservable,
   useInitialPick,
   useSupported,
   useRafFn,
-  get,
   type ReadonlyObservable,
   type Supportable,
   type Fn,
@@ -90,7 +90,7 @@ function extractNativeOpts(
 // ---------------------------------------------------------------------------
 
 export function useAnimate(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   keyframes: UseAnimateKeyframes,
   options?: number | DeepMaybeObservable<UseAnimateOptions>
 ): UseAnimateReturn {
@@ -198,11 +198,13 @@ export function useAnimate(
 
   // ── update() — create / recreate animation ──
   function update(init?: boolean) {
-    const el = peekElement(target);
+    const el = peek(target);
     if (!isSupported$.peek() || !el || !(el instanceof Element)) return;
 
     if (!animRef.current) {
-      const nativeOpts = isNumberOpts ? (options as number) : extractNativeOpts(opts$.peek());
+      const nativeOpts = isNumberOpts
+        ? (options as number)
+        : extractNativeOpts(opts$.peek() as UseAnimateOptions | undefined);
       const anim = el.animate(get(keyframes), nativeOpts);
       animRef.current = anim;
       _animate$.set(ObservableHint.opaque(anim) as OpaqueObject<Animation>);
@@ -317,7 +319,7 @@ export function useAnimate(
 
   // ── Element change → recreate animation ──
   useObserve(() => {
-    const el = getElement(target);
+    const el = get(target);
     if (el) {
       update(true);
     } else {
@@ -335,9 +337,11 @@ export function useAnimate(
   // ── Keyframes & options reactivity ──
   useObserve(() => {
     const kf = get(keyframes);
-    const nativeOpts = isNumberOpts ? (options as number) : extractNativeOpts(opts$.get());
+    const nativeOpts = isNumberOpts
+      ? (options as number)
+      : extractNativeOpts(opts$.get() as UseAnimateOptions | undefined);
     if (animRef.current) {
-      const el = peekElement(target);
+      const el = peek(target);
       if (el && el instanceof Element) {
         animRef.current.effect = new KeyframeEffect(el, kf ?? null, nativeOpts);
       }

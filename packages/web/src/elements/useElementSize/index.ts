@@ -1,7 +1,8 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { getElement, MaybeElement } from "@usels/core";
+import { get } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useResizeObserver } from "@elements/useResizeObserver";
 
 export interface UseElementSizeOptions {
@@ -31,7 +32,7 @@ export interface UseElementSizeReturn {
  * ```
  */
 export function useElementSize(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   initialSize?: { width: number; height: number },
   options?: UseElementSizeOptions
 ): UseElementSizeReturn {
@@ -79,7 +80,7 @@ export function useElementSize(
   // Set initial size from offsetWidth/Height after element mounts.
   // Uses getElement (tracked) so this re-runs when target Ref$ changes.
   useObserveEffect(() => {
-    const el = getElement(target) as HTMLElement | null;
+    const el = get(target) as HTMLElement | null;
     if (!el) {
       size$.assign({ width: initial.width, height: initial.height });
       return;

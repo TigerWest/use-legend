@@ -4,8 +4,6 @@ import { useMemo } from "react";
 import { get } from "@utilities/get";
 import { useLatest } from "@shared/useLatest";
 import type { DeepMaybeObservable, MaybeObservable } from "../../types";
-import { getElement } from "@reactivity/useRef$";
-import type { MaybeElement } from "@reactivity/useRef$";
 
 /**
  * Per-field resolution hint for the object-form transform.
@@ -14,7 +12,7 @@ import type { MaybeElement } from "@reactivity/useRef$";
  * - `'opaque'`   — `get()` then `ObservableHint.opaque()`. Null-safe.
  * - `'plain'`    — `get()` then `ObservableHint.plain()`. Prevents nested auto-deref. Null-safe.
  * - `'function'` — `get()` then `ObservableHint.function()`. For callbacks. Null-safe.
- * - `'element'`  — `getElement(fieldValue)` (reactive) then `ObservableHint.opaque()`. For MaybeElement.
+ * - `'element'`  — `get(fieldValue)` (reactive) then `ObservableHint.opaque()`. For `MaybeEventTarget` fields.
  *
  * Escape hatch:
  * - `(value) => R` — custom transform function.
@@ -97,7 +95,9 @@ function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>):
             result[key] = undefined;
             break;
           }
-          const el = getElement(fieldValue as MaybeElement);
+          const el = (
+            isObservable(fieldValue) ? (fieldValue as Observable<unknown>).get() : fieldValue
+          ) as Element | Document | Window | null;
           result[key] = el != null ? ObservableHint.opaque(el) : null;
         }
         break;

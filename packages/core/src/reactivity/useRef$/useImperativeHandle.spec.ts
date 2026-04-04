@@ -3,7 +3,8 @@ import { render, renderHook, act } from "@testing-library/react";
 import { useObserve } from "@legendapp/state/react";
 import { createElement, createRef, forwardRef, useImperativeHandle, useRef } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { useRef$, peekElement } from ".";
+import { useRef$ } from ".";
+import { peek } from "@utilities/peek";
 
 interface TestHandle {
   focus: () => void;
@@ -38,7 +39,7 @@ describe("useRef$() + useImperativeHandle compatibility", () => {
 
       useImperativeHandle(ref, () => ({
         focus: () => {
-          const el = peekElement(el$) as HTMLDivElement | null;
+          const el = peek(el$) as HTMLDivElement | null;
           el?.focus?.();
           focusSpy();
         },
@@ -57,7 +58,7 @@ describe("useRef$() + useImperativeHandle compatibility", () => {
     expect(typeof parentRef.current?.getValue).toBe("function");
     expect(parentRef.current?.getValue()).toBe("test-value");
 
-    // Custom handle methods can reach the real DOM via peekElement
+    // Custom handle methods can reach the real DOM via .peek()
     act(() => {
       parentRef.current?.focus();
     });
@@ -89,7 +90,7 @@ describe("useRef$() + useImperativeHandle compatibility", () => {
     expect(typeof parentRef.current?.focus).toBe("function");
 
     // el$ must hold the actual DOM element
-    const element = peekElement(capturedRef$!);
+    const element = peek(capturedRef$);
     expect(element).toBeInstanceOf(HTMLDivElement);
   });
 

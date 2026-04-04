@@ -2,16 +2,16 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable, useObserveEffect } from "@legendapp/state/react";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
-import type { MaybeElement } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useIntersectionObserver } from "@elements/useIntersectionObserver";
 import type { UseIntersectionObserverOptions } from "@elements/useIntersectionObserver";
-import { normalizeTargets } from "@elements/useResizeObserver";
+import { normalizeTargets } from "@shared/normalizeTargets";
 
 export interface UseElementVisibilityOptions {
   /** Initial visibility value. Default: false */
   initialValue?: boolean;
   /** Element used as the viewport for intersection. Maps to IntersectionObserver `root`. */
-  scrollTarget?: MaybeElement;
+  scrollTarget?: MaybeEventTarget;
   /** Margin around the root. Accepts CSS-style values. Default: "0px" */
   rootMargin?: string;
   /** Threshold(s) at which to trigger. Default: 0 */
@@ -45,7 +45,7 @@ export interface UseElementVisibilityOptions {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function useElementVisibility(
-  element: MaybeElement,
+  element: MaybeEventTarget,
   options?: DeepMaybeObservable<UseElementVisibilityOptions>
 ): Observable<boolean> {
   const opts$ = useMaybeObservable<UseElementVisibilityOptions>(options, {

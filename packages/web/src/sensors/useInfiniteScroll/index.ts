@@ -1,8 +1,9 @@
 "use client";
 import { useObservable, useObserve } from "@legendapp/state/react";
 import { useCallback } from "react";
-import { useMaybeObservable, peekElement } from "@usels/core";
-import type { DeepMaybeObservable, MaybeElement, ReadonlyObservable, Awaitable } from "@usels/core";
+import { useMaybeObservable, peek } from "@usels/core";
+import type { DeepMaybeObservable, ReadonlyObservable, Awaitable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useInitialPick } from "@usels/core";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { isWindow } from "@usels/core/shared/index";
@@ -38,7 +39,7 @@ export interface UseInfiniteScrollReturn {
 }
 
 export function useInfiniteScroll(
-  element: MaybeElement,
+  element: MaybeEventTarget<Element | Document | Window>,
   onLoadMore: (direction: UseInfiniteScrollDirection) => Awaitable<void>,
   options?: DeepMaybeObservable<UseInfiniteScrollOptions>
 ): UseInfiniteScrollReturn {
@@ -79,7 +80,7 @@ export function useInfiniteScroll(
     const opts = opts$.peek();
     const canLoadMore = opts?.canLoadMore;
     if (canLoadMore) {
-      const el = peekElement(element);
+      const el = peek(element);
       const domEl = isWindow(el)
         ? (window$.peek()?.document.documentElement ?? null)
         : (el as HTMLElement | null);
@@ -104,7 +105,7 @@ export function useInfiniteScroll(
 
   // Check if content doesn't overflow the container
   function isNarrower(): boolean {
-    const el = peekElement(element);
+    const el = peek(element);
     if (!el) return false;
     const isVertical = direction === "top" || direction === "bottom";
     if (isWindow(el)) {
@@ -131,7 +132,7 @@ export function useInfiniteScroll(
     const opts = opts$.peek();
     const canLoadMore = opts?.canLoadMore;
     if (canLoadMore) {
-      const el = peekElement(element);
+      const el = peek(element);
       const domEl = isWindow(el)
         ? (window$.peek()?.document.documentElement ?? null)
         : (el as HTMLElement | null);

@@ -4,8 +4,12 @@ import { observable, ObservableHint } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useScroll } from ".";
+import type { MaybeEventTarget } from "../../types";
 
-const wrapEl = (el: Element) => observable<OpaqueObject<Element> | null>(ObservableHint.opaque(el));
+const wrapEl = (el: Element): MaybeEventTarget<Element | Document | Window> =>
+  observable<OpaqueObject<Element> | null>(
+    ObservableHint.opaque(el)
+  ) as unknown as MaybeEventTarget<Element | Document | Window>;
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
 

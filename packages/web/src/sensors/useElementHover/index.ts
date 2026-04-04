@@ -3,7 +3,7 @@ import type { ReadonlyObservable, DeepMaybeObservable } from "@usels/core";
 import { useMaybeObservable } from "@usels/core";
 import { useObservable } from "@legendapp/state/react";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { type MaybeElement } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useEventListener } from "@browser/useEventListener";
 import { useUnmount } from "@usels/core/shared/useUnmount";
 
@@ -16,7 +16,7 @@ export interface UseElementHoverOptions {
 
 /*@__NO_SIDE_EFFECTS__*/
 export function useElementHover(
-  target: MaybeElement | EventTarget,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseElementHoverOptions>
 ): ReadonlyObservable<boolean> {
   const opts$ = useMaybeObservable(options);

@@ -1,12 +1,8 @@
 import { isClient } from "@usels/core/shared/utils";
 import type { Ref$ } from "@usels/core";
-import type { Observable, OpaqueObject } from "@legendapp/state";
 
 /** Window를 resolve할 수 있는 소스 타입 */
-export type WindowSource =
-  | Window
-  | Ref$<HTMLIFrameElement>
-  | Observable<OpaqueObject<HTMLIFrameElement> | null>;
+export type WindowSource = Window | Ref$<HTMLIFrameElement>;
 
 export interface ConfigurableWindow {
   /*

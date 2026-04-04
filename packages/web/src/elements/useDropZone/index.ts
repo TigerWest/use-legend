@@ -3,7 +3,7 @@ import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
 import { useCallback, useRef } from "react";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
-import { type MaybeElement } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useEventListener } from "@browser/useEventListener";
 import { defaultNavigator } from "@shared/configurable";
 
@@ -41,7 +41,7 @@ export interface UseDropZoneReturn {
  * ```
  */
 export function useDropZone(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseDropZoneOptions> | UseDropZoneOptions["onDrop"]
 ): UseDropZoneReturn {
   // If options is a function, treat it as the onDrop shorthand

@@ -21,6 +21,7 @@ import { MaybeObservable } from "../../types";
  * const obsValue = peek(observable(42)) // 42  — no dep registered
  * ```
  */
+export function peek<T>(v: { peek(): T }): T;
 export function peek<T>(maybeObservable: MaybeObservable<T>): T;
 export function peek<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 

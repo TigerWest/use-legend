@@ -1,7 +1,8 @@
 "use client";
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { peekElement, type MaybeElement } from "@usels/core";
+import { peek } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useEventListener } from "@browser/useEventListener";
 
 export interface UseFocusWithinReturn {
@@ -18,12 +19,12 @@ export interface UseFocusWithinReturn {
  * Shadow DOM boundaries where `relatedTarget` would be `null`.
  *
  * @param target - The container element to track focus within. Supports
- *   `MaybeElement` (element, ref, Observable ref, or null).
+ *   `MaybeEventTarget` (element, ref, Observable ref, or null).
  * @returns `focused$` — an Observable<boolean> that is true when focus is
  *   anywhere inside the container.
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function useFocusWithin(target: MaybeElement): UseFocusWithinReturn {
+export function useFocusWithin(target: MaybeEventTarget): UseFocusWithinReturn {
   const focused$ = useObservable<boolean>(false);
 
   useEventListener(target, "focusin", () => {
@@ -31,7 +32,7 @@ export function useFocusWithin(target: MaybeElement): UseFocusWithinReturn {
   });
 
   useEventListener(target, "focusout", () => {
-    const el = peekElement(target) as HTMLElement | null;
+    const el = peek(target) as HTMLElement | null;
     if (!el) return;
     // Delegate to the browser's CSS engine — handles iframes, Shadow DOM,
     // and other cases where relatedTarget would be null.

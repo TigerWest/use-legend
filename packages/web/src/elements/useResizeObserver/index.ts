@@ -1,10 +1,11 @@
 import { useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
 import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
-import { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
-import { MaybeElement, type Supportable } from "@usels/core";
+import { normalizeTargets } from "@shared/normalizeTargets";
+import { type Supportable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 
-export { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
+export { normalizeTargets } from "@shared/normalizeTargets";
 
 export interface UseResizeObserverOptions {
   box?: "content-box" | "border-box" | "device-pixel-content-box";
@@ -36,7 +37,7 @@ export interface UseResizeObserverReturn extends Supportable {
  * ```
  */
 export function useResizeObserver(
-  target: MaybeElement | MaybeElement[],
+  target: MaybeEventTarget | MaybeEventTarget[],
   callback: ResizeObserverCallback,
   options?: UseResizeObserverOptions
 ): UseResizeObserverReturn {

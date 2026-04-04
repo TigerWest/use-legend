@@ -1,7 +1,8 @@
 import { useObservable, useMount, useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
-import type { MaybeElement, Supportable } from "@usels/core";
-import { normalizeTargets } from "@elements/useResizeObserver";
+import type { Supportable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
+import { normalizeTargets } from "@shared/normalizeTargets";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentional alias to allow future extension without breaking API
 export interface UseMutationObserverOptions extends MutationObserverInit {}
@@ -13,7 +14,7 @@ export interface UseMutationObserverReturn extends Supportable {
 }
 
 export function useMutationObserver(
-  target: MaybeElement | MaybeElement[],
+  target: MaybeEventTarget | MaybeEventTarget[],
   callback: MutationCallback,
   options?: UseMutationObserverOptions
 ): UseMutationObserverReturn {

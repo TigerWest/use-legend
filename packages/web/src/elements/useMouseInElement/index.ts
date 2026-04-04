@@ -5,7 +5,8 @@ import { useCallback } from "react";
 import { type ConfigurableWindow } from "@shared/configurable";
 import { useResolvedWindow } from "../../internal/useResolvedWindow";
 import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
-import { type MaybeElement, peekElement } from "@usels/core";
+import { peek } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useResizeObserver } from "@elements/useResizeObserver";
 import { useMutationObserver } from "@elements/useMutationObserver";
 import { useEventListener } from "@browser/useEventListener";
@@ -61,7 +62,7 @@ export interface UseMouseInElementReturn {
  * ```
  */
 export function useMouseInElement(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   options?: DeepMaybeObservable<UseMouseInElementOptions>
 ): UseMouseInElementReturn {
   const opts$ = useMaybeObservable<UseMouseInElementOptions>(options, { window: "element" });
@@ -87,7 +88,7 @@ export function useMouseInElement(
 
   // Recalculate element-relative position from current mouse coords
   const update = useCallback(() => {
-    const el = peekElement(target) as HTMLElement | null;
+    const el = peek(target) as HTMLElement | null;
     if (!el || !(el instanceof Element)) {
       state$.isOutside.set(true);
       return;

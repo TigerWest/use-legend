@@ -1,7 +1,8 @@
 "use client";
 import { useRef, useCallback } from "react";
 import type { Fn } from "@usels/core";
-import { peekElement, type MaybeElement } from "@usels/core";
+import { peek } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { useEventListener } from "@browser/useEventListener";
@@ -63,7 +64,7 @@ export interface UseOnLongPressOptions {
  * @returns A stop function that removes all event listeners and clears timers
  */
 export function useOnLongPress(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   handler: (evt: PointerEvent) => void,
   options: UseOnLongPressOptions = {}
 ): Fn {
@@ -87,7 +88,7 @@ export function useOnLongPress(
 
   const onDown = useCallback((ev: PointerEvent) => {
     const opts = optionsRef.current;
-    const el = peekElement(target);
+    const el = peek(target);
 
     if (opts.modifiers?.self && ev.target !== el) return;
 
@@ -108,7 +109,7 @@ export function useOnLongPress(
 
   const onMove = useCallback((ev: PointerEvent) => {
     const opts = optionsRef.current;
-    const el = peekElement(target);
+    const el = peek(target);
 
     if (opts.modifiers?.self && ev.target !== el) return;
     if (!posStartRef.current || opts.distanceThreshold === false) return;
@@ -127,7 +128,7 @@ export function useOnLongPress(
 
   const onRelease = useCallback((ev: PointerEvent) => {
     const opts = optionsRef.current;
-    const el = peekElement(target);
+    const el = peek(target);
     const _startTimestamp = startTimestampRef.current;
     const _posStart = posStartRef.current;
     const _hasLongPressed = hasLongPressedRef.current;

@@ -2,7 +2,7 @@ import { describe, it, expectTypeOf } from "vitest";
 import { observable } from "@legendapp/state";
 import type { Observable } from "@legendapp/state";
 import { useDraggable, type UseDraggableReturn, type UseDraggableOptions, type Position } from ".";
-import type { MaybeElement } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 
 // ---------------------------------------------------------------------------
 // useDraggable() — types
@@ -10,8 +10,8 @@ import type { MaybeElement } from "@usels/core";
 
 describe("useDraggable() — types", () => {
   describe("generic constraint", () => {
-    it("target accepts HTMLElement wrapped as MaybeElement", () => {
-      expectTypeOf<typeof useDraggable>().parameter(0).toExtend<MaybeElement>();
+    it("target accepts HTMLElement wrapped as MaybeEventTarget", () => {
+      expectTypeOf<typeof useDraggable>().parameter(0).toExtend<MaybeEventTarget>();
     });
 
     it("target parameter accepts null", () => {

@@ -1,37 +1,23 @@
-import { isObservable, ObservableHint } from "@legendapp/state";
-import type { Observable, OpaqueObject } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
-import { type Ref, type RefObject, useMemo } from "react";
+import { type Ref, type RefObject } from "react";
 import { useLatest } from "@shared/useLatest";
-import { isWindow } from "@shared/index";
+import { useConstant } from "@shared/useConstant";
+import { useOpaque } from "@reactivity/useOpaque";
+import { ReadonlyObservable } from "types";
 
-export type Ref$<T> = ((node: T | null) => void) & {
-  /** returns element, registers tracking when called inside useObserve */
-  get(): OpaqueObject<T> | null;
-  /** returns element without registering tracking */
-  peek(): OpaqueObject<T> | null;
-  /** returns element without tracking — useRef-compatible read */
-  readonly current: OpaqueObject<T> | null;
-};
+export const REF$_SYMBOL = Symbol("Ref$");
 
-/**
- * A value that resolves to an Element, Document, Window, or null.
- *
- * - `Ref$<T>` — React-managed element ref (created via `useRef$()`). Primary choice.
- * - `Document` / `Window` — stable global singletons, always safe to pass raw.
- * - `Observable<OpaqueObject<Element> | null>` — for imperatively obtained elements.
- *   Use `ObservableHint.opaque(el)` when storing: `observable(ObservableHint.opaque(el))`.
- *
- * Raw `HTMLElement` is intentionally excluded: in React's render model, elements
- * don't exist at hook call time, making raw element references inherently stale.
- */
-export type MaybeElement =
-  | Ref$<any> // eslint-disable-line @typescript-eslint/no-explicit-any -- Ref$<T> callback param: contravariance prevents Ref$<Element> from accepting Ref$<HTMLDivElement>
-  | Document
-  | Window
-  | null
-  | undefined
-  | Observable<OpaqueObject<Element> | null>;
+export type Ref$<T> = ((node: T | null) => void) &
+  ReadonlyObservable<T> & {
+    readonly [REF$_SYMBOL]: true;
+    /** returns element, registers tracking when called inside useObserve */
+    get(): T | null;
+    /** returns element without registering tracking */
+    peek(): T | null;
+    /** imperatively set element */
+    set(value: T | null): void;
+    /** returns element without tracking — useRef-compatible read */
+    current: T | null;
+  };
 
 /**
  * Creates an observable element ref. Can be used as a drop-in replacement for
@@ -65,12 +51,12 @@ export type MaybeElement =
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useRef$<T = any>(externalRef?: Ref<T> | null): Ref$<T> {
-  const el$ = useObservable<OpaqueObject<T> | null>(null);
+  const el$ = useOpaque();
 
   // store externalRef — simple assignment each render, no new closure
   const extRef = useLatest(externalRef);
 
-  return useMemo(() => {
+  return useConstant(() => {
     const fn = (node: T | null) => {
       const ext = extRef.current;
       if (typeof ext === "function") {
@@ -78,49 +64,32 @@ export function useRef$<T = any>(externalRef?: Ref<T> | null): Ref$<T> {
       } else if (ext != null && "current" in ext) {
         (ext as RefObject<T | null>).current = node;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- useObservable return type is overly complex; .set() exists at runtime
-      (el$ as any).set(node ? ObservableHint.opaque(node) : null);
+      el$.set(node);
     };
-    // eslint-disable-next-line react-hooks/refs -- fn is not a React ref; closures capture el$ observable, not extRef.current
-    Object.assign(fn, { get: () => el$.get(), peek: () => el$.peek() });
-    // Object.assign copies getter values as static data — defineProperty preserves the getter
-    // eslint-disable-next-line react-hooks/refs -- same as above
-    Object.defineProperty(fn, "current", { get: () => el$.peek(), enumerable: true });
-    return fn as Ref$<T>;
-  }, []);
+
+    return new Proxy(fn, {
+      get(_target, prop) {
+        if (prop === REF$_SYMBOL) return true;
+        if (prop === "get") return () => el$.get(); // T | null (auto-unwrapped)
+        if (prop === "peek") return () => el$.peek(); // T | null (auto-unwrapped)
+        if (prop === "set") return (value: T | null) => el$.set(value);
+        if (prop === "current") return el$.peek(); // T | null
+        // symbolGetNode etc. delegated to el$ → isObservable() = true
+        const val = (el$ as any)[prop]; // eslint-disable-line @typescript-eslint/no-explicit-any
+        return typeof val === "function" ? val.bind(el$) : val;
+      },
+      set(_target, p, newValue) {
+        if (p === "current") {
+          el$.set(newValue);
+          return true;
+        }
+        return false;
+      },
+    }) as Ref$<T>;
+  });
 }
 
 /** Type guard for Ref$ — distinguishes it from Observable and raw values */
 export function isRef$(v: unknown): v is Ref$<Element> {
-  return typeof v === "function" && !isObservable(v) && "get" in v && "peek" in v;
-}
-
-/** Unwraps MaybeElement with tracking (use inside useObserve) */
-export function getElement(v: MaybeElement): Element | Document | Window | null {
-  if (v == null) return null;
-  if (isRef$(v)) {
-    const raw = v.get();
-    return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
-  }
-  if (isWindow(v)) return v;
-  if (isObservable(v)) {
-    const val = (v as Observable<OpaqueObject<Element> | null>).get();
-    return val ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
-  }
-  return v as Document | null;
-}
-
-/** Unwraps MaybeElement without tracking (use inside setup/peek) */
-export function peekElement(v: MaybeElement): HTMLElement | Document | Window | null {
-  if (v == null) return null;
-  if (isRef$(v)) {
-    const raw = v.peek();
-    return raw ? ((raw as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
-  }
-  if (isWindow(v)) return v;
-  if (isObservable(v)) {
-    const val = (v as Observable<OpaqueObject<Element> | null>).peek();
-    return val ? ((val as OpaqueObject<Element>).valueOf() as HTMLElement) : null;
-  }
-  return v as Document | null;
+  return v != null && (v as any)[REF$_SYMBOL] === true; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

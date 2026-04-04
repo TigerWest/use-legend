@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useRef } from "react";
 import type { Fn } from "@usels/core";
-import { peekElement, useMaybeObservable, type MaybeElement } from "@usels/core";
+import { peek, useMaybeObservable } from "@usels/core";
+import type { MaybeEventTarget } from "../../types";
 import { useEventListener } from "@browser/useEventListener";
 import { useConstant } from "@usels/core/shared/useConstant";
 import { useLatest } from "@usels/core/shared/useLatest";
@@ -15,7 +16,7 @@ export interface OnClickOutsideOptions<
   /**
    * List of elements or CSS selectors that should not trigger the handler.
    */
-  ignore?: (string | MaybeElement)[];
+  ignore?: (string | MaybeEventTarget)[];
   /**
    * Use capturing phase for internal event listener.
    * @default true
@@ -69,7 +70,7 @@ let _iOSWorkaround = false;
  * @returns A stop function that removes all event listeners
  */
 export function useOnClickOutside<T extends OnClickOutsideOptions<false>>(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   handler: OnClickOutsideHandler<T>,
   options?: T
 ): Fn;
@@ -83,7 +84,7 @@ export function useOnClickOutside<T extends OnClickOutsideOptions<false>>(
  * @returns `{ stop, cancel, trigger }` control object
  */
 export function useOnClickOutside<T extends OnClickOutsideOptions<true>>(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   handler: OnClickOutsideHandler<T>,
   options: T
 ): OnClickOutsideReturn;
@@ -93,7 +94,7 @@ export function useOnClickOutside<T extends OnClickOutsideOptions<true>>(
 // ---------------------------------------------------------------------------
 
 export function useOnClickOutside(
-  target: MaybeElement,
+  target: MaybeEventTarget,
   handler: OnClickOutsideHandler<OnClickOutsideOptions<boolean>>,
   options: OnClickOutsideOptions<boolean> = {}
 ): Fn | OnClickOutsideReturn {
@@ -140,7 +141,7 @@ export function useOnClickOutside(
           (el) => el === event.target || event.composedPath().includes(el)
         );
       }
-      const el = peekElement(item);
+      const el = peek(item);
       return (
         el && el instanceof Element && (event.target === el || event.composedPath().includes(el))
       );
@@ -148,7 +149,7 @@ export function useOnClickOutside(
   }, []);
 
   const listener = useCallback((event: Event) => {
-    const el = peekElement(target);
+    const el = peek(target);
 
     if (event.target == null) return;
     if (!el || !(el instanceof Element)) return;
@@ -195,7 +196,7 @@ export function useOnClickOutside(
     window$,
     "pointerdown",
     useCallback((e: PointerEvent) => {
-      const el = peekElement(target);
+      const el = peek(target);
       shouldListenRef.current =
         !shouldIgnore(e) && !!(el && el instanceof Element && !e.composedPath().includes(el));
     }, []),
@@ -212,7 +213,7 @@ export function useOnClickOutside(
       setTimeout(() => {
         const win = window$.peek();
         if (!win) return;
-        const el = peekElement(target);
+        const el = peek(target);
         if (
           win.document.activeElement?.tagName === "IFRAME" &&
           el instanceof Element &&
