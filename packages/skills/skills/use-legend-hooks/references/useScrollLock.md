@@ -76,7 +76,7 @@ export interface UseScrollLockReturn {
     unlock: () => void;
     toggle: () => void;
 }
-export declare function useScrollLock(element?: MaybeElement, initialState?: MaybeObservable<boolean>, options?: ConfigurableWindow): UseScrollLockReturn;
+export declare function useScrollLock(element?: MaybeEventTarget<HTMLElement>, initialState?: MaybeObservable<boolean>, options?: ConfigurableWindow): UseScrollLockReturn;
 ```
 
 ## Source

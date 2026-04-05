@@ -59,7 +59,7 @@ export interface UseCssVarOptions extends ConfigurableWindow {
     initialValue?: string;
     observe?: boolean;
 }
-export declare function useCssVar(prop: MaybeObservable<string | null | undefined>, target?: MaybeElement, options?: UseCssVarOptions): Observable<string>;
+export declare function useCssVar(prop: MaybeObservable<string | null | undefined>, target?: MaybeEventTarget, options?: UseCssVarOptions): Observable<string>;
 ```
 
 ## Source

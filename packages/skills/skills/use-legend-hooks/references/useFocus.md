@@ -79,7 +79,7 @@ export interface UseFocusOptions extends ConfigurableWindow {
 export interface UseFocusReturn {
     focused$: Observable<boolean>;
 }
-export declare function useFocus(target: MaybeElement, options?: DeepMaybeObservable<UseFocusOptions>): UseFocusReturn;
+export declare function useFocus(target: MaybeEventTarget, options?: DeepMaybeObservable<UseFocusOptions>): UseFocusReturn;
 ```
 
 ## Source

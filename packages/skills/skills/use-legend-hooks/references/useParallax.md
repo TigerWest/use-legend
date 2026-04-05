@@ -74,7 +74,7 @@ export interface UseParallaxReturn {
     tilt$: ReadonlyObservable<number>;
     source$: ReadonlyObservable<UseParallaxSource>;
 }
-export declare function useParallax(target: MaybeElement, options?: DeepMaybeObservable<UseParallaxOptions>): UseParallaxReturn;
+export declare function useParallax(target: MaybeEventTarget, options?: DeepMaybeObservable<UseParallaxOptions>): UseParallaxReturn;
 ```
 
 ## Source

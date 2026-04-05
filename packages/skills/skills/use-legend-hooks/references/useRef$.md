@@ -65,16 +65,16 @@ const Component = forwardRef<HTMLDivElement>((props, ref) => {
 ## Type Declarations
 
 ```typescript
-export type Ref$<T> = ((node: T | null) => void) & {
-    get(): OpaqueObject<T> | null;
-    peek(): OpaqueObject<T> | null;
-    readonly current: OpaqueObject<T> | null;
+export declare const REF$_SYMBOL: unique symbol;
+export type Ref$<T> = ((node: T | null) => void) & ReadonlyObservable<T> & {
+    readonly [REF$_SYMBOL]: true;
+    get(): T | null;
+    peek(): T | null;
+    set(value: T | null): void;
+    current: T | null;
 };
-export type MaybeElement = Ref$<any> | Document | Window | null | undefined | Observable<OpaqueObject<Element> | null>;
 export declare function useRef$<T = any>(externalRef?: Ref<T> | null): Ref$<T>;
 export declare function isRef$(v: unknown): v is Ref$<Element>;
-export declare function getElement(v: MaybeElement): Element | Document | Window | null;
-export declare function peekElement(v: MaybeElement): HTMLElement | Document | Window | null;
 ```
 
 ## Source

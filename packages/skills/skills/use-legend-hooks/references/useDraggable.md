@@ -102,8 +102,8 @@ export interface UseDraggableOptions extends ConfigurableWindow {
     preventDefault?: boolean;
     stopPropagation?: boolean;
     capture?: boolean;
-    handle?: MaybeElement;
-    containerElement?: MaybeElement;
+    handle?: MaybeEventTarget;
+    containerElement?: MaybeEventTarget;
     initialValue?: Position;
     onStart?: (position: Position, event: PointerEvent) => void | false;
     onMove?: (position: Position, event: PointerEvent) => void;
@@ -120,7 +120,7 @@ export interface UseDraggableReturn {
     isDragging$: Observable<boolean>;
     style$: Observable<string>;
 }
-export declare function useDraggable(target: MaybeElement, options?: DeepMaybeObservable<UseDraggableOptions>): UseDraggableReturn;
+export declare function useDraggable(target: MaybeEventTarget, options?: DeepMaybeObservable<UseDraggableOptions>): UseDraggableReturn;
 ```
 
 ## Source

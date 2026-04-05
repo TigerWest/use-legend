@@ -123,7 +123,7 @@ export interface UseOnLongPressOptions {
     modifiers?: UseOnLongPressModifiers;
     onMouseUp?: (duration: number, distance: number, isLongPress: boolean, event: PointerEvent) => void;
 }
-export declare function useOnLongPress(target: MaybeElement, handler: (evt: PointerEvent) => void, options?: UseOnLongPressOptions): Fn;
+export declare function useOnLongPress(target: MaybeEventTarget, handler: (evt: PointerEvent) => void, options?: UseOnLongPressOptions): Fn;
 ```
 
 ## Source

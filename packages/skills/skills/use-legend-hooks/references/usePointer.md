@@ -68,7 +68,7 @@ function AreaTracker() {
 ```typescript
 export type UsePointerType = "mouse" | "touch" | "pen";
 export interface UsePointerOptions extends ConfigurableWindow {
-    target?: MaybeElement;
+    target?: MaybeEventTarget;
     pointerTypes?: UsePointerType[];
 }
 export interface UsePointerReturn {

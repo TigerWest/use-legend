@@ -56,7 +56,7 @@ export interface UseElementHoverOptions {
     delayEnter?: number;
     delayLeave?: number;
 }
-export declare function useElementHover(target: MaybeElement | EventTarget, options?: DeepMaybeObservable<UseElementHoverOptions>): ReadonlyObservable<boolean>;
+export declare function useElementHover(target: MaybeEventTarget, options?: DeepMaybeObservable<UseElementHoverOptions>): ReadonlyObservable<boolean>;
 ```
 
 ## Source

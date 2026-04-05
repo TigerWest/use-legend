@@ -51,14 +51,14 @@ console.log(isSupported$.get()); // Observable<boolean>
 ## Type Declarations
 
 ```typescript
-export { normalizeTargets } from "@usels/core/shared/normalizeTargets/index";
+export { normalizeTargets } from "@shared/normalizeTargets";
 export interface UseResizeObserverOptions {
     box?: "content-box" | "border-box" | "device-pixel-content-box";
 }
 export interface UseResizeObserverReturn extends Supportable {
     stop: () => void;
 }
-export declare function useResizeObserver(target: MaybeElement | MaybeElement[], callback: ResizeObserverCallback, options?: UseResizeObserverOptions): UseResizeObserverReturn;
+export declare function useResizeObserver(target: MaybeEventTarget | MaybeEventTarget[], callback: ResizeObserverCallback, options?: UseResizeObserverOptions): UseResizeObserverReturn;
 ```
 
 ## Source

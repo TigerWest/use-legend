@@ -34,7 +34,7 @@ function RemovalDetector() {
 
 ```typescript
 export type UseOnElementRemovalOptions = ConfigurableDocumentOrShadowRoot;
-export declare function useOnElementRemoval(target: MaybeElement, callback: (mutations: MutationRecord[]) => void, options?: DeepMaybeObservable<UseOnElementRemovalOptions>): void;
+export declare function useOnElementRemoval(target: MaybeEventTarget, callback: (mutations: MutationRecord[]) => void, options?: DeepMaybeObservable<UseOnElementRemovalOptions>): void;
 ```
 
 ## Source

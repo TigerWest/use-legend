@@ -92,12 +92,12 @@ rootMargin$.set("-50px 0px");
 ```typescript
 export interface UseElementVisibilityOptions {
     initialValue?: boolean;
-    scrollTarget?: MaybeElement;
+    scrollTarget?: MaybeEventTarget;
     rootMargin?: string;
     threshold?: number | number[];
     once?: boolean;
 }
-export declare function useElementVisibility(element: MaybeElement, options?: DeepMaybeObservable<UseElementVisibilityOptions>): Observable<boolean>;
+export declare function useElementVisibility(element: MaybeEventTarget, options?: DeepMaybeObservable<UseElementVisibilityOptions>): Observable<boolean>;
 ```
 
 ## Source

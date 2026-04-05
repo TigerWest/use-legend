@@ -62,7 +62,7 @@ function Component({ el }: { el: HTMLElement }) {
 ## Type Declarations
 
 ```typescript
-export declare function useParentElement(element?: MaybeElement): Observable<OpaqueObject<HTMLElement | SVGElement> | null>;
+export declare function useParentElement(element?: MaybeEventTarget): Observable<OpaqueObject<HTMLElement | SVGElement> | null>;
 ```
 
 ## Source

@@ -63,7 +63,7 @@ export interface UseElementSizeReturn {
     height$: Observable<number>;
     stop: () => void;
 }
-export declare function useElementSize(target: MaybeElement, initialSize?: {
+export declare function useElementSize(target: MaybeEventTarget, initialSize?: {
     width: number;
     height: number;
 }, options?: UseElementSizeOptions): UseElementSizeReturn;

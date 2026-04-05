@@ -180,7 +180,7 @@ export interface UseInfiniteScrollReturn {
     load: () => Promise<void>;
     reset: () => void;
 }
-export declare function useInfiniteScroll(element: MaybeElement, onLoadMore: (direction: UseInfiniteScrollDirection) => Awaitable<void>, options?: DeepMaybeObservable<UseInfiniteScrollOptions>): UseInfiniteScrollReturn;
+export declare function useInfiniteScroll(element: MaybeEventTarget<Element | Document | Window>, onLoadMore: (direction: UseInfiniteScrollDirection) => Awaitable<void>, options?: DeepMaybeObservable<UseInfiniteScrollOptions>): UseInfiniteScrollReturn;
 ```
 
 ## Source

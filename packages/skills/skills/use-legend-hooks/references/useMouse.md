@@ -108,7 +108,7 @@ export interface UseMouseOptions extends ConfigurableEventFilter, ConfigurableWi
     type?: UseMouseCoordType;
     touch?: boolean;
     resetOnTouchEnds?: boolean;
-    target?: MaybeElement;
+    target?: MaybeEventTarget;
     initialValue?: {
         x: number;
         y: number;

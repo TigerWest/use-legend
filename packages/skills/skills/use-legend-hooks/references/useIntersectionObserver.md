@@ -100,14 +100,14 @@ console.log(isSupported$.get()); // Observable<boolean>
 ```typescript
 export interface UseIntersectionObserverOptions {
     immediate?: boolean;
-    root?: MaybeElement;
+    root?: MaybeEventTarget;
     rootMargin?: string;
     threshold?: number | number[];
 }
 export interface UseIntersectionObserverReturn extends Supportable, Pausable {
     stop: () => void;
 }
-export declare function useIntersectionObserver(target: MaybeElement | MaybeElement[], callback: IntersectionObserverCallback, options?: DeepMaybeObservable<UseIntersectionObserverOptions>): UseIntersectionObserverReturn;
+export declare function useIntersectionObserver(target: MaybeEventTarget | MaybeEventTarget[], callback: IntersectionObserverCallback, options?: DeepMaybeObservable<UseIntersectionObserverOptions>): UseIntersectionObserverReturn;
 ```
 
 ## Source

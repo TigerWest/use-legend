@@ -74,7 +74,7 @@ export interface UseElementBoundingReturn {
     height$: Observable<number>;
     update: () => void;
 }
-export declare function useElementBounding(target: MaybeElement, options?: DeepMaybeObservable<UseElementBoundingOptions>): UseElementBoundingReturn;
+export declare function useElementBounding(target: MaybeEventTarget, options?: DeepMaybeObservable<UseElementBoundingOptions>): UseElementBoundingReturn;
 ```
 
 ## Source

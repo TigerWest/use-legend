@@ -153,7 +153,7 @@ export interface UseScrollReturn {
     directions$: Observable<ScrollDirections>;
     measure: () => void;
 }
-export declare function useScroll(element: MaybeElement, options?: DeepMaybeObservable<UseScrollOptions>): UseScrollReturn;
+export declare function useScroll(element: MaybeEventTarget<Element | Document | Window>, options?: DeepMaybeObservable<UseScrollOptions>): UseScrollReturn;
 ```
 
 ## Source

@@ -1,7 +1,7 @@
 # use-legend Hook Catalog
 
 > Observable-native React utility hooks built on Legend-State.
-> 105 hooks across 2 packages: `@usels/core` and `@usels/web`.
+> 107 hooks across 2 packages: `@usels/core` and `@usels/web`.
 
 > Auto-generated. Run `pnpm --filter @usels/skills build` to regenerate.
 
@@ -80,7 +80,7 @@
 
 ## @usels/web
 
-### Browser (13 hooks)
+### Browser (15 hooks)
 
 | Hook | Description | Reference |
 |------|-------------|-----------|
@@ -96,7 +96,9 @@
 | [`usePreferredReducedMotion`](references/usePreferredReducedMotion.md) | Reactive reduced motion preference. Returns a `ReadonlyObservable` tracking the user's motion pre... | AUTO |
 | [`usePreferredReducedTransparency`](references/usePreferredReducedTransparency.md) | Reactive reduced transparency preference. Returns a `ReadonlyObservable` tracking the user's tran... | AUTO |
 | [`useScreenOrientation`](references/useScreenOrientation.md) | Reactive wrapper for the [Screen Orientation API](https://developer.mozilla.org/en-US/docs/Web/AP... | AUTO |
+| [`useScriptTag`](references/useScriptTag.md) |  | AUTO |
 | [`useSessionStorage`](references/useSessionStorage.md) | Reactive `sessionStorage` binding. Thin wrapper around `useStorage` with `ObservablePersistSessio... | AUTO |
+| [`useStyleTag`](references/useStyleTag.md) |  | AUTO |
 
 ### Elements (13 hooks)
 
@@ -160,4 +162,4 @@
 | [`useWindowScroll`](references/useWindowScroll.md) | Tracks the window scroll position, direction, arrived state, and scrolling status as reactive `Ob... | AUTO |
 
 ---
-Total: 105 hooks
+Total: 107 hooks

@@ -70,7 +70,7 @@ export interface UsePointerSwipeReturn {
     }>;
     stop: () => void;
 }
-export declare function usePointerSwipe(target: MaybeElement, options?: DeepMaybeObservable<UsePointerSwipeOptions>): UsePointerSwipeReturn;
+export declare function usePointerSwipe(target: MaybeEventTarget, options?: DeepMaybeObservable<UsePointerSwipeOptions>): UsePointerSwipeReturn;
 ```
 
 ## Source

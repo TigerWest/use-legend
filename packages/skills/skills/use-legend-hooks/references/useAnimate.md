@@ -135,7 +135,7 @@ export interface UseAnimateReturn extends Supportable {
     timeline$: Observable<AnimationTimeline | null>;
     playbackRate$: Observable<number>;
 }
-export declare function useAnimate(target: MaybeElement, keyframes: UseAnimateKeyframes, options?: number | DeepMaybeObservable<UseAnimateOptions>): UseAnimateReturn;
+export declare function useAnimate(target: MaybeEventTarget, keyframes: UseAnimateKeyframes, options?: number | DeepMaybeObservable<UseAnimateOptions>): UseAnimateReturn;
 ```
 
 ## Source

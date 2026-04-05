@@ -26,6 +26,9 @@ console.log(peek(obs$, "name")); // 'John'                     — no dep regist
 ## Type Declarations
 
 ```typescript
+export declare function peek<T>(v: {
+    peek(): T;
+}): T;
 export declare function peek<T>(maybeObservable: MaybeObservable<T>): T;
 export declare function peek<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 export declare function peek<T, K extends keyof T>(maybeObservable: MaybeObservable<T>, key: K): T[K] | undefined;

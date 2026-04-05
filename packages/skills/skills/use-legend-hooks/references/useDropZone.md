@@ -83,7 +83,7 @@ export interface UseDropZoneReturn {
     files$: Observable<File[] | null>;
     isOverDropZone$: Observable<boolean>;
 }
-export declare function useDropZone(target: MaybeElement, options?: DeepMaybeObservable<UseDropZoneOptions> | UseDropZoneOptions["onDrop"]): UseDropZoneReturn;
+export declare function useDropZone(target: MaybeEventTarget, options?: DeepMaybeObservable<UseDropZoneOptions> | UseDropZoneOptions["onDrop"]): UseDropZoneReturn;
 ```
 
 ## Source

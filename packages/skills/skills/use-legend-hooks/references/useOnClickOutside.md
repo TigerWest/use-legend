@@ -82,7 +82,7 @@ useOnClickOutside(el$, handler, { capture: false });
 
 ```typescript
 export interface OnClickOutsideOptions<Controls extends boolean = false> extends ConfigurableWindow {
-    ignore?: (string | MaybeElement)[];
+    ignore?: (string | MaybeEventTarget)[];
     capture?: boolean;
     detectIframe?: boolean;
     controls?: Controls;
@@ -99,8 +99,8 @@ export interface OnClickOutsideReturn {
     cancel: Fn;
     trigger: (event: Event) => void;
 }
-export declare function useOnClickOutside<T extends OnClickOutsideOptions<false>>(target: MaybeElement, handler: OnClickOutsideHandler<T>, options?: T): Fn;
-export declare function useOnClickOutside<T extends OnClickOutsideOptions<true>>(target: MaybeElement, handler: OnClickOutsideHandler<T>, options: T): OnClickOutsideReturn;
+export declare function useOnClickOutside<T extends OnClickOutsideOptions<false>>(target: MaybeEventTarget, handler: OnClickOutsideHandler<T>, options?: T): Fn;
+export declare function useOnClickOutside<T extends OnClickOutsideOptions<true>>(target: MaybeEventTarget, handler: OnClickOutsideHandler<T>, options: T): OnClickOutsideReturn;
 ```
 
 ## Source

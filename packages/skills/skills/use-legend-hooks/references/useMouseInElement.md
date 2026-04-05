@@ -82,7 +82,7 @@ export interface UseMouseInElementReturn {
     y$: Observable<number>;
     stop: () => void;
 }
-export declare function useMouseInElement(target: MaybeElement, options?: DeepMaybeObservable<UseMouseInElementOptions>): UseMouseInElementReturn;
+export declare function useMouseInElement(target: MaybeEventTarget, options?: DeepMaybeObservable<UseMouseInElementOptions>): UseMouseInElementReturn;
 ```
 
 ## Source

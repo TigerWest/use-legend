@@ -59,7 +59,7 @@ function HighlightedForm() {
 export interface UseFocusWithinReturn {
     focused$: Observable<boolean>;
 }
-export declare function useFocusWithin(target: MaybeElement): UseFocusWithinReturn;
+export declare function useFocusWithin(target: MaybeEventTarget): UseFocusWithinReturn;
 ```
 
 ## Source

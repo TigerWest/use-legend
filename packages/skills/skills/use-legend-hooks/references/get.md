@@ -26,6 +26,9 @@ console.log(get(obs$, "name")); // 'John'
 ## Type Declarations
 
 ```typescript
+export declare function get<T>(v: {
+    get(): T;
+}): T;
 export declare function get<T>(maybeObservable: MaybeObservable<T>): T;
 export declare function get<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 export declare function get<T, K extends keyof T>(maybeObservable: MaybeObservable<T>, key: K): T[K] | undefined;

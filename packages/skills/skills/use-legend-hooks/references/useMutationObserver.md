@@ -106,7 +106,7 @@ export interface UseMutationObserverReturn extends Supportable {
     resume: () => void;
     takeRecords: () => MutationRecord[];
 }
-export declare function useMutationObserver(target: MaybeElement | MaybeElement[], callback: MutationCallback, options?: UseMutationObserverOptions): UseMutationObserverReturn;
+export declare function useMutationObserver(target: MaybeEventTarget | MaybeEventTarget[], callback: MutationCallback, options?: UseMutationObserverOptions): UseMutationObserverReturn;
 ```
 
 ## Source

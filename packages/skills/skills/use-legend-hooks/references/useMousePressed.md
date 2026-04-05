@@ -105,7 +105,7 @@ function Component() {
 export type UseMousePressedSourceType = "mouse" | "touch" | null;
 export interface UseMousePressedOptions extends ConfigurableWindow {
     touch?: boolean;
-    target?: MaybeElement;
+    target?: MaybeEventTarget;
     preventDragEvent?: boolean;
     onPressed?: (e: PointerEvent | TouchEvent) => void;
     onReleased?: (e: PointerEvent | TouchEvent) => void;
