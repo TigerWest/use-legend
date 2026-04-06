@@ -218,9 +218,7 @@ describe("useScope()", () => {
     it("scope is disposed on unmount", () => {
       renderHook(() =>
         useScope(() => {
-          onMount(() => {
-            // side-effect: we'll detect via onScopeDispose
-          });
+          onMount(() => {});
           return {};
         })
       );

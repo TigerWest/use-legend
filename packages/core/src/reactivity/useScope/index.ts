@@ -8,7 +8,7 @@ import {
   type ReactiveProps,
 } from "./reactiveProps";
 
-export { onBeforeMount, onMount, onUnmount, onScopeDispose } from "./effectScope";
+export { onBeforeMount, onMount, onUnmount } from "./effectScope";
 export { observe } from "./observe";
 export { toObs } from "./reactiveProps";
 export type { ReactiveProps } from "./reactiveProps";

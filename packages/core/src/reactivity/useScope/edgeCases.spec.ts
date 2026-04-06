@@ -2,14 +2,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
-import {
-  effectScope,
-  getCurrentScope,
-  onBeforeMount,
-  onMount,
-  onUnmount,
-  onScopeDispose,
-} from "./effectScope";
+import { effectScope, getCurrentScope, onBeforeMount, onMount, onUnmount } from "./effectScope";
 import { observe } from "./observe";
 import { useScope, toObs } from ".";
 
@@ -25,10 +18,6 @@ describe("useScope() — edge cases", () => {
 
     it("onUnmount outside scope does not throw", () => {
       expect(() => onUnmount(() => {})).not.toThrow();
-    });
-
-    it("onScopeDispose outside scope does not throw", () => {
-      expect(() => onScopeDispose(() => {})).not.toThrow();
     });
 
     it("observe outside scope behaves as normal legend-state observe", () => {
@@ -109,7 +98,7 @@ describe("useScope() — edge cases", () => {
       const { unmount } = renderHook(() =>
         useScope(() => {
           const child = effectScope();
-          child.run(() => onScopeDispose(childDispose));
+          child.run(() => getCurrentScope()!._addDispose(childDispose));
           return {};
         })
       );

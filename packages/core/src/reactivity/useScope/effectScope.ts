@@ -22,7 +22,7 @@ export class EffectScope {
 
   /**
    * Run a function inside this scope.
-   * Any `onScopeDispose`, `onMount`, `onBeforeMount`, `observe()` calls made during
+   * Any `onMount`, `onBeforeMount`, `observe()` calls made during
    * execution are registered to this scope.
    */
   run<T>(fn: () => T): T {
@@ -81,15 +81,6 @@ export function getCurrentScope(): EffectScope | null {
 }
 
 /**
- * Register a cleanup callback on the currently active scope.
- * Runs when the scope is disposed (component unmounts).
- * No-op when called outside a scope.
- */
-export function onScopeDispose(fn: () => void): void {
-  _currentScope?._addDispose(fn);
-}
-
-/**
  * Register a callback to run before the component mounts (useLayoutEffect timing).
  * Must be called inside a `useScope` factory. No-op outside a scope.
  */
@@ -113,4 +104,17 @@ export function onMount(cb: () => (() => void) | void): void {
  */
 export function onUnmount(cb: () => void): void {
   onMount(() => cb);
+}
+
+/**
+ * Create a new EffectScope that is NOT attached to any parent scope.
+ * Use this when you need a root-level scope that won't be disposed when a parent scope disposes.
+ * The caller is responsible for calling scope.dispose() manually.
+ */
+export function detachedEffectScope(): EffectScope {
+  const prev = _currentScope;
+  _currentScope = null; // prevent parent registration
+  const scope = new EffectScope();
+  _currentScope = prev; // restore caller's scope context
+  return scope;
 }
