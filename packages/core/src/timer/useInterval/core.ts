@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import type { Disposable, Fn, Pausable } from "../../types";
+import type { Disposable, Fn, MaybeObservable, Pausable } from "../../types";
 import { createIntervalFn } from "@timer/useIntervalFn/core";
 
 export interface IntervalOptions {
@@ -19,9 +19,10 @@ export interface IntervalReturn {
  * No React dependency — uses intervalFn core internally.
  */
 export function createInterval(
-  interval$: Observable<number>,
+  interval: MaybeObservable<number>,
   options?: IntervalOptions
 ): Disposable & IntervalReturn & Pausable {
+  const interval$ = observable(interval);
   const counter$ = observable<number>(0);
   const callback = options?.callback;
 

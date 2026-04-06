@@ -9,6 +9,7 @@ export * from "@utilities/useDebounceFn";
 export * from "@utilities/useThrottleFn";
 export * from "@utilities/usePausableFilter";
 
+export * from "@reactivity/useScope";
 export * from "@reactivity/useRef$";
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/useInitialPick";
