@@ -1,5 +1,5 @@
 import pluginTester from 'babel-plugin-tester';
-import plugin from '../src';
+import plugin from '../../src';
 
 const babelOptions = {
   plugins: ['@babel/plugin-syntax-jsx'],

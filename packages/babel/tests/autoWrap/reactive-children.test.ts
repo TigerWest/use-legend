@@ -1,5 +1,5 @@
 import pluginTester from 'babel-plugin-tester';
-import plugin from '../src';
+import plugin from '../../src';
 
 const babelOptions = {
   plugins: ['@babel/plugin-syntax-jsx'],
@@ -198,7 +198,7 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { wrapReactiveChildren: false },
+  pluginOptions: { autoWrap: { wrapReactiveChildren: false } },
   babelOptions,
   title: 'wrapReactiveChildren: false — disables auto-wrapping',
   tests: {
@@ -232,7 +232,7 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { wrapReactiveChildrenComponents: ['Custom'] },
+  pluginOptions: { autoWrap: { wrapReactiveChildrenComponents: ['Custom'] } },
   babelOptions,
   title: 'wrapReactiveChildrenComponents — extends default set',
   tests: {

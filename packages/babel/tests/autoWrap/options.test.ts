@@ -1,5 +1,5 @@
 import pluginTester from 'babel-plugin-tester';
-import plugin from '../src';
+import plugin from '../../src';
 
 const babelOptions = {
   plugins: ['@babel/plugin-syntax-jsx'],
@@ -9,7 +9,7 @@ const babelOptions = {
 
 pluginTester({
   plugin,
-  pluginOptions: { componentName: 'Reactive', importSource: '@usels/core' },
+  pluginOptions: { autoWrap: { componentName: 'Reactive', importSource: '@usels/core' } },
   babelOptions,
   title: 'componentName option',
   tests: {
@@ -35,7 +35,7 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { importSource: '@my/lib' },
+  pluginOptions: { autoWrap: { importSource: '@my/lib' } },
   babelOptions,
   title: 'importSource option',
   tests: {
@@ -80,7 +80,7 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { allGet: true },
+  pluginOptions: { autoWrap: { allGet: true } },
   babelOptions,
   title: 'allGet option',
   tests: {
@@ -122,7 +122,7 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { reactiveComponents: ['CustomReactive'] },
+  pluginOptions: { autoWrap: { reactiveComponents: ['CustomReactive'] } },
   babelOptions,
   title: 'reactiveComponents option',
   tests: {
@@ -138,7 +138,7 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { observerNames: ['reactive'] },
+  pluginOptions: { autoWrap: { observerNames: ['reactive'] } },
   babelOptions,
   title: 'observerNames option',
   tests: {
