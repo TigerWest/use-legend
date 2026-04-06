@@ -12,6 +12,8 @@ beforeEach(() => {
 function createTestValue(): StoreRegistryValue {
   return {
     registry: new Map<string, unknown>(),
+    scopes: new Map(),
+    mounted: false,
     devtools: false,
     actionTrackers: new Map(),
   };

@@ -1,6 +1,6 @@
 import { isObservable } from "@legendapp/state";
 import { isClient } from "../../shared/utils";
-import type { StoreRegistryValue } from "./core";
+import type { StoreRegistryValue } from "./storeContext";
 
 // ---------------------------------------------------------------------------
 // Types

@@ -9,7 +9,7 @@ export * from "@utilities/useDebounceFn";
 export * from "@utilities/useThrottleFn";
 export * from "@utilities/usePausableFilter";
 
-export * from "@reactivity/useScope";
+export * from "@state/useScope";
 export * from "@reactivity/useRef$";
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/useInitialPick";
@@ -26,7 +26,7 @@ export * from "@state/useHistory";
 export * from "@state/useThrottledHistory";
 export * from "@state/useDebouncedHistory";
 export * from "@state/createProvider";
-export * from "@state/createStore";
+export * from "@state/defineStore";
 export * from "@state/useLastChanged";
 
 export * from "@shared/filters";

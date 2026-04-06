@@ -1,6 +1,14 @@
 import type { ImmutableObservableBase } from "@legendapp/state";
 import { isObservable } from "@legendapp/state";
 import React from "react";
+import { detachedEffectScope } from "../useScope/effectScope";
+import {
+  type ActionTracker,
+  type StoreRegistryValue,
+  StoreRegistryContext,
+  getActiveValue,
+  setActiveValue,
+} from "./storeContext";
 
 // --- Types ---
 
@@ -31,14 +39,6 @@ export type StoreActions<T extends Record<string, unknown>> = {
 };
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
-
-// --- Action tracking ---
-
-/** Shared mutable ref between sync wrapping (core) and async DevTools connection. */
-export interface ActionTracker {
-  activeAction: string | null;
-  dispatch: ((actionType: string) => void) | null;
-}
 
 /**
  * Synchronously wrap function values on the store for action-level tracking.
@@ -72,41 +72,41 @@ function wrapStoreActions(
   }
 }
 
-// --- Registry value (per StoreProvider) ---
-
-export interface StoreRegistryValue {
-  registry: Map<string, unknown>;
-  devtools: boolean;
-  actionTrackers: Map<string, ActionTracker>;
-}
-
 // --- Module-scoped state ---
 
 const storeDefinitions = new Map<string, StoreDefinition>();
-let activeValue: StoreRegistryValue | null = null;
-
-// --- Registry Context ---
-
-export const StoreRegistryContext = React.createContext<StoreRegistryValue | null>(null);
-
-StoreRegistryContext.displayName = "StoreRegistry";
 
 // --- Internal: resolveStore ---
 
 function resolveStore<T>(name: string, setup: () => T, value: StoreRegistryValue): T {
-  const { registry } = value;
+  const { registry, scopes } = value;
   if (!registry.has(name)) {
-    const prev = activeValue;
-    activeValue = value;
+    const prev = setActiveValue(value);
     try {
-      const instance = setup();
-      registry.set(name, instance);
-      // DevTools
+      const scope = detachedEffectScope();
+      let instance: T;
+      try {
+        instance = scope.run(setup);
+      } catch (e) {
+        scope.dispose();
+        throw e;
+      }
+      scopes.set(name, scope);
+      registry.set(name, instance!);
+
+      if (scope._beforeMountCbs.length > 0) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn(
+            `[defineStore] "${name}": onBeforeMount is not supported in store setup. ` +
+              `Use onMount or onUnmount instead.`
+          );
+        }
+        scope._beforeMountCbs.length = 0;
+      }
+
       if (process.env.NODE_ENV !== "production" || value.devtools) {
         const store = instance as Record<string, unknown>;
-        // Sync: wrap functions immediately so destructured refs are always wrapped
         wrapStoreActions(name, store, value.actionTrackers);
-        // Async: connect DevTools (observers + dispatch binding)
         void import("./devtools")
           .then(({ connectDevTools }) => {
             connectDevTools(name, store, value);
@@ -114,7 +114,7 @@ function resolveStore<T>(name: string, setup: () => T, value: StoreRegistryValue
           .catch(() => {});
       }
     } finally {
-      activeValue = prev;
+      setActiveValue(prev);
     }
   }
   return registry.get(name) as T;
@@ -123,7 +123,60 @@ function resolveStore<T>(name: string, setup: () => T, value: StoreRegistryValue
 // --- Public API ---
 
 /**
+ * Defines a store and returns a tuple `[useStore, createStore]`.
+ *
+ * - `useStore()` (tuple[0]): React hook — call inside React components via useContext.
+ *   Also works inside another store's setup() via the activeValue path (backward compat).
+ * - `createStore()` (tuple[1]): Core accessor — for inter-store deps inside store setup().
+ *   Throws if called outside a store setup().
+ *
+ * The setup function runs inside an EffectScope, so `observe()`, `onMount()`, and `onUnmount()`
+ * called within setup are automatically registered to the scope.
+ */
+export function defineStore<T extends Record<string, unknown>>(
+  name: string,
+  setup: () => T
+): [() => T, () => T] {
+  // HMR handling: allow re-definition in development
+  if (storeDefinitions.has(name)) {
+    if (process.env.NODE_ENV !== "production") {
+      storeDefinitions.delete(name);
+    } else {
+      throw new Error(`defineStore: store "${name}" is already defined`);
+    }
+  }
+  storeDefinitions.set(name, { name, setup });
+
+  // [0] useStore: React hook — useContext path + activeValue fallback for inter-store deps
+  function useStore(): T {
+    if (getActiveValue()) {
+      return resolveStore(name, setup, getActiveValue()!);
+    }
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const value = React.useContext(StoreRegistryContext);
+    if (!value) {
+      throw new Error(`defineStore: "${name}" must be used within a <StoreProvider>`);
+    }
+    return resolveStore(name, setup, value);
+  }
+
+  // [1] createStore accessor: core function — activeValue only (inter-store deps)
+  function getStore(): T {
+    if (!getActiveValue()) {
+      throw new Error(
+        `defineStore: "${name}" getStore must be called inside another store's setup() or inside a useScope factory within a <StoreProvider>`
+      );
+    }
+    return resolveStore(name, setup, getActiveValue()!);
+  }
+
+  return [useStore, getStore];
+}
+
+/**
  * Creates a store definition and returns a hook to access the store value.
+ *
+ * @deprecated Use `defineStore()` instead. `createStore()` will be removed in a future version.
  *
  * Uses the activeValue pattern: when called from inside another store's
  * setup(), the activeValue short-circuits useContext so inter-store
@@ -136,34 +189,7 @@ export function createStore<T extends Record<string, unknown>>(
   name: string,
   setup: () => T
 ): () => T {
-  // HMR handling: allow re-definition in development
-  if (storeDefinitions.has(name)) {
-    if (process.env.NODE_ENV !== "production") {
-      storeDefinitions.delete(name);
-    } else {
-      throw new Error(`createStore: store "${name}" is already defined`);
-    }
-  }
-  storeDefinitions.set(name, { name, setup });
-
-  function useStore(): T {
-    // Path 1: called from another store's setup() — activeValue is set
-    if (activeValue) {
-      return resolveStore(name, setup, activeValue);
-    }
-
-    // Path 2: called from a React component — read registry value from context.
-    // The eslint-disable is safe here: this branch is only reached when
-    // activeValue is null, which only happens outside of setup() execution.
-    // The hook call order is always consistent from React's perspective.
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const value = React.useContext(StoreRegistryContext);
-    if (!value) {
-      throw new Error(`createStore: "${name}" must be used within a <StoreProvider>`);
-    }
-    return resolveStore(name, setup, value);
-  }
-
+  const [useStore] = defineStore(name, setup);
   return useStore;
 }
 

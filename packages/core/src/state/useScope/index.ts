@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { effectScope } from "./effectScope";
+import { StoreRegistryContext, setActiveValue } from "../../state/defineStore/storeContext";
 import {
   createReactiveProxy,
   syncProps,
@@ -50,6 +51,8 @@ export function useScope<P extends Record<string, unknown>, T extends object>(
 export function useScope(fn: any, props?: any): any {
   const hasProps = props !== undefined;
 
+  const _registry = React.useContext(StoreRegistryContext);
+
   // ── refs (always called unconditionally) ──────────────────────────
   const ref = useRef<{
     scope: ReturnType<typeof effectScope>;
@@ -65,7 +68,13 @@ export function useScope(fn: any, props?: any): any {
   if (!hasProps) {
     if (ref.current === null) {
       const scope = effectScope();
-      const result = scope.run(fn);
+      const _prev = setActiveValue(_registry);
+      let result: unknown;
+      try {
+        result = scope.run(fn);
+      } finally {
+        setActiveValue(_prev);
+      }
       ref.current = { scope, result };
     }
   } else {
@@ -78,11 +87,17 @@ export function useScope(fn: any, props?: any): any {
         rawPrev: null,
       };
       const reactiveProxy = createReactiveProxy(propsCtx);
-      const result = scope.run(() => fn(reactiveProxy));
+      const _prev = setActiveValue(_registry);
+      let result: unknown;
+      try {
+        result = scope.run(() => fn(reactiveProxy));
+      } finally {
+        setActiveValue(_prev);
+      }
       scopeRef.current = { scope, result, ctx: propsCtx };
     }
     // Sync props every render (updates ref + observable diff if toObs was called)
-    // eslint-disable-next-line react-hooks/refs
+
     syncProps(scopeRef.current.ctx as ScopePropsCtx<Record<string, unknown>>, props);
   }
 
@@ -92,7 +107,12 @@ export function useScope(fn: any, props?: any): any {
       // Re-create scope and re-run factory to restore observers/lifecycle.
       if (!ref.current!.scope.active) {
         const scope = effectScope();
-        scope.run(fn);
+        const _prev = setActiveValue(_registry);
+        try {
+          scope.run(fn);
+        } finally {
+          setActiveValue(_prev);
+        }
         ref.current = { ...ref.current!, scope };
       }
       for (const cb of ref.current!.scope._beforeMountCbs) cb();
@@ -110,7 +130,12 @@ export function useScope(fn: any, props?: any): any {
         };
         // Re-use the existing reactive proxy (already captured in factory closures)
         const existingProxy = createReactiveProxy(propsCtx);
-        scope.run(() => fn(existingProxy));
+        const _prev2 = setActiveValue(_registry);
+        try {
+          scope.run(() => fn(existingProxy));
+        } finally {
+          setActiveValue(_prev2);
+        }
         scopeRef.current = { scope, result: prev.result, ctx: propsCtx };
       }
       for (const cb of scopeRef.current!.scope._beforeMountCbs) cb();
@@ -145,6 +170,5 @@ export function useScope(fn: any, props?: any): any {
     }
   }, []);
 
-  // eslint-disable-next-line react-hooks/refs
   return hasProps ? scopeRef.current!.result : ref.current!.result;
 }
