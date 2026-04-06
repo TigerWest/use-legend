@@ -7,7 +7,7 @@ import starlightCatppuccin from "@catppuccin/starlight";
 import { defineConfig } from "astro/config";
 import ecTwoSlash from "expressive-code-twoslash";
 import { fileURLToPath } from "node:url";
-import useLegend from "@usels/vite-plugin-legend-memo";
+import useLegend from "@usels/vite-plugin";
 
 const DOCS_WARMUP_MODE = process.env.DOCS_WARMUP_MODE ?? "off";
 const DOCS_FAST_DEV = process.env.DOCS_FAST_DEV === "1";

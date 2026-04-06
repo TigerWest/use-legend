@@ -1,5 +1,5 @@
 import type { Plugin } from "vite";
-import type { CombinedOptions } from "@usels/babel-plugin-legend-memo";
+import type { CombinedOptions } from "@usels/babel-plugin";
 
 /**
  * Vite plugin that runs autoWrap and autoScope transforms in a single pass.
