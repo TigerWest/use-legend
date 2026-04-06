@@ -5,7 +5,11 @@ import { hasScopeDirective } from "../utils/detectDirective";
 import { splitBody } from "../utils/splitBody";
 import { detectEarlyReturns } from "../utils/detectEarlyReturns";
 import { collectPropsInScope } from "../utils/collectPropsInScope";
-import { extractBindings, buildUseScopeDeclaration } from "../utils/buildUseScope";
+import {
+  extractBindings,
+  buildUseScopeDeclaration,
+  buildUseScopeReturn,
+} from "../utils/buildUseScope";
 
 /**
  * WeakSet prevents re-transformation of factory arrows inserted by this transform.
@@ -14,6 +18,17 @@ import { extractBindings, buildUseScopeDeclaration } from "../utils/buildUseScop
 const transformed = new WeakSet<import("@babel/types").Node>();
 
 export function createFunctionVisitor(t: typeof BabelTypes) {
+  function isHookFunction(path: NodePath<BabelFunction>): boolean {
+    if (path.isFunctionDeclaration() && path.node.id) {
+      return /^use[A-Z]/.test(path.node.id.name);
+    }
+    const parent = path.parent;
+    if (t.isVariableDeclarator(parent) && t.isIdentifier(parent.id)) {
+      return /^use[A-Z]/.test(parent.id.name);
+    }
+    return false;
+  }
+
   function handleFunction(path: NodePath<BabelFunction>, state: AutoScopeState): void {
     // Skip already-transformed nodes (inserted factory arrows)
     if (transformed.has(path.node)) return;
@@ -46,23 +61,29 @@ export function createFunctionVisitor(t: typeof BabelTypes) {
     //    because it mutates identifier nodes inside declarations.
     const propsInfo = collectPropsInScope(path, declarations, t);
 
-    // 5. Extract variable bindings from declarations
-    const bindings = extractBindings(declarations, t);
+    if (isHookFunction(path)) {
+      // Hook path: wrap entire body (declarations + return) in `return useScope(() => { ... })`
+      if (declarations.length === 0 && !finalReturn) {
+        bodyPath.node.body = [];
+        return;
+      }
 
-    // 6. If nothing to scope (empty body after directive)
-    if (declarations.length === 0) {
-      bodyPath.node.body = finalReturn ? [finalReturn] : [];
-      return;
+      const useScopeReturn = buildUseScopeReturn(t, declarations, finalReturn, propsInfo);
+      markNodes(useScopeReturn, t);
+      bodyPath.node.body = [useScopeReturn];
+    } else {
+      // Component path: extract bindings, destructure outside useScope, keep original return
+      const bindings = extractBindings(declarations, t);
+
+      if (declarations.length === 0) {
+        bodyPath.node.body = finalReturn ? [finalReturn] : [];
+        return;
+      }
+
+      const useScopeDecl = buildUseScopeDeclaration(t, declarations, bindings, propsInfo);
+      markNodes(useScopeDecl, t);
+      bodyPath.node.body = [useScopeDecl, ...(finalReturn ? [finalReturn] : [])];
     }
-
-    // 7. Build useScope declaration
-    const useScopeDecl = buildUseScopeDeclaration(t, declarations, bindings, propsInfo);
-
-    // 8. Mark inserted factory arrows so they're not re-traversed
-    markNodes(useScopeDecl, t);
-
-    // 9. Replace body: [useScope decl, return stmt]
-    bodyPath.node.body = [useScopeDecl, ...(finalReturn ? [finalReturn] : [])];
 
     state.useScopeImportNeeded = true;
   }

@@ -383,6 +383,124 @@ pluginTester({
       `,
     },
 
+    'hook: wraps entire body in return useScope': {
+      code: `
+        function useCounter() {
+          "use scope"
+          const count$ = createObservable(0)
+          return { count$ }
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function useCounter() {
+          return useScope(() => {
+            const count$ = createObservable(0);
+            return {
+              count$,
+            };
+          });
+        }
+      `,
+    },
+
+    'hook: bare calls only, no return': {
+      code: `
+        function useSetup() {
+          "use scope"
+          onMount(() => console.log("hi"))
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function useSetup() {
+          return useScope(() => {
+            onMount(() => console.log("hi"));
+          });
+        }
+      `,
+    },
+
+    'hook: arrow function assigned to useX variable': {
+      code: `
+        const useCounter = () => {
+          "use scope"
+          const count$ = createObservable(0)
+          return { count$ }
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        const useCounter = () => {
+          return useScope(() => {
+            const count$ = createObservable(0);
+            return {
+              count$,
+            };
+          });
+        };
+      `,
+    },
+
+    'hook: props forwarded as second arg': {
+      code: `
+        function useCounter({ initial }) {
+          "use scope"
+          const count$ = createObservable(initial)
+          return { count$ }
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function useCounter({ initial }) {
+          return useScope(
+            (p) => {
+              const count$ = createObservable(p.initial);
+              return {
+                count$,
+              };
+            },
+            {
+              initial,
+            }
+          );
+        }
+      `,
+    },
+
+    'hook: empty scope (directive only)': {
+      code: `
+        function useEmpty() {
+          "use scope"
+        }
+      `,
+      output: `
+        function useEmpty() {}
+      `,
+    },
+
+    'use without uppercase letter is not a hook (treated as component)': {
+      code: `
+        function usecase() {
+          "use scope"
+          const x$ = createObservable(0)
+          return <div />
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function usecase() {
+          const { x$ } = useScope(() => {
+            const x$ = createObservable(0);
+            return {
+              x$,
+            };
+          });
+          return <div />;
+        }
+      `,
+    },
+
     'namespace import from importSource: adds separate named import': {
       code: `
         import * as Core from "@usels/core"

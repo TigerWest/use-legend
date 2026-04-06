@@ -111,6 +111,36 @@ export function buildUseScopeDeclaration(
   ]);
 }
 
+/**
+ * Builds (for hooks):
+ *   return useScope(() => {
+ *     [declarations]
+ *     [finalReturn]
+ *   })
+ *
+ * When propsInfo is provided:
+ *   return useScope((p) => { ... }, propsSecondArg)
+ */
+export function buildUseScopeReturn(
+  t: typeof BabelTypes,
+  declarations: Statement[],
+  finalReturn: import("@babel/types").ReturnStatement | undefined,
+  propsInfo: CollectedProps | null
+): import("@babel/types").ReturnStatement {
+  const hasProps = propsInfo != null && propsInfo.used;
+  const factoryParams = hasProps ? [t.identifier(propsInfo!.factoryParam)] : [];
+  const secondArg = hasProps ? buildSecondArg(t, propsInfo!) : null;
+
+  const factoryBody = [...declarations, ...(finalReturn ? [finalReturn] : [])];
+
+  const factory = t.arrowFunctionExpression(factoryParams, t.blockStatement(factoryBody));
+  const callArgs: import("@babel/types").Expression[] = secondArg
+    ? [factory, secondArg]
+    : [factory];
+
+  return t.returnStatement(t.callExpression(t.identifier("useScope"), callArgs));
+}
+
 function buildSecondArg(
   t: typeof BabelTypes,
   propsInfo: CollectedProps
