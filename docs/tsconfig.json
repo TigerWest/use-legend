@@ -5,6 +5,8 @@
   "compilerOptions": {
     "paths": {
       "@demos/*": ["./src/components/demos/*"]
-    }
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }

@@ -117,6 +117,12 @@ importers:
       '@babel/core':
         specifier: ^7.0.0
         version: 7.29.0
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.14)
       '@usels/babel-plugin-legend-memo':
         specifier: workspace:*
         version: link:../packages/babel
@@ -3194,7 +3200,7 @@ packages:
       vitest: 4.0.18
     dependencies:
       '@vitest/browser': 4.0.18(vitest@4.0.18)
-      '@vitest/mocker': 4.0.18(vite@5.4.21)
+      '@vitest/mocker': 4.0.18(vite@6.4.1)
       playwright: 1.58.2
       tinyrainbow: 3.0.3
       vitest: 4.0.18(@types/node@25.3.3)(@vitest/browser-playwright@4.0.18)(jsdom@25.0.1)
@@ -3231,7 +3237,7 @@ packages:
     peerDependencies:
       vitest: 4.0.18
     dependencies:
-      '@vitest/mocker': 4.0.18(vite@5.4.21)
+      '@vitest/mocker': 4.0.18(vite@6.4.1)
       '@vitest/utils': 4.0.18
       magic-string: 0.30.21
       pixelmatch: 7.1.0

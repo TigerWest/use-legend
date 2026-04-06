@@ -35,6 +35,8 @@
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@babel/core": "^7.0.0",
     "@usels/babel-plugin-legend-memo": "workspace:*",
     "@usels/vite-plugin-legend-memo": "workspace:*",
