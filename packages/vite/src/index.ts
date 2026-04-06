@@ -1,63 +1,45 @@
 import type { Plugin } from "vite";
-import type { PluginOptions } from "@usels/babel-plugin-legend-memo";
+import type { CombinedOptions } from "@usels/babel-plugin-legend-memo";
 
 /**
- * Vite plugin that applies @usels/babel-plugin-legend-memo during transform.
+ * Vite plugin that runs autoWrap and autoScope transforms in a single pass.
  *
- * Wraps Legend-State observable .get() calls in JSX with <Auto> component
- * for fine-grained reactive rendering.
+ * - `autoWrap`: Wraps JSX expressions in reactive Memo components (`.tsx`/`.jsx` only)
+ * - `autoScope`: Transforms "use scope" directive into `useScope(() => {...})` calls
  *
- * IMPORTANT: Must be placed BEFORE @vitejs/plugin-react in the plugins array,
- * because `enforce: "pre"` ensures this runs before esbuild JSX transform.
- *
- * @example
- * ```typescript
- * // vite.config.ts
- * import { defineConfig } from 'vite';
- * import react from '@vitejs/plugin-react';
- * import { autoWrap } from '@usels/vite-plugin-legend-memo';
- *
- * export default defineConfig({
- *   plugins: [
- *     autoWrap({ importSource: '@usels/core' }),
- *     react(),
- *   ],
- * });
- * ```
+ * V1 limitations for autoScope:
+ * - Component props referenced inside scope body → compile error
+ *   (use useScope(fn, props) directly for reactive props)
  */
-export function autoWrap(opts: PluginOptions = {}): Plugin {
+export function legendPlugin(opts: CombinedOptions = {}): Plugin {
   return {
-    name: "@usels/vite-plugin-legend-memo",
-    // Must run before esbuild JSX transform (before @vitejs/plugin-react)
+    name: "@usels/vite-plugin",
     enforce: "pre",
-
     async transform(code, id) {
-      // Only process .jsx and .tsx files
-      if (!/\.[jt]sx$/.test(id)) return null;
+      if (id.includes("/node_modules/")) return null;
 
-      // Lazy import @babel/core to avoid bundling it
+      const isJsx = /\.[jt]sx$/.test(id);
+      const isTs = /\.[jt]s$/.test(id);
+
+      if (!isJsx && !isTs) return null;
+      // Fast path: non-JSX files only need processing if "use scope" is present
+      if (!isJsx && !code.includes('"use scope"') && !code.includes("'use scope'")) return null;
+
       const babel = await import("@babel/core");
-
       const result = await babel.transformAsync(code, {
         filename: id,
-        plugins: [["@usels/babel-plugin-legend-memo", opts]],
-        parserOpts: {
-          plugins: ["jsx", "typescript"],
-        },
+        plugins: [["@usels/babel-plugin", opts]],
+        parserOpts: { plugins: ["jsx", "typescript"] },
         sourceMaps: true,
         configFile: false,
         babelrc: false,
       });
 
       if (!result || !result.code) return null;
-
-      return {
-        code: result.code,
-        map: result.map ?? undefined,
-      };
+      return { code: result.code, map: result.map ?? undefined };
     },
   };
 }
 
-export default autoWrap;
-export type { PluginOptions };
+export default legendPlugin;
+export type { CombinedOptions };

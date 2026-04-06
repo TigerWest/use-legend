@@ -1,50 +1,52 @@
 import type { PluginObj, types as BabelTypes } from "@babel/core";
-import type { PluginState } from "./types";
-import { createProgramVisitor } from "./visitors/program";
-import { createJSXElementVisitor } from "./visitors/jsxElement";
-import { createJSXExpressionContainerVisitor } from "./visitors/jsxExpressionContainer";
+import type { PluginState } from "./autoWrap/types";
+import type { AutoScopeOptions, AutoScopeState } from "./autoScope/types";
+import { createAutoWrapVisitor } from "./autoWrap/visitors/index";
+import { createAutoScopeVisitor } from "./autoScope/visitors/index";
 
-export type { PluginOptions } from "./types";
+export type { PluginOptions } from "./autoWrap/types";
+export type { AutoScopeOptions } from "./autoScope/types";
+export { autoScopePlugin } from "./autoScope/index";
 
-/**
- * @usels/babel-plugin-legend-memo
- *
- * Automatically wraps Legend-State observable .get() calls in JSX with <Auto> component
- * for fine-grained reactive rendering without wrapping entire components.
- *
- * Detection rules:
- * - Zero-argument .get() on $-suffixed variables (e.g., count$.get(), user$.name.get())
- * - Also supports optional chaining: obs$?.get()
- * - Skips: .get(key) with args, non-$ vars (unless allGet:true), inside reactive contexts
- *
- * @example
- * Input:  <div>{count$.get()}</div>
- * Output: import { Auto } from "@usels/core";
- *         <div><Auto>{() => count$.get()}</Auto></div>
- */
-export default function autoWrapPlugin({
+export interface CombinedOptions {
+  autoWrap?: import("./autoWrap/types").PluginOptions;
+  autoScope?: AutoScopeOptions;
+}
+
+type CombinedState = Omit<PluginState, "opts"> &
+  Omit<AutoScopeState, "opts"> & { opts: CombinedOptions };
+
+export default function useLsPlugin({
   types: t,
 }: {
   types: typeof BabelTypes;
-}): PluginObj<PluginState> {
-  const programVisitor = createProgramVisitor(t);
-  const jsxElementVisitor = createJSXElementVisitor(t);
-  const jsxExpressionContainerVisitor = createJSXExpressionContainerVisitor(t);
+}): PluginObj<CombinedState> {
+  const autoWrap = createAutoWrapVisitor(t);
+  const autoScope = createAutoScopeVisitor(t);
 
   return {
-    name: "@usels/babel-plugin-legend-memo",
+    name: "@usels/babel-plugin",
     visitor: {
       Program: {
-        enter: programVisitor.enter,
-        exit: programVisitor.exit,
+        enter(path, state) {
+          autoWrap.program.enter(path, state as unknown as PluginState, state.opts.autoWrap);
+          autoScope.program.enter(state as unknown as AutoScopeState, state.opts.autoScope);
+        },
+        exit(path, state) {
+          autoWrap.program.exit(path, state as unknown as PluginState);
+          autoScope.program.exit(path, state as unknown as AutoScopeState);
+        },
       },
-      // JSXElement visitor runs FIRST on each element:
-      // If attributes contain .get(), wrap the whole element and skip() children.
-      // This prevents double-wrapping when both attrs and children have .get().
-      JSXElement: jsxElementVisitor,
-      // JSXExpressionContainer visitor handles children .get() cases.
-      // It skips expressions inside JSXAttributes (handled by JSXElement visitor).
-      JSXExpressionContainer: jsxExpressionContainerVisitor,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      JSXElement: autoWrap.JSXElement as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      JSXExpressionContainer: autoWrap.JSXExpressionContainer as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      FunctionDeclaration: autoScope.FunctionDeclaration as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      FunctionExpression: autoScope.FunctionExpression as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ArrowFunctionExpression: autoScope.ArrowFunctionExpression as any,
     },
   };
 }
