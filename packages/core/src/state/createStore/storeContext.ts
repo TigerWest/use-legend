@@ -1,7 +1,7 @@
 import React from "react";
 import type { EffectScope } from "../useScope/effectScope";
 
-// Shared between state/defineStore and state/useScope layers.
+// Shared between state/createStore and state/useScope layers.
 
 /** Shared mutable ref between sync wrapping (core) and async DevTools connection. */
 export interface ActionTracker {

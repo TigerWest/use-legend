@@ -5,7 +5,7 @@ import type { EffectScope } from "../useScope/effectScope";
 import type { ActionTracker, StoreRegistryValue } from "./storeContext";
 import { StoreRegistryContext } from "./storeContext";
 
-export { createStore, defineStore, __resetStoreDefinitions } from "./core";
+export { createStore, __resetStoreDefinitions } from "./core";
 export type { StoreProviderProps, StoreState, StoreActions } from "./core";
 export type { StoreRegistryValue, ActionTracker } from "./storeContext";
 export { StoreRegistryContext } from "./storeContext";

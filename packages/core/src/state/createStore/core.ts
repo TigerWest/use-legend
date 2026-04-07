@@ -97,7 +97,7 @@ function resolveStore<T>(name: string, setup: () => T, value: StoreRegistryValue
       if (scope._beforeMountCbs.length > 0) {
         if (process.env.NODE_ENV !== "production") {
           console.warn(
-            `[defineStore] "${name}": onBeforeMount is not supported in store setup. ` +
+            `[createStore] "${name}": onBeforeMount is not supported in store setup. ` +
               `Use onMount or onUnmount instead.`
           );
         }
@@ -123,17 +123,17 @@ function resolveStore<T>(name: string, setup: () => T, value: StoreRegistryValue
 // --- Public API ---
 
 /**
- * Defines a store and returns a tuple `[useStore, createStore]`.
+ * Creates a store and returns a tuple `[useStore, getStore]`.
  *
  * - `useStore()` (tuple[0]): React hook — call inside React components via useContext.
  *   Also works inside another store's setup() via the activeValue path (backward compat).
- * - `createStore()` (tuple[1]): Core accessor — for inter-store deps inside store setup().
+ * - `getStore()` (tuple[1]): Core accessor — for inter-store deps inside store setup().
  *   Throws if called outside a store setup().
  *
  * The setup function runs inside an EffectScope, so `observe()`, `onMount()`, and `onUnmount()`
  * called within setup are automatically registered to the scope.
  */
-export function defineStore<T extends Record<string, unknown>>(
+export function createStore<T extends Record<string, unknown>>(
   name: string,
   setup: () => T
 ): [() => T, () => T] {
@@ -142,7 +142,7 @@ export function defineStore<T extends Record<string, unknown>>(
     if (process.env.NODE_ENV !== "production") {
       storeDefinitions.delete(name);
     } else {
-      throw new Error(`defineStore: store "${name}" is already defined`);
+      throw new Error(`createStore: store "${name}" is already defined`);
     }
   }
   storeDefinitions.set(name, { name, setup });
@@ -155,42 +155,22 @@ export function defineStore<T extends Record<string, unknown>>(
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const value = React.useContext(StoreRegistryContext);
     if (!value) {
-      throw new Error(`defineStore: "${name}" must be used within a <StoreProvider>`);
+      throw new Error(`createStore: "${name}" must be used within a <StoreProvider>`);
     }
     return resolveStore(name, setup, value);
   }
 
-  // [1] createStore accessor: core function — activeValue only (inter-store deps)
+  // [1] getStore accessor: core function — activeValue only (inter-store deps)
   function getStore(): T {
     if (!getActiveValue()) {
       throw new Error(
-        `defineStore: "${name}" getStore must be called inside another store's setup() or inside a useScope factory within a <StoreProvider>`
+        `createStore: "${name}" getStore must be called inside another store's setup() or inside a useScope factory within a <StoreProvider>`
       );
     }
     return resolveStore(name, setup, getActiveValue()!);
   }
 
   return [useStore, getStore];
-}
-
-/**
- * Creates a store definition and returns a hook to access the store value.
- *
- * @deprecated Use `defineStore()` instead. `createStore()` will be removed in a future version.
- *
- * Uses the activeValue pattern: when called from inside another store's
- * setup(), the activeValue short-circuits useContext so inter-store
- * dependencies are resolved without a React component tree.
- *
- * When called from a React component, the hook reads from the nearest
- * StoreProvider's registry via context.
- */
-export function createStore<T extends Record<string, unknown>>(
-  name: string,
-  setup: () => T
-): () => T {
-  const [useStore] = defineStore(name, setup);
-  return useStore;
 }
 
 // --- Internal: Test Helpers ---

@@ -12,7 +12,7 @@ beforeEach(() => {
 describe("createStore() — rerender stability", () => {
   describe("store instance stability", () => {
     it("observable references remain stable across consumer re-renders", () => {
-      const useMyStore = createStore("stable-obs", () => {
+      const [useMyStore] = createStore("stable-obs", () => {
         const count$ = observable(0);
         return { count$ };
       });
@@ -29,7 +29,7 @@ describe("createStore() — rerender stability", () => {
     });
 
     it("plain object store value is stable across re-renders", () => {
-      const useMyStore = createStore("stable-ref", () => {
+      const [useMyStore] = createStore("stable-ref", () => {
         return { stable: true };
       });
 
@@ -47,7 +47,7 @@ describe("createStore() — rerender stability", () => {
 
   describe("Provider rerender", () => {
     it("store hooks maintain state when parent causes re-render", () => {
-      const useMyStore = createStore("parent-rerender", () => {
+      const [useMyStore] = createStore("parent-rerender", () => {
         const count$ = observable(0);
         const increment = () => count$.set((v) => v + 1);
         return { count$, increment };

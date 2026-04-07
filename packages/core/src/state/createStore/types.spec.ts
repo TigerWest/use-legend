@@ -7,13 +7,13 @@ import type { ReadonlyObservable } from "../../types";
 
 describe("createStore() — types", () => {
   describe("return type", () => {
-    it("returns a function (hook)", () => {
-      const useStore = createStore("t1", () => ({ value$: {} as Observable<number> }));
-      expectTypeOf(useStore).toBeFunction();
+    it("returns a tuple of [useStore, getStore]", () => {
+      const tuple = createStore("t1", () => ({ value$: {} as Observable<number> }));
+      expectTypeOf(tuple).toBeArray();
     });
 
-    it("hook return type matches setup return type", () => {
-      const useStore = createStore("t2", () => ({
+    it("useStore (tuple[0]) return type matches setup return type", () => {
+      const [useStore] = createStore("t2", () => ({
         count$: {} as Observable<number>,
         name$: {} as Observable<string>,
       }));
@@ -24,7 +24,7 @@ describe("createStore() — types", () => {
     });
 
     it("infers complex return types", () => {
-      const useStore = createStore("t3", () => {
+      const [useStore] = createStore("t3", () => {
         const increment = () => {};
         return {
           value$: {} as Observable<number>,
@@ -54,7 +54,7 @@ describe("createStore() — types", () => {
     });
 
     it("infers object shape from setup", () => {
-      const useStore = createStore("t5", () => ({
+      const [useStore] = createStore("t5", () => ({
         a$: {} as Observable<number>,
         b$: {} as Observable<string>,
         reset: () => {},

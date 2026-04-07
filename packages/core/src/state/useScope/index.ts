@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { effectScope } from "./effectScope";
-import { StoreRegistryContext, setActiveValue } from "../../state/defineStore/storeContext";
+import { StoreRegistryContext, setActiveValue } from "../../state/createStore/storeContext";
 import {
   createReactiveProxy,
   syncProps,

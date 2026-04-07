@@ -1,5 +1,5 @@
 ---
-title: defineStore
+title: createStore
 description: "Lazily-initialized store with `StoreProvider`, effectScope lifecycle, inter-store dependencies, and Redux DevTools action tracking in development."
 category: State
 ---
@@ -13,9 +13,9 @@ category: State
 ```tsx twoslash
 // @noErrors
 import { observable } from "@legendapp/state";
-import { defineStore, StoreProvider } from "@usels/core";
+import { createStore, StoreProvider } from "@usels/core";
 
-const [useCountStore] = defineStore("count", () => {
+const [useCountStore] = createStore("count", () => {
   const count$ = observable(0);
   const increment = () => count$.set((v) => v + 1);
   return { count$, increment };
@@ -37,15 +37,15 @@ function Counter() {
 
 ### Tuple return: `[useStore, getStore]`
 
-`defineStore` returns a tuple of two functions:
+`createStore` returns a tuple of two functions:
 
 - **`useStore`** (tuple[0]) — React hook, call inside React components via `useContext`.
 - **`getStore`** (tuple[1]) — core accessor, call inside another store's `setup()` or inside a `useScope` factory within a `StoreProvider`.
 
 ```tsx
-import { defineStore } from "@usels/core";
+import { createStore } from "@usels/core";
 
-const [useAuthStore, getAuthStore] = defineStore("auth", () => {
+const [useAuthStore, getAuthStore] = createStore("auth", () => {
   const user$ = observable<string | null>(null);
   const login = (name: string) => user$.set(name);
   return { user$, login };
@@ -61,14 +61,14 @@ Use `getStore` (tuple[1]) inside another store's `setup()` to declare inter-stor
 
 ```tsx
 import { observable } from "@legendapp/state";
-import { defineStore } from "@usels/core";
+import { createStore } from "@usels/core";
 
-const [, getAuthStore] = defineStore("auth", () => {
+const [, getAuthStore] = createStore("auth", () => {
   const user$ = observable<string | null>(null);
   return { user$ };
 });
 
-const [useCountStore] = defineStore("count", () => {
+const [useCountStore] = createStore("count", () => {
   const { user$ } = getAuthStore(); // inter-store dep
   const count$ = observable(0);
   return { count$, user$ };
@@ -80,10 +80,10 @@ const [useCountStore] = defineStore("count", () => {
 `getStore` also works inside a `useScope` factory when the component is rendered within a `StoreProvider`. This allows store access in hook-level reactive scopes without prop drilling.
 
 ```tsx
-import { defineStore } from "@usels/core";
+import { createStore } from "@usels/core";
 import { useScope, observe } from "@usels/core/state/useScope";
 
-const [, getSettingsStore] = defineStore("settings", () => {
+const [, getSettingsStore] = createStore("settings", () => {
   const theme$ = observable<"light" | "dark">("light");
   return { theme$ };
 });
@@ -124,10 +124,10 @@ The `StoreProvider` runs `onMount` when it mounts and disposes scopes (running `
 
 ```tsx
 import { observable } from "@legendapp/state";
-import { defineStore } from "@usels/core";
+import { createStore } from "@usels/core";
 import { onMount, onUnmount } from "@usels/core/state/useScope/effectScope";
 
-const [useWebSocketStore] = defineStore("ws", () => {
+const [useWebSocketStore] = createStore("ws", () => {
   const messages$ = observable<string[]>([]);
   let socket: WebSocket | null = null;
 
@@ -155,10 +155,10 @@ Use `observe` from the scope-aware import so subscriptions are automatically cle
 
 ```tsx
 import { observable } from "@legendapp/state";
-import { defineStore } from "@usels/core";
+import { createStore } from "@usels/core";
 import { observe } from "@usels/core/state/useScope/observe";
 
-const [useDocStore] = defineStore("doc", () => {
+const [useDocStore] = createStore("doc", () => {
   const content$ = observable("");
   const isDirty$ = observable(false);
 
@@ -205,9 +205,9 @@ Stores auto-connect to Redux DevTools Extension in development mode.
 
 ```tsx
 import { observable } from "@legendapp/state";
-import { defineStore } from "@usels/core";
+import { createStore } from "@usels/core";
 
-const [useAppStore] = defineStore("app", () => {
+const [useAppStore] = createStore("app", () => {
   const theme$ = observable<"light" | "dark">("light");
   const toggleTheme = () => theme$.set((v) => (v === "light" ? "dark" : "light"));
   return { theme$, toggleTheme };
@@ -225,7 +225,7 @@ const [useAppStore] = defineStore("app", () => {
 ```tsx
 import { createStore } from "@usels/core";
 
-// @deprecated — use defineStore() instead
+// @deprecated — use createStore() instead
 const useCountStore = createStore("count", () => {
   const count$ = observable(0);
   return { count$ };
@@ -239,7 +239,7 @@ Stores are lazily initialized on first hook call and cached within the provider.
 The provider is responsible for executing `onMount` and `onUnmount` lifecycle callbacks.
 
 ```tsx
-import { defineStore, StoreProvider } from "@usels/core";
+import { createStore, StoreProvider } from "@usels/core";
 
 function App() {
   return (

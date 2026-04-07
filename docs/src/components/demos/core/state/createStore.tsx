@@ -1,7 +1,7 @@
 import { batch, observable } from "@legendapp/state";
 import type { Observable } from "@legendapp/state";
 import { For, Memo, Show, useObservable } from "@legendapp/state/react";
-import { defineStore, StoreProvider } from "@usels/core";
+import { createStore, StoreProvider } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "@demos/_shared";
 
 // --- Types ---
@@ -16,7 +16,7 @@ type Filter = "all" | "active" | "done";
 
 // --- Store 1: Todo items ---
 
-const [useTodoStore, getTodoStore] = defineStore("todo-demo", () => {
+const [useTodoStore, getTodoStore] = createStore("todo-demo", () => {
   const todos$ = observable<Todo[]>([]);
   let nextId = 0;
 
@@ -39,7 +39,7 @@ const [useTodoStore, getTodoStore] = defineStore("todo-demo", () => {
 
 // --- Store 2: Filter (depends on todo store via getStore) ---
 
-const [useFilterStore] = defineStore("todo-filter", () => {
+const [useFilterStore] = createStore("todo-filter", () => {
   const { todos$ } = getTodoStore(); // inter-store dependency
   const filter$ = observable<Filter>("all");
 

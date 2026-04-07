@@ -3,13 +3,7 @@ import React from "react";
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { observable } from "@legendapp/state";
-import {
-  createStore,
-  defineStore,
-  StoreProvider,
-  useStoreRegistry,
-  __resetStoreDefinitions,
-} from ".";
+import { createStore, StoreProvider, useStoreRegistry, __resetStoreDefinitions } from ".";
 import { act } from "@testing-library/react";
 import { onMount, onUnmount, onBeforeMount } from "../useScope/effectScope";
 import { useScope } from "../useScope";
@@ -20,15 +14,22 @@ beforeEach(() => {
 
 describe("createStore()", () => {
   describe("return type / structure", () => {
-    it("returns a hook function", () => {
-      const useStore = createStore("test", () => ({ value: 1 }));
+    it("returns a tuple of [useStore, getStore]", () => {
+      const tuple = createStore("test", () => ({ value: 1 }));
+      expect(Array.isArray(tuple)).toBe(true);
+      expect(tuple).toHaveLength(2);
+    });
+
+    it("both tuple elements are functions", () => {
+      const [useStore, getStore] = createStore("ds-fns", () => ({ v: 1 }));
       expect(typeof useStore).toBe("function");
+      expect(typeof getStore).toBe("function");
     });
   });
 
   describe("basic usage", () => {
     it("useStore returns the setup return value", () => {
-      const useCountStore = createStore("count", () => {
+      const [useCountStore] = createStore("count", () => {
         return { count: 42 };
       });
 
@@ -40,7 +41,7 @@ describe("createStore()", () => {
     });
 
     it("useStore returns the same reference across multiple calls", () => {
-      const useMyStore = createStore("ref-test", () => {
+      const [useMyStore] = createStore("ref-test", () => {
         return { data: "hello" };
       });
 
@@ -58,8 +59,8 @@ describe("createStore()", () => {
     });
 
     it("multiple stores work independently", () => {
-      const useStoreA = createStore("a", () => ({ value: "A" }));
-      const useStoreB = createStore("b", () => ({ value: "B" }));
+      const [useStoreA] = createStore("a", () => ({ value: "A" }));
+      const [useStoreB] = createStore("b", () => ({ value: "B" }));
 
       const { result } = renderHook(
         () => ({
@@ -78,7 +79,7 @@ describe("createStore()", () => {
 
   describe("core functions in setup", () => {
     it("observable works inside setup", () => {
-      const useMyStore = createStore("obs-test", () => {
+      const [useMyStore] = createStore("obs-test", () => {
         const count$ = observable(0);
         return { count$ };
       });
@@ -91,7 +92,7 @@ describe("createStore()", () => {
     });
 
     it("plain ref object works inside setup", () => {
-      const useMyStore = createStore("ref-hook-test", () => {
+      const [useMyStore] = createStore("ref-hook-test", () => {
         const ref = { current: 0 };
         return { ref };
       });
@@ -106,11 +107,11 @@ describe("createStore()", () => {
 
   describe("inter-store dependency", () => {
     it("store can access another store via useOtherStore()", () => {
-      const useAuthStore = createStore("auth", () => {
+      const [useAuthStore] = createStore("auth", () => {
         return { user: "Alice" };
       });
 
-      const useProfileStore = createStore("profile", () => {
+      const [useProfileStore] = createStore("profile", () => {
         const auth = useAuthStore();
         return { greeting: `Hello, ${auth.user}` };
       });
@@ -123,12 +124,12 @@ describe("createStore()", () => {
     });
 
     it("three-level dependency chain works", () => {
-      const useBase = createStore("base", () => ({ n: 1 }));
-      const useMid = createStore("mid", () => {
+      const [useBase] = createStore("base", () => ({ n: 1 }));
+      const [useMid] = createStore("mid", () => {
         const base = useBase();
         return { n: base.n + 1 };
       });
-      const useTop = createStore("top", () => {
+      const [useTop] = createStore("top", () => {
         const mid = useMid();
         return { n: mid.n + 1 };
       });
@@ -143,7 +144,7 @@ describe("createStore()", () => {
 
   describe("error handling", () => {
     it("throws when used outside StoreProvider", () => {
-      const useMyStore = createStore("no-provider", () => ({ v: 1 }));
+      const [useMyStore] = createStore("no-provider", () => ({ v: 1 }));
       const spy = vi.spyOn(console, "error").mockImplementation(() => {});
       expect(() => {
         renderHook(() => useMyStore());
@@ -155,9 +156,9 @@ describe("createStore()", () => {
       const original = process.env.NODE_ENV;
       process.env.NODE_ENV = "production";
       try {
-        createStore("dup", () => ({}));
+        createStore("dup", () => ({}) as Record<string, unknown>);
         expect(() => {
-          createStore("dup", () => ({}));
+          createStore("dup", () => ({}) as Record<string, unknown>);
         }).toThrow(/already defined/);
       } finally {
         process.env.NODE_ENV = original;
@@ -177,7 +178,7 @@ describe("createStore()", () => {
 
   describe("unmount cleanup", () => {
     it("StoreProvider unmounts without error", () => {
-      const useMyStore = createStore("unmount-test", () => ({ v: 1 }));
+      const [useMyStore] = createStore("unmount-test", () => ({ v: 1 }));
 
       const { unmount } = renderHook(() => useMyStore(), {
         wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
@@ -189,7 +190,7 @@ describe("createStore()", () => {
 
   describe("shared state across consumers", () => {
     it("multiple hooks in the same Provider share the same store instance", () => {
-      const useMyStore = createStore("shared", () => {
+      const [useMyStore] = createStore("shared", () => {
         const count$ = observable(0);
         return { count$ };
       });
@@ -213,7 +214,7 @@ describe("createStore()", () => {
   describe("lazy initialization", () => {
     it("store is initialized on first useStore() call", () => {
       const setup = vi.fn(() => ({ value: 99 }));
-      const useLazyStore = createStore("lazy-init", setup);
+      const [useLazyStore] = createStore("lazy-init", setup);
 
       // setup not called yet
       expect(setup).not.toHaveBeenCalled();
@@ -232,7 +233,7 @@ describe("createStore()", () => {
         const count$ = observable(42);
         return { count$ };
       });
-      const useLazyStore = createStore("lazy-shared", setup);
+      const [useLazyStore] = createStore("lazy-shared", setup);
 
       const { result } = renderHook(
         () => {
@@ -250,7 +251,7 @@ describe("createStore()", () => {
     });
 
     it("lazy store preserves state across re-renders", () => {
-      const useLazyStore = createStore("lazy-rerender", () => {
+      const [useLazyStore] = createStore("lazy-rerender", () => {
         const count$ = observable(0);
         return { count$ };
       });
@@ -266,26 +267,10 @@ describe("createStore()", () => {
       expect(firstRef).toBe(secondRef);
     });
   });
-});
-
-describe("defineStore()", () => {
-  describe("return type / structure", () => {
-    it("returns a tuple of [useStore, createStore]", () => {
-      const tuple = defineStore("ds-tuple", () => ({ v: 1 }));
-      expect(Array.isArray(tuple)).toBe(true);
-      expect(tuple).toHaveLength(2);
-    });
-
-    it("both tuple elements are functions", () => {
-      const [useStore, getStore] = defineStore("ds-fns", () => ({ v: 1 }));
-      expect(typeof useStore).toBe("function");
-      expect(typeof getStore).toBe("function");
-    });
-  });
 
   describe("useStore (tuple[0])", () => {
     it("works as a React hook inside StoreProvider", () => {
-      const [useMyStore] = defineStore("ds-hook", () => ({ value: 42 }));
+      const [useMyStore] = createStore("ds-hook", () => ({ value: 42 }));
       const { result } = renderHook(() => useMyStore(), {
         wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
       });
@@ -293,7 +278,7 @@ describe("defineStore()", () => {
     });
 
     it("throws when used outside StoreProvider", () => {
-      const [useMyStore] = defineStore("ds-no-provider", () => ({ v: 1 }));
+      const [useMyStore] = createStore("ds-no-provider", () => ({ v: 1 }));
       const spy = vi.spyOn(console, "error").mockImplementation(() => {});
       expect(() => {
         renderHook(() => useMyStore());
@@ -302,11 +287,11 @@ describe("defineStore()", () => {
     });
   });
 
-  describe("createStore accessor (tuple[1])", () => {
+  describe("getStore accessor (tuple[1])", () => {
     it("works inside another store's setup", () => {
-      const [, createBaseStore] = defineStore("ds-base", () => ({ n: 10 }));
-      const [useDerived] = defineStore("ds-derived", () => {
-        const base = createBaseStore();
+      const [, getBaseStore] = createStore("ds-base", () => ({ n: 10 }));
+      const [useDerived] = createStore("ds-derived", () => {
+        const base = getBaseStore();
         return { n: base.n * 2 };
       });
 
@@ -317,20 +302,20 @@ describe("defineStore()", () => {
     });
 
     it("throws when called outside a store setup", () => {
-      const [, createBaseStore] = defineStore("ds-accessor-outside", () => ({ n: 1 }));
-      expect(() => createBaseStore()).toThrow(/setup/);
+      const [, getBaseStore] = createStore("ds-accessor-outside", () => ({ n: 1 }));
+      expect(() => getBaseStore()).toThrow(/setup/);
     });
   });
 
-  describe("inter-store dependency", () => {
-    it("three-level chain: A → B.createStore → C.createStore", () => {
-      const [, createA] = defineStore("ds-chain-a", () => ({ n: 1 }));
-      const [, createB] = defineStore("ds-chain-b", () => {
-        const a = createA();
+  describe("inter-store dependency via getStore", () => {
+    it("three-level chain: A → B.getStore → C.getStore", () => {
+      const [, getA] = createStore("ds-chain-a", () => ({ n: 1 }));
+      const [, getB] = createStore("ds-chain-b", () => {
+        const a = getA();
         return { n: a.n + 1 };
       });
-      const [useC] = defineStore("ds-chain-c", () => {
-        const b = createB();
+      const [useC] = createStore("ds-chain-c", () => {
+        const b = getB();
         return { n: b.n + 1 };
       });
 
@@ -341,8 +326,8 @@ describe("defineStore()", () => {
     });
 
     it("useStore (tuple[0]) also works inside another store's setup (activeValue path)", () => {
-      const [useAuth] = defineStore("ds-compat-auth", () => ({ user: "Bob" }));
-      const [useProfile] = defineStore("ds-compat-profile", () => {
+      const [useAuth] = createStore("ds-compat-auth", () => ({ user: "Bob" }));
+      const [useProfile] = createStore("ds-compat-profile", () => {
         const auth = useAuth(); // useStore inside setup — activeValue path
         return { greeting: `Hi, ${auth.user}` };
       });
@@ -359,7 +344,7 @@ describe("effectScope integration", () => {
   describe("onMount / onUnmount", () => {
     it("onMount callback runs when StoreProvider mounts", async () => {
       const mounted = vi.fn();
-      const [useStore] = defineStore("es-mount", () => {
+      const [useStore] = createStore("es-mount", () => {
         onMount(mounted);
         return {};
       });
@@ -374,7 +359,7 @@ describe("effectScope integration", () => {
 
     it("onMount return cleanup runs on StoreProvider unmount", async () => {
       const cleanup = vi.fn();
-      const [useStore] = defineStore("es-mount-cleanup", () => {
+      const [useStore] = createStore("es-mount-cleanup", () => {
         onMount(() => cleanup);
         return {};
       });
@@ -390,7 +375,7 @@ describe("effectScope integration", () => {
 
     it("onUnmount callback runs on StoreProvider unmount", async () => {
       const unmountCb = vi.fn();
-      const [useStore] = defineStore("es-unmount", () => {
+      const [useStore] = createStore("es-unmount", () => {
         onUnmount(unmountCb);
         return {};
       });
@@ -406,7 +391,7 @@ describe("effectScope integration", () => {
 
     it("multiple onMount cleanup callbacks run in reverse order on unmount", async () => {
       const order: number[] = [];
-      const [useStore] = defineStore("es-reverse-order", () => {
+      const [useStore] = createStore("es-reverse-order", () => {
         onMount(() => () => order.push(1));
         onMount(() => () => order.push(2));
         onMount(() => () => order.push(3));
@@ -424,9 +409,9 @@ describe("effectScope integration", () => {
 
   describe("inter-store scope isolation", () => {
     it("dependent store scopes are independent (no parent-child)", () => {
-      const [, createA] = defineStore("es-iso-a", () => ({ v: "a" }));
-      const [useB] = defineStore("es-iso-b", () => {
-        createA();
+      const [, getA] = createStore("es-iso-a", () => ({ v: "a" }));
+      const [useB] = createStore("es-iso-b", () => {
+        getA();
         return { v: "b" };
       });
 
@@ -442,7 +427,7 @@ describe("effectScope integration", () => {
   describe("dev warnings", () => {
     it("warns when onBeforeMount is called in store setup (dev only)", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const [useStore] = defineStore("es-warn-before-mount", () => {
+      const [useStore] = createStore("es-warn-before-mount", () => {
         onBeforeMount(() => {});
         return {};
       });
@@ -457,7 +442,7 @@ describe("effectScope integration", () => {
 
     it("does NOT warn for onMount/onUnmount in store setup", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const [useStore] = defineStore("es-no-warn-mount", () => {
+      const [useStore] = createStore("es-no-warn-mount", () => {
         onMount(() => {});
         onUnmount(() => {});
         return {};
@@ -475,13 +460,13 @@ describe("effectScope integration", () => {
   describe("error resilience", () => {
     it("scope dispose errors do not prevent other scopes from disposing", async () => {
       const secondDisposed = vi.fn();
-      const [useA] = defineStore("es-err-a", () => {
+      const [useA] = createStore("es-err-a", () => {
         onUnmount(() => {
           throw new Error("dispose error");
         });
         return {};
       });
-      const [useB] = defineStore("es-err-b", () => {
+      const [useB] = createStore("es-err-b", () => {
         onUnmount(secondDisposed);
         return {};
       });
@@ -506,7 +491,7 @@ describe("effectScope integration", () => {
   describe("lazy init limitation", () => {
     it("onMount is NOT called for stores first accessed after StoreProvider mount", async () => {
       const mounted = vi.fn();
-      const [useLate] = defineStore("es-late-init", () => {
+      const [useLate] = createStore("es-late-init", () => {
         onMount(mounted);
         return {};
       });
@@ -536,7 +521,7 @@ describe("effectScope integration", () => {
 
     it("onUnmount is NOT called for stores first accessed after StoreProvider mount", async () => {
       const unmountCb = vi.fn();
-      const [useLate] = defineStore("es-late-unmount", () => {
+      const [useLate] = createStore("es-late-unmount", () => {
         onUnmount(unmountCb);
         return {};
       });
@@ -566,38 +551,9 @@ describe("effectScope integration", () => {
   });
 });
 
-describe("createStore() backward compatibility", () => {
-  it("createStore returns a single function (not tuple)", () => {
-    const result = createStore("bc-fn", () => ({ v: 1 }));
-    expect(typeof result).toBe("function");
-    expect(Array.isArray(result)).toBe(false);
-  });
-
-  it("createStore function works as useStore hook", () => {
-    const useMyStore = createStore("bc-hook", () => ({ value: 99 }));
-    const { result } = renderHook(() => useMyStore(), {
-      wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
-    });
-    expect(result.current.value).toBe(99);
-  });
-
-  it("createStore function works for inter-store dep (activeValue path)", () => {
-    const useBase = createStore("bc-base", () => ({ n: 5 }));
-    const useTop = createStore("bc-top", () => {
-      const base = useBase();
-      return { n: base.n + 1 };
-    });
-
-    const { result } = renderHook(() => useTop(), {
-      wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
-    });
-    expect(result.current.n).toBe(6);
-  });
-});
-
 describe("getStore() inside useScope", () => {
   it("getStore() resolves the store inside a useScope factory within StoreProvider", () => {
-    const [, getCountStore] = defineStore("us-gs-basic", () => ({ n: 42 }));
+    const [, getCountStore] = createStore("us-gs-basic", () => ({ n: 42 }));
 
     const { result } = renderHook(
       () =>
@@ -612,7 +568,7 @@ describe("getStore() inside useScope", () => {
   });
 
   it("getStore() throws inside useScope without StoreProvider", () => {
-    const [, getMyStore] = defineStore("us-gs-no-provider", () => ({ v: 1 }));
+    const [, getMyStore] = createStore("us-gs-no-provider", () => ({ v: 1 }));
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     expect(() => {
@@ -628,7 +584,7 @@ describe("getStore() inside useScope", () => {
   });
 
   it("getStore() inside useScope shares the same registry as useStore()", () => {
-    const [useShared, getShared] = defineStore("us-gs-shared", () => {
+    const [useShared, getShared] = createStore("us-gs-shared", () => {
       const count$ = observable(0);
       return { count$ };
     });
