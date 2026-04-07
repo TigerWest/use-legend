@@ -1,0 +1,12 @@
+---
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+---
+
+<Tabs syncKey="code-style">
+  <TabItem label="Hook">
+    <slot name="hook" />
+  </TabItem>
+  <TabItem label="Scope">
+    <slot name="scope" />
+  </TabItem>
+</Tabs>

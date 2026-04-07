@@ -1,7 +1,12 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import matter from "gray-matter";
-import { PACKAGES_ROOT, SOURCE_PACKAGES, DOCS_DEMOS_ROOT, toGeneratedRelativeDocPath } from "./config";
+import {
+  PACKAGES_ROOT,
+  SOURCE_PACKAGES,
+  DOCS_DEMOS_ROOT,
+  toGeneratedRelativeDocPath,
+} from "./config";
 import { buildAutoSections, serializeFrontmatter } from "./markdown-sections";
 import { extractTypeDeclarations } from "./type-declarations";
 import type { GeneratedDoc } from "./types";
@@ -33,7 +38,7 @@ export async function transformPackageDoc(
   }
 
   const sourceFile = path.relative(PACKAGES_ROOT, doc.sourcePath);
-  const sourcePackageConfig = SOURCE_PACKAGES.find(pkg => pkg.name === doc.sourcePackage);
+  const sourcePackageConfig = SOURCE_PACKAGES.find((pkg) => pkg.name === doc.sourcePackage);
   const outputSection = sourcePackageConfig?.outputSection ?? doc.sourcePackage;
   const slug = `${outputSection}/${doc.filename}`;
   const enhancedFrontmatter: Record<string, unknown> = {
@@ -66,10 +71,12 @@ export async function transformPackageDoc(
 
   let finalContent = `---\n${serializeFrontmatter(enhancedFrontmatter)}\n---\n`;
 
+  finalContent += `\nimport { CodeTabs } from '@components/CodeTabs'\n`;
+
   if (hasDemo) {
     const demoRelDir = relDocDir === "." ? "" : relDocDir + "/";
     const demoImportPath = `@demos/${demoSection}/${demoRelDir}${doc.filename}`;
-    finalContent += `\nimport Demo from '${demoImportPath}'\n`;
+    finalContent += `import Demo from '${demoImportPath}'\n`;
   }
 
   let processedBody = body.trim();

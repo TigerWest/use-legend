@@ -8,6 +8,7 @@ import { defineConfig } from "astro/config";
 import ecTwoSlash from "expressive-code-twoslash";
 import { fileURLToPath } from "node:url";
 import useLegend from "@usels/vite-plugin";
+import { watchDocsPlugin } from "./scripts/vite-plugin-watch-docs";
 
 const DOCS_WARMUP_MODE = process.env.DOCS_WARMUP_MODE ?? "off";
 const DOCS_FAST_DEV = process.env.DOCS_FAST_DEV === "1";
@@ -40,12 +41,16 @@ export default defineConfig({
             }
           : undefined,
     },
-    plugins: [tailwindcss(), useLegend({})],
+    plugins: [tailwindcss(), useLegend({}), watchDocsPlugin()],
     resolve: {
       alias: [
         {
           find: "@demos",
           replacement: fileURLToPath(new URL("./src/components/demos", import.meta.url)),
+        },
+        {
+          find: "@components",
+          replacement: fileURLToPath(new URL("./src/components", import.meta.url)),
         },
       ],
     },

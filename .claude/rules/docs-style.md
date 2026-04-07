@@ -9,10 +9,10 @@ paths:
 # API Documentation Rule
 
 Documentation files are located next to the source code (VueUse style).
-When `collect-docs.ts` is run, they are automatically generated as `.gen.mdx` / `.gen.md` files in `docs/src/content/docs/`.
+When `collect-docs.ts` is run, they are automatically generated as `.gen.mdx` files in `docs/src/content/docs/`.
 Never write API docs directly in `docs/src/content/docs/` (except manual `index.mdx` files).
 
-Generated files are gitignored via `**/*.gen.md` and `**/*.gen.mdx`.
+Generated files are gitignored via `**/*.gen.mdx`.
 
 Documentation is written in English.
 
@@ -35,8 +35,7 @@ Examples:
 
 ```
 docs/src/content/docs/
-  core/{category}/{functionName}.gen.mdx    ← has demo
-  core/{category}/{functionName}.gen.md     ← no demo
+  core/{category}/{functionName}.gen.mdx
   tanstack-query/{hookName}.gen.mdx
 ```
 
@@ -67,19 +66,72 @@ If there is a demonstrable example, write a demo.tsx and import it to enable int
 
 You may include multiple code examples and descriptions based on the code.
 
-**TwoSlash is only used for the first code block in `## Usage` (for type hover support). All subsequent blocks use plain `tsx`:**
+### Providing Hook and Scope variants: `CodeTabs`
+
+When a function supports both the Hook style and the `useScope` style, use `<CodeTabs>`.
+`collect-docs.ts` automatically injects `import { CodeTabs } from '@components/CodeTabs'` into every generated file — do not write the import manually.
+
+Use `<Fragment slot="hook">` and `<Fragment slot="scope">` with standard code fences inside.
+
+**Scope variant** uses the `"use scope"` directive inside the component function body to indicate scope-based APIs (`createXxx`, `observe`, `onMount`, `onUnmount`).
+
+**First Usage block — add `twoslash` to the hook fence for type hover:**
+
+```mdx
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useDebounced } from "@usels/core";
+
+    const value$ = useDebounced(source$, 200);
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDebounced } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { value$ } = createDebounced(source$, 200);
+      return <div>{value$.get()}</div>;
+    }
+    ```
+  </Fragment>
+</CodeTabs>
+```
+
+**Subsequent blocks — omit `twoslash` to keep build performance fast:**
+
+```mdx
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    useDebounced(source$, 200, { maxWait: 1000 });
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    function Component() {
+      "use scope"
+      createDebounced(source$, 200, { maxWait: 1000 });
+    }
+    ```
+  </Fragment>
+</CodeTabs>
+```
+
+**Hook-only** (when a `useScope` variant is not meaningful): use plain code blocks as usual.
 
 ```tsx twoslash
 // @noErrors
 import { useSomething } from "@usels/core";
-// First usage block — hover shows inferred types
 ```
 
 > Use the `/twoslash-docs` skill for full TwoSlash syntax guide and rules.
 
 ```tsx
 // All subsequent usage blocks — plain tsx (no twoslash)
-// This keeps docs build/dev performance fast
 ```
 
 ```typescript
@@ -131,7 +183,7 @@ Examples:
 - `docs/src/components/demos/web/elements/useDraggable.tsx`
 - `docs/src/components/demos/tanstack-query/useQuery.tsx`
 
-The filename must match the hook name (e.g. `useQuery.tsx` for `useQuery`). `collect-docs.ts` looks for this file to decide whether to generate `.gen.mdx` (with demo) or `.gen.md` (without).
+The filename must match the hook name (e.g. `useQuery.tsx` for `useQuery`). When a demo file exists, `collect-docs.ts` automatically imports and renders it in the `## Demo` section.
 
 ### Demo Code Rules
 
