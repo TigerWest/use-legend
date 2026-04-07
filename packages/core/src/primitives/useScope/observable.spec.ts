@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
+import { useState } from "react";
 import { observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
 import { useScope, toObs, observe } from ".";
@@ -372,5 +373,98 @@ describe("useScope() — multi-params (rest args)", () => {
     const first = result.current;
     rerender({ a: 3, b: 4 });
     expect(result.current).toBe(first);
+  });
+});
+
+describe("useScope() — reactiveProps plain state selectivity", () => {
+  it("same-value rerender does not trigger observe (Object.is guard)", () => {
+    const spy = vi.fn();
+    const { rerender } = renderHook(
+      ({ count }) =>
+        useScope(
+          (p) => {
+            const p$ = toObs(p);
+            observe(() => spy(p$.count.get()));
+            return {};
+          },
+          { count }
+        ),
+      { initialProps: { count: 5 } }
+    );
+    const callsAfterMount = spy.mock.calls.length;
+
+    rerender({ count: 5 }); // same value — Object.is true
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount);
+  });
+
+  it("observer fires only when observed field changes, not unobserved field", () => {
+    const spyA = vi.fn();
+    const { rerender } = renderHook(
+      ({ a, b }) =>
+        useScope(
+          (p) => {
+            const p$ = toObs(p);
+            observe(() => spyA(p$.a.get())); // only tracking 'a'
+            return {};
+          },
+          { a, b }
+        ),
+      { initialProps: { a: 1, b: 10 } }
+    );
+    const callsAfterMount = spyA.mock.calls.length;
+
+    rerender({ a: 1, b: 99 }); // only b changes
+    expect(spyA).toHaveBeenCalledTimes(callsAfterMount);
+
+    rerender({ a: 2, b: 99 }); // a changes
+    expect(spyA).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spyA).toHaveBeenLastCalledWith(2);
+  });
+
+  it("useState-driven prop change triggers observer with new value", () => {
+    let setCount!: (n: number) => void;
+    const spy = vi.fn();
+
+    renderHook(() => {
+      const [count, _set] = useState(0);
+      setCount = _set;
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          observe(() => spy(p$.count.get()));
+          return {};
+        },
+        { count }
+      );
+    });
+
+    const callsAfterMount = spy.mock.calls.length;
+
+    act(() => setCount(42));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith(42);
+  });
+
+  it("useState change to unobserved field does not trigger observer", () => {
+    let setName!: (s: string) => void;
+    const spy = vi.fn();
+
+    renderHook(() => {
+      const [name, _set] = useState("a");
+      setName = _set;
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          observe(() => spy(p$.count.get())); // only observing count
+          return {};
+        },
+        { count: 0, name }
+      );
+    });
+
+    const callsAfterMount = spy.mock.calls.length;
+
+    act(() => setName("b")); // name changes, count stays 0
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount); // not triggered
   });
 });

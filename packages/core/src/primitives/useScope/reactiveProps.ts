@@ -1,5 +1,70 @@
-import { batch, observable, ObservableHint, type Observable } from "@legendapp/state";
-import type { FieldHint, FieldTransformMap } from "@reactivity/useMaybeObservable";
+import { observable, ObservableHint, type Observable } from "@legendapp/state";
+import type { ImmutableObservableBase } from "@legendapp/state";
+import type { OpaqueObject } from "@legendapp/state";
+
+/** @internal Strip Observable/ReadonlyObservable wrapper from a type (distributive over unions) */
+type UnwrapObs<T> = T extends ImmutableObservableBase<infer U> ? U : T;
+
+/**
+ * Map each prop field to its unwrapped value type, stripping MaybeObservable wrappers.
+ * Ensures `toObs(p).field` resolves to `Observable<T>` instead of `Observable<Observable<T> | T>`.
+ * @public
+ */
+export type PropsOf<P extends Record<string, unknown>> = {
+  [K in keyof P]: UnwrapObs<P[K]>;
+};
+
+/** @internal Leaf hint for a single field in toObs */
+export type ScopeHint = "opaque" | "plain" | "function";
+
+/** @internal depth-3 hint map */
+type HintMap3<P> = { [K in keyof P]?: ScopeHint };
+
+/** @internal depth-2 hint map */
+type HintMap2<P> = {
+  [K in keyof P]?: ScopeHint | (P[K] extends Record<string, unknown> ? HintMap3<P[K]> : never);
+};
+
+/** @internal depth-1 hint map (top-level fields) */
+type HintMap1<P> = {
+  [K in keyof P]?: ScopeHint | (P[K] extends Record<string, unknown> ? HintMap2<P[K]> : never);
+};
+
+/**
+ * Hint spec for `toObs`: scalar hint or up to 3-level nested hint map.
+ * Supported hints: `'opaque'` | `'plain'` | `'function'`
+ * @public
+ */
+export type NestedHintSpec<P> = ScopeHint | HintMap1<P>;
+
+/** @internal Apply a leaf hint to a type — only opaque changes the TS type */
+type ApplyLeafHint<T, H extends ScopeHint> = H extends "opaque" ? OpaqueObject<T & object> : T;
+
+/** @internal Recursively apply a hint map to a props type */
+type ApplyHintMap<P, M> = {
+  [K in keyof P]: K extends keyof M
+    ? M[K] extends ScopeHint
+      ? ApplyLeafHint<P[K], M[K] & ScopeHint>
+      : M[K] extends Record<string, unknown>
+        ? P[K] extends Record<string, unknown>
+          ? ApplyHintMap<P[K], M[K]>
+          : P[K]
+        : P[K]
+    : P[K];
+};
+
+/**
+ * Transform a props type according to a `NestedHintSpec`.
+ * - scalar `'opaque'` → entire props wrapped in `OpaqueObject`
+ * - map `{ field: 'opaque' }` → only that field wrapped
+ * - nested `{ field: { sub: 'opaque' } }` → only that sub-field wrapped
+ * @public
+ */
+export type ApplyHints<P, H> = H extends ScopeHint
+  ? ApplyLeafHint<P, H & ScopeHint>
+  : H extends Record<string, unknown>
+    ? ApplyHintMap<P, H>
+    : P;
 
 /** @internal Symbol to retrieve ScopePropsCtx from a ReactiveProps proxy */
 const REACTIVE_PROPS_CTX = Symbol("reactivePropsCtx");
@@ -8,7 +73,7 @@ const REACTIVE_PROPS_CTX = Symbol("reactivePropsCtx");
 export interface ScopePropsCtx<P extends Record<string, unknown>> {
   propsRef: { current: P };
   props$: Observable<P> | null;
-  hints: FieldTransformMap<P> | FieldHint | null;
+  hints: NestedHintSpec<Record<string, unknown>> | null;
   rawPrev: Record<string, unknown> | null;
 }
 
@@ -50,34 +115,54 @@ function isReactElement(val: unknown): boolean {
   return val !== null && typeof val === "object" && "$$typeof" in (val as object);
 }
 
-/** @internal Apply a single FieldHint to a value before storing in observable */
-function applyHintToValue(hint: FieldHint | undefined, val: unknown): unknown {
+/** @internal Recursively apply a ScopeHint or nested hint map to a value */
+function applyHintToValue(
+  hint: ScopeHint | Record<string, unknown> | undefined,
+  val: unknown
+): unknown {
   if (val == null) return val;
-  // Explicit hints take priority
-  if (hint === "opaque") return ObservableHint.opaque(val);
-  if (hint === "plain") return ObservableHint.plain(val as object);
-  // Auto-detect: functions always wrapped (covers 'function' hint too)
+
+  if (typeof hint === "string") {
+    switch (hint) {
+      case "opaque":
+        return ObservableHint.opaque(val as object);
+      case "plain":
+        return ObservableHint.plain(val as object);
+      case "function":
+        return ObservableHint.function(val);
+      default:
+        return val;
+    }
+  }
+
+  if (hint && typeof hint === "object") {
+    // nested hint map — only transform hinted keys, copy rest as-is
+    if (typeof val !== "object" || Array.isArray(val)) return val;
+    const src = val as Record<string, unknown>;
+    const out: Record<string, unknown> = { ...src };
+    for (const key of Object.keys(hint)) {
+      out[key] = applyHintToValue(
+        hint[key] as ScopeHint | Record<string, unknown> | undefined,
+        src[key]
+      );
+    }
+    return out;
+  }
+
+  // no hint — auto-detect
   if (typeof val === "function") return ObservableHint.function(val);
-  if (isReactElement(val)) return ObservableHint.opaque(val);
-  if (Array.isArray(val) && val.some(isReactElement)) return ObservableHint.opaque(val);
+  if (isReactElement(val)) return ObservableHint.opaque(val as object);
+  if (Array.isArray(val) && val.some(isReactElement)) return ObservableHint.opaque(val as object);
   return val;
 }
 
 /** @internal Build initial observable value with hints applied */
 function buildInitialValue<P extends Record<string, unknown>>(
   props: P,
-  hints: FieldTransformMap<P> | FieldHint | null | undefined
-): P {
-  // Scalar hint: apply hint to entire props object
-  if (typeof hints === "string" || typeof hints === "function") {
-    return applyHintToValue(hints as FieldHint, props) as P;
-  }
+  hints: NestedHintSpec<Record<string, unknown>> | null | undefined
+): unknown {
   if (!hints) return props;
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(props)) {
-    result[key] = applyHintToValue(hints[key as keyof P] as FieldHint | undefined, props[key]);
-  }
-  return result as P;
+  return applyHintToValue(hints as ScopeHint | Record<string, unknown>, props);
 }
 
 /**
@@ -92,35 +177,39 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
   // If no observable created (toObs not called), nothing to sync
   if (!ctx.props$) return;
 
-  // Scalar hint: replace entire observable value at once
-  if (typeof ctx.hints === "string" || typeof ctx.hints === "function") {
-    const val = applyHintToValue(ctx.hints as FieldHint, next);
+  const hints = ctx.hints as NestedHintSpec<P> | null;
+  const prev = ctx.rawPrev ?? {};
+
+  // scalar hint: replace entire observable value at once
+  if (typeof hints === "string") {
+    const val = applyHintToValue(hints, next);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ctx.props$ as any).set(val);
     ctx.rawPrev = { ...next };
     return;
   }
 
-  const prev = ctx.rawPrev ?? {};
-  batch(() => {
-    // Updated or added keys
-    for (const key of Object.keys(next)) {
-      if (Object.is(prev[key], next[key as keyof P])) continue; // unchanged
-      const hint = (ctx.hints as FieldTransformMap<P> | null)?.[key as keyof P] as
-        | FieldHint
-        | undefined;
-      const val = applyHintToValue(hint, next[key as keyof P]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (ctx.props$ as any)[key].set(val);
-    }
-    // Removed keys → set to undefined
-    for (const key of Object.keys(prev)) {
-      if (!(key in next)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (ctx.props$ as any)[key].set(undefined);
-      }
-    }
-  });
+  // field/nested hint: collect only changed keys → assign
+  const changed: Record<string, unknown> = {};
+
+  for (const key of Object.keys(next)) {
+    if (Object.is(prev[key], next[key as keyof P])) continue;
+    const fieldHint = (hints as Record<string, unknown> | null)?.[key];
+    changed[key] = applyHintToValue(
+      fieldHint as ScopeHint | Record<string, unknown> | undefined,
+      next[key as keyof P]
+    );
+  }
+  // removed keys → set to undefined (skip if already undefined to avoid spurious assign)
+  for (const key of Object.keys(prev)) {
+    if (!(key in next) && prev[key] !== undefined) changed[key] = undefined;
+  }
+
+  if (Object.keys(changed).length > 0) {
+    // assign handles beginBatch/endBatch internally — no outer batch needed
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ctx.props$ as any).assign(changed);
+  }
 
   ctx.rawPrev = { ...next };
 }
@@ -132,7 +221,7 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
  * Hints are stored and applied on every subsequent `syncProps` call (each render).
  *
  * @param p - The ReactiveProps proxy from `useScope`
- * @param hints - Optional per-field FieldHint map (same as useMaybeObservable's FieldTransformMap)
+ * @param hints - Optional hint spec: scalar `'opaque'`|`'plain'`|`'function'` or per-field/nested map
  *
  * @example
  * ```ts
@@ -148,10 +237,10 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
  * }, props)
  * ```
  */
-export function toObs<P extends Record<string, unknown>>(
+export function toObs<P extends Record<string, unknown>, H extends NestedHintSpec<P> = never>(
   p: ReactiveProps<P>,
-  hints?: FieldTransformMap<P> | FieldHint
-): Observable<P> {
+  hints?: H
+): Observable<[H] extends [never] ? PropsOf<P> : ApplyHints<PropsOf<P>, H>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ctx = (p as any)[REACTIVE_PROPS_CTX] as ScopePropsCtx<P> | undefined;
   if (!ctx) {
@@ -162,12 +251,14 @@ export function toObs<P extends Record<string, unknown>>(
     // First call — create observable with hints applied to initial props
     if (hints) ctx.hints = hints;
     const initial = buildInitialValue(ctx.propsRef.current, ctx.hints);
-    ctx.props$ = observable(initial);
+    ctx.props$ = observable(initial) as unknown as Observable<P>;
     ctx.rawPrev = { ...ctx.propsRef.current };
   } else if (hints) {
     // Subsequent call with new hints — update for future syncs
     ctx.hints = hints;
   }
 
-  return ctx.props$;
+  return ctx.props$ as unknown as Observable<
+    [H] extends [never] ? PropsOf<P> : ApplyHints<PropsOf<P>, H>
+  >;
 }

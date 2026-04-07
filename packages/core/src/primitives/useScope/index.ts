@@ -56,196 +56,80 @@ export function useScope<
 ): T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useScope(fn: any, ...rest: any[]): any {
-  const isMulti = rest.length >= 2;
-  const hasProps = rest.length >= 1;
-  const props = rest[0];
-
   const _registry = React.useContext(StoreRegistryContext);
 
-  // ── refs (always called unconditionally) ──────────────────────────
-  const ref = useRef<{
-    scope: ReturnType<typeof effectScope>;
-    result: unknown;
-  } | null>(null);
-  const scopeRef = useRef<{
-    scope: ReturnType<typeof effectScope>;
-    result: unknown;
-    ctx: ScopePropsCtx<Record<string, unknown>>;
-  } | null>(null);
-  const multiRef = useRef<{
+  const stateRef = useRef<{
     scope: ReturnType<typeof effectScope>;
     result: unknown;
     ctxList: ScopePropsCtx<Record<string, unknown>>[];
   } | null>(null);
 
-  // ── initialization (not hooks, safe to branch) ────────────────────
-  if (isMulti) {
-    const paramsList = rest as Record<string, unknown>[];
-
-    // DEV assertion: rest args count must not change between renders
-    if (process.env.NODE_ENV !== "production") {
-      if (multiRef.current !== null && paramsList.length !== multiRef.current.ctxList.length) {
-        console.error("[useScope] multi-params count changed between renders");
-      }
+  if (process.env.NODE_ENV !== "production") {
+    if (stateRef.current !== null && rest.length !== stateRef.current.ctxList.length) {
+      console.error("[useScope] params count changed between renders");
     }
+  }
 
-    if (multiRef.current === null) {
+  if (stateRef.current === null) {
+    const scope = effectScope();
+    const ctxList: ScopePropsCtx<Record<string, unknown>>[] = rest.map((p) => ({
+      propsRef: { current: p },
+      props$: null,
+      hints: null,
+      rawPrev: null,
+    }));
+    const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
+    const _prev = setActiveValue(_registry);
+    let result: unknown;
+    try {
+      result = scope.run(() => fn(...proxies));
+    } finally {
+      setActiveValue(_prev);
+    }
+    stateRef.current = { scope, result, ctxList };
+  }
+
+  for (let i = 0; i < stateRef.current.ctxList.length; i++) {
+    syncProps(stateRef.current.ctxList[i], rest[i]);
+  }
+
+  // ── Strict Mode: re-create disposed scope ─────────────────────────
+  useLayoutEffect(() => {
+    if (!stateRef.current!.scope.active) {
+      const prev = stateRef.current!;
       const scope = effectScope();
-      const ctxList: ScopePropsCtx<Record<string, unknown>>[] = paramsList.map((p) => ({
-        propsRef: { current: p },
+      const ctxList: ScopePropsCtx<Record<string, unknown>>[] = prev.ctxList.map((prevCtx) => ({
+        propsRef: prevCtx.propsRef, // reuse — syncProps keeps this current
         props$: null,
         hints: null,
         rawPrev: null,
       }));
       const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
       const _prev = setActiveValue(_registry);
-      let result: unknown;
       try {
-        result = scope.run(() => fn(...proxies));
+        scope.run(() => fn(...proxies)); // re-register observers/lifecycle; result discarded
       } finally {
         setActiveValue(_prev);
       }
-      multiRef.current = { scope, result, ctxList };
+      stateRef.current = { scope, result: prev.result, ctxList };
     }
-    // Sync each param every render
-    for (let i = 0; i < multiRef.current.ctxList.length; i++) {
-      syncProps(multiRef.current.ctxList[i], paramsList[i]);
-    }
-  } else if (!hasProps) {
-    if (ref.current === null) {
-      const scope = effectScope();
-      const _prev = setActiveValue(_registry);
-      let result: unknown;
-      try {
-        result = scope.run(fn);
-      } finally {
-        setActiveValue(_prev);
-      }
-      ref.current = { scope, result };
-    }
-  } else {
-    if (scopeRef.current === null) {
-      const scope = effectScope();
-      const propsCtx: ScopePropsCtx<Record<string, unknown>> = {
-        propsRef: { current: props },
-        props$: null,
-        hints: null,
-        rawPrev: null,
-      };
-      const reactiveProxy = createReactiveProxy(propsCtx);
-      const _prev = setActiveValue(_registry);
-      let result: unknown;
-      try {
-        result = scope.run(() => fn(reactiveProxy));
-      } finally {
-        setActiveValue(_prev);
-      }
-      scopeRef.current = { scope, result, ctx: propsCtx };
-    }
-    // Sync props every render (updates ref + observable diff if toObs was called)
-    syncProps(scopeRef.current.ctx as ScopePropsCtx<Record<string, unknown>>, props);
-  }
-
-  useLayoutEffect(() => {
-    if (isMulti) {
-      if (!multiRef.current!.scope.active) {
-        const prev = multiRef.current!;
-        const scope = effectScope();
-        const ctxList: ScopePropsCtx<Record<string, unknown>>[] = prev.ctxList.map((prevCtx) => ({
-          propsRef: prevCtx.propsRef, // reuse — syncProps updates via this ref
-          props$: null,
-          hints: null,
-          rawPrev: null,
-        }));
-        const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
-        const _prev2 = setActiveValue(_registry);
-        try {
-          scope.run(() => fn(...proxies)); // re-register observers/lifecycle only, result discarded
-        } finally {
-          setActiveValue(_prev2);
-        }
-        multiRef.current = { scope, result: prev.result, ctxList }; // preserve prev.result
-      }
-      for (const cb of multiRef.current!.scope._beforeMountCbs) cb();
-    } else if (!hasProps) {
-      // Strict Mode: cleanup disposed scope between layoutEffect runs (no new render).
-      // Re-create scope and re-run factory to restore observers/lifecycle.
-      if (!ref.current!.scope.active) {
-        const scope = effectScope();
-        const _prev = setActiveValue(_registry);
-        try {
-          scope.run(fn);
-        } finally {
-          setActiveValue(_prev);
-        }
-        ref.current = { ...ref.current!, scope };
-      }
-      for (const cb of ref.current!.scope._beforeMountCbs) cb();
-    } else {
-      // Strict Mode: re-create scope if disposed between layoutEffect runs.
-      // Reuse existing ctx + result so closures from the first factory run remain valid.
-      if (!scopeRef.current!.scope.active) {
-        const prev = scopeRef.current!;
-        const scope = effectScope();
-        const propsCtx: ScopePropsCtx<Record<string, unknown>> = {
-          propsRef: prev.ctx.propsRef,
-          props$: null,
-          hints: null,
-          rawPrev: null,
-        };
-        // Re-use the existing reactive proxy (already captured in factory closures)
-        const existingProxy = createReactiveProxy(propsCtx);
-        const _prev2 = setActiveValue(_registry);
-        try {
-          scope.run(() => fn(existingProxy));
-        } finally {
-          setActiveValue(_prev2);
-        }
-        scopeRef.current = { scope, result: prev.result, ctx: propsCtx };
-      }
-      for (const cb of scopeRef.current!.scope._beforeMountCbs) cb();
-    }
+    for (const cb of stateRef.current!.scope._beforeMountCbs) cb();
   }, []);
 
+  // ── mount / unmount ───────────────────────────────────────────────
   // eslint-disable-next-line use-legend/prefer-use-observe
   useEffect(() => {
-    if (isMulti) {
-      const { scope } = multiRef.current!;
-      const cleanups: Array<() => void> = [];
-      for (const cb of scope._mountCbs) {
-        const cleanup = cb();
-        if (typeof cleanup === "function") cleanups.push(cleanup);
-      }
-      return () => {
-        for (let i = cleanups.length - 1; i >= 0; i--) cleanups[i]();
-        scope.dispose();
-      };
-    } else if (!hasProps) {
-      // Read scope from ref at effect time (may be fresh scope after Strict Mode remount)
-      const { scope } = ref.current!;
-      const cleanups: Array<() => void> = [];
-      for (const cb of scope._mountCbs) {
-        const cleanup = cb();
-        if (typeof cleanup === "function") cleanups.push(cleanup);
-      }
-      return () => {
-        for (let i = cleanups.length - 1; i >= 0; i--) cleanups[i]();
-        scope.dispose();
-      };
-    } else {
-      const { scope } = scopeRef.current!;
-      const cleanups: Array<() => void> = [];
-      for (const cb of scope._mountCbs) {
-        const cleanup = cb();
-        if (typeof cleanup === "function") cleanups.push(cleanup);
-      }
-      return () => {
-        for (let i = cleanups.length - 1; i >= 0; i--) cleanups[i]();
-        scope.dispose();
-      };
+    const { scope } = stateRef.current!;
+    const cleanups: Array<() => void> = [];
+    for (const cb of scope._mountCbs) {
+      const cleanup = cb();
+      if (typeof cleanup === "function") cleanups.push(cleanup);
     }
+    return () => {
+      for (let i = cleanups.length - 1; i >= 0; i--) cleanups[i]();
+      scope.dispose();
+    };
   }, []);
 
-  if (isMulti) return multiRef.current!.result;
-  return hasProps ? scopeRef.current!.result : ref.current!.result;
+  return stateRef.current!.result;
 }
