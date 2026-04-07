@@ -262,3 +262,27 @@ describe("useScope() — React Strict Mode", () => {
     });
   });
 });
+
+describe("multi-params — Strict Mode", () => {
+  it("multi-params factory re-runs in Strict Mode, observe still reactive", () => {
+    const spy = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ debounce, name }) =>
+        useScope(
+          (timing: any, _opts: any) => {
+            const t$ = toObs(timing);
+            observe(() => spy(t$.debounce.get()));
+            return {};
+          },
+          { debounce },
+          { name }
+        ),
+      { wrapper: StrictMode, initialProps: { debounce: 100, name: "x" } }
+    );
+
+    spy.mockClear();
+    act(() => rerender({ debounce: 500, name: "x" }));
+    expect(spy).toHaveBeenCalledWith(500);
+  });
+});

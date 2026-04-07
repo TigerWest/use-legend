@@ -47,9 +47,18 @@ export function useScope<P extends Record<string, unknown>, T extends object>(
   fn: (props: ReactiveProps<P>) => T,
   props: P
 ): T;
+export function useScope<
+  Params extends [Record<string, unknown>, Record<string, unknown>, ...Record<string, unknown>[]],
+  T extends object,
+>(
+  fn: (...params: { [K in keyof Params]: ReactiveProps<Params[K] & Record<string, unknown>> }) => T,
+  ...params: Params
+): T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useScope(fn: any, props?: any): any {
-  const hasProps = props !== undefined;
+export function useScope(fn: any, ...rest: any[]): any {
+  const isMulti = rest.length >= 2;
+  const hasProps = rest.length >= 1;
+  const props = rest[0];
 
   const _registry = React.useContext(StoreRegistryContext);
 
@@ -63,9 +72,46 @@ export function useScope(fn: any, props?: any): any {
     result: unknown;
     ctx: ScopePropsCtx<Record<string, unknown>>;
   } | null>(null);
+  const multiRef = useRef<{
+    scope: ReturnType<typeof effectScope>;
+    result: unknown;
+    ctxList: ScopePropsCtx<Record<string, unknown>>[];
+  } | null>(null);
 
   // ── initialization (not hooks, safe to branch) ────────────────────
-  if (!hasProps) {
+  if (isMulti) {
+    const paramsList = rest as Record<string, unknown>[];
+
+    // DEV assertion: rest args count must not change between renders
+    if (process.env.NODE_ENV !== "production") {
+      if (multiRef.current !== null && paramsList.length !== multiRef.current.ctxList.length) {
+        console.error("[useScope] multi-params count changed between renders");
+      }
+    }
+
+    if (multiRef.current === null) {
+      const scope = effectScope();
+      const ctxList: ScopePropsCtx<Record<string, unknown>>[] = paramsList.map((p) => ({
+        propsRef: { current: p },
+        props$: null,
+        hints: null,
+        rawPrev: null,
+      }));
+      const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
+      const _prev = setActiveValue(_registry);
+      let result: unknown;
+      try {
+        result = scope.run(() => fn(...proxies));
+      } finally {
+        setActiveValue(_prev);
+      }
+      multiRef.current = { scope, result, ctxList };
+    }
+    // Sync each param every render
+    for (let i = 0; i < multiRef.current.ctxList.length; i++) {
+      syncProps(multiRef.current.ctxList[i], paramsList[i]);
+    }
+  } else if (!hasProps) {
     if (ref.current === null) {
       const scope = effectScope();
       const _prev = setActiveValue(_registry);
@@ -97,12 +143,31 @@ export function useScope(fn: any, props?: any): any {
       scopeRef.current = { scope, result, ctx: propsCtx };
     }
     // Sync props every render (updates ref + observable diff if toObs was called)
-
     syncProps(scopeRef.current.ctx as ScopePropsCtx<Record<string, unknown>>, props);
   }
 
   useLayoutEffect(() => {
-    if (!hasProps) {
+    if (isMulti) {
+      if (!multiRef.current!.scope.active) {
+        const prev = multiRef.current!;
+        const scope = effectScope();
+        const ctxList: ScopePropsCtx<Record<string, unknown>>[] = prev.ctxList.map((prevCtx) => ({
+          propsRef: prevCtx.propsRef, // reuse — syncProps updates via this ref
+          props$: null,
+          hints: null,
+          rawPrev: null,
+        }));
+        const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
+        const _prev2 = setActiveValue(_registry);
+        try {
+          scope.run(() => fn(...proxies)); // re-register observers/lifecycle only, result discarded
+        } finally {
+          setActiveValue(_prev2);
+        }
+        multiRef.current = { scope, result: prev.result, ctxList }; // preserve prev.result
+      }
+      for (const cb of multiRef.current!.scope._beforeMountCbs) cb();
+    } else if (!hasProps) {
       // Strict Mode: cleanup disposed scope between layoutEffect runs (no new render).
       // Re-create scope and re-run factory to restore observers/lifecycle.
       if (!ref.current!.scope.active) {
@@ -144,7 +209,18 @@ export function useScope(fn: any, props?: any): any {
 
   // eslint-disable-next-line use-legend/prefer-use-observe
   useEffect(() => {
-    if (!hasProps) {
+    if (isMulti) {
+      const { scope } = multiRef.current!;
+      const cleanups: Array<() => void> = [];
+      for (const cb of scope._mountCbs) {
+        const cleanup = cb();
+        if (typeof cleanup === "function") cleanups.push(cleanup);
+      }
+      return () => {
+        for (let i = cleanups.length - 1; i >= 0; i--) cleanups[i]();
+        scope.dispose();
+      };
+    } else if (!hasProps) {
       // Read scope from ref at effect time (may be fresh scope after Strict Mode remount)
       const { scope } = ref.current!;
       const cleanups: Array<() => void> = [];
@@ -170,5 +246,6 @@ export function useScope(fn: any, props?: any): any {
     }
   }, []);
 
+  if (isMulti) return multiRef.current!.result;
   return hasProps ? scopeRef.current!.result : ref.current!.result;
 }

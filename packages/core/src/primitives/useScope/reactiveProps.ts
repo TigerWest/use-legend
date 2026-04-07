@@ -8,7 +8,7 @@ const REACTIVE_PROPS_CTX = Symbol("reactivePropsCtx");
 export interface ScopePropsCtx<P extends Record<string, unknown>> {
   propsRef: { current: P };
   props$: Observable<P> | null;
-  hints: FieldTransformMap<P> | null;
+  hints: FieldTransformMap<P> | FieldHint | null;
   rawPrev: Record<string, unknown> | null;
 }
 
@@ -66,8 +66,12 @@ function applyHintToValue(hint: FieldHint | undefined, val: unknown): unknown {
 /** @internal Build initial observable value with hints applied */
 function buildInitialValue<P extends Record<string, unknown>>(
   props: P,
-  hints: FieldTransformMap<P> | null | undefined
+  hints: FieldTransformMap<P> | FieldHint | null | undefined
 ): P {
+  // Scalar hint: apply hint to entire props object
+  if (typeof hints === "string" || typeof hints === "function") {
+    return applyHintToValue(hints as FieldHint, props) as P;
+  }
   if (!hints) return props;
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(props)) {
@@ -88,12 +92,23 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
   // If no observable created (toObs not called), nothing to sync
   if (!ctx.props$) return;
 
+  // Scalar hint: replace entire observable value at once
+  if (typeof ctx.hints === "string" || typeof ctx.hints === "function") {
+    const val = applyHintToValue(ctx.hints as FieldHint, next);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ctx.props$ as any).set(val);
+    ctx.rawPrev = { ...next };
+    return;
+  }
+
   const prev = ctx.rawPrev ?? {};
   batch(() => {
     // Updated or added keys
     for (const key of Object.keys(next)) {
       if (Object.is(prev[key], next[key as keyof P])) continue; // unchanged
-      const hint = ctx.hints?.[key as keyof P] as FieldHint | undefined;
+      const hint = (ctx.hints as FieldTransformMap<P> | null)?.[key as keyof P] as
+        | FieldHint
+        | undefined;
       const val = applyHintToValue(hint, next[key as keyof P]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ctx.props$ as any)[key].set(val);
@@ -135,7 +150,7 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
  */
 export function toObs<P extends Record<string, unknown>>(
   p: ReactiveProps<P>,
-  hints?: FieldTransformMap<P>
+  hints?: FieldTransformMap<P> | FieldHint
 ): Observable<P> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ctx = (p as any)[REACTIVE_PROPS_CTX] as ScopePropsCtx<P> | undefined;

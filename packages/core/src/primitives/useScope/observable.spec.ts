@@ -255,3 +255,122 @@ describe("useScope() — reactive props (toObs)", () => {
     });
   });
 });
+
+describe("toObs with scalar hint", () => {
+  it("toObs(p, 'opaque') wraps entire props with opaque hint", () => {
+    const obj1 = { nested: 1 };
+    const obj2 = { nested: 2 };
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const obs$ = toObs(p, "opaque");
+          return { obs$ };
+        },
+        { data1: obj1, data2: obj2 }
+      )
+    );
+
+    // opaque wrapping: obs$.get() returns entire raw props object
+    const val = result.current.obs$.get();
+    expect(val).toBeDefined();
+  });
+
+  it("toObs(p, 'function') wraps entire props with function hint", () => {
+    const fn1 = () => "a";
+    const fn2 = () => "b";
+    const spy = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ onClick, onHover }) =>
+        useScope(
+          (p) => {
+            const obs$ = toObs(p, "function");
+            observe(() => spy(obs$.onClick.get(), obs$.onHover.get()));
+            return {};
+          },
+          { onClick, onHover }
+        ),
+      { initialProps: { onClick: fn1, onHover: fn2 } }
+    );
+
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    const fn3 = () => "c";
+    rerender({ onClick: fn3, onHover: fn2 });
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it("toObs(p, { field: hint }) per-field hint still works", () => {
+    // 기존 per-field hint 하위 호환 확인
+    const spy = vi.fn();
+    renderHook(
+      ({ dump }) =>
+        useScope(
+          (p) => {
+            const obs$ = toObs(p, { dump: "function" });
+            observe(() => spy(obs$.dump.get()));
+            return {};
+          },
+          { dump }
+        ),
+      { initialProps: { dump: JSON.stringify } }
+    );
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("useScope() — multi-params (rest args)", () => {
+  it("useScope((a, b) => ..., obj1, obj2) passes two ReactiveProps", () => {
+    const { result } = renderHook(() =>
+      useScope(
+        (timing, opts) => {
+          return {
+            getDebounce: () => timing.debounce,
+            getDump: () => opts.dump,
+          };
+        },
+        { debounce: 200 },
+        { dump: JSON.stringify }
+      )
+    );
+
+    expect(result.current.getDebounce()).toBe(200);
+    expect(result.current.getDump()).toBe(JSON.stringify);
+  });
+
+  it("toObs works independently on each param", () => {
+    const spy = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ debounce, name }) =>
+        useScope(
+          (timing, opts) => {
+            const t$ = toObs(timing);
+            const o$ = toObs(opts);
+            observe(() => spy(t$.debounce.get(), o$.name.get()));
+            return {};
+          },
+          { debounce },
+          { name }
+        ),
+      { initialProps: { debounce: 200, name: "a" } }
+    );
+
+    expect(spy).toHaveBeenCalledWith(200, "a");
+
+    rerender({ debounce: 500, name: "a" });
+    expect(spy).toHaveBeenCalledWith(500, "a");
+  });
+
+  it("multi-params result is stable across rerenders", () => {
+    const { result, rerender } = renderHook(
+      ({ a, b }) => useScope((p1, _p2) => ({ val: p1.a }), { a }, { b }),
+      { initialProps: { a: 1, b: 2 } }
+    );
+
+    const first = result.current;
+    rerender({ a: 3, b: 4 });
+    expect(result.current).toBe(first);
+  });
+});
