@@ -1,5 +1,6 @@
-import { type Observable, observe, batch as legendBatch } from "@legendapp/state";
-import type { Disposable, Fn, ReadonlyObservable } from "../../types";
+import { type Observable, batch as legendBatch } from "@legendapp/state";
+import { observe, onUnmount } from "@primitives/useScope";
+import type { Fn, ReadonlyObservable } from "../../types";
 import type { EventFilter } from "@shared/filters";
 import { createPausableFilter } from "@utilities/usePausableFilter";
 import { noop } from "@shared/utils";
@@ -9,7 +10,7 @@ import {
   type ManualHistoryReturn,
 } from "../useManualHistory/core";
 
-export interface HistoryOptions<Raw, Serialized = Raw> extends ManualHistoryOptions<
+export interface DataHistoryOptions<Raw, Serialized = Raw> extends ManualHistoryOptions<
   Raw,
   Serialized
 > {
@@ -32,8 +33,10 @@ export interface HistoryOptions<Raw, Serialized = Raw> extends ManualHistoryOpti
   shouldCommit?: (newValue: Raw) => boolean;
 }
 
-export interface HistoryReturn<Raw, Serialized = Raw>
-  extends Omit<ManualHistoryReturn<Raw, Serialized>, "dispose">, Disposable {
+export interface DataHistoryReturn<Raw, Serialized = Raw> extends Omit<
+  ManualHistoryReturn<Raw, Serialized>,
+  "dispose"
+> {
   /** Whether auto-tracking is currently active. */
   readonly isTracking$: ReadonlyObservable<boolean>;
   /** Stop auto-committing. */
@@ -46,15 +49,15 @@ export interface HistoryReturn<Raw, Serialized = Raw>
 
 /**
  * Core observable function for auto-tracking undo/redo history.
- * No React dependency — can be used in any JavaScript environment.
+ * No React dependency — must be called within a useScope factory.
  *
  * @param source$ - The Observable to track.
  * @param options - Configuration for auto-tracking, filtering, and serialization.
  */
-export function createHistory<Raw, Serialized = Raw>(
+export function createDataHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
-  options?: HistoryOptions<Raw, Serialized>
-): HistoryReturn<Raw, Serialized> {
+  options?: DataHistoryOptions<Raw, Serialized>
+): DataHistoryReturn<Raw, Serialized> {
   // Delegate stack management to manualHistory
   const manual = createManualHistory<Raw, Serialized>(source$, options);
 
@@ -64,13 +67,11 @@ export function createHistory<Raw, Serialized = Raw>(
 
   // Flag to prevent circular auto-commit during undo/redo/transaction
   let isRestoring = false;
-  // Flag to track if disposed
-  let isDisposed = false;
   // Skip the initial observe pass: manualHistory already seeded the first snapshot.
   let hasObservedInitial = false;
 
-  // Auto-commit on source$ change
-  const unsub = observe(() => {
+  // Auto-commit on source$ change — unsub auto-registered to current scope
+  observe(() => {
     const value = source$.get(); // register reactive dependency
 
     if (!hasObservedInitial) {
@@ -78,7 +79,7 @@ export function createHistory<Raw, Serialized = Raw>(
       return;
     }
 
-    if (isRestoring || isDisposed) return;
+    if (isRestoring) return;
 
     pausable.eventFilter(
       () => {
@@ -87,6 +88,12 @@ export function createHistory<Raw, Serialized = Raw>(
       },
       { fn: noop, args: [], thisArg: undefined }
     );
+  });
+
+  // Cleanup registered to scope — no dispose() needed
+  onUnmount(() => {
+    pausable.pause();
+    manual.dispose();
   });
 
   // Wrapped undo/redo — set isRestoring to prevent auto-commit
@@ -123,21 +130,15 @@ export function createHistory<Raw, Serialized = Raw>(
     if (!canceled) manual.commit();
   };
 
-  const dispose = () => {
-    isDisposed = true;
-    pausable.pause();
-    unsub();
-    manual.dispose();
-  };
+  const { dispose: _dispose, ...manualRest } = manual;
 
   return {
-    ...manual,
+    ...manualRest,
     undo,
     redo,
     isTracking$: pausable.isActive$,
     pause,
     resume,
     transaction,
-    dispose,
   };
 }

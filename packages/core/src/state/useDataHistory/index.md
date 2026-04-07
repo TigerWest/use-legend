@@ -1,5 +1,5 @@
 ---
-title: useHistory
+title: useDataHistory
 description: "A hook that automatically tracks changes to an Observable and manages undo/redo history. Records a snapshot automatically whenever the source Observable changes. Built on top of `useManualHistory`, with additional support for auto-commit, pause/resume, and transaction."
 category: Reactivity
 ---
@@ -11,10 +11,10 @@ category: Reactivity
 ```tsx twoslash
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useDataHistory } from "@usels/core";
 
 const text$ = useObservable("hello");
-const { undo, redo, canUndo$, canRedo$ } = useHistory(text$);
+const { undo, redo, canUndo$, canRedo$ } = useDataHistory(text$);
 
 text$.set("world"); // auto-committed
 undo(); // text$ → "hello"
@@ -26,10 +26,10 @@ redo(); // text$ → "world"
 ```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useDataHistory } from "@usels/core";
 
 const text$ = useObservable("hello");
-const { pause, resume, isTracking$ } = useHistory(text$);
+const { pause, resume, isTracking$ } = useDataHistory(text$);
 
 pause();
 text$.set("not tracked"); // skipped — no history record
@@ -49,10 +49,10 @@ Call the provided `cancel()` to abort the commit entirely.
 ```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useDataHistory } from "@usels/core";
 
 const value$ = useObservable(0);
-const { transaction, undo } = useHistory(value$);
+const { transaction, undo } = useDataHistory(value$);
 
 transaction((cancel) => {
   value$.set(1);
@@ -71,12 +71,12 @@ Return `false` from `shouldCommit` to skip recording specific values.
 ```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useDataHistory } from "@usels/core";
 
 const count$ = useObservable(0);
 
 // Only record even numbers
-const { undo } = useHistory(count$, {
+const { undo } = useDataHistory(count$, {
   shouldCommit: (value) => value % 2 === 0,
 });
 ```
@@ -86,23 +86,10 @@ const { undo } = useHistory(count$, {
 ```tsx
 // @noErrors
 import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useDataHistory } from "@usels/core";
 
 const text$ = useObservable("");
 
 // Keep at most 50 undo steps
-const { undo, redo } = useHistory(text$, { capacity: 50 });
-```
-
-### dispose — permanently stop tracking
-
-```tsx
-// @noErrors
-import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
-
-const value$ = useObservable(0);
-const { dispose } = useHistory(value$);
-
-dispose(); // stops auto-tracking permanently; undo/redo stacks still usable
+const { undo, redo } = useDataHistory(text$, { capacity: 50 });
 ```

@@ -11,7 +11,7 @@ import {
   demoClasses,
 } from "@demos/_shared";
 
-export default function UseHistoryDemo() {
+export default function UseDataHistoryDemo() {
   const text$ = useObservable("");
   const { undo, redo, canUndo$, canRedo$, isTracking$, pause, resume, history$ } =
     useHistory(text$);

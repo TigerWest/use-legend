@@ -1,17 +1,15 @@
 "use client";
 
-import { type Observable } from "@legendapp/state";
+import { isObservable, type Observable } from "@legendapp/state";
 import type { DeepMaybeObservable, Fn, ReadonlyObservable } from "../../types";
 import type { EventFilter } from "@shared/filters";
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { useConstant } from "@shared/useConstant";
-import { createHistory } from "./core";
+import { useScope } from "@primitives/useScope";
+import { createDataHistory } from "./core";
 import type { UseManualHistoryOptions, UseManualHistoryReturn } from "../useManualHistory";
-import { useUnmount } from "@legendapp/state/react";
 
-export { createHistory, type HistoryOptions, type HistoryReturn } from "./core";
+export { createDataHistory, type DataHistoryOptions, type DataHistoryReturn } from "./core";
 
-export interface UseHistoryOptions<Raw, Serialized = Raw> extends UseManualHistoryOptions<
+export interface UseDataHistoryOptions<Raw, Serialized = Raw> extends UseManualHistoryOptions<
   Raw,
   Serialized
 > {
@@ -34,9 +32,9 @@ export interface UseHistoryOptions<Raw, Serialized = Raw> extends UseManualHisto
   shouldCommit?: (newValue: Raw) => boolean;
 }
 
-export interface UseHistoryReturn<Raw, Serialized = Raw> extends UseManualHistoryReturn<
-  Raw,
-  Serialized
+export interface UseDataHistoryReturn<Raw, Serialized = Raw> extends Omit<
+  UseManualHistoryReturn<Raw, Serialized>,
+  "dispose"
 > {
   /** Whether auto-tracking is currently active. */
   readonly isTracking$: ReadonlyObservable<boolean>;
@@ -46,8 +44,6 @@ export interface UseHistoryReturn<Raw, Serialized = Raw> extends UseManualHistor
   resume: (commitCurrent?: boolean) => void;
   /** Group multiple mutations into a single history record. Call `cancel()` inside `fn` to abort. */
   transaction: (fn: (cancel: Fn) => void) => void;
-  /** Stop auto-tracking permanently. */
-  dispose: Fn;
 }
 
 /**
@@ -60,27 +56,19 @@ export interface UseHistoryReturn<Raw, Serialized = Raw> extends UseManualHistor
  * @example
  * ```ts
  * const text$ = observable('hello');
- * const { undo, redo, canUndo$, pause, resume } = useHistory(text$);
+ * const { undo, redo, canUndo$, pause, resume } = useDataHistory(text$);
  *
  * text$.set('world');  // auto-committed
  * undo();              // text$ → 'hello'
  * ```
  */
-export function useHistory<Raw, Serialized = Raw>(
+export function useDataHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
-  options?: DeepMaybeObservable<UseHistoryOptions<Raw, Serialized>>
-): UseHistoryReturn<Raw, Serialized> {
-  const opts$ = useMaybeObservable(options, {
-    dump: "function",
-    parse: "function",
-    shouldCommit: "function",
+  options?: DeepMaybeObservable<UseDataHistoryOptions<Raw, Serialized>>
+): UseDataHistoryReturn<Raw, Serialized> {
+  const rawOpts = isObservable(options) ? options.peek() : options;
+
+  return useScope(() => {
+    return createDataHistory<Raw, Serialized>(source$, rawOpts);
   });
-
-  // 1. core 함수 1회 호출 (useConstant — 리렌더에도 재생성 안 됨)
-  const result = useConstant(() => createHistory<Raw, Serialized>(source$, opts$.peek()));
-
-  // 2. unmount 시 cleanup
-  useUnmount(result.dispose);
-
-  return result;
 }

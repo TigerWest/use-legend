@@ -24,7 +24,7 @@ export * from "@reactivity/useThrottled";
 export * from "@reactivity/useComputedWithControl";
 
 export * from "@state/useManualHistory";
-export * from "@state/useHistory";
+export * from "@state/useDataHistory";
 export * from "@state/useThrottledHistory";
 export * from "@state/useDebouncedHistory";
 export * from "@state/createProvider";

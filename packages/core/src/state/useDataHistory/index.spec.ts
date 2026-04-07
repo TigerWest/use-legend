@@ -2,13 +2,13 @@
 import { renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { describe, it, expect } from "vitest";
-import { useHistory } from ".";
+import { useDataHistory } from ".";
 
-describe("useHistory()", () => {
+describe("useDataHistory()", () => {
   describe("auto-tracking", () => {
     it("does not create a duplicate initial snapshot on mount", () => {
       const source$ = observable("");
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       expect(result.current.history$.get()).toHaveLength(1);
       expect(result.current.history$.get()[0]?.snapshot).toBe("");
@@ -16,7 +16,7 @@ describe("useHistory()", () => {
 
     it("automatically commits on source$ change", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       // last$ starts at the initial value
       expect(result.current.last$.get().snapshot).toBe(0);
@@ -32,7 +32,7 @@ describe("useHistory()", () => {
 
     it("does not commit during undo restore (no circular commit)", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       act(() => {
         source$.set(1);
@@ -59,7 +59,7 @@ describe("useHistory()", () => {
 
     it("does not commit during redo restore", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       act(() => {
         source$.set(1);
@@ -86,7 +86,7 @@ describe("useHistory()", () => {
     it("respects shouldCommit filter (return false skips recording)", () => {
       const source$ = observable(0);
       const { result } = renderHook(() =>
-        useHistory(source$, { shouldCommit: (v) => v % 2 === 0 })
+        useDataHistory(source$, { shouldCommit: (v) => v % 2 === 0 })
       );
 
       const baselineLength = result.current.history$.get().length;
@@ -109,7 +109,7 @@ describe("useHistory()", () => {
   describe("pause/resume", () => {
     it("pause() stops auto-commit (changes during pause are not recorded)", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       const baselineLength = result.current.history$.get().length;
 
@@ -130,7 +130,7 @@ describe("useHistory()", () => {
 
     it("resume() restarts auto-commit", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       act(() => {
         result.current.pause();
@@ -154,7 +154,7 @@ describe("useHistory()", () => {
 
     it("resume(true) commits current value immediately", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       act(() => {
         result.current.pause();
@@ -176,7 +176,7 @@ describe("useHistory()", () => {
 
     it("isTracking$ reflects pause/resume state", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       expect(result.current.isTracking$.get()).toBe(true);
 
@@ -197,7 +197,7 @@ describe("useHistory()", () => {
   describe("transaction", () => {
     it("groups multiple mutations into one history record", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       const baselineLength = result.current.history$.get().length;
 
@@ -216,7 +216,7 @@ describe("useHistory()", () => {
 
     it("cancel() inside transaction prevents commit", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       const baselineLength = result.current.history$.get().length;
 
@@ -235,7 +235,7 @@ describe("useHistory()", () => {
   describe("inherited from useManualHistory", () => {
     it("undo restores previous auto-committed value", () => {
       const source$ = observable("a");
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       act(() => {
         source$.set("b");
@@ -253,7 +253,7 @@ describe("useHistory()", () => {
 
     it("redo restores next value after undo", () => {
       const source$ = observable("a");
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       act(() => {
         source$.set("b");
@@ -273,7 +273,7 @@ describe("useHistory()", () => {
 
     it("clear resets history", () => {
       const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
+      const { result } = renderHook(() => useDataHistory(source$));
 
       act(() => {
         source$.set(1);
@@ -292,30 +292,6 @@ describe("useHistory()", () => {
       expect(result.current.canRedo$.get()).toBe(false);
       // After clear, history is a fresh single record
       expect(result.current.history$.get()).toHaveLength(1);
-    });
-  });
-
-  describe("dispose", () => {
-    it("stops auto-tracking permanently", () => {
-      const source$ = observable(0);
-      const { result } = renderHook(() => useHistory(source$));
-
-      act(() => {
-        result.current.dispose();
-      });
-
-      const baselineLength = result.current.history$.get().length;
-
-      act(() => {
-        source$.set(1);
-      });
-      act(() => {
-        source$.set(2);
-      });
-
-      // dispose stops auto-commit; length unchanged
-      expect(result.current.history$.get().length).toBe(baselineLength);
-      expect(result.current.isTracking$.get()).toBe(false);
     });
   });
 });

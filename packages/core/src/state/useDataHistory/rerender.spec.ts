@@ -2,12 +2,12 @@
 import { renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { describe, it, expect } from "vitest";
-import { useHistory } from ".";
+import { useDataHistory } from ".";
 
-describe("useHistory() — rerender stability", () => {
+describe("useDataHistory() — rerender stability", () => {
   it("auto-tracking continues across re-renders", () => {
     const source$ = observable(0);
-    const { result, rerender } = renderHook(() => useHistory(source$));
+    const { result, rerender } = renderHook(() => useDataHistory(source$));
 
     act(() => {
       source$.set(1);
@@ -26,7 +26,7 @@ describe("useHistory() — rerender stability", () => {
 
   it("does not duplicate commits on re-render", () => {
     const source$ = observable(0);
-    const { result, rerender } = renderHook(() => useHistory(source$));
+    const { result, rerender } = renderHook(() => useDataHistory(source$));
 
     const baselineLength = result.current.history$.get().length;
 
@@ -40,7 +40,7 @@ describe("useHistory() — rerender stability", () => {
 
   it("isTracking$ reference is stable across re-renders", () => {
     const source$ = observable(0);
-    const { result, rerender } = renderHook(() => useHistory(source$));
+    const { result, rerender } = renderHook(() => useDataHistory(source$));
 
     const isTracking$Before = result.current.isTracking$;
 
@@ -53,7 +53,7 @@ describe("useHistory() — rerender stability", () => {
 
   it("pause/resume state preserved after re-render", () => {
     const source$ = observable(0);
-    const { result, rerender } = renderHook(() => useHistory(source$));
+    const { result, rerender } = renderHook(() => useDataHistory(source$));
 
     act(() => {
       result.current.pause();
