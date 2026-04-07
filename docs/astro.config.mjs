@@ -138,6 +138,7 @@ export default defineConfig({
         {
           label: "Core",
           items: [
+            { label: "Primitives", autogenerate: { directory: "core/primitives" } },
             { label: "State", autogenerate: { directory: "core/state" } },
             { label: "Reactivity", autogenerate: { directory: "core/reactivity" } },
             { label: "Observe", autogenerate: { directory: "core/observe" } },

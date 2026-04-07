@@ -1,7 +1,7 @@
 ---
 title: createStore
 description: "Lazily-initialized store with `StoreProvider`, effectScope lifecycle, inter-store dependencies, and Redux DevTools action tracking in development."
-category: State
+category: Primitives
 ---
 
 ## Demo

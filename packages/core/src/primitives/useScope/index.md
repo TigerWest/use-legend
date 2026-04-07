@@ -1,6 +1,6 @@
 ---
 title: useScope
-category: State
+category: Primitives
 ---
 
 Runs a factory function exactly once per mount inside an effect scope. The factory's return value is stable across re-renders. Reactive subscriptions registered inside the factory (via `observe`) are automatically cleaned up on unmount.

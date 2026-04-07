@@ -5,7 +5,7 @@ import { isObservable, observable, observe, ObservableHint } from "@legendapp/st
 import type { OpaqueObject } from "@legendapp/state";
 import { useState } from "react";
 import { useMaybeObservable } from ".";
-import { useRef$ } from "@reactivity/useRef$";
+import { useRef$ } from "@primitives/useRef$";
 
 interface SimpleOpts {
   val: string;
