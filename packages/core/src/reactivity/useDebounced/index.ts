@@ -1,48 +1,36 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import type { MaybeObservable, ReadonlyObservable } from "../../types";
-import type { DebounceFilterOptions } from "@shared/filters";
-import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { useConstant } from "@shared/useConstant";
-import { createDebounced } from "./core";
-import { useUnmount } from "@legendapp/state/react";
 
-export { createDebounced } from "./core";
+import { useScope, toObs } from "@primitives/useScope";
+import { createDebounced } from "./core";
+
+export { createDebounced, type DebouncedOptions } from "./core";
+
+// Aliases for hook consumers — single source of truth from core
+export type { DebouncedOptions as UseDebouncedOptions } from "./core";
 
 /**
  * Debounce an Observable value.
  * Creates a read-only Observable that updates only after the source value
  * stops changing for the specified delay.
  *
- * @param value - Source value to debounce. Accepts a plain value or an Observable.
- * @param ms - Debounce delay in milliseconds. Accepts a plain number or an Observable<number>.
- * @param options - `maxWait` to cap maximum delay.
+ * @param source$ - Source Observable to debounce.
+ * @param options - Debounce configuration (ms, maxWait).
  * @returns A ReadonlyObservable that reflects the debounced source value.
  *
  * @example
  * ```tsx
  * const source$ = observable("hello");
- * const debounced$ = useDebounced(source$, 300);
+ * const debounced$ = useDebounced(source$, { ms: 300 });
  * // debounced$.get() updates 300ms after source$ stops changing
  * ```
  */
-export function useDebounced<T>(
-  value: MaybeObservable<T>,
-  ms: MaybeObservable<number> = 200,
-  options: DebounceFilterOptions = {}
-): ReadonlyObservable<T> {
-  const source$ = useMaybeObservable(value);
-  const delay$ = useMaybeObservable(ms);
-
-  const { value$, dispose } = useConstant(() =>
-    createDebounced(
-      source$ as unknown as Observable<T>,
-      delay$ as unknown as Observable<number>,
-      options
-    )
+export type UseDebounced = typeof createDebounced;
+export const useDebounced: UseDebounced = (source$, options) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p);
+      return createDebounced(source$, p$);
+    },
+    (options ?? {}) as Record<string, unknown>
   );
-
-  useUnmount(dispose);
-
-  return value$ as unknown as ReadonlyObservable<T>;
-}
+};

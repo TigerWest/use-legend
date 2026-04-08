@@ -17,7 +17,7 @@ describe("useDebounced() — edge cases", () => {
   it("ms=0 — updates synchronously without delay", () => {
     const source$ = observable("initial");
 
-    const { result } = renderHook(() => useDebounced(source$, 0));
+    const { result } = renderHook(() => useDebounced(source$, { ms: 0 }));
 
     // debounceFilter skips the timer path when ms <= 0 and calls invoke() directly
     act(() => {
@@ -31,7 +31,7 @@ describe("useDebounced() — edge cases", () => {
   it("source changes to same value — debounced$ remains stable", () => {
     const source$ = observable("hello");
 
-    const { result } = renderHook(() => useDebounced(source$, 300));
+    const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
     // Complete the initial debounce cycle so debounced$ is in sync
     act(() => {
@@ -62,7 +62,7 @@ describe("useDebounced() — edge cases", () => {
   it("rapid source changes — intermediate values never appear in debounced$", () => {
     const source$ = observable("initial");
 
-    const { result } = renderHook(() => useDebounced(source$, 300));
+    const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
     const seen: string[] = [];
     result.current.onChange((value) => {

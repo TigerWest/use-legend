@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
+import { observable } from "@legendapp/state";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useAutoReset } from ".";
 
@@ -15,13 +16,12 @@ afterEach(() => {
 describe("useAutoReset() — rerender stability", () => {
   describe("reference stability", () => {
     it("returned Observable reference is stable across re-renders", () => {
-      const { result, rerender } = renderHook(
-        (props) => useAutoReset(props.defaultValue, props.afterMs),
-        { initialProps: { defaultValue: "", afterMs: 500 } }
-      );
+      const source$ = observable("");
+      const afterMs$ = observable(500);
+      const { result, rerender } = renderHook(() => useAutoReset(source$, { afterMs: afterMs$ }));
 
       const first = result.current;
-      rerender({ defaultValue: "", afterMs: 500 });
+      rerender();
       const second = result.current;
 
       expect(first).toBe(second);
@@ -30,10 +30,9 @@ describe("useAutoReset() — rerender stability", () => {
 
   describe("timer persistence", () => {
     it("pending reset timer persists across re-renders", () => {
-      const { result, rerender } = renderHook(
-        (props) => useAutoReset(props.defaultValue, props.afterMs),
-        { initialProps: { defaultValue: "", afterMs: 500 } }
-      );
+      const source$ = observable("");
+      const afterMs$ = observable(500);
+      const { result, rerender } = renderHook(() => useAutoReset(source$, { afterMs: afterMs$ }));
 
       act(() => {
         result.current.set("hello");
@@ -47,7 +46,7 @@ describe("useAutoReset() — rerender stability", () => {
       expect(result.current.get()).toBe("hello");
 
       // Re-render mid-flight — timer must NOT reset
-      rerender({ defaultValue: "", afterMs: 500 });
+      rerender();
 
       // Advance remaining time
       act(() => {
@@ -60,10 +59,9 @@ describe("useAutoReset() — rerender stability", () => {
 
   describe("value accuracy", () => {
     it("value remains accurate after re-render", () => {
-      const { result, rerender } = renderHook(
-        (props) => useAutoReset(props.defaultValue, props.afterMs),
-        { initialProps: { defaultValue: "", afterMs: 500 } }
-      );
+      const source$ = observable("");
+      const afterMs$ = observable(500);
+      const { result, rerender } = renderHook(() => useAutoReset(source$, { afterMs: afterMs$ }));
 
       act(() => {
         result.current.set("hello");
@@ -71,22 +69,21 @@ describe("useAutoReset() — rerender stability", () => {
 
       expect(result.current.get()).toBe("hello");
 
-      rerender({ defaultValue: "", afterMs: 500 });
+      rerender();
 
       expect(result.current.get()).toBe("hello");
     });
 
     it("reset still fires correctly after re-render", () => {
-      const { result, rerender } = renderHook(
-        (props) => useAutoReset(props.defaultValue, props.afterMs),
-        { initialProps: { defaultValue: "default", afterMs: 500 } }
-      );
+      const source$ = observable("default");
+      const afterMs$ = observable(500);
+      const { result, rerender } = renderHook(() => useAutoReset(source$, { afterMs: afterMs$ }));
 
       act(() => {
         result.current.set("changed");
       });
 
-      rerender({ defaultValue: "default", afterMs: 500 });
+      rerender();
 
       act(() => {
         vi.advanceTimersByTime(500);

@@ -1,42 +1,39 @@
-import { observable, observe, type Observable } from "@legendapp/state";
-import type { Disposable, TimerHandle, WidenPrimitive } from "../../types";
+import { type Observable } from "@legendapp/state";
+import { observe, onUnmount } from "@primitives/useScope";
+import { observable } from "@shared/observable";
+import type { DeepMaybeObservable, TimerHandle, WidenPrimitive } from "../../types";
 
-/**
- * Core observable function for auto-reset.
- * Creates an observable that automatically resets to a default value
- * after a specified delay when changed.
- *
- * @param defaultValue$ - Observable holding the default/reset target value.
- * @param afterMs$ - Observable holding the delay in milliseconds before auto-reset.
- * @returns Disposable with writable Observable that auto-resets.
- */
+export interface AutoResetOptions {
+  /** Delay in milliseconds before auto-reset. @default 1000 */
+  afterMs?: number;
+}
+
 export function createAutoReset<T>(
-  defaultValue$: Observable<T>,
-  afterMs$: Observable<number>
-): Disposable & { value$: Observable<WidenPrimitive<T>> } {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see useDebounced for rationale
-  const value$ = observable<any>(defaultValue$.peek());
+  source$: Observable<T>,
+  options?: DeepMaybeObservable<AutoResetOptions>
+): Observable<WidenPrimitive<T>> {
+  const opts$ = observable(options);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- WidenPrimitive requires any for initial value
+  const value$ = observable<any>(source$.peek());
   let timer: TimerHandle;
 
-  const unsub = observe(() => {
+  observe(() => {
     const current = value$.get();
-    const def = defaultValue$.peek();
+    const def = source$.get();
 
     clearTimeout(timer);
 
     if (!Object.is(current, def)) {
-      const ms = afterMs$.get();
+      const ms = opts$.get()?.afterMs ?? 1000;
       timer = setTimeout(() => {
-        value$.set(defaultValue$.peek());
+        value$.set(source$.peek());
       }, ms);
     }
   });
 
-  return {
-    value$: value$ as unknown as Observable<WidenPrimitive<T>>,
-    dispose: () => {
-      clearTimeout(timer);
-      unsub();
-    },
-  };
+  onUnmount(() => {
+    clearTimeout(timer);
+  });
+
+  return value$ as unknown as Observable<WidenPrimitive<T>>;
 }

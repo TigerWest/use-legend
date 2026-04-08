@@ -1,9 +1,8 @@
 "use client";
+import type { Observable } from "@legendapp/state";
 import type { Fn, MaybeObservable, ReadonlyObservable } from "../../types";
-import { useLatest } from "@shared/useLatest";
-import { useConstant } from "@shared/useConstant";
+import { useScope } from "@primitives/useScope";
 import { createComputedWithControl } from "./core";
-import { useUnmount } from "@legendapp/state/react";
 
 export { createComputedWithControl } from "./core";
 
@@ -25,7 +24,7 @@ export { createComputedWithControl } from "./core";
  */
 // Overload: single source
 export function useComputedWithControl<S, T>(
-  source: MaybeObservable<S>,
+  source: Observable<S>,
   fn: (sourceValue: S, prev: T | undefined) => T
 ): { value$: ReadonlyObservable<T>; trigger: Fn };
 
@@ -41,17 +40,15 @@ export function useComputedWithControl<T>(
   source: MaybeObservable<any> | MaybeObservable<any>[],
   fn: (sourceValue: any, prev: T | undefined) => T
 ): { value$: ReadonlyObservable<T>; trigger: Fn } {
-  const fnRef = useLatest(fn);
+  return useScope(
+    (p) => {
+      // p.fn gives the latest fn (replaces useLatest pattern)
 
-  // Wrap fn so core always calls the latest version (survives React re-renders)
-  const fnWrapper = (sourceValue: any, prev: T | undefined) => fnRef.current(sourceValue, prev);
-
-  // Pass source directly — core handles MaybeObservable via peek/isObservable
-  const { value$, trigger, dispose } = useConstant(() =>
-    createComputedWithControl(source as any, fnWrapper)
+      const fnWrapper = (sourceValue: any, prev: T | undefined) =>
+        (p.fn as typeof fn)(sourceValue, prev);
+      const { value$, trigger } = createComputedWithControl(source as any, fnWrapper);
+      return { value$: value$ as unknown as ReadonlyObservable<T>, trigger };
+    },
+    { fn } as Record<string, unknown>
   );
-
-  useUnmount(dispose);
-
-  return { value$: value$ as unknown as ReadonlyObservable<T>, trigger };
 }

@@ -18,9 +18,12 @@ describe("useDebounced() — rerender stability", () => {
     it("returned Observable reference is stable across re-renders", () => {
       const source$ = observable("hello");
 
-      const { result, rerender } = renderHook((props) => useDebounced(props.source, props.ms), {
-        initialProps: { source: source$, ms: 300 },
-      });
+      const { result, rerender } = renderHook(
+        (props) => useDebounced(props.source, { ms: props.ms }),
+        {
+          initialProps: { source: source$, ms: 300 },
+        }
+      );
 
       const first = result.current;
       rerender({ source: source$, ms: 300 });
@@ -32,9 +35,12 @@ describe("useDebounced() — rerender stability", () => {
     it("pending debounce timer persists across re-renders", () => {
       const source$ = observable("initial");
 
-      const { result, rerender } = renderHook((props) => useDebounced(props.source, props.ms), {
-        initialProps: { source: source$, ms: 300 },
-      });
+      const { result, rerender } = renderHook(
+        (props) => useDebounced(props.source, { ms: props.ms }),
+        {
+          initialProps: { source: source$, ms: 300 },
+        }
+      );
 
       // Change source to start a pending debounce timer
       act(() => {
@@ -64,9 +70,12 @@ describe("useDebounced() — rerender stability", () => {
     it("debounced value remains accurate after re-render", () => {
       const source$ = observable("hello");
 
-      const { result, rerender } = renderHook((props) => useDebounced(props.source, props.ms), {
-        initialProps: { source: source$, ms: 300 },
-      });
+      const { result, rerender } = renderHook(
+        (props) => useDebounced(props.source, { ms: props.ms }),
+        {
+          initialProps: { source: source$, ms: 300 },
+        }
+      );
 
       // Complete a full debounce cycle
       act(() => {

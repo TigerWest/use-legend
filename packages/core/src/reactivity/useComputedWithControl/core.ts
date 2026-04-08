@@ -1,6 +1,7 @@
 import { isObservable, observable, type Observable } from "@legendapp/state";
-import type { Disposable, Fn, MaybeObservable } from "../../types";
+import type { Fn, MaybeObservable } from "../../types";
 import { peek } from "@utilities/peek";
+import { onUnmount } from "@primitives/useScope";
 
 /**
  * Core observable function for computed-with-control.
@@ -17,19 +18,19 @@ import { peek } from "@utilities/peek";
 export function createComputedWithControl<S, T>(
   source$: Observable<S>,
   fn: (sourceValue: S, prev: T | undefined) => T
-): Disposable & { value$: Observable<T>; trigger: Fn };
+): { value$: Observable<T>; trigger: Fn };
 
 // Overload: array source
 export function createComputedWithControl<T>(
   source$: MaybeObservable<any>[],
   fn: (sourceValues: any[], prev: T | undefined) => T
-): Disposable & { value$: Observable<T>; trigger: Fn };
+): { value$: Observable<T>; trigger: Fn };
 
 // Implementation
 export function createComputedWithControl<T>(
   source$: MaybeObservable<any> | MaybeObservable<any>[],
   fn: (sourceValue: any, prev: T | undefined) => T
-): Disposable & { value$: Observable<T>; trigger: Fn } {
+): { value$: Observable<T>; trigger: Fn } {
   const readSource = () => (Array.isArray(source$) ? source$.map((s) => peek(s)) : peek(source$));
 
   const value$ = observable<any>(fn(readSource(), undefined));
@@ -47,9 +48,10 @@ export function createComputedWithControl<T>(
     value$.set(fn(readSource(), value$.peek()));
   };
 
+  onUnmount(() => disposers.forEach((d) => d()));
+
   return {
     value$: value$ as unknown as Observable<T>,
     trigger,
-    dispose: () => disposers.forEach((d) => d()),
   };
 }

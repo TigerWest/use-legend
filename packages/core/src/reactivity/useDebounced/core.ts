@@ -1,37 +1,36 @@
-import { observable, observe, type Observable } from "@legendapp/state";
-import type { Disposable } from "../../types";
+import { type Observable } from "@legendapp/state";
+import { observe } from "@primitives/useScope";
+import { observable } from "@shared/observable";
 import { createFilterWrapper, debounceFilter, type DebounceFilterOptions } from "@shared/filters";
+import type { DeepMaybeObservable, ReadonlyObservable } from "../../types";
 
-/**
- * Core observable function for debouncing.
- * Creates an observable that updates only after the source value
- * stops changing for the specified delay.
- *
- * @param source$ - Observable source value to debounce.
- * @param delay$ - Observable debounce delay in milliseconds.
- * @param options - `maxWait` to cap maximum delay.
- * @returns Disposable with an Observable reflecting the debounced value.
- */
+export interface DebouncedOptions extends DebounceFilterOptions {
+  /** Debounce delay in milliseconds. @default 200 */
+  ms?: number;
+}
+
 export function createDebounced<T>(
   source$: Observable<T>,
-  delay$: Observable<number>,
-  options: DebounceFilterOptions = {}
-): Disposable & { value$: Observable<T> } {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see useDebounced for rationale
+  options?: DeepMaybeObservable<DebouncedOptions>
+): ReadonlyObservable<T> {
+  const opts$ = observable(options);
+
+  // Reactive delay — re-evaluates when opts$.ms changes
+  const delay$ = observable(() => opts$.get()?.ms ?? 200);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- initial value from source peek
   const value$ = observable<any>(source$.peek());
 
-  const filter = debounceFilter(delay$, options);
+  // Construction-time only — maxWait is structurally immutable
+  const filter = debounceFilter(delay$, { maxWait: opts$.peek()?.maxWait });
   const debouncedUpdate = createFilterWrapper(filter, (newValue: T) => {
     value$.set(newValue);
   });
 
-  const unsub = observe(() => {
+  observe(() => {
     const current = source$.get();
     debouncedUpdate(current);
   });
 
-  return {
-    value$: value$ as unknown as Observable<T>,
-    dispose: () => unsub(),
-  };
+  return value$ as unknown as ReadonlyObservable<T>;
 }

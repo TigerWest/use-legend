@@ -16,20 +16,20 @@ afterEach(() => {
 describe("useAutoReset()", () => {
   describe("initial value", () => {
     it("initializes with defaultValue", () => {
-      const { result } = renderHook(() => useAutoReset("hello", 1000));
+      const { result } = renderHook(() => useAutoReset(observable("hello"), { afterMs: 1000 }));
 
       expect(result.current.get()).toBe("hello");
     });
 
     it("initializes with Observable defaultValue", () => {
       const default$ = observable("hello");
-      const { result } = renderHook(() => useAutoReset(default$, 1000));
+      const { result } = renderHook(() => useAutoReset(default$, { afterMs: 1000 }));
 
       expect(result.current.get()).toBe("hello");
     });
 
     it("returns an Observable with .get() and .set()", () => {
-      const { result } = renderHook(() => useAutoReset(0, 1000));
+      const { result } = renderHook(() => useAutoReset(observable(0), { afterMs: 1000 }));
 
       expect(typeof result.current.get).toBe("function");
       expect(typeof result.current.set).toBe("function");
@@ -38,7 +38,7 @@ describe("useAutoReset()", () => {
 
   describe("auto-reset behavior", () => {
     it("resets to defaultValue after afterMs when value changes", () => {
-      const { result } = renderHook(() => useAutoReset("", 500));
+      const { result } = renderHook(() => useAutoReset(observable(""), { afterMs: 500 }));
 
       act(() => {
         result.current.set("hello");
@@ -54,7 +54,7 @@ describe("useAutoReset()", () => {
     });
 
     it("does not reset before afterMs elapses", () => {
-      const { result } = renderHook(() => useAutoReset("", 500));
+      const { result } = renderHook(() => useAutoReset(observable(""), { afterMs: 500 }));
 
       act(() => {
         result.current.set("hello");
@@ -74,7 +74,7 @@ describe("useAutoReset()", () => {
     });
 
     it("uses default 1000ms when afterMs not provided", () => {
-      const { result } = renderHook(() => useAutoReset(""));
+      const { result } = renderHook(() => useAutoReset(observable("")));
 
       act(() => {
         result.current.set("hello");
@@ -95,7 +95,7 @@ describe("useAutoReset()", () => {
 
     it("resets to latest default when defaultValue is Observable", () => {
       const default$ = observable("initial");
-      const { result } = renderHook(() => useAutoReset(default$, 500));
+      const { result } = renderHook(() => useAutoReset(default$, { afterMs: 500 }));
 
       act(() => {
         result.current.set("changed");
@@ -116,7 +116,7 @@ describe("useAutoReset()", () => {
 
   describe("timer management", () => {
     it("restarts timer on each new value set", () => {
-      const { result } = renderHook(() => useAutoReset("", 500));
+      const { result } = renderHook(() => useAutoReset(observable(""), { afterMs: 500 }));
 
       act(() => {
         result.current.set("first");
@@ -148,7 +148,7 @@ describe("useAutoReset()", () => {
     });
 
     it("only applies latest value when set multiple times within delay", () => {
-      const { result } = renderHook(() => useAutoReset("", 500));
+      const { result } = renderHook(() => useAutoReset(observable(""), { afterMs: 500 }));
 
       act(() => {
         result.current.set("a");
@@ -170,7 +170,7 @@ describe("useAutoReset()", () => {
     });
 
     it("clears timer when value is manually set back to default", () => {
-      const { result } = renderHook(() => useAutoReset("default", 500));
+      const { result } = renderHook(() => useAutoReset(observable("default"), { afterMs: 500 }));
 
       act(() => {
         result.current.set("changed");
@@ -195,7 +195,7 @@ describe("useAutoReset()", () => {
   describe("reactive afterMs", () => {
     it("Observable<number> afterMs — delay change restarts pending timer", () => {
       const afterMs$ = observable(500);
-      const { result } = renderHook(() => useAutoReset("", afterMs$));
+      const { result } = renderHook(() => useAutoReset(observable(""), { afterMs: afterMs$ }));
 
       act(() => {
         result.current.set("hello");
@@ -224,7 +224,7 @@ describe("useAutoReset()", () => {
 
   describe("unmount cleanup", () => {
     it("does not throw after unmount when timer is pending", () => {
-      const { result, unmount } = renderHook(() => useAutoReset("", 500));
+      const { result, unmount } = renderHook(() => useAutoReset(observable(""), { afterMs: 500 }));
 
       act(() => {
         result.current.set("hello");

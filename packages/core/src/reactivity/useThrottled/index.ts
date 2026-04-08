@@ -1,48 +1,36 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import type { MaybeObservable, ReadonlyObservable } from "../../types";
-import type { ThrottleFilterOptions } from "@shared/filters";
-import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { useConstant } from "@shared/useConstant";
-import { createThrottled } from "./core";
-import { useUnmount } from "@legendapp/state/react";
 
-export { createThrottled } from "./core";
+import { useScope, toObs } from "@primitives/useScope";
+import { createThrottled } from "./core";
+
+export { createThrottled, type ThrottledOptions } from "./core";
+
+// Aliases for hook consumers — single source of truth from core
+export type { ThrottledOptions as UseThrottledOptions } from "./core";
 
 /**
  * Throttle an Observable value.
  * Creates a read-only Observable that updates at most once per interval
  * when the source value changes.
  *
- * @param value - Source value to throttle. Accepts a plain value or an Observable.
- * @param ms - Throttle interval in milliseconds. Accepts a plain number or an Observable<number>.
- * @param options - `edges` for leading/trailing control.
+ * @param source$ - Source Observable to throttle.
+ * @param options - Throttle configuration (ms, edges).
  * @returns A ReadonlyObservable that reflects the throttled source value.
  *
  * @example
  * ```tsx
  * const source$ = observable("hello");
- * const throttled$ = useThrottled(source$, 300);
+ * const throttled$ = useThrottled(source$, { ms: 300 });
  * // throttled$.get() updates at most once per 300ms
  * ```
  */
-export function useThrottled<T>(
-  value: MaybeObservable<T>,
-  ms: MaybeObservable<number> = 200,
-  options: ThrottleFilterOptions = {}
-): ReadonlyObservable<T> {
-  const source$ = useMaybeObservable(value);
-  const interval$ = useMaybeObservable(ms);
-
-  const { value$, dispose } = useConstant(() =>
-    createThrottled(
-      source$ as unknown as Observable<T>,
-      interval$ as unknown as Observable<number>,
-      options
-    )
+export type UseThrottled = typeof createThrottled;
+export const useThrottled: UseThrottled = (source$, options) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p);
+      return createThrottled(source$, p$);
+    },
+    (options ?? {}) as Record<string, unknown>
   );
-
-  useUnmount(dispose);
-
-  return value$ as unknown as ReadonlyObservable<T>;
-}
+};

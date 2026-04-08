@@ -1,42 +1,35 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import type { MaybeObservable, WidenPrimitive } from "../../types";
-import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { useConstant } from "@shared/useConstant";
-import { createAutoReset } from "./core";
-import { useUnmount } from "@legendapp/state/react";
 
-export { createAutoReset } from "./core";
+import { useScope, toObs } from "@primitives/useScope";
+import { createAutoReset } from "./core";
+
+export { createAutoReset, type AutoResetOptions } from "./core";
+
+// Aliases for hook consumers — single source of truth from core
+export type { AutoResetOptions as UseAutoResetOptions } from "./core";
 
 /**
  * Observable that automatically resets to a default value after a specified delay.
  * Each time the value changes, the reset timer restarts.
  *
- * @param defaultValue - Initial value and reset target. Accepts a plain value or an Observable.
- * @param afterMs - Delay in milliseconds before auto-reset. Accepts a plain number or an Observable<number>. @default 1000
- * @returns A writable Observable that auto-resets to defaultValue after the delay.
+ * @param source$ - Source Observable providing the default/reset target value.
+ * @param options - Configuration options.
+ * @returns A writable Observable that auto-resets to source$ value after the delay.
  *
  * @example
  * ```tsx
- * const message$ = useAutoReset("", 2000);
+ * const defaultValue$ = observable("");
+ * const message$ = useAutoReset(defaultValue$, { afterMs: 2000 });
  * message$.set("Saved!"); // resets to "" after 2 seconds
  * ```
  */
-export function useAutoReset<T>(
-  defaultValue: MaybeObservable<T>,
-  afterMs: MaybeObservable<number> = 1000
-): Observable<WidenPrimitive<T>> {
-  const defaultValue$ = useMaybeObservable(defaultValue);
-  const afterMs$ = useMaybeObservable(afterMs);
-
-  const { value$, dispose } = useConstant(() =>
-    createAutoReset(
-      defaultValue$ as unknown as Observable<T>,
-      afterMs$ as unknown as Observable<number>
-    )
+export type UseAutoReset = typeof createAutoReset;
+export const useAutoReset: UseAutoReset = (source$, options) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p);
+      return createAutoReset(source$, p$);
+    },
+    (options ?? {}) as Record<string, unknown>
   );
-
-  useUnmount(dispose);
-
-  return value$;
-}
+};

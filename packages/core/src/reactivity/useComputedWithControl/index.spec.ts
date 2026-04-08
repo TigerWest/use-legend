@@ -153,7 +153,9 @@ describe("useComputedWithControl()", () => {
 
   describe("plain source", () => {
     it("computes with plain (non-Observable) source value", () => {
-      const { result } = renderHook(() => useComputedWithControl(42, (val: number) => val * 2));
+      const { result } = renderHook(() =>
+        useComputedWithControl(observable(42), (val: number) => val * 2)
+      );
       expect(result.current.value$.get()).toBe(84);
     });
   });

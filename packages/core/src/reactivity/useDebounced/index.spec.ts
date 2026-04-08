@@ -17,14 +17,14 @@ describe("useDebounced()", () => {
   describe("initial value", () => {
     it("initializes with current source value", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useDebounced(source$, 300));
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       expect(result.current.get()).toBe("hello");
     });
 
     it("returns a ReadonlyObservable (.get() works immediately)", () => {
       const source$ = observable(42);
-      const { result } = renderHook(() => useDebounced(source$, 300));
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       expect(typeof result.current.get).toBe("function");
       expect(result.current.get()).toBe(42);
@@ -34,7 +34,7 @@ describe("useDebounced()", () => {
   describe("debounced updates", () => {
     it("updates debounced value after ms delay when source changes", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useDebounced(source$, 300));
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       act(() => {
         source$.set("updated");
@@ -51,7 +51,7 @@ describe("useDebounced()", () => {
 
     it("does not update debounced value before ms elapses", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useDebounced(source$, 300));
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       act(() => {
         source$.set("updated");
@@ -72,7 +72,7 @@ describe("useDebounced()", () => {
 
     it("only applies latest value when source changes multiple times within delay", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useDebounced(source$, 300));
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       act(() => {
         source$.set("a");
@@ -116,7 +116,7 @@ describe("useDebounced()", () => {
   describe("options", () => {
     it("maxWait — forces update after maxWait ms even with continuous source changes", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useDebounced(source$, 300, { maxWait: 500 }));
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300, maxWait: 500 }));
 
       // keep resetting the debounce timer every 100ms
       act(() => {
@@ -147,7 +147,7 @@ describe("useDebounced()", () => {
   describe("reactive source (Observable)", () => {
     it("Observable<T> source — tracks changes reactively", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useDebounced(source$, 300));
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       act(() => {
         source$.set("world");
@@ -161,7 +161,8 @@ describe("useDebounced()", () => {
     });
 
     it("plain T source — returns stable debounced value", () => {
-      const { result } = renderHook(() => useDebounced("hello", 300));
+      const source$ = observable("hello");
+      const { result } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       expect(result.current.get()).toBe("hello");
 
@@ -178,7 +179,7 @@ describe("useDebounced()", () => {
     it("Observable<number> ms — delay changes apply to subsequent debounces", () => {
       const source$ = observable("hello");
       const ms$ = observable(300);
-      const { result } = renderHook(() => useDebounced(source$, ms$));
+      const { result } = renderHook(() => useDebounced(source$, { ms: ms$ }));
 
       // first call with ms=300
       act(() => {
@@ -219,7 +220,7 @@ describe("useDebounced()", () => {
   describe("unmount cleanup", () => {
     it("does not throw errors after unmount when pending debounce timer fires", () => {
       const source$ = observable("hello");
-      const { result, unmount } = renderHook(() => useDebounced(source$, 300));
+      const { result, unmount } = renderHook(() => useDebounced(source$, { ms: 300 }));
 
       act(() => {
         source$.set("updated");

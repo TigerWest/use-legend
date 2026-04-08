@@ -17,14 +17,14 @@ describe("useThrottled()", () => {
   describe("initial value", () => {
     it("initializes with current source value", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       expect(result.current.get()).toBe("hello");
     });
 
     it("returns a ReadonlyObservable (.get() works immediately)", () => {
       const source$ = observable(42);
-      const { result } = renderHook(() => useThrottled(source$, 300));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       expect(typeof result.current.get).toBe("function");
       expect(result.current.get()).toBe(42);
@@ -34,7 +34,7 @@ describe("useThrottled()", () => {
   describe("throttled updates", () => {
     it("updates immediately on source change after throttle window expires (leading edge)", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       // The initial useObserve call consumes the leading slot.
       // Let the throttle window expire so the leading slot resets.
@@ -52,7 +52,7 @@ describe("useThrottled()", () => {
 
     it("rate-limits rapid source changes to one per interval", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       // Expire initial window
       act(() => {
@@ -78,7 +78,7 @@ describe("useThrottled()", () => {
 
     it("applies trailing update after interval when source changed during window", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       // Expire initial window
       act(() => {
@@ -139,7 +139,7 @@ describe("useThrottled()", () => {
 
     it("source change within initial throttle window goes through trailing", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       // Source change immediately after mount — within initial throttle window
       act(() => {
@@ -161,7 +161,7 @@ describe("useThrottled()", () => {
   describe("options", () => {
     it("edges: ['leading'] — updates only on leading edge", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300, { edges: ["leading"] }));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300, edges: ["leading"] }));
 
       // Expire initial window
       act(() => {
@@ -188,7 +188,7 @@ describe("useThrottled()", () => {
 
     it("edges: ['trailing'] — updates only after interval ends", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300, { edges: ["trailing"] }));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300, edges: ["trailing"] }));
 
       act(() => {
         source$.set("a"); // no leading fire
@@ -209,7 +209,7 @@ describe("useThrottled()", () => {
   describe("reactive source (Observable)", () => {
     it("Observable<T> source — tracks changes reactively", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useThrottled(source$, 300));
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       // Expire initial window
       act(() => {
@@ -224,7 +224,8 @@ describe("useThrottled()", () => {
     });
 
     it("plain T source — returns stable throttled value", () => {
-      const { result } = renderHook(() => useThrottled("hello", 300));
+      const source$ = observable("hello");
+      const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       expect(result.current.get()).toBe("hello");
 
@@ -241,7 +242,7 @@ describe("useThrottled()", () => {
     it("Observable<number> ms — interval updates when observable changes", () => {
       const source$ = observable("hello");
       const ms$ = observable(100);
-      const { result } = renderHook(() => useThrottled(source$, ms$));
+      const { result } = renderHook(() => useThrottled(source$, { ms: ms$ }));
 
       // Expire initial window
       act(() => {
@@ -300,7 +301,7 @@ describe("useThrottled()", () => {
   describe("unmount cleanup", () => {
     it("does not throw errors after unmount when pending throttle timer fires", () => {
       const source$ = observable("hello");
-      const { unmount } = renderHook(() => useThrottled(source$, 300));
+      const { unmount } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
       // Source change within initial window — queued for trailing
       act(() => {

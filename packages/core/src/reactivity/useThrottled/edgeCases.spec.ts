@@ -17,7 +17,7 @@ describe("useThrottled() — edge cases", () => {
   it("ms=0 — updates synchronously without delay", () => {
     const source$ = observable("initial");
 
-    const { result } = renderHook(() => useThrottled(source$, 0));
+    const { result } = renderHook(() => useThrottled(source$, { ms: 0 }));
 
     act(() => {
       source$.set("immediate");
@@ -29,7 +29,7 @@ describe("useThrottled() — edge cases", () => {
   it("source changes to same value — throttled$ remains stable", () => {
     const source$ = observable("hello");
 
-    const { result } = renderHook(() => useThrottled(source$, 300));
+    const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
     // Wait for initial throttle window to pass
     act(() => {
@@ -60,7 +60,7 @@ describe("useThrottled() — edge cases", () => {
   it("rapid source changes — leading captures first, trailing captures last", () => {
     const source$ = observable("initial");
 
-    const { result } = renderHook(() => useThrottled(source$, 300));
+    const { result } = renderHook(() => useThrottled(source$, { ms: 300 }));
 
     // Expire initial window
     act(() => {

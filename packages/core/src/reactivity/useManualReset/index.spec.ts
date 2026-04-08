@@ -7,7 +7,7 @@ import { useManualReset } from ".";
 describe("useManualReset()", () => {
   describe("initial value", () => {
     it("initializes with defaultValue", () => {
-      const { result } = renderHook(() => useManualReset("hello"));
+      const { result } = renderHook(() => useManualReset(observable("hello")));
 
       expect(result.current.value$.get()).toBe("hello");
     });
@@ -20,7 +20,7 @@ describe("useManualReset()", () => {
     });
 
     it("returns { value$, reset } with correct types", () => {
-      const { result } = renderHook(() => useManualReset(0));
+      const { result } = renderHook(() => useManualReset(observable(0)));
 
       expect(typeof result.current.value$.get).toBe("function");
       expect(typeof result.current.value$.set).toBe("function");
@@ -30,7 +30,7 @@ describe("useManualReset()", () => {
 
   describe("reset behavior", () => {
     it("reset() restores to default value", () => {
-      const { result } = renderHook(() => useManualReset("default"));
+      const { result } = renderHook(() => useManualReset(observable("default")));
 
       act(() => {
         result.current.value$.set("changed");
@@ -46,7 +46,7 @@ describe("useManualReset()", () => {
     });
 
     it("reset() works after multiple value changes", () => {
-      const { result } = renderHook(() => useManualReset(0));
+      const { result } = renderHook(() => useManualReset(observable(0)));
 
       act(() => {
         result.current.value$.set(1);
@@ -88,7 +88,7 @@ describe("useManualReset()", () => {
     });
 
     it("reset() can be called multiple times", () => {
-      const { result } = renderHook(() => useManualReset("default"));
+      const { result } = renderHook(() => useManualReset(observable("default")));
 
       act(() => {
         result.current.value$.set("a");
@@ -110,7 +110,7 @@ describe("useManualReset()", () => {
 
   describe("value$ behavior", () => {
     it("value$ is writable via .set()", () => {
-      const { result } = renderHook(() => useManualReset(""));
+      const { result } = renderHook(() => useManualReset(observable("")));
 
       act(() => {
         result.current.value$.set("hello");
@@ -120,7 +120,7 @@ describe("useManualReset()", () => {
     });
 
     it("value$ supports functional updater", () => {
-      const { result } = renderHook(() => useManualReset(0));
+      const { result } = renderHook(() => useManualReset(observable(0)));
 
       act(() => {
         result.current.value$.set((v) => v + 1);
@@ -136,7 +136,7 @@ describe("useManualReset()", () => {
     });
 
     it("value$ supports boolean toggle pattern", () => {
-      const { result } = renderHook(() => useManualReset(false));
+      const { result } = renderHook(() => useManualReset(observable(false)));
 
       act(() => {
         result.current.value$.set(true);
@@ -154,7 +154,7 @@ describe("useManualReset()", () => {
 
   describe("unmount", () => {
     it("no errors after unmount", () => {
-      const { result, unmount } = renderHook(() => useManualReset(""));
+      const { result, unmount } = renderHook(() => useManualReset(observable("")));
 
       act(() => {
         result.current.value$.set("hello");

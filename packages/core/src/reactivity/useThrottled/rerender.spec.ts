@@ -18,9 +18,12 @@ describe("useThrottled() — rerender stability", () => {
     it("returned Observable reference is stable across re-renders", () => {
       const source$ = observable("hello");
 
-      const { result, rerender } = renderHook((props) => useThrottled(props.source, props.ms), {
-        initialProps: { source: source$, ms: 300 },
-      });
+      const { result, rerender } = renderHook(
+        (props) => useThrottled(props.source, { ms: props.ms }),
+        {
+          initialProps: { source: source$, ms: 300 },
+        }
+      );
 
       const first = result.current;
       rerender({ source: source$, ms: 300 });
@@ -32,9 +35,12 @@ describe("useThrottled() — rerender stability", () => {
     it("pending throttle timer persists across re-renders", () => {
       const source$ = observable("initial");
 
-      const { result, rerender } = renderHook((props) => useThrottled(props.source, props.ms), {
-        initialProps: { source: source$, ms: 300 },
-      });
+      const { result, rerender } = renderHook(
+        (props) => useThrottled(props.source, { ms: props.ms }),
+        {
+          initialProps: { source: source$, ms: 300 },
+        }
+      );
 
       // Source change within initial window — queued for trailing
       act(() => {
@@ -64,9 +70,12 @@ describe("useThrottled() — rerender stability", () => {
     it("throttled value remains accurate after re-render", () => {
       const source$ = observable("hello");
 
-      const { result, rerender } = renderHook((props) => useThrottled(props.source, props.ms), {
-        initialProps: { source: source$, ms: 300 },
-      });
+      const { result, rerender } = renderHook(
+        (props) => useThrottled(props.source, { ms: props.ms }),
+        {
+          initialProps: { source: source$, ms: 300 },
+        }
+      );
 
       // Expire initial window
       act(() => {
