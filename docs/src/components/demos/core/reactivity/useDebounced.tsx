@@ -4,7 +4,7 @@ import { DemoPanel, DemoShell, StatCard, demoClasses } from "@demos/_shared";
 
 export default function UseDebouncedDemo() {
   const source$ = useObservable("");
-  const debounced$ = useDebounced(source$, 500, { maxWait: 1000 });
+  const debounced$ = useDebounced(source$, { maxWait: 1000, ms: 500 });
 
   return (
     <DemoShell eyebrow="Debounce">

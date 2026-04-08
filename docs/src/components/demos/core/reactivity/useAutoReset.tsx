@@ -7,9 +7,11 @@ import {
   ValueToken,
   demoClasses,
 } from "@demos/_shared";
+import { useObservable } from "@legendapp/state/react";
 
 export default function UseAutoResetDemo() {
-  const message$ = useAutoReset("", 2000);
+  const source = useObservable("");
+  const message$ = useAutoReset(source, { afterMs: 2000 });
 
   return (
     <DemoShell eyebrow="Auto Reset">

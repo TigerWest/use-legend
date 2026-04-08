@@ -4,7 +4,7 @@ import { DemoPanel, DemoShell, StatCard, demoClasses } from "@demos/_shared";
 
 export default function UseThrottledDemo() {
   const source$ = useObservable("");
-  const throttled$ = useThrottled(source$, 500);
+  const throttled$ = useThrottled(source$, { ms: 500 });
 
   return (
     <DemoShell eyebrow="Throttle">
