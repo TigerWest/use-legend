@@ -28,70 +28,119 @@ packages/core/src/
 
 ### Core Function Rules
 
-| Rule                        | Description                                                                                              |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **No React**                | Never import `react` or `@legendapp/state/react`                                                         |
-| **Observable args**         | Reactive parameters use `Observable<T>` (hook converts via `useMaybeObservable`)                         |
-| **`observe()` only**        | Use `observe()` from `@legendapp/state`, not `useObserve()`                                              |
-| **Return `Disposable`**     | Every core function returns `Disposable & { ... }` — all subscriptions/timers cleaned up via `dispose()` |
-| **Observable results**      | Output values are `Observable<T>` — no additional wrapping needed in hook                                |
-| **Plain non-reactive opts** | Mount-time-only settings (edges, maxWait) are plain values, captured in closure                          |
+| Rule                                    | Description                                                                                                                                                                                           |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **No React**                            | Never import `react` or `@legendapp/state/react`                                                                                                                                                      |
+| **`observe()` only**                    | Use `observe()` from `@primitives/useScope`, not `useObserve()`                                                                                                                                       |
+| **Same options type as hook**           | Accept `DeepMaybeObservable<Options>` — the same type the hook receives. Core decides how to consume it.                                                                                              |
+| **Reactive read → `opts$.get().field`** | Use `opts$.get().field` inside `observe()` or computed observables. Avoids the JSON serialization error that occurs when calling `.get()` on a function-typed child observable (`opts$.field.get()`). |
+| **Non-reactive read → `opts$.peek()`**  | Use `opts$.peek()?.field` for construction-time-only reads — no separate `rawOpts` snapshot needed.                                                                                                   |
+| **Computed returning functions**        | Wrap returned objects containing functions with `ObservableHint.opaque({...})` to prevent Legend-State from JSON-comparing function values.                                                           |
+| **Observable results**                  | Return `Observable<T>` output — no additional wrapping needed in the hook layer.                                                                                                                      |
+| **Cleanup via `onUnmount`**             | Register cleanup with `onUnmount()` from `@primitives/useScope` — no need to return `dispose` in the result.                                                                                          |
+| **Setup via `onMount`**                 | Register post-mount setup with `onMount()` — return a cleanup function from the callback for setup+cleanup pairs.                                                                                     |
+| **Layout setup via `onBeforeMount`**    | Register pre-paint setup with `onBeforeMount()` — useLayoutEffect timing.                                                                                                                             |
 
 ```ts
-import { type Observable, observe, observable } from "@legendapp/state";
-import type { Disposable } from "../../types";
+import { type Observable, observable } from "@legendapp/state";
+import { observe, onUnmount } from "@primitives/useScope";
+import type { DeepMaybeObservable } from "../../types";
 
 function createDebounced<T>(
   source$: Observable<T>,
-  delay$: Observable<number>,
-  options?: DebounceOptions // non-reactive → plain
-): Disposable & { value$: Observable<T> } {
+  options?: DeepMaybeObservable<DebounceOptions> // same type as hook
+): { value$: Observable<T> } {
+  // Needs change detection → wrap with observable(). Auto-derefs plain, per-field, or outer Observable.
+  const opts$ = observable(options);
   const value$ = observable<T>(source$.peek());
 
-  const unsub = observe(() => {
-    const val = source$.get(); // reactive dep
-    const ms = delay$.get(); // reactive dep
+  observe(() => {
+    const val = source$.get();
+    const ms = opts$.delay.get(); // reactive — re-runs when opts$.delay changes
     // debounce logic...
     value$.set(val);
   });
 
-  return {
-    value$,
-    dispose: () => unsub(),
-  };
+  onUnmount(() => {
+    /* cleanup timers, subscriptions, etc. */
+  });
+
+  // Construction-time only → peek whole object, then access field (no rawOpts needed)
+  // const capacity = opts$.peek()?.capacity;
+
+  return { value$ }; // no dispose — cleanup registered via onUnmount
 }
 ```
 
 ### Hook Wrapper Rules
 
-| Rule                                 | Description                                                               |
-| ------------------------------------ | ------------------------------------------------------------------------- |
-| **`useMaybeObservable()`**           | Convert `MaybeObservable<T>` / `DeepMaybeObservable<T>` → `Observable<T>` |
-| **`useConstant(() => coreFn(...))`** | Call core function exactly once — stable across re-renders                |
-| **`useUnmount(dispose)`**            | Cleanup on unmount (or `useEffect(() => dispose, [dispose])`)             |
-| **Preserve public API**              | Return type stays the same — no breaking changes                          |
+| Rule                        | Description                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| **`useScope((p) => ...)`**  | Factory runs exactly once at mount — stable across re-renders                                   |
+| **`toObs(p)`**              | Convert ReactiveProps proxy to `Observable<Props>` — prop changes flow reactively into core     |
+| **Pass `toObs(p)` to core** | Core accepts `DeepMaybeObservable`, so `Observable<Props>` from `toObs` passes through directly |
+| **No `dispose()` needed**   | Cleanup is registered via `onUnmount` inside the scope — hook just returns the factory result   |
+| **Preserve public API**     | Return type stays the same — no breaking changes                                                |
+| **Lifecycle functions**     | `onMount`, `onUnmount`, `onBeforeMount` are available inside the factory for lifecycle control  |
 
 ```ts
-import { useMaybeObservable } from "../../reactivity/useMaybeObservable";
-import { useConstant } from "@shared/useConstant";
-import { useUnmount } from "@legendapp/state/react";
+import { useScope, toObs } from "@primitives/useScope";
 import { createDebounced } from "./core";
 
 export function useDebounced<T>(
   value: MaybeObservable<T>,
   ms: MaybeObservable<number> = 200,
-  options?: DebounceOptions
+  options?: DeepMaybeObservable<DebounceOptions>
 ): ReadonlyObservable<T> {
-  const source$ = useMaybeObservable(value);
-  const delay$ = useMaybeObservable(ms);
-
-  const { value$, dispose } = useConstant(() => createDebounced(source$, delay$, options));
-
-  useUnmount(dispose);
-
-  return value$ as ReadonlyObservable<T>;
+  return useScope(
+    (args, opts) => {
+      const args$ = toObs(args);
+      const opts$ = toObs(opts, { onCallback: "function" });
+      // args$ and opts$ are Observable<Props> — pass directly as DeepMaybeObservable
+      const result = createDebounced(source$, args$, opts$);
+      onMount(() => {
+        /* post-mount setup */
+      });
+      return result.value$ as ReadonlyObservable<T>;
+    },
+    { value, ms }, // reactive scalar args
+    options ?? {} // options pass-through
+  );
 }
 ```
+
+### Type Reuse — Derive Hook Types from Core
+
+When the hook's options and return type match the core function exactly, derive them rather than redefining.
+
+```ts
+// ❌ Bad — duplicates core types under different names
+export interface UseManualHistoryOptions<Raw, Serialized = Raw> {
+  capacity?: number;
+  dump?: (value: Raw) => Serialized;
+  // ... identical to ManualHistoryOptions
+}
+
+// ✅ Good — re-export or alias core types directly
+export type { ManualHistoryOptions as UseManualHistoryOptions } from "./core";
+
+// Hook type derived from core function signature
+export type UseManualHistory = typeof createManualHistory;
+export const useManualHistory: UseManualHistory = (source$, options) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p, { dump: "function", parse: "function" });
+      return createManualHistory(source$, p$);
+    },
+    (options ?? {}) as Record<string, unknown>
+  );
+};
+```
+
+This ensures a single source of truth — option and return types never drift between core and hook.
+
+> **Prerequisite:** Core function must not return `dispose` (use `onUnmount` for cleanup instead).
+> When `dispose` is absent from the core return, `typeof createX` is a direct match for the hook type.
 
 ### Naming Convention
 
@@ -108,12 +157,99 @@ export function useDebounced<T>(
 Core functions in the `observe` category use `observe*` naming instead of `create*`.
 These functions are also exported as public framework-agnostic API, making the `observe` verb more natural.
 
-| Core file | Core function | Hook |
-|-----------|---------------|------|
-| `observe/useWatch/core.ts` | `watch()` | `useWatch()` |
+| Core file                              | Core function         | Hook                     |
+| -------------------------------------- | --------------------- | ------------------------ |
+| `observe/useWatch/core.ts`             | `watch()`             | `useWatch()`             |
 | `observe/useObserveWithFilter/core.ts` | `observeWithFilter()` | `useObserveWithFilter()` |
-| `observe/useObserveDebounced/core.ts` | `observeDebounced()` | `useObserveDebounced()` |
-| `observe/useObserveThrottled/core.ts` | `observeThrottled()` | `useObserveThrottled()` |
+| `observe/useObserveDebounced/core.ts`  | `observeDebounced()`  | `useObserveDebounced()`  |
+| `observe/useObserveThrottled/core.ts`  | `observeThrottled()`  | `useObserveThrottled()`  |
+
+---
+
+## Lifecycle — `useScope`
+
+`useScope` replaces the old `useConstant + useMount/useUnmount` combination with a single scope-based lifecycle.
+
+### Deprecated Hooks
+
+| Old                  | Replacement                          |
+| -------------------- | ------------------------------------ |
+| `useMaybeObservable` | `toObs(p)` — Legend-State auto-deref |
+| `useLatest`          | `p.field` — raw latest from props    |
+| `useConstant`        | `useScope` factory                   |
+
+### Lifecycle API
+
+| API             | Import from            | Timing                         |
+| --------------- | ---------------------- | ------------------------------ |
+| `observe`       | `@primitives/useScope` | reactive, scope auto-cleanup   |
+| `onMount`       | `@primitives/useScope` | useEffect — after mount        |
+| `onUnmount`     | `@primitives/useScope` | unmount-only cleanup           |
+| `onBeforeMount` | `@primitives/useScope` | useLayoutEffect — before paint |
+
+### Lifecycle Mapping from Old Patterns
+
+| Old pattern                                    | useScope equivalent                           | Timing                       |
+| ---------------------------------------------- | --------------------------------------------- | ---------------------------- |
+| `useLayoutEffect(() => cb(), [])`              | `onBeforeMount(cb)`                           | layout effect, before paint  |
+| `useMount(cb)`                                 | `onMount(cb)`                                 | effect, after mount          |
+| `useMount(() => { setup(); return cleanup; })` | `onMount(() => { setup(); return cleanup; })` | setup + cleanup pair         |
+| `useUnmount(cb)`                               | `onUnmount(cb)`                               | unmount-only cleanup         |
+| `observe()` from `@legendapp/state`            | `observe()` from `@primitives/useScope`       | reactive, scope auto-cleanup |
+
+> **`observe` import**: Use `observe` from `@primitives/useScope`, not `@legendapp/state`.
+> Only the scoped version is automatically registered for cleanup.
+
+### `onMount` vs `onUnmount`
+
+```ts
+// setup + cleanup pair → return cleanup from onMount
+onMount(() => {
+  const sub = source$.onChange(handler);
+  return () => sub();
+});
+
+// cleanup only → use onUnmount
+onUnmount(() => {
+  result.dispose();
+});
+```
+
+### `onBeforeMount` Use Cases
+
+Use when DOM measurement or layout-based setup must happen before paint.
+
+```ts
+useScope(() => {
+  onBeforeMount(() => {
+    // useLayoutEffect timing — before paint
+    // DOM measurement, scroll position restore, CSS variable setup
+  });
+
+  onMount(() => {
+    // useEffect timing — after mount
+    const sub = source$.onChange(handler);
+    return () => sub(); // setup + cleanup pair
+  });
+
+  onUnmount(() => {
+    // cleanup only
+    resource.release();
+  });
+});
+```
+
+> **Note**: `onMount`/`onUnmount` only run inside `useScope`'s `useEffect`.
+> They do not fire from a bare `scope.run()` call.
+
+### Related Files
+
+| File                                                     | Role                                    |
+| -------------------------------------------------------- | --------------------------------------- |
+| `packages/core/src/primitives/useScope/index.ts`         | `useScope` implementation               |
+| `packages/core/src/primitives/useScope/effectScope.ts`   | `onMount`, `onUnmount`, `onBeforeMount` |
+| `packages/core/src/primitives/useScope/observe.ts`       | scope-aware `observe`                   |
+| `packages/core/src/primitives/useScope/reactiveProps.ts` | `toObs`, `ReactiveProps`                |
 
 ---
 
@@ -143,33 +279,39 @@ These are **pure functions** — usable in both core functions and hooks.
 ```ts
 import { getElement, peekElement } from "../useRef$";
 
-function createElementSize(target: MaybeElement): Disposable & { size$: Observable<Size> } {
+function createElementSize(target: MaybeElement): { size$: Observable<Size> } {
   const size$ = observable({ width: 0, height: 0 });
 
-  const unsub = observe(() => {
+  observe(() => {
     const el = getElement(target); // reactive tracking registered
     if (!el || !(el instanceof HTMLElement)) return;
     // ResizeObserver setup...
   });
 
-  return { size$, dispose: () => unsub() };
+  onUnmount(() => {
+    /* disconnect observer */
+  });
+
+  return { size$ }; // no dispose — cleanup via onUnmount
 }
 ```
 
-#### In a Hook (uses `useObserve`)
+#### In a Hook (uses `useScope`)
 
 ```ts
 import { getElement, peekElement, isRef$ } from "../useRef$";
 
 function useMyHook(element: MaybeElement) {
-  useObserve(() => {
-    // Reactive read — registers tracking dependency on Ref$ or Observable element
-    const el = getElement(element);
-    if (el) setup(el);
-  });
+  return useScope(() => {
+    observe(() => {
+      // Reactive read — registers tracking dependency on Ref$ or Observable element
+      const el = getElement(element);
+      if (el) setup(el);
+    });
 
-  // Non-reactive read — use inside setup() callback (called from useObserve)
-  const el = peekElement(element);
+    // Non-reactive read
+    const el = peekElement(element);
+  });
 }
 ```
 
@@ -178,11 +320,10 @@ function useMyHook(element: MaybeElement) {
 When wrapping a core function, pass `MaybeElement` as-is — no conversion needed:
 
 ```ts
-export function useElementSize(target: MaybeElement, options?: ElementSizeOptions) {
-  const { size$, dispose } = useConstant(() => createElementSize(target, options));
-  useUnmount(dispose);
-  return size$;
-}
+export type UseElementSize = typeof createElementSize;
+export const useElementSize: UseElementSize = (target, options) => {
+  return useScope(() => createElementSize(target, options));
+};
 ```
 
 ### Creating Ref$ Refs in Components
@@ -226,25 +367,34 @@ because it handles opaque wrapping automatically.
 
 ## Rule 2 — Options Parameters: Core vs Hook
 
-### Core Function — `Observable<T>` directly
+### Core Function — `DeepMaybeObservable<T>` (same as hook)
 
-Core functions receive reactive parameters as `Observable<T>`. Non-reactive options use plain types.
-`DeepMaybeObservable` is **not** used in core — it is a hook-layer concern.
+Core functions use the **same** options type as the hook — `DeepMaybeObservable<Options>`.
+Core wraps options with `observable(options)` at the top of the function body.
+This means callers (hooks or plain JS) can pass plain objects, per-field Observables, or outer Observables without any conversion layer.
 
 ```ts
-// Core — reactive args as Observable, non-reactive as plain
-interface DebounceOptions { maxWait?: number; }
+// Core — same options type as hook, wrap with observable()
+interface MyHookOptions {
+  maxWait?: number;
+  enabled?: boolean;
+}
 
-function createDebounced<T>(
-  source$: Observable<T>,         // reactive → Observable
-  delay$: Observable<number>,     // reactive → Observable
-  options?: DebounceOptions       // non-reactive → plain
-): Disposable & { value$: Observable<T> } { ... }
+function createMyUtil<T>(
+  source$: Observable<T>,
+  delay$: Observable<number>,
+  options?: DeepMaybeObservable<MyHookOptions>
+): { value$: Observable<T> } {
+  const opts$ = observable(options); // always wrap — handles plain, per-field, or outer Observable
+  // Reactive read → opts$.get().field inside observe()
+  // Construction-time read → opts$.peek()?.field
+}
 ```
 
-### Hook Wrapper — `DeepMaybeObservable<T>`
+### Hook Wrapper — `DeepMaybeObservable<T>` (passes through to core)
 
-When designing a hook function, define the options interface with **plain types** and wrap the parameter with `DeepMaybeObservable<T>`.
+Define the options interface with **plain types** and wrap the parameter with `DeepMaybeObservable<T>`.
+Pass `options` directly to the core function — no conversion needed.
 
 ```ts
 // ❌ Bad — per-field MaybeObservable in the interface
@@ -252,55 +402,186 @@ interface UseMyHookOptions {
   enabled?: MaybeObservable<boolean>;
   rootMargin?: MaybeObservable<string>;
 }
-function useMyHook(options?: MaybeObservable<UseMyHookOptions>) { ... }
 
 // ✅ Good — plain interface, DeepMaybeObservable on the parameter
 interface UseMyHookOptions {
   enabled?: boolean;
   rootMargin?: string;
 }
-function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) { ... }
-```
 
-### ❌ Anti-pattern — One-time read outside reactive context
-
-```ts
-// ❌ NEVER do this — snapshot at mount, changes silently ignored
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts = isObservable(options) ? options.get() : options; // snapshot!
-  setup(opts?.rootMargin); // Observable changes after mount are invisible
+  return useScope(() => createMyUtil(source$, options)); // options passed as-is
 }
 ```
 
-`get()` and `.get()` outside a reactive context (`useObservable`, `useObserve`, `computed`)
-produce a **one-time snapshot**. Observable changes after mount are silently ignored.
-
----
-
-### Hook Standard Pattern — `useMaybeObservable(options, transform?)`
-
-`useMaybeObservable` normalizes `DeepMaybeObservable<T>` into a stable computed
-`Observable<T | undefined>`. Use it at the top of every hook that accepts `DeepMaybeObservable` options.
-The resulting `Observable` is then passed to the core function via `useConstant`.
+### ❌ Anti-pattern — Converting options before passing to core
 
 ```ts
-import { useMaybeObservable } from "../reactivity/useMaybeObservable";
-
+// ❌ NEVER do this — snapshot at hook level loses reactivity
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useMaybeObservable(options);
-  //
-  // Outer Observable case:  get(options$) → dep registered on options$
-  //                         child-field notifications propagate via parent dep
-  // Per-field case:         Legend-State auto-derefs inner Observables
-  //                         opts$.rootMargin.get() returns "0px", not Observable<string>
-  //                         Changes to rootMargin$ ARE reflected in opts$.rootMargin
-
-  useObserve(() => {
-    const rootMargin = opts$.rootMargin.get();
-    const enabled = opts$.enabled.get() ?? true;
-    if (enabled) setup(rootMargin);
-  });
+  const rawOpts = isObservable(options) ? options.peek() : options; // snapshot in hook!
+  return useScope(() => createMyUtil(source$, rawOpts)); // rawOpts is stale
 }
+
+// ✅ Pass options as scope param — toObs(p) handles reactivity
+function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
+  return useScope((p) => {
+    const p$ = toObs(p);
+    return createMyUtil(source$, p$);
+  }, options);
+}
+```
+
+### Hook Standard Pattern — `useScope` + `toObs`
+
+For hooks where options contain reactive scalar fields (e.g. `MaybeObservable<number>`), use `useScope((p) => ...)` with `toObs(p)` to get a reactive Observable of the props. Pass `options` to the core as-is.
+
+#### Pattern 1: MaybeObservable arg
+
+Replaces `useMaybeObservable`, `useLatest`, and `useConstant` with the `useScope((p) => ..., { ...args })` pattern.
+
+`toObs(p)` converts the ReactiveProps proxy to `Observable<Props>`. This `Observable` passes directly to core functions that accept `DeepMaybeObservable` — core wraps it with `observable()` internally, so prop changes propagate reactively into `observe()`.
+
+```ts
+// Hook type derived from core — single source of truth for params and return type
+export type UseIntervalFn = typeof createIntervalFn;
+
+export const useIntervalFn: UseIntervalFn = (cb, interval, options) => {
+  const rawOpts = isObservable(options) ? options.peek() : options;
+
+  return useScope(
+    (p) => {
+      const p$ = toObs(p, { cb: "function" });
+      // p$ is Observable<Props> — passes directly as DeepMaybeObservable
+      // core wraps it with observable(p$) → prop changes propagate reactively
+
+      const result = createIntervalFn(
+        (...args: unknown[]) => p.cb?.(...args), // p.cb: raw latest, always fresh
+        p$.interval as Observable<number>,
+        p$ // pass toObs(p) result directly to core
+      );
+
+      onMount(() => {
+        if (p.immediate ?? true) result.resume();
+      });
+
+      return result;
+    },
+    { cb, interval, ...rawOpts }
+  );
+};
+```
+
+#### Pattern 2: DeepMaybeObservable options
+
+Read mount-time-only values (e.g. `controls: boolean`) outside the factory. Pass `toObs(p)` to core — core wraps it with `observable()` internally for reactive access.
+
+> **Exception to `typeof createX`:** When the hook has a conditional/overloaded return type driven by a mount-time option (like `controls: boolean`), the return type diverges from core — use explicit overloads instead.
+
+```ts
+export function useInterval(intervalValue: MaybeObservable<number>, options?: DeepMaybeObservable<UseIntervalOptions & { controls?: false }>): ReadonlyObservable<number>;
+export function useInterval(intervalValue: MaybeObservable<number>, options: DeepMaybeObservable<UseIntervalOptions & { controls: true }>): Readonly<UseIntervalReturn & Pausable>;
+export function useInterval(
+  intervalValue: MaybeObservable<number>,
+  options?: DeepMaybeObservable<UseIntervalOptions>
+): ReadonlyObservable<number> | Readonly<UseIntervalReturn & Pausable> {
+  const rawOpts = isObservable(options) ? options.peek() : options;
+  const exposeControls = rawOpts?.controls ?? false; // mount-time-only: read outside factory
+
+  return useScope(
+    (p) => {
+      const p$ = toObs(p, { callback: "function" });
+      // p$ is Observable<Props> — passes as DeepMaybeObservable to core
+      // core calls observable(p$) internally → p changes reach observe() reactively
+
+      const result = createInterval(
+        p$.interval as Observable<number>,
+        p$ // pass toObs(p) directly — core handles DeepMaybeObservable
+      );
+
+      onMount(() => {
+        if (p.immediate ?? true) result.resume();
+      });
+
+      if (exposeControls) {
+        return Object.freeze({
+          counter$: result.counter$ as ReadonlyObservable<number>,
+          reset: result.reset,
+          isActive$: result.isActive$,
+          pause: result.pause,
+          resume: result.resume,
+        });
+      }
+      return result.counter$ as ReadonlyObservable<number>;
+    },
+    { interval: intervalValue, ...rawOpts }
+  );
+}
+```
+
+#### Pattern 3: Multi-params pass-through
+
+When a hook accepts **multiple parameters**, each parameter needs its own independent ReactiveProps proxy.
+
+Pass parameters as separate rest args rather than merging them into one object — merging breaks per-parameter proxy tracking.
+
+```ts
+// hook signature: useDebouncedHistory(source$, timing, restOpts)
+// timing and restOpts are separate parameters → each needs its own proxy
+
+// ❌ Before — merging into one object breaks timing proxy
+useScope(
+  (p) => {
+    const obs$ = toObs(p, { dump: "function", parse: "function" });
+    const result = createDebouncedHistory(source$, obs$.debounce as Observable<number>, {
+      ...obs$.peek(),
+      maxWait: obs$.maxWait,
+    });
+    onUnmount(() => result.dispose());
+    return result;
+  },
+  { ...rawOpts, debounce: rawOpts?.debounce ?? 200 }
+);
+
+// ✅ After — independent proxy per parameter, each with its own toObs
+useScope(
+  (timing, restOpts) => {
+    const timing$ = toObs(timing);
+    const rest$ = toObs(restOpts, {
+      dump: "function",
+      parse: "function",
+      shouldCommit: "function",
+    });
+
+    const result = createDebouncedHistory(source$, timing$.debounce as Observable<number>, {
+      ...rest$.peek(),
+      maxWait: timing$.maxWait as Observable<number | undefined>,
+    });
+    onUnmount(() => result.dispose());
+    return result;
+  },
+  timing // timing param
+);
+```
+
+##### Nested object parameter with scalar hint
+
+For nested object parameters, use `toObs(p, 'opaque')` to wrap the entire value as a single opaque observable.
+
+```ts
+useScope(
+  (options1, options2) => {
+    const obs1$ = toObs(options1);
+    const obs2$ = toObs(options2, "opaque"); // { nested: { ... } } → treat as opaque
+
+    observe(() => {
+      const val = obs2$.get(); // raw nested object
+    });
+    return {};
+  },
+  options1,
+  options2 // { nested: { deep: value } }
+);
 ```
 
 > **⚠️ Outer Observable — child-field mutation vs full-object replace**
@@ -344,25 +625,26 @@ interface UseMyHookOptions {
 }
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useMaybeObservable(options, {
-    scrollTarget: "element", // resolves Ref$/Observable<Element> reactively, wraps in opaque
-  });
+  return useScope((p) => {
+    const p$ = toObs(p, {
+      scrollTarget: "element", // resolves Ref$/Observable<Element> reactively, wraps in opaque
+    });
 
-  useObserve(() => {
-    const root = opts$.scrollTarget.peek(); // OpaqueObject<HTMLElement> | null
-    const rootMargin = opts$.rootMargin.get();
-    setup({ root, rootMargin });
-  });
+    observe(() => {
+      const root = p$.get().scrollTarget; // OpaqueObject<HTMLElement> | null
+      const rootMargin = p$.get().rootMargin;
+      setup({ root, rootMargin });
+    });
+  }, options ?? {});
 }
 ```
 
 > `'element'` internally calls `getElement(fieldValue)` → registers dep on Ref$'s internal Observable.
-> When Ref$ mounts, `opts$` recomputes → `opts$.scrollTarget` updates → `useObserve` re-runs.
+> When Ref$ mounts, `p$` recomputes → `p$.scrollTarget` updates → `observe` re-runs.
 
 ### Standard Pattern (with callback fields)
 
-Use `'function'` hint for callback fields. Legend-State stores the function directly
-(not as a child observable), so access via `opts$.peek()?.fieldName` pattern.
+Use `'function'` hint for callback fields. Access callbacks via `p$.get().fieldName` or raw prop access `p.fieldName`.
 
 ```ts
 interface UseMyHookOptions {
@@ -370,58 +652,39 @@ interface UseMyHookOptions {
 }
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useMaybeObservable(options, {
-    onStart: "function",
-  });
+  return useScope((p) => {
+    const p$ = toObs(p, {
+      onStart: "function",
+    });
 
-  // ✅ Correct — access via opts$.peek()?.fieldName
-  opts$.peek()?.onStart?.(pos, e);
-
-  // ❌ Wrong — 'function' hint stores directly, NOT as child observable
-  // opts$.onStart.peek()?.(pos, e)  ← .peek is not a function
+    // ✅ Correct — access via p$.get().onStart (reactive) or p.onStart (raw latest)
+    observe(() => {
+      // ... when event fires:
+      p$.get().onStart?.(pos, e);
+    });
+  }, options ?? {});
 }
 ```
 
 ### Passthrough Pattern (delegating to hooks with internal `useObserve`)
 
 When delegating to a hook that already tracks options reactively inside its own `useObserve`
-(e.g., `useIntersectionObserver`), normalize first with `useMaybeObservable`, then pass
+(e.g., `useIntersectionObserver`), normalize with `toObs(p)`, then pass
 the computed Observable child fields as references.
 
 ```ts
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  const opts$ = useMaybeObservable(options, {
-    scrollTarget: "element",
-  });
+  return useScope((p) => {
+    const p$ = toObs(p, {
+      scrollTarget: "element",
+    });
 
-  // Pass computed Observable child fields — downstream useObserve tracks them
-  useIntersectionObserver(element, callback, {
-    rootMargin: opts$.rootMargin,
-    root: opts$.scrollTarget as unknown as MaybeElement | undefined,
-  });
-}
-```
-
-### Hook-to-Core Bridge Pattern
-
-When the core function needs both reactive Observable args and non-reactive plain options:
-
-```ts
-export function useHistory<Raw, Serialized = Raw>(
-  source$: Observable<Raw>,
-  options?: DeepMaybeObservable<UseHistoryOptions<Raw, Serialized>>
-): UseHistoryReturn<Raw, Serialized> {
-  const opts$ = useMaybeObservable(options, {
-    dump: "function",
-    parse: "function",
-    shouldCommit: "function",
-  });
-
-  // opts$.peek() → snapshot plain object for core (non-reactive options captured in closure)
-  const result = useConstant(() => createHistory<Raw, Serialized>(source$, opts$.peek()));
-
-  useUnmount(result.dispose);
-  return result;
+    // Pass computed Observable child fields — downstream useObserve tracks them
+    useIntersectionObserver(element, callback, {
+      rootMargin: p$.rootMargin,
+      root: p$.scrollTarget as unknown as MaybeElement | undefined,
+    });
+  }, options ?? {});
 }
 ```
 
@@ -429,10 +692,10 @@ export function useHistory<Raw, Serialized = Raw>(
 
 ## Rule 3 — Mount-time-only Properties (Special Cases Only)
 
-> **Most options should be reactive.** Only use `useInitialPick` when changing a field after mount is **structurally impossible or meaningless**.
+> **Most options should be reactive.** Only read mount-time values outside the factory when changing a field after mount is **structurally impossible or meaningless**.
 > Ask yourself: "If this field changes after mount, does it matter?" If yes, make it reactive.
 
-`useInitialPick` is restricted to these cases:
+Mount-time reads are restricted to these cases:
 
 | Allowed case               | Example                                       | Why mount-time-only                           |
 | -------------------------- | --------------------------------------------- | --------------------------------------------- |
@@ -440,30 +703,40 @@ export function useHistory<Raw, Serialized = Raw>(
 | Conditional hook branching | `controls: boolean`                           | React rules-of-hooks — branch must not change |
 | Observable initial seed    | `initialValue`                                | Seed is consumed once at Observable creation  |
 
-**These must be reactive** (do NOT use `useInitialPick`):
+**These must be reactive** (do NOT read at mount-time):
 
 - Runtime-adjustable settings: `rootMargin`, `threshold`, `distance`, `offset`
 - User-togglable flags: `enabled`, `immediate`
 - Any field where post-mount changes should take effect
 
+### Reading Mount-time Values
+
+Read mount-time-only values **outside** the `useScope` factory, before it runs:
+
+```ts
+function useMyHook(
+  intervalValue: MaybeObservable<number>,
+  options?: DeepMaybeObservable<UseMyHookOptions>
+) {
+  const rawOpts = isObservable(options) ? options.peek() : options;
+  const exposeControls = rawOpts?.controls ?? false; // read outside factory
+
+  return useScope(
+    (p) => {
+      // exposeControls captured from outer scope — stable, mount-time value
+      if (exposeControls) {
+        return createWithControls(source$, p$);
+      }
+      return createSimple(source$, p$);
+    },
+    { interval: intervalValue, ...rawOpts }
+  );
+}
+```
+
 ### Core Function
 
-Core functions have no React lifecycle — parameters are naturally captured in the closure. `useInitialPick` is not needed.
-
-### Hook Wrapper — `useInitialPick(opts$, defaults)`
-
-```ts
-const { interval, controls: exposeControls } = useInitialPick(opts$, {
-  interval: "requestAnimationFrame" as const,
-  controls: false,
-});
-```
-
-For fields without a NonNullable default (e.g., SSR-nullable `window`), read separately:
-
-```ts
-const _window = useConstant(() => opts$.window.peek()) ?? defaultWindow;
-```
+Core functions have no React lifecycle — parameters are naturally captured in the closure. Mount-time reads use `opts$.peek()?.field`.
 
 ---
 
@@ -512,25 +785,31 @@ return {
 
 ### Core → Hook pass-through
 
-Core functions return `Disposable & { value$, isActive$, ... }`.
-The hook wrapper strips `dispose` (handled by `useUnmount`) and passes the rest through:
+Core functions using `onUnmount` for cleanup return only the functional result (no `dispose`).
+The hook wrapper returns the result directly — no stripping needed:
 
 ```ts
-// Core
-function createIntervalFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
+// Core — uses onUnmount, no dispose in return
+function createIntervalFn(fn: AnyFn, interval$: Observable<number>): Pausable {
   const isActive$ = observable(true);
   // ...
-  return { isActive$, pause, resume, dispose };
+  onUnmount(() => {
+    pause(); /* cleanup */
+  });
+  return { isActive$, pause, resume }; // no dispose
 }
 
-// Hook — strip dispose, pass-through controls
-function useIntervalFn(fn: AnyFn, interval: MaybeObservable<number>): Pausable {
-  const interval$ = useMaybeObservable(interval);
-  const result = useConstant(() => createIntervalFn(fn, interval$));
-  useUnmount(result.dispose);
-  const { dispose: _, ...controls } = result;
-  return controls;
-}
+// Hook — type derived from core, direct pass-through via useScope
+export type UseIntervalFn = typeof createIntervalFn;
+export const useIntervalFn: UseIntervalFn = (fn, interval) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p, { fn: "function" });
+      return createIntervalFn((...args) => p.fn?.(...args), p$.interval as Observable<number>);
+    },
+    { fn, interval }
+  );
+};
 ```
 
 ---
@@ -573,20 +852,27 @@ function useMyHook(): { count$: ReadonlyObservable<number> } {
 ### Core → Hook narrowing pattern
 
 ```ts
-// Core — returns writable Observable (full internal access)
-function createMyUtil(source$: Observable<number>): Disposable & { value$: Observable<number> } {
-  const value$ = observable(source$.peek());
+// Core — declares ReadonlyObservable in return type so hook can use typeof createX
+function createMyUtil(source$: Observable<number>): { value$: ReadonlyObservable<number> } {
+  const value$ = observable(source$.peek()); // internally writable Observable
   // ... observe, modify value$ internally ...
-  return { value$, dispose };
+  onUnmount(() => {
+    /* cleanup */
+  });
+  return { value$: value$ as ReadonlyObservable<number> }; // narrow at the boundary
 }
 
-// Hook — narrows to ReadonlyObservable (external read-only)
-function useMyUtil(source: MaybeObservable<number>): ReadonlyObservable<number> {
-  const source$ = useMaybeObservable(source);
-  const { value$, dispose } = useConstant(() => createMyUtil(source$));
-  useUnmount(dispose);
-  return value$ as ReadonlyObservable<number>;
-}
+// Hook — type derived from core, no separate type annotation needed
+export type UseMyUtil = typeof createMyUtil;
+export const useMyUtil: UseMyUtil = (source$) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p);
+      return createMyUtil(p$.source as Observable<number>);
+    },
+    { source: source$ }
+  );
+};
 ```
 
 ### Real-world examples
@@ -612,9 +898,9 @@ export function useElementVisibility(...): Observable<boolean>; // simple return
 
 These types are shared interfaces defined in `../../types`. Functions matching these patterns must return the corresponding type so callers get a consistent API.
 
-### `Disposable` — Core Function Cleanup (required)
+### `Disposable` — Core Function Cleanup
 
-Every core function **must** return `Disposable`. All subscriptions, timers, and observers are cleaned up via `dispose()`.
+Core functions that run inside `useScope` use `onUnmount` for cleanup — no `dispose` needed in the return value. The `Disposable` interface is only required when composing core functions outside `useScope` (e.g., in another core function that needs to manage sub-function lifetimes manually).
 
 ```ts
 export interface Disposable {
@@ -622,32 +908,30 @@ export interface Disposable {
 }
 ```
 
-| Criteria                              | Example                                                  |
-| ------------------------------------- | -------------------------------------------------------- |
-| Any `observe()` subscription          | `dispose: () => unsub()`                                 |
-| `setTimeout` / `setInterval`          | `dispose: () => clearInterval(handle)`                   |
-| `ResizeObserver` / `MutationObserver` | `dispose: () => observer.disconnect()`                   |
-| Composed core functions               | `dispose: () => { innerA.dispose(); innerB.dispose(); }` |
+| Context                                      | Cleanup strategy                                                            |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| Core function called inside `useScope`       | `onUnmount(() => { /* cleanup */ })` — no `dispose` in return               |
+| Core function composing other core functions | Inner functions use `onUnmount` (shared scope) — no manual `dispose` needed |
+| Standalone core function (no scope context)  | Return `Disposable` for manual cleanup by the caller                        |
 
 ```ts
-function createMyUtil(source$: Observable<T>): Disposable & { result$: Observable<T> } {
+// ✅ Scope-aware core — uses onUnmount, no dispose in return
+function createMyUtil(source$: Observable<T>): { result$: Observable<T> } {
   const result$ = observable<T>(source$.peek());
-  const subscriptions: (() => void)[] = [];
 
-  subscriptions.push(
-    observe(() => {
-      result$.set(source$.get());
-    })
-  );
+  observe(() => {
+    result$.set(source$.get());
+  }); // auto-registered to current scope
 
-  return {
-    result$,
-    dispose: () => subscriptions.forEach((unsub) => unsub()),
-  };
+  onUnmount(() => {
+    /* cleanup timers, etc. */
+  });
+
+  return { result$ }; // no dispose
 }
 ```
 
-> **Hook wrappers** handle `dispose` via `useUnmount(result.dispose)` — callers never call `dispose()` directly.
+> **Hook wrappers** using `useScope` get automatic cleanup — `onUnmount` runs when the scope is disposed.
 
 ### `Pausable` — Pause/Resume Loops
 
@@ -667,8 +951,8 @@ export interface Pausable {
 | Subscription where pause/resume is meaningful | —                                     | `useNow`                    |
 
 ```ts
-// Core — returns Disposable & Pausable
-function createPollerFn(fn: AnyFn, interval$: Observable<number>): Disposable & Pausable {
+// Core — uses onUnmount, returns Pausable (no dispose)
+function createPollerFn(fn: AnyFn, interval$: Observable<number>): Pausable {
   const isActive$ = observable(false);
   const pause = () => {
     isActive$.set(false); /* clearInterval... */
@@ -676,28 +960,29 @@ function createPollerFn(fn: AnyFn, interval$: Observable<number>): Disposable & 
   const resume = () => {
     isActive$.set(true); /* setInterval... */
   };
-  const unsub = observe(() => {
+
+  observe(() => {
     /* re-setup on interval$.get() change */
   });
-  return {
-    isActive$,
-    pause,
-    resume,
-    dispose: () => {
-      pause();
-      unsub();
-    },
-  };
+
+  onUnmount(() => {
+    pause();
+  });
+
+  return { isActive$, pause, resume }; // no dispose
 }
 
-// Hook — strips dispose, returns Pausable
-function usePoller(fn: AnyFn, interval: MaybeObservable<number>): Pausable {
-  const interval$ = useMaybeObservable(interval);
-  const result = useConstant(() => createPollerFn(fn, interval$));
-  useUnmount(result.dispose);
-  const { dispose: _, ...controls } = result;
-  return controls;
-}
+// Hook — type derived from core
+export type UsePoller = typeof createPollerFn;
+export const usePoller: UsePoller = (fn, interval) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p, { fn: "function" });
+      return createPollerFn((...args) => p.fn?.(...args), p$.interval as Observable<number>);
+    },
+    { fn, interval }
+  );
+};
 ```
 
 ### `Stoppable<StartFnArgs>` — One-shot Timers
@@ -820,14 +1105,12 @@ function useMyHook(options: UseMyHookOptions = {}) {
 #### Core Function — guard at function top level
 
 Core functions have no React hooks, so early return is safe at the top level.
-Return a no-op `Disposable` with default values:
+Return a no-op result with default values:
 
 ```ts
-function createMediaQuery(
-  query$: Observable<string>
-): Disposable & { matches$: Observable<boolean> } {
+function createMediaQuery(query$: Observable<string>): { matches$: Observable<boolean> } {
   if (!defaultWindow) {
-    return { matches$: observable(false), dispose: () => {} };
+    return { matches$: observable(false) };
   }
   // ... actual implementation
 }
@@ -905,11 +1188,11 @@ function MyComponent() {
 
 ### Decision table
 
-| Goal | Pattern |
-| --------------------------------- | -------------------------------------- |
-| Render reactive value in JSX | `<div>{obs$.get()}</div>` — inline, babel tracks it |
-| Derive a new Observable from existing ones | `useObservable(() => a$.get() + b$.get())` |
-| React to changes as a side-effect | `useObserve(() => { ... obs$.get() ... })` |
-| Read once at mount (non-reactive) | `obs$.peek()` — makes intent explicit |
+| Goal                                       | Pattern                                             |
+| ------------------------------------------ | --------------------------------------------------- |
+| Render reactive value in JSX               | `<div>{obs$.get()}</div>` — inline, babel tracks it |
+| Derive a new Observable from existing ones | `useObservable(() => a$.get() + b$.get())`          |
+| React to changes as a side-effect          | `useObserve(() => { ... obs$.get() ... })`          |
+| Read once at mount (non-reactive)          | `obs$.peek()` — makes intent explicit               |
 
 > **Key rule:** Call `.get()` inline in JSX or inside reactive contexts (`useObservable`, `useObserve`). Never store `.get()` in a plain variable and reuse it — that's a snapshot. Use `.peek()` only when a one-time mount-time read is intentional.

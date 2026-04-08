@@ -1,5 +1,5 @@
-import { type Observable, observable } from "@legendapp/state";
-import type { Disposable, Fn, ReadonlyObservable, UseHistoryRecord } from "../../types";
+import { type Observable, ObservableHint, observable } from "@legendapp/state";
+import type { DeepMaybeObservable, Fn, ReadonlyObservable, UseHistoryRecord } from "../../types";
 
 export interface ManualHistoryOptions<Raw, Serialized = Raw> {
   /**
@@ -27,7 +27,7 @@ export interface ManualHistoryOptions<Raw, Serialized = Raw> {
   parse?: (value: Serialized) => Raw;
 }
 
-export interface ManualHistoryReturn<Raw, Serialized = Raw> extends Disposable {
+export interface ManualHistoryReturn<Raw, Serialized = Raw> {
   /** Whether undo is possible (undoStack is non-empty). */
   readonly canUndo$: ReadonlyObservable<boolean>;
   /** Whether redo is possible (redoStack is non-empty). */
@@ -57,23 +57,29 @@ export interface ManualHistoryReturn<Raw, Serialized = Raw> extends Disposable {
  */
 export function createManualHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
-  options?: ManualHistoryOptions<Raw, Serialized>
+  options?: DeepMaybeObservable<ManualHistoryOptions<Raw, Serialized>>
 ): ManualHistoryReturn<Raw, Serialized> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Observable<Raw>.set() type workaround
   const src = source$ as any as { set: (v: Raw) => void; peek: () => Raw };
 
-  const capacity = options?.capacity;
-  const dumpOpt = options?.dump;
-  const parseOpt = options?.parse;
-  const cloneOpt = options?.clone;
+  // observable(options) auto-derefs all DeepMaybeObservable forms at runtime
+  const opts$ = observable(options) as unknown as Observable<
+    ManualHistoryOptions<Raw, Serialized> | undefined
+  >;
 
-  let serialize: (v: Raw) => Serialized;
-  let deserialize: (v: Serialized) => Raw;
-
-  if (dumpOpt && parseOpt) {
-    serialize = dumpOpt;
-    deserialize = parseOpt;
-  } else {
+  // serializer$ — opaque to prevent Legend-State from JSON-serializing function values.
+  // Uses peek() internally (no reactive tracking) — strategy is fixed at construction time,
+  // but function refs are always read fresh via opts$.peek() on every serialize/deserialize call.
+  // serializer$ — opts$.get() tracks parent-level changes (avoids JSON error from function child observables).
+  // ObservableHint.opaque() prevents Legend-State from JSON-comparing the returned function object.
+  const serializer$ = observable(() => {
+    const { dump, parse, clone: cloneOpt } = opts$.get() ?? {};
+    if (dump && parse) {
+      return ObservableHint.opaque({
+        serialize: (v: Raw): Serialized => dump(v),
+        deserialize: (v: Serialized): Raw => parse(v),
+      });
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- internal clone bridging Raw ↔ Serialized
     const cloneFn: (v: any) => any =
       typeof cloneOpt === "function"
@@ -81,12 +87,14 @@ export function createManualHistory<Raw, Serialized = Raw>(
         : cloneOpt === false
           ? (v: unknown) => v
           : (v: unknown) => structuredClone(v);
-    serialize = cloneFn as (v: Raw) => Serialized;
-    deserialize = cloneFn as (v: Serialized) => Raw;
-  }
+    return ObservableHint.opaque({
+      serialize: cloneFn as (v: Raw) => Serialized,
+      deserialize: cloneFn as (v: Serialized) => Raw,
+    });
+  });
 
   const initialRecord: UseHistoryRecord<Serialized> = {
-    snapshot: serialize(src.peek()),
+    snapshot: serializer$.peek().serialize(src.peek()),
     timestamp: Date.now(),
   };
 
@@ -123,6 +131,8 @@ export function createManualHistory<Raw, Serialized = Raw>(
   // --- Actions ---
 
   const commit = () => {
+    const { serialize } = serializer$.peek();
+    const capacity = opts$.peek()?.capacity;
     undoStack = [last, ...undoStack];
     if (capacity && undoStack.length > capacity) {
       undoStack = undoStack.slice(0, capacity);
@@ -137,6 +147,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
 
   const undo = () => {
     if (undoStack.length === 0) return;
+    const { deserialize } = serializer$.peek();
     const [top, ...rest] = undoStack;
     redoStack = [last, ...redoStack];
     last = top;
@@ -147,6 +158,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
 
   const redo = () => {
     if (redoStack.length === 0) return;
+    const { deserialize } = serializer$.peek();
     const [top, ...rest] = redoStack;
     undoStack = [last, ...undoStack];
     last = top;
@@ -156,6 +168,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
   };
 
   const clear = () => {
+    const { serialize } = serializer$.peek();
     undoStack = [];
     redoStack = [];
     last = {
@@ -166,6 +179,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
   };
 
   const reset = () => {
+    const { deserialize } = serializer$.peek();
     src.set(deserialize(last.snapshot));
   };
 
@@ -179,6 +193,5 @@ export function createManualHistory<Raw, Serialized = Raw>(
     redo,
     clear,
     reset,
-    dispose: () => {},
   };
 }

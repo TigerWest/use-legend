@@ -200,6 +200,24 @@ act(() => opts$.set({ rootMargin: "20px", threshold: 1.0 }));
 - Values are accurate before and after the change
 - Per-field vs outer Observable behavior differences with Legend-State
 
+### ⚠️ Never pass an Observable directly to `expect()`
+
+`expect(someObservable$)` causes Vitest to serialize/inspect the value, triggering Legend-State's Proxy to deep-traverse the entire observable tree → infinite recursion → OOM/worker crash.
+
+```ts
+// ❌ OOM — Observable passed directly to expect
+expect(result.current.p$.obs).toBe(source$);
+expect(result.current.someObs$).toBeDefined();
+
+// ✅ Compare using === and pass the boolean result
+expect(result.current.p$.obs === source$).toBe(true);
+
+// ✅ Call .get() and pass the plain value
+expect(result.current.p$.obs.get()).toBe(42);
+```
+
+This applies to any Legend-State `Observable` — including child field observables accessed via `p$.field`.
+
 ---
 
 ## edgeCases.spec.ts — Edge Case Tests
