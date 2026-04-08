@@ -1,5 +1,5 @@
 import { isObservable } from "@legendapp/state";
-import { MaybeObservable } from "../../types";
+import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 
 /**
  * Extracts the value from a MaybeObservable
@@ -19,6 +19,8 @@ import { MaybeObservable } from "../../types";
  * ```
  */
 export function get<T>(v: { get(): T }): T;
+export function get<T extends object>(v: DeepMaybeObservable<T>): T;
+export function get<T extends object>(v: DeepMaybeObservable<T> | undefined): T | undefined;
 export function get<T>(maybeObservable: MaybeObservable<T>): T;
 export function get<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 
@@ -47,11 +49,9 @@ export function get<T, K extends keyof T>(
   key: K
 ): T[K] | undefined;
 
-// Implementation
-export function get<T>(
-  maybeObservable: MaybeObservable<T>,
-  key?: keyof T
-): T | T[keyof T] | undefined {
+// Implementation — uses any to cover all overload signatures (DeepMaybeObservable is wider than MaybeObservable)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function get(maybeObservable: any, key?: any): any {
   // Extract the base value
   const value = isObservable(maybeObservable) ? maybeObservable.get() : maybeObservable;
 
@@ -62,7 +62,7 @@ export function get<T>(
 
   // If key provided, extract property (two-arg overload)
   if (value !== null && value !== undefined && typeof value === "object") {
-    return (value as T)[key];
+    return value[key];
   }
 
   return undefined;

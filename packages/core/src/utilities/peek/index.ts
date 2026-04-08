@@ -1,5 +1,5 @@
 import { isObservable } from "@legendapp/state";
-import { MaybeObservable } from "../../types";
+import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 
 /**
  * Extracts the value from a MaybeObservable **without** registering a tracking dependency.
@@ -22,6 +22,8 @@ import { MaybeObservable } from "../../types";
  * ```
  */
 export function peek<T>(v: { peek(): T }): T;
+export function peek<T extends object>(v: DeepMaybeObservable<T>): T;
+export function peek<T extends object>(v: DeepMaybeObservable<T> | undefined): T | undefined;
 export function peek<T>(maybeObservable: MaybeObservable<T>): T;
 export function peek<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 
@@ -48,11 +50,9 @@ export function peek<T, K extends keyof T>(
   key: K
 ): T[K] | undefined;
 
-// Implementation
-export function peek<T>(
-  maybeObservable: MaybeObservable<T>,
-  key?: keyof T
-): T | T[keyof T] | undefined {
+// Implementation — uses any to cover all overload signatures (DeepMaybeObservable is wider than MaybeObservable)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function peek(maybeObservable: any, key?: any): any {
   // Extract the base value without registering a tracking dependency
   const value = isObservable(maybeObservable) ? maybeObservable.peek() : maybeObservable;
 
@@ -61,7 +61,7 @@ export function peek<T>(
   }
 
   if (value !== null && value !== undefined && typeof value === "object") {
-    return (value as T)[key];
+    return value[key];
   }
 
   return undefined;
