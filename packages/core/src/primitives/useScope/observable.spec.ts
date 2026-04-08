@@ -376,6 +376,98 @@ describe("useScope() — multi-params (rest args)", () => {
   });
 });
 
+describe("toObs with Observable field props — auto-deref", () => {
+  it("p.obs (raw proxy) is the same Observable instance as source$", () => {
+    const source$ = observable(42);
+
+    const { result } = renderHook(() =>
+      useScope((p) => ({ getRaw: () => p.obs }), { obs: source$ })
+    );
+
+    // p is raw proxy → reads directly from propsRef.current → same instance
+    expect(result.current.getRaw() === source$).toBe(true);
+  });
+
+  it("toObs(p).obs is a linked child observable (not same instance as source$)", () => {
+    const source$ = observable(42);
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          return { p$ };
+        },
+        { obs: source$ }
+      )
+    );
+
+    // p$.obs is a Legend-State linked child — different proxy, same tracked value
+    expect(result.current.p$.obs === source$).toBe(false);
+    expect(result.current.p$.obs.get()).toBe(source$.get());
+  });
+
+  it("toObs(p).obs.get() tracks source$ value changes", () => {
+    const source$ = observable(42);
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          return { p$ };
+        },
+        { obs: source$ }
+      )
+    );
+
+    expect(result.current.p$.obs.get()).toBe(42);
+
+    act(() => source$.set(99));
+    expect(result.current.p$.obs.get()).toBe(99);
+  });
+
+  it("observe() on toObs(p).obs fires when the Observable field value changes", () => {
+    const source$ = observable(0);
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          observe(() => spy(p$.obs.get()));
+          return {};
+        },
+        { obs: source$ }
+      )
+    );
+
+    expect(spy).toHaveBeenCalledWith(0);
+
+    act(() => source$.set(1));
+    expect(spy).toHaveBeenCalledWith(1);
+  });
+
+  it("multiple Observable fields — each p$.field is a linked child with correct value", () => {
+    const a$ = observable("hello");
+    const b$ = observable(true);
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          return { p$ };
+        },
+        { a: a$, b: b$ }
+      )
+    );
+
+    // linked children — different instances but correct values
+    expect(result.current.p$.a === a$).toBe(false);
+    expect(result.current.p$.b === b$).toBe(false);
+    expect(result.current.p$.a.get()).toBe("hello");
+    expect(result.current.p$.b.get()).toBe(true);
+  });
+});
+
 describe("useScope() — reactiveProps plain state selectivity", () => {
   it("same-value rerender does not trigger observe (Object.is guard)", () => {
     const spy = vi.fn();
