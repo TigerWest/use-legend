@@ -1,6 +1,6 @@
 ---
 title: useDebouncedHistory
-description: 'A hook that tracks Observable change history with debounce. A thin wrapper around `useHistory` with `debounceFilter` applied — it only records history after typing has stopped. Ideal for text inputs or search fields where you want to snapshot only when a burst of changes has "settled".'
+description: 'A hook that tracks Observable change history with debounce. A thin wrapper around `useDataHistory` with `debounceFilter` applied — it only records history after typing has stopped. Ideal for text inputs or search fields where you want to snapshot only when a burst of changes has "settled".'
 category: Reactivity
 ---
 
@@ -24,7 +24,6 @@ const { undo, redo, canUndo$ } = useDebouncedHistory(search$, { debounce: 500 })
 Even if the user keeps typing, a snapshot is forced after `maxWait` ms.
 
 ```tsx
-// @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useDebouncedHistory } from "@usels/core";
 
@@ -40,7 +39,6 @@ const { undo, redo } = useDebouncedHistory(text$, {
 ### Combined with capacity
 
 ```tsx
-// @noErrors
 import { useObservable } from "@legendapp/state/react";
 import { useDebouncedHistory } from "@usels/core";
 

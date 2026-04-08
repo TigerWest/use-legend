@@ -1,6 +1,5 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { useConstant } from "@usels/core/shared/useConstant";
 import { useThrottledHistory } from "@usels/core";
 import {
   ActionButton,
@@ -15,8 +14,7 @@ import {
 export default function UseThrottledHistoryDemo() {
   const value$ = useObservable(50);
   const throttleMs$ = useObservable(300);
-  const historyOptions = useConstant(() => ({ throttle: throttleMs$ }));
-  const { undo, redo, canUndo$, canRedo$, history$ } = useThrottledHistory(value$, historyOptions);
+  const { undo, redo, canUndo$, canRedo$, history$ } = useThrottledHistory(value$, { throttle: throttleMs$ });
   return (
     <DemoShell eyebrow="Throttled Sampling">
       <DemoPanel

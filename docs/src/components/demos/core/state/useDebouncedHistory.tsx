@@ -1,6 +1,5 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { useConstant } from "@usels/core/shared/useConstant";
 import { useDebouncedHistory } from "@usels/core";
 import {
   ActionButton,
@@ -15,8 +14,7 @@ import {
 export default function UseDebouncedHistoryDemo() {
   const text$ = useObservable("");
   const debounceMs$ = useObservable(600);
-  const historyOptions = useConstant(() => ({ debounce: debounceMs$ }));
-  const { undo, redo, canUndo$, canRedo$, history$ } = useDebouncedHistory(text$, historyOptions);
+  const { undo, redo, canUndo$, canRedo$, history$ } = useDebouncedHistory(text$, { debounce: debounceMs$ });
   return (
     <DemoShell eyebrow="Debounced Commits">
       <DemoPanel

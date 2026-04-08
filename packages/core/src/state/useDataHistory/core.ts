@@ -1,6 +1,7 @@
 import { type Observable, batch as legendBatch } from "@legendapp/state";
 import { observe, onUnmount } from "@primitives/useScope";
-import type { Fn, ReadonlyObservable } from "../../types";
+import type { DeepMaybeObservable, Fn, ReadonlyObservable } from "../../types";
+import { observable } from "@shared/observable";
 import type { EventFilter } from "@shared/filters";
 import { createPausableFilter } from "@utilities/usePausableFilter";
 import { noop } from "@shared/utils";
@@ -9,6 +10,7 @@ import {
   type ManualHistoryOptions,
   type ManualHistoryReturn,
 } from "../useManualHistory/core";
+import { peek } from "@utilities/peek";
 
 export interface DataHistoryOptions<Raw, Serialized = Raw> extends ManualHistoryOptions<
   Raw,
@@ -33,9 +35,9 @@ export interface DataHistoryOptions<Raw, Serialized = Raw> extends ManualHistory
   shouldCommit?: (newValue: Raw) => boolean;
 }
 
-export interface DataHistoryReturn<Raw, Serialized = Raw> extends Omit<
-  ManualHistoryReturn<Raw, Serialized>,
-  "dispose"
+export interface DataHistoryReturn<Raw, Serialized = Raw> extends ManualHistoryReturn<
+  Raw,
+  Serialized
 > {
   /** Whether auto-tracking is currently active. */
   readonly isTracking$: ReadonlyObservable<boolean>;
@@ -56,21 +58,26 @@ export interface DataHistoryReturn<Raw, Serialized = Raw> extends Omit<
  */
 export function createDataHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
-  options?: DataHistoryOptions<Raw, Serialized>
+  options?: DeepMaybeObservable<DataHistoryOptions<Raw, Serialized>>
 ): DataHistoryReturn<Raw, Serialized> {
+  // Construction-time only — capacity, clone, dump, parse, eventFilter are structurally immutable
+  const rawOpts = peek(options);
+
   // Delegate stack management to manualHistory
-  const manual = createManualHistory<Raw, Serialized>(source$, options);
+  const manual = createManualHistory<Raw, Serialized>(source$, rawOpts);
 
   // Pausable filter — composes with optional eventFilter (throttle/debounce)
-  const pausable = createPausableFilter(options?.eventFilter);
-  const shouldCommitFn = options?.shouldCommit;
+  const pausable = createPausableFilter(peek(rawOpts?.eventFilter));
+
+  // shouldCommit is called inside observe() on every source change — needs reactive access
+  const opts$ = observable(options);
 
   // Flag to prevent circular auto-commit during undo/redo/transaction
   let isRestoring = false;
   // Skip the initial observe pass: manualHistory already seeded the first snapshot.
   let hasObservedInitial = false;
 
-  // Auto-commit on source$ change — unsub auto-registered to current scope
+  // Auto-commit on source$ change — auto-registered to current scope
   observe(() => {
     const value = source$.get(); // register reactive dependency
 
@@ -83,7 +90,8 @@ export function createDataHistory<Raw, Serialized = Raw>(
 
     pausable.eventFilter(
       () => {
-        if (shouldCommitFn && !shouldCommitFn(value)) return;
+        const shouldCommit = opts$.peek()?.shouldCommit; // latest ref, no tracking needed here
+        if (shouldCommit && !shouldCommit(value)) return;
         manual.commit();
       },
       { fn: noop, args: [], thisArg: undefined }
@@ -93,7 +101,6 @@ export function createDataHistory<Raw, Serialized = Raw>(
   // Cleanup registered to scope — no dispose() needed
   onUnmount(() => {
     pausable.pause();
-    manual.dispose();
   });
 
   // Wrapped undo/redo — set isRestoring to prevent auto-commit
@@ -130,7 +137,7 @@ export function createDataHistory<Raw, Serialized = Raw>(
     if (!canceled) manual.commit();
   };
 
-  const { dispose: _dispose, ...manualRest } = manual;
+  const { ...manualRest } = manual;
 
   return {
     ...manualRest,
