@@ -22,14 +22,17 @@ Documentation is written in English.
 
 ```
 packages/
-  core/src/{category}/{functionName}/index.md
-  libraries/tanstack-query/src/{hookName}/index.md
+  core/src/{category}/{functionName}/index.mdx
+  libraries/tanstack-query/src/{hookName}/index.mdx
 ```
+
+**File extension rule:** Use `.mdx` by default.
 
 Examples:
 
-- `packages/core/src/utilities/get/index.md`
-- `packages/libraries/tanstack-query/src/useQuery/index.md`
+- `packages/core/src/utilities/get/index.mdx`
+- `packages/core/src/state/useDataHistory/index.mdx`
+- `packages/libraries/tanstack-query/src/useQuery/index.mdx`
 
 ### Generated docs (do not edit)
 
@@ -54,7 +57,7 @@ Prohibited field: `order` (not used)
 
 ## Body Structure
 
-````markdown
+`````markdown
 First paragraph: feature description (start immediately without h1 title)
 
 ## Demo
@@ -75,51 +78,82 @@ Use `<Fragment slot="hook">` and `<Fragment slot="scope">` with standard code fe
 
 **Scope variant** uses the `"use scope"` directive inside the component function body to indicate scope-based APIs (`createXxx`, `observe`, `onMount`, `onUnmount`).
 
+**Scope variant — no React hooks allowed:** Inside `"use scope"`, React hooks (including `useObservable`, `useSelector`, etc.) cannot be called. Use `observable()`.
+
+```tsx
+// ❌ Bad — React hook inside "use scope"
+function Component() {
+  "use scope";
+  const count$ = useObservable(0); // hook not allowed
+}
+
+// ✅ Good — observable() is not a hook
+import { observable } from "@usels/core";
+
+function Component() {
+  "use scope";
+  const count$ = observable(0);
+}
+```
+
+**Both variants must show the same context — always inside a component:** The hook slot and scope slot should be directly comparable. Wrap both inside a component function so the reader can see exactly what changes between the two styles.
+
 **First Usage block — add `twoslash` to the hook fence for type hover:**
 
-```mdx
+````mdx
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
+    import { useObservable } from "@legendapp/state/react";
     import { useDebounced } from "@usels/core";
 
-    const value$ = useDebounced(source$, 200);
+    function Component() {
+      const source$ = useObservable("hello");
+      const value$ = useDebounced(source$, 200);
+      return <div>{value$.get()}</div>;
+    }
     ```
   </Fragment>
   <Fragment slot="scope">
     ```tsx
+    import { observable } from "@legendapp/state";
     import { createDebounced } from "@usels/core";
 
     function Component() {
       "use scope"
+      const source$ = observable("hello");
       const { value$ } = createDebounced(source$, 200);
       return <div>{value$.get()}</div>;
     }
     ```
   </Fragment>
 </CodeTabs>
-```
+````
 
 **Subsequent blocks — omit `twoslash` to keep build performance fast:**
 
-```mdx
+````mdx
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    useDebounced(source$, 200, { maxWait: 1000 });
+    function Component() {
+      const source$ = useObservable("hello");
+      useDebounced(source$, 200, { maxWait: 1000 });
+    }
     ```
   </Fragment>
   <Fragment slot="scope">
     ```tsx
     function Component() {
       "use scope"
+      const source$ = observable("hello");
       createDebounced(source$, 200, { maxWait: 1000 });
     }
     ```
   </Fragment>
 </CodeTabs>
-```
+````
 
 **Hook-only** (when a `useScope` variant is not meaningful): use plain code blocks as usual.
 
@@ -137,6 +171,7 @@ import { useSomething } from "@usels/core";
 ```typescript
 // Plain typescript (no hover) — use for short option-only snippets
 ```
+
 ````
 
 If there are many usage patterns, you may add supplementary descriptions using ### (h3).
@@ -200,7 +235,7 @@ return <span>{count}</span>;
 
 // ✅ Good — call .get() directly in JSX (babel plugin auto-tracks reactivity)
 return <span>{count$.get()}</span>;
-````
+```
 
 #### Rule: No snapshot variables from `.get()`
 

@@ -1,0 +1,74 @@
+---
+title: useLastChanged
+description: "A hook that tracks when a source Observable last changed. Returns a read-only Observable containing the `Date.now()` timestamp of the most recent change, or `null` if the source has not changed yet."
+category: Reactivity
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useObservable } from "@legendapp/state/react";
+    import { useLastChanged } from "@usels/core";
+
+    function Component() {
+      const count$ = useObservable(0);
+      const lastChanged$ = useLastChanged(count$);
+
+      // null before any change, Date.now() timestamp after
+      return <div>{lastChanged$.get()}</div>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createLastChanged } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const count$ = observable(0);
+      const { timestamp$ } = createLastChanged(count$);
+
+      return <div>{timestamp$.get()}</div>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### initialValue — custom initial timestamp
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable } from "@legendapp/state/react";
+    import { useLastChanged } from "@usels/core";
+
+    function Component() {
+      const count$ = useObservable(0);
+      // Start with a known timestamp instead of null
+      const lastChanged$ = useLastChanged(count$, Date.now());
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createLastChanged } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const count$ = observable(0);
+      const { timestamp$ } = createLastChanged(count$, Date.now());
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
