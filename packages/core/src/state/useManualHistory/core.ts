@@ -1,5 +1,6 @@
-import { type Observable, ObservableHint, observable } from "@legendapp/state";
+import { type Observable, ObservableHint } from "@legendapp/state";
 import type { DeepMaybeObservable, Fn, ReadonlyObservable, UseHistoryRecord } from "../../types";
+import { observable } from "@shared/observable";
 
 export interface ManualHistoryOptions<Raw, Serialized = Raw> {
   /**
@@ -59,13 +60,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
   source$: Observable<Raw>,
   options?: DeepMaybeObservable<ManualHistoryOptions<Raw, Serialized>>
 ): ManualHistoryReturn<Raw, Serialized> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Observable<Raw>.set() type workaround
-  const src = source$ as any as { set: (v: Raw) => void; peek: () => Raw };
-
-  // observable(options) auto-derefs all DeepMaybeObservable forms at runtime
-  const opts$ = observable(options) as unknown as Observable<
-    ManualHistoryOptions<Raw, Serialized> | undefined
-  >;
+  const opts$ = observable(options);
 
   // serializer$ — opaque to prevent Legend-State from JSON-serializing function values.
   // Uses peek() internally (no reactive tracking) — strategy is fixed at construction time,
@@ -94,7 +89,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
   });
 
   const initialRecord: UseHistoryRecord<Serialized> = {
-    snapshot: serializer$.peek().serialize(src.peek()),
+    snapshot: serializer$.peek().serialize(source$.peek()),
     timestamp: Date.now(),
   };
 
@@ -138,7 +133,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
       undoStack = undoStack.slice(0, capacity);
     }
     last = {
-      snapshot: serialize(src.peek()),
+      snapshot: serialize(source$.peek()),
       timestamp: Date.now(),
     };
     redoStack = [];
@@ -152,7 +147,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
     redoStack = [last, ...redoStack];
     last = top;
     undoStack = rest;
-    src.set(deserialize(last.snapshot));
+    (source$ as Observable).set(deserialize(last.snapshot));
     bump();
   };
 
@@ -163,7 +158,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
     undoStack = [last, ...undoStack];
     last = top;
     redoStack = rest;
-    src.set(deserialize(last.snapshot));
+    (source$ as Observable).set(deserialize(last.snapshot));
     bump();
   };
 
@@ -172,7 +167,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
     undoStack = [];
     redoStack = [];
     last = {
-      snapshot: serialize(src.peek()),
+      snapshot: serialize((source$ as Observable).peek()),
       timestamp: Date.now(),
     };
     bump();
@@ -180,7 +175,7 @@ export function createManualHistory<Raw, Serialized = Raw>(
 
   const reset = () => {
     const { deserialize } = serializer$.peek();
-    src.set(deserialize(last.snapshot));
+    (source$ as Observable).set(deserialize(last.snapshot));
   };
 
   return {
