@@ -1,5 +1,7 @@
-import { observable, observe, type Observable } from "@legendapp/state";
-import type { Disposable } from "../../types";
+import { type Observable } from "@legendapp/state";
+import { observe } from "@primitives/useScope";
+import { observable } from "@shared/observable";
+import type { DeepMaybeObservable, ReadonlyObservable } from "../../types";
 
 export interface LastChangedOptions {
   /**
@@ -15,17 +17,18 @@ export interface LastChangedOptions {
  *
  * @param source$ - Observable source value to watch.
  * @param options - Configuration options.
- * @returns Disposable with an Observable reflecting the last-changed timestamp.
+ * @returns Observable reflecting the last-changed timestamp.
  */
 export function createLastChanged<T>(
   source$: Observable<T>,
-  options?: LastChangedOptions
-): Disposable & { timestamp$: Observable<number | null> } {
-  const timestamp$ = observable<number | null>(options?.initialValue ?? null);
+  options?: DeepMaybeObservable<LastChangedOptions>
+): ReadonlyObservable<number | null> {
+  const opts$ = observable(options);
+  const timestamp$ = observable<number | null>(opts$.peek()?.initialValue ?? null);
 
   let hasObservedInitial = false;
 
-  const unsub = observe(() => {
+  observe(() => {
     source$.get(); // register reactive dependency
 
     if (!hasObservedInitial) {
@@ -36,8 +39,5 @@ export function createLastChanged<T>(
     timestamp$.set(Date.now());
   });
 
-  return {
-    timestamp$,
-    dispose: () => unsub(),
-  };
+  return timestamp$;
 }

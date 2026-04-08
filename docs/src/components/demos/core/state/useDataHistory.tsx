@@ -1,6 +1,6 @@
 import type { Observable } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useDataHistory } from "@usels/core";
 import {
   ActionButton,
   DemoPanel,
@@ -14,7 +14,7 @@ import {
 export default function UseDataHistoryDemo() {
   const text$ = useObservable("");
   const { undo, redo, canUndo$, canRedo$, isTracking$, pause, resume, history$ } =
-    useHistory(text$);
+    useDataHistory(text$);
   return (
     <DemoShell eyebrow="Auto Tracking">
       <DemoPanel

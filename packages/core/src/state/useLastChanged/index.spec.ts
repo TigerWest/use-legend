@@ -32,7 +32,7 @@ describe("useLastChanged()", () => {
 
     it("uses custom initialValue when provided", () => {
       const source$ = observable("hello");
-      const { result } = renderHook(() => useLastChanged(source$, 1000));
+      const { result } = renderHook(() => useLastChanged(source$, { initialValue: 1000 }));
 
       expect(result.current.get()).toBe(1000);
     });
@@ -102,9 +102,8 @@ describe("useLastChanged()", () => {
 
       expect(result.current.get()).toBe(1700000001000);
     });
-
     it("plain T source — timestamp stays null (no reactive changes)", () => {
-      const { result } = renderHook(() => useLastChanged("hello"));
+      const { result } = renderHook(() => useLastChanged(observable("hello")));
 
       expect(result.current.get()).toBeNull();
     });

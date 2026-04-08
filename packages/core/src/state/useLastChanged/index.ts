@@ -1,41 +1,37 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import type { MaybeObservable, ReadonlyObservable } from "../../types";
-import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { useConstant } from "@shared/useConstant";
+
+import { useScope, toObs } from "@primitives/useScope";
 import { createLastChanged } from "./core";
-import { useUnmount } from "@legendapp/state/react";
 
 export { createLastChanged, type LastChangedOptions } from "./core";
 
+// Aliases for hook consumers — single source of truth from core
+export type { LastChangedOptions as UseLastChangedOptions } from "./core";
+
 /**
  * Track when a source value last changed.
- * Returns a read-only Observable containing the timestamp (`Date.now()`)
+ * Returns `{ timestamp$ }` — a read-only Observable containing the timestamp (`Date.now()`)
  * of the most recent change, or `null` if the source has not changed yet.
  *
- * @param source - Source value to watch. Accepts a plain value or an Observable.
- * @param initialValue - Initial timestamp value. Defaults to `null`.
- * @returns A ReadonlyObservable reflecting the last-changed timestamp.
+ * @param source$ - Source Observable to watch.
+ * @param options - Configuration options.
+ * @returns `{ timestamp$ }` — Observable reflecting the last-changed timestamp.
  *
  * @example
  * ```tsx
  * const count$ = observable(0);
- * const lastChanged$ = useLastChanged(count$);
- * // lastChanged$.get() → null (no change yet)
- * // after count$.set(1) → lastChanged$.get() → 1715000000000 (Date.now())
+ * const { timestamp$ } = useLastChanged(count$);
+ * // timestamp$.get() → null (no change yet)
+ * // after count$.set(1) → timestamp$.get() → 1715000000000 (Date.now())
  * ```
  */
-export function useLastChanged<T>(
-  source: MaybeObservable<T>,
-  initialValue?: number | null
-): ReadonlyObservable<number | null> {
-  const source$ = useMaybeObservable(source);
-
-  const { timestamp$, dispose } = useConstant(() =>
-    createLastChanged(source$ as unknown as Observable<T>, { initialValue: initialValue ?? null })
+export type UseLastChanged = typeof createLastChanged;
+export const useLastChanged: UseLastChanged = (source$, options) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p);
+      return createLastChanged(source$, p$);
+    },
+    (options ?? {}) as Record<string, unknown>
   );
-
-  useUnmount(dispose);
-
-  return timestamp$ as unknown as ReadonlyObservable<number | null>;
-}
+};
