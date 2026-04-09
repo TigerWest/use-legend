@@ -436,5 +436,117 @@ pluginTester({
         }
       `,
     },
+
+    'multi-param hook: both params used': {
+      code: `
+        function useHook({ count }, { step }) {
+          "use scope"
+          const result$ = obs(count + step)
+          return { result$ }
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function useHook({ count }, { step }) {
+          return useScope(
+            (p0, p1) => {
+              const result$ = obs(p0.count + p1.step);
+              return {
+                result$,
+              };
+            },
+            {
+              count,
+            },
+            {
+              step,
+            }
+          );
+        }
+      `,
+    },
+
+    'multi-param hook: only second param used': {
+      code: `
+        function useHook(ignored, { step }) {
+          "use scope"
+          const r$ = obs(step)
+          return { r$ }
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function useHook(ignored, { step }) {
+          return useScope(
+            (p1) => {
+              const r$ = obs(p1.step);
+              return {
+                r$,
+              };
+            },
+            {
+              step,
+            }
+          );
+        }
+      `,
+    },
+
+    'multi-param hook: identifier param used in body': {
+      code: `
+        function useHook(props, { step }) {
+          "use scope"
+          const r$ = obs(props.count + step)
+          return { r$ }
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function useHook(props, { step }) {
+          return useScope(
+            (p0, p1) => {
+              const r$ = obs(p0.count + p1.step);
+              return {
+                r$,
+              };
+            },
+            props,
+            {
+              step,
+            }
+          );
+        }
+      `,
+    },
+
+    'multi-param component: both params used': {
+      code: `
+        function Comp({ title }, { theme }) {
+          "use scope"
+          const styled$ = obs(title + theme)
+          return <div>{styled$.get()}</div>
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function Comp({ title }, { theme }) {
+          const { styled$ } = useScope(
+            (p0, p1) => {
+              const styled$ = obs(p0.title + p1.theme);
+              return {
+                styled$,
+              };
+            },
+            {
+              title,
+            },
+            {
+              theme,
+            }
+          );
+          return <div>{styled$.get()}</div>;
+        }
+      `,
+    },
   },
 });

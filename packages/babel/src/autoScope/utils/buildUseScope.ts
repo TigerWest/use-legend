@@ -64,27 +64,25 @@ function collectPatternBindings(
  *
  * If no bindings (only bare calls): useScope(() => { [declarations] })  — expression statement
  *
- * When propsInfo is provided, the factory receives a props param and useScope
- * receives a second argument with the props object/identifier.
+ * When propsInfoList is provided, the factory receives props params and useScope
+ * receives rest arguments with the props objects/identifiers.
  */
 export function buildUseScopeDeclaration(
   t: typeof BabelTypes,
   declarations: Statement[],
   bindings: string[],
-  propsInfo: CollectedProps | null
+  propsInfoList: CollectedProps[]
 ): Statement {
-  const hasProps = propsInfo != null && propsInfo.used;
+  const usedInfos = propsInfoList.filter((p) => p.used);
+  const hasProps = usedInfos.length > 0;
 
-  // Build factory params: () or (p) or (_p) etc.
-  const factoryParams = hasProps ? [t.identifier(propsInfo!.factoryParam)] : [];
-
-  // Build second arg for useScope(factory, secondArg)
-  const secondArg = hasProps ? buildSecondArg(t, propsInfo!) : null;
+  const factoryParams = hasProps ? usedInfos.map((info) => t.identifier(info.factoryParam)) : [];
+  const secondArgs = hasProps ? usedInfos.map((info) => buildSecondArg(t, info)) : [];
 
   if (bindings.length === 0) {
     // Only bare calls — expression statement
     const factory = t.arrowFunctionExpression(factoryParams, t.blockStatement(declarations));
-    const callArgs = secondArg ? [factory, secondArg] : [factory];
+    const callArgs = hasProps ? [factory, ...secondArgs] : [factory];
     return t.expressionStatement(t.callExpression(t.identifier("useScope"), callArgs));
   }
 
@@ -97,7 +95,7 @@ export function buildUseScopeDeclaration(
     t.blockStatement([...declarations, t.returnStatement(t.objectExpression(returnProps))])
   );
 
-  const callArgs = secondArg ? [factory, secondArg] : [factory];
+  const callArgs = hasProps ? [factory, ...secondArgs] : [factory];
 
   return t.variableDeclaration("const", [
     t.variableDeclarator(
@@ -118,24 +116,25 @@ export function buildUseScopeDeclaration(
  *     [finalReturn]
  *   })
  *
- * When propsInfo is provided:
- *   return useScope((p) => { ... }, propsSecondArg)
+ * When propsInfoList is provided:
+ *   return useScope((p0, p1) => { ... }, arg0, arg1)
  */
 export function buildUseScopeReturn(
   t: typeof BabelTypes,
   declarations: Statement[],
   finalReturn: import("@babel/types").ReturnStatement | undefined,
-  propsInfo: CollectedProps | null
+  propsInfoList: CollectedProps[]
 ): import("@babel/types").ReturnStatement {
-  const hasProps = propsInfo != null && propsInfo.used;
-  const factoryParams = hasProps ? [t.identifier(propsInfo!.factoryParam)] : [];
-  const secondArg = hasProps ? buildSecondArg(t, propsInfo!) : null;
+  const usedInfos = propsInfoList.filter((p) => p.used);
+  const hasProps = usedInfos.length > 0;
+  const factoryParams = hasProps ? usedInfos.map((info) => t.identifier(info.factoryParam)) : [];
+  const secondArgs = hasProps ? usedInfos.map((info) => buildSecondArg(t, info)) : [];
 
   const factoryBody = [...declarations, ...(finalReturn ? [finalReturn] : [])];
 
   const factory = t.arrowFunctionExpression(factoryParams, t.blockStatement(factoryBody));
-  const callArgs: import("@babel/types").Expression[] = secondArg
-    ? [factory, secondArg]
+  const callArgs: import("@babel/types").Expression[] = hasProps
+    ? [factory, ...secondArgs]
     : [factory];
 
   return t.returnStatement(t.callExpression(t.identifier("useScope"), callArgs));

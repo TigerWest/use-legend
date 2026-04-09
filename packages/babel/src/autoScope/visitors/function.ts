@@ -59,7 +59,7 @@ export function createFunctionVisitor(t: typeof BabelTypes) {
     //    Safe to run after detectEarlyReturns — scope bindings are not mutated by
     //    early-return detection. collectPropsInScope runs before extractBindings
     //    because it mutates identifier nodes inside declarations.
-    const propsInfo = collectPropsInScope(path, declarations, t);
+    const propsInfoList = collectPropsInScope(path, declarations, t);
 
     if (isHookFunction(path)) {
       // Hook path: wrap entire body (declarations + return) in `return useScope(() => { ... })`
@@ -68,7 +68,7 @@ export function createFunctionVisitor(t: typeof BabelTypes) {
         return;
       }
 
-      const useScopeReturn = buildUseScopeReturn(t, declarations, finalReturn, propsInfo);
+      const useScopeReturn = buildUseScopeReturn(t, declarations, finalReturn, propsInfoList);
       markNodes(useScopeReturn, t);
       bodyPath.node.body = [useScopeReturn];
     } else {
@@ -80,7 +80,7 @@ export function createFunctionVisitor(t: typeof BabelTypes) {
         return;
       }
 
-      const useScopeDecl = buildUseScopeDeclaration(t, declarations, bindings, propsInfo);
+      const useScopeDecl = buildUseScopeDeclaration(t, declarations, bindings, propsInfoList);
       markNodes(useScopeDecl, t);
       bodyPath.node.body = [useScopeDecl, ...(finalReturn ? [finalReturn] : [])];
     }

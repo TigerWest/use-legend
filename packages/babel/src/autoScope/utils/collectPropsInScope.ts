@@ -46,85 +46,130 @@ function getFactoryParamName(fnPath: NodePath<BabelFunction>): string {
   return scope.generateUid("p");
 }
 
+function getFactoryParamNameForIndex(fnPath: NodePath<BabelFunction>, index: number): string {
+  const scope = fnPath.scope;
+  const candidate = `p${index}`;
+  if (!scope.hasBinding(candidate) && !scope.hasReference(candidate)) {
+    return candidate;
+  }
+  return scope.generateUid(`p${index}`);
+}
+
+interface ParamInfo {
+  entries: CollectedPropEntry[];
+  kind: "none" | "identifier" | "object";
+  factoryParam: string;
+  used: boolean;
+  nestedBindingNames: Set<string>;
+  nonRestEntryByLocal: Map<string, CollectedPropEntry>;
+  restLocalNames: Set<string>;
+  identifierLocal: string | null;
+}
+
 export function collectPropsInScope(
   fnPath: NodePath<BabelFunction>,
   declarations: Statement[],
   t: typeof BabelTypes
-): CollectedProps {
+): CollectedProps[] {
   const params = fnPath.node.params;
 
-  // Step 1: No params → nothing to collect
+  // No params → nothing to collect
   if (params.length === 0) {
-    return { used: false, entries: [], kind: "none", factoryParam: "" };
+    return [];
   }
 
-  const param = params[0];
-  const entries: CollectedPropEntry[] = [];
-  let kind: "none" | "identifier" | "object" = "none";
+  const isSingleParam = params.length === 1;
 
-  // Build nestedBindingNames before traverse
-  const nestedBindingNames = new Set<string>();
+  // Build per-param info structures
+  const paramInfos: ParamInfo[] = params.map((param, i) => {
+    const entries: CollectedPropEntry[] = [];
+    let kind: "none" | "identifier" | "object" = "none";
+    const nestedBindingNames = new Set<string>();
 
-  // Step 2: Build entries from params[0]
-  if (t.isObjectPattern(param)) {
-    kind = "object";
+    if (t.isObjectPattern(param)) {
+      kind = "object";
 
-    // Collect nested destructuring names for error reporting
-    for (const prop of (param as ObjectPattern).properties) {
-      if (t.isObjectProperty(prop)) {
-        const val = prop.value;
-        if (t.isObjectPattern(val) || t.isArrayPattern(val)) {
-          collectNestedNames(val, t, nestedBindingNames);
+      for (const prop of (param as ObjectPattern).properties) {
+        if (t.isObjectProperty(prop)) {
+          const val = prop.value;
+          if (t.isObjectPattern(val) || t.isArrayPattern(val)) {
+            collectNestedNames(val, t, nestedBindingNames);
+          }
         }
+      }
+
+      for (const prop of (param as ObjectPattern).properties) {
+        if (t.isRestElement(prop)) {
+          if (t.isIdentifier(prop.argument)) {
+            entries.push({ local: prop.argument.name, rest: true });
+          }
+        } else if (t.isObjectProperty(prop)) {
+          const key = t.isIdentifier(prop.key) ? prop.key.name : undefined;
+          const val = prop.value;
+
+          if (t.isIdentifier(val)) {
+            if (key !== undefined) {
+              entries.push({ key, local: val.name });
+            }
+          } else if (t.isAssignmentPattern(val) && t.isIdentifier(val.left)) {
+            if (key !== undefined) {
+              entries.push({ key, local: val.left.name });
+            }
+          }
+        }
+      }
+    } else if (t.isIdentifier(param)) {
+      kind = "identifier";
+      entries.push({ local: param.name, identifier: true });
+    }
+    // ArrayPattern: kind stays 'none', entries stays empty
+
+    const nonRestEntryByLocal = new Map<string, CollectedPropEntry>();
+    const restLocalNames = new Set<string>();
+    let identifierLocal: string | null = null;
+
+    for (const entry of entries) {
+      if (entry.rest) {
+        restLocalNames.add(entry.local);
+      } else if (entry.identifier) {
+        identifierLocal = entry.local;
+      } else {
+        nonRestEntryByLocal.set(entry.local, entry);
       }
     }
 
-    for (const prop of (param as ObjectPattern).properties) {
-      if (t.isRestElement(prop)) {
-        if (t.isIdentifier(prop.argument)) {
-          entries.push({ local: prop.argument.name, rest: true });
-        }
-      } else if (t.isObjectProperty(prop)) {
-        const key = t.isIdentifier(prop.key) ? prop.key.name : undefined;
-        const val = prop.value;
-
-        if (t.isIdentifier(val)) {
-          if (key !== undefined) {
-            entries.push({ key, local: val.name });
-          }
-        } else if (t.isAssignmentPattern(val) && t.isIdentifier(val.left)) {
-          if (key !== undefined) {
-            entries.push({ key, local: val.left.name });
-          }
-        }
-        // Nested ObjectPattern/ArrayPattern: names collected in nestedBindingNames above, not added to entries
-      }
-    }
-  } else if (t.isIdentifier(param)) {
-    kind = "identifier";
-    entries.push({ local: param.name, identifier: true });
-  }
-  // ArrayPattern: kind stays 'none', entries stays empty
-
-  // Step 3: Build lookup maps
-  const nonRestEntryByLocal = new Map<string, CollectedPropEntry>();
-  const restLocalNames = new Set<string>();
-  let identifierLocal: string | null = null;
-
-  for (const entry of entries) {
-    if (entry.rest) {
-      restLocalNames.add(entry.local);
-    } else if (entry.identifier) {
-      identifierLocal = entry.local;
+    // Determine factory param name
+    let factoryParam = "";
+    if (isSingleParam) {
+      // Single param: use original logic (lazy, set on first use)
+      factoryParam = ""; // will be assigned lazily in traverse
     } else {
-      nonRestEntryByLocal.set(entry.local, entry);
+      // Multi-param: pre-assign based on index (will be used if param is used)
+      factoryParam = getFactoryParamNameForIndex(fnPath, i);
+    }
+
+    return {
+      entries,
+      kind,
+      factoryParam,
+      used: false,
+      nestedBindingNames,
+      nonRestEntryByLocal,
+      restLocalNames,
+      identifierLocal,
+    };
+  });
+
+  // Build localName → paramIndex map
+  const localToParamIndex = new Map<string, number>();
+  for (let i = 0; i < params.length; i++) {
+    const info = paramInfos[i];
+    for (const entry of info.entries) {
+      localToParamIndex.set(entry.local, i);
     }
   }
 
-  // Step 5: Traverse declarations
-  let used = false;
-  let factoryParam = "";
-
+  // Traverse declarations
   const bodyPath = fnPath.get("body") as NodePath<import("@babel/types").BlockStatement>;
   const stmtPaths = bodyPath.get("body") as NodePath<Statement>[];
 
@@ -171,8 +216,18 @@ export function collectPropsInScope(
         if (!binding) return;
         if (!isParamBinding(binding, fnPath)) return;
 
+        // Resolve which param owns this name
+        let info: ParamInfo;
+        if (isSingleParam) {
+          info = paramInfos[0];
+        } else {
+          const paramIndex = localToParamIndex.get(name);
+          if (paramIndex === undefined) return;
+          info = paramInfos[paramIndex];
+        }
+
         // Guard (e): rest-binding referenced → error
-        if (restLocalNames.has(name)) {
+        if (info.restLocalNames.has(name)) {
           throw idPath.buildCodeFrameError(
             `"use scope" V2: rest-spread prop "${name}" cannot be referenced in scope body. ` +
               `Use the identifier param form (props) => props.${name} instead, or destructure ` +
@@ -181,36 +236,38 @@ export function collectPropsInScope(
         }
 
         // Guard (f): nested destructuring referenced → error
-        if (nestedBindingNames.has(name)) {
+        if (info.nestedBindingNames.has(name)) {
           throw idPath.buildCodeFrameError(
             `"use scope" V2: nested destructured prop "${name}" is not supported. ` +
               `Use flat destructuring or the identifier param form.`
           );
         }
 
-        // Lazy-initialize factory param on first rewrite
-        if (!factoryParam) {
-          factoryParam = getFactoryParamName(fnPath);
+        // Lazy-initialize factory param on first rewrite (single-param starts as "")
+        if (!info.factoryParam) {
+          info.factoryParam = getFactoryParamName(fnPath);
         }
 
-        // Guard (g): rewrite
-        const entry = nonRestEntryByLocal.get(name);
+        const entry = info.nonRestEntryByLocal.get(name);
         if (entry) {
-          // Destructured prop: count → p.count
           idPath.replaceWith(
-            t.memberExpression(t.identifier(factoryParam), t.identifier(entry.key!))
+            t.memberExpression(t.identifier(info.factoryParam), t.identifier(entry.key!))
           );
-        } else if (name === identifierLocal) {
-          // Identifier param: props → p
-          idPath.replaceWith(t.identifier(factoryParam));
+        } else if (name === info.identifierLocal) {
+          idPath.replaceWith(t.identifier(info.factoryParam));
         } else {
-          return; // not a tracked prop binding
+          return;
         }
 
-        used = true;
+        info.used = true;
       },
     });
   }
 
-  return { used, entries, kind, factoryParam };
+  return paramInfos.map((info) => ({
+    used: info.used,
+    entries: info.entries,
+    kind: info.kind,
+    factoryParam: info.factoryParam,
+  }));
 }
