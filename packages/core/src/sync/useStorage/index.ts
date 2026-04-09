@@ -1,21 +1,10 @@
 "use client";
 
-import { useConstant } from "@shared/useConstant";
-import { useUnmount } from "@legendapp/state/react";
 import { createStorage } from "./core";
+import { useConstant } from "@shared/useConstant";
 
 export { createStorage } from "./core";
 export type { StorageOptions, StorageReturn } from "./core";
-
-/**
- * Options for `useStorage`.
- */
-export type UseStorageOptions = import("./core").StorageOptions;
-
-/**
- * Return type for `useStorage`.
- */
-export type UseStorageReturn<T> = import("./core").StorageReturn<T>;
 
 /**
  * Reactive storage binding powered by Legend-State's
@@ -39,22 +28,7 @@ export type UseStorageReturn<T> = import("./core").StorageReturn<T>;
  * data$.get();   // 42
  * ```
  */
-export function useStorage<T>(
-  key: string,
-  defaults: T,
-  options: UseStorageOptions
-): UseStorageReturn<T>;
-
-export function useStorage(
-  key: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  defaults: any,
-  options: UseStorageOptions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): UseStorageReturn<any> {
-  const { dispose, ...result } = useConstant(() => createStorage(key, defaults, options));
-
-  useUnmount(dispose);
-
-  return result;
-}
+export type UseStorage = typeof createStorage;
+export const useStorage: UseStorage = (key, defaults, options) => {
+  return useConstant(() => createStorage(key, defaults, options));
+};

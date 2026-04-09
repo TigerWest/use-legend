@@ -1,7 +1,7 @@
 import { observable, syncState } from "@legendapp/state";
 import type { Observable } from "@legendapp/state";
 import { synced, type PersistOptions } from "@legendapp/state/sync";
-import type { Disposable, ReadonlyObservable } from "../../types";
+import type { ReadonlyObservable } from "../../types";
 
 /**
  * Options for `offlineFirst` / `useOfflineFirst`.
@@ -85,9 +85,7 @@ export interface OfflineFirstReturn<T> {
  * @param options - Offline-first sync configuration.
  * @returns `Disposable & { data$, isLoaded$, isFetching$, isPersistLoaded$, error$, lastSync$, refetch, clearPersist }`
  */
-export function createOfflineFirst<T>(
-  options: OfflineFirstOptions<T>
-): Disposable & OfflineFirstReturn<T> {
+export function createOfflineFirst<T>(options: OfflineFirstOptions<T>): OfflineFirstReturn<T> {
   const { get, set, initial, persistKey, persistPlugin, mode, debounceSet, transform, retry } =
     options;
 
@@ -135,6 +133,5 @@ export function createOfflineFirst<T>(
     lastSync$: state$.lastSync as unknown as ReadonlyObservable<number | undefined>,
     refetch: () => state$.sync(),
     clearPersist: () => state$.clearPersist(),
-    dispose: () => {},
   };
 }

@@ -1,21 +1,10 @@
 "use client";
 
-import { useConstant } from "@shared/useConstant";
-import { useUnmount } from "@legendapp/state/react";
 import { createOfflineFirst } from "./core";
+import { useConstant } from "@shared/useConstant";
 
 export { createOfflineFirst } from "./core";
 export type { OfflineFirstOptions, OfflineFirstReturn } from "./core";
-
-/**
- * Options for `useOfflineFirst`.
- */
-export type UseOfflineFirstOptions<T> = import("./core").OfflineFirstOptions<T>;
-
-/**
- * Return type for `useOfflineFirst`.
- */
-export type UseOfflineFirstReturn<T> = import("./core").OfflineFirstReturn<T>;
 
 /**
  * Reactive offline-first data binding powered by Legend-State's
@@ -44,10 +33,7 @@ export type UseOfflineFirstReturn<T> = import("./core").OfflineFirstReturn<T>;
  * });
  * ```
  */
-export function useOfflineFirst<T>(options: UseOfflineFirstOptions<T>): UseOfflineFirstReturn<T> {
-  const { dispose, ...result } = useConstant(() => createOfflineFirst(options));
-
-  useUnmount(dispose);
-
-  return result;
-}
+export type UseOfflineFirst = typeof createOfflineFirst;
+export const useOfflineFirst: UseOfflineFirst = (options) => {
+  return useConstant(() => createOfflineFirst(options));
+};

@@ -1,7 +1,7 @@
 import { observable, syncState } from "@legendapp/state";
 import type { Observable } from "@legendapp/state";
 import { synced, type PersistOptions } from "@legendapp/state/sync";
-import type { Disposable, ReadonlyObservable } from "../../types";
+import type { ReadonlyObservable } from "../../types";
 
 /**
  * Options for `storage` / `useStorage`.
@@ -57,7 +57,7 @@ export function createStorage<T>(
   key: string,
   defaults: T,
   options: StorageOptions
-): Disposable & StorageReturn<T>;
+): StorageReturn<T>;
 
 export function createStorage(
   key: string,
@@ -65,7 +65,7 @@ export function createStorage(
   defaults: any,
   options: StorageOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Disposable & StorageReturn<any> {
+): StorageReturn<any> {
   const { plugin, transform, retrySync, readonly: readonlyOpt, options: pluginOptions } = options;
 
   const data$ = observable(
@@ -90,6 +90,5 @@ export function createStorage(
     isLoaded$: state$.isLoaded,
     isPersistLoaded$: state$.isPersistLoaded as unknown as ReadonlyObservable<boolean>,
     error$: state$.error as unknown as ReadonlyObservable<Error | undefined>,
-    dispose: () => {},
   };
 }

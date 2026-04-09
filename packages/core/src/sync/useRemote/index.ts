@@ -1,21 +1,10 @@
 "use client";
 
-import { useConstant } from "@shared/useConstant";
-import { useUnmount } from "@legendapp/state/react";
 import { createRemote } from "./core";
+import { useConstant } from "@shared/useConstant";
 
 export { createRemote } from "./core";
 export type { RemoteOptions, RemoteReturn } from "./core";
-
-/**
- * Options for `useRemote`.
- */
-export type UseRemoteOptions<T> = import("./core").RemoteOptions<T>;
-
-/**
- * Return type for `useRemote`.
- */
-export type UseRemoteReturn<T> = import("./core").RemoteReturn<T>;
 
 /**
  * Reactive remote data binding powered by Legend-State's
@@ -39,10 +28,7 @@ export type UseRemoteReturn<T> = import("./core").RemoteReturn<T>;
  * });
  * ```
  */
-export function useRemote<T>(options: UseRemoteOptions<T>): UseRemoteReturn<T> {
-  const { dispose, ...result } = useConstant(() => createRemote(options));
-
-  useUnmount(dispose);
-
-  return result;
-}
+export type UseRemote = typeof createRemote;
+export const useRemote: UseRemote = (options) => {
+  return useConstant(() => createRemote(options));
+};

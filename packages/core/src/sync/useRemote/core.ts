@@ -1,7 +1,7 @@
 import { observable, syncState } from "@legendapp/state";
 import type { Observable } from "@legendapp/state";
 import { synced } from "@legendapp/state/sync";
-import type { Disposable, ReadonlyObservable } from "../../types";
+import type { ReadonlyObservable } from "../../types";
 
 /**
  * Options for `remote` / `useRemote`.
@@ -63,7 +63,7 @@ export interface RemoteReturn<T> {
  * @param options - Remote sync configuration.
  * @returns `Disposable & { data$, isLoaded$, isFetching$, error$, refetch }`
  */
-export function createRemote<T>(options: RemoteOptions<T>): Disposable & RemoteReturn<T> {
+export function createRemote<T>(options: RemoteOptions<T>): RemoteReturn<T> {
   const { get, set, initial, mode, debounceSet, transform } = options;
 
   const isFetching$ = observable(false);
@@ -97,6 +97,5 @@ export function createRemote<T>(options: RemoteOptions<T>): Disposable & RemoteR
     isFetching$: isFetching$ as unknown as ReadonlyObservable<boolean>,
     error$: state$.error as unknown as ReadonlyObservable<Error | undefined>,
     refetch: () => state$.sync(),
-    dispose: () => {},
   };
 }
