@@ -43,3 +43,36 @@
   --color-demo-normal: var(--sl-color-orange);
   --color-demo-fine: var(--sl-color-green);
 }
+
+/* Type tables — narrow name/type/default, wide description */
+.type-table table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.type-table-params table th:nth-child(1),
+.type-table-params table td:nth-child(1) { width: 15%; }
+.type-table-params table th:nth-child(2),
+.type-table-params table td:nth-child(2) { width: 25%; }
+.type-table-params table th:nth-child(3),
+.type-table-params table td:nth-child(3) { width: 60%; }
+
+.type-table-options table th:nth-child(1),
+.type-table-options table td:nth-child(1) { width: 20%; }
+.type-table-options table th:nth-child(2),
+.type-table-options table td:nth-child(2) { width: 20%; }
+.type-table-options table th:nth-child(3),
+.type-table-options table td:nth-child(3) { width: 10%; }
+.type-table-options table th:nth-child(4),
+.type-table-options table td:nth-child(4) { width: 50%; }
+
+.type-table-returns table th:nth-child(1),
+.type-table-returns table td:nth-child(1) { width: 25%; }
+.type-table-returns table th:nth-child(2),
+.type-table-returns table td:nth-child(2) { width: 25%; }
+.type-table-returns table th:nth-child(3),
+.type-table-returns table td:nth-child(3) { width: 50%; }
+
+.type-table table td code {
+  word-break: break-word;
+}

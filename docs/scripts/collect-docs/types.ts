@@ -31,3 +31,40 @@ export interface GeneratedDoc {
   relativePath: string
   filename: string
 }
+
+export interface FunctionSignature {
+  name: string;
+  description?: string;
+  typeParameters?: string;
+  params: ParamInfo[];
+  returns: ReturnInfo;
+  paramChildren?: ChildTypeInfo[];
+  returnChildren?: ChildTypeInfo[];
+}
+
+export interface ParamInfo {
+  name: string;
+  type: string;
+  description?: string;
+  optional: boolean;
+  properties?: PropertyInfo[];
+}
+
+export interface PropertyInfo {
+  name: string;
+  type: string;
+  description?: string;
+  optional: boolean;
+  defaultValue?: string;
+}
+
+export interface ReturnInfo {
+  type: string;
+  description?: string;
+  properties?: PropertyInfo[];
+}
+
+export interface ChildTypeInfo {
+  name: string;
+  properties: PropertyInfo[];
+}

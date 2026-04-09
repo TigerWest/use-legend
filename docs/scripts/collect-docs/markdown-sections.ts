@@ -1,13 +1,14 @@
 import { GITHUB_REPO_URL } from './config'
+import type { ChildTypeInfo, FunctionSignature } from './types'
 
 export function buildAutoSections(meta: {
-  typeDeclarations: string
   sourceFile: string
+  signature?: FunctionSignature | null
 }): string {
   const sections: string[] = []
 
-  if (meta.typeDeclarations) {
-    sections.push(`## Type Declarations\n\n\`\`\`typescript\n${meta.typeDeclarations}\n\`\`\``)
+  if (meta.signature) {
+    sections.push(buildTypeSection(meta.signature))
   }
 
   if (meta.sourceFile) {
@@ -16,6 +17,104 @@ export function buildAutoSections(meta: {
   }
 
   return sections.join('\n\n')
+}
+
+/** Escape a string for use inside a markdown table cell (plain text, not code) */
+function escapeCell(value: string): string {
+  return value
+    .replace(/\n/g, ' ')          // newlines break table rows
+    .replace(/\|/g, '\\|')        // pipes break table columns
+    .replace(/</g, '&lt;')        // MDX parses <T> as JSX in plain text cells
+    .replace(/>/g, '&gt;')
+}
+
+/** Escape a string for use inside backtick code spans in table cells */
+function escapeCode(value: string): string {
+  return value
+    .replace(/\n/g, ' ')          // newlines break table rows
+    .replace(/\|/g, '\\|')        // pipes break table columns
+}
+
+function buildChildTypeTable(child: ChildTypeInfo): string {
+  const parts: string[] = []
+  parts.push(`\n### ${escapeCode(child.name)}\n`)
+  parts.push('<div class="type-table type-table-options">\n')
+  parts.push('| Option | Type | Default | Description |')
+  parts.push('|--------|------|---------|-------------|')
+  for (const prop of child.properties) {
+    parts.push(
+      `| \`${escapeCode(prop.name)}\` | \`${escapeCode(prop.type)}\` | \`${escapeCode(prop.defaultValue ?? '-')}\` | ${escapeCell(prop.description ?? '-')} |`
+    )
+  }
+  parts.push('\n</div>')
+  return parts.join('\n')
+}
+
+function buildTypeSection(sig: FunctionSignature): string {
+  const parts: string[] = ['## Type']
+
+  // Parameters table
+  if (sig.params.length > 0) {
+    parts.push('\n### Parameters\n')
+    parts.push('<div class="type-table type-table-params">\n')
+    parts.push('| Parameter | Type | Description |')
+    parts.push('|-----------|------|-------------|')
+    for (const p of sig.params) {
+      const opt = p.optional ? ' (optional)' : ''
+      parts.push(`| \`${escapeCode(p.name)}\` | \`${escapeCode(p.type)}\`${opt} | ${escapeCell(p.description ?? '-')} |`)
+    }
+    parts.push('\n</div>')
+
+    // Explicitly referenced param children types (takes priority)
+    if (sig.paramChildren?.length) {
+      for (const child of sig.paramChildren) {
+        parts.push(buildChildTypeTable(child))
+      }
+    } else {
+      // Fallback: auto-detected from DeepMaybeObservable unwrap
+      for (const p of sig.params) {
+        if (p.properties?.length) {
+          parts.push(`\n### ${escapeCode(p.type)}\n`)
+          parts.push('<div class="type-table type-table-options">\n')
+          parts.push('| Option | Type | Default | Description |')
+          parts.push('|--------|------|---------|-------------|')
+          for (const prop of p.properties) {
+            parts.push(
+              `| \`${escapeCode(prop.name)}\` | \`${escapeCode(prop.type)}\` | \`${escapeCode(prop.defaultValue ?? '-')}\` | ${escapeCell(prop.description ?? '-')} |`
+            )
+          }
+          parts.push('\n</div>')
+        }
+      }
+    }
+  }
+
+  // Returns
+  parts.push('\n### Returns\n')
+  if (sig.returns.properties?.length) {
+    parts.push(`\`${escapeCode(sig.returns.type)}\`\n`)
+    parts.push('<div class="type-table type-table-returns">\n')
+    parts.push('| Name | Type | Description |')
+    parts.push('|------|------|-------------|')
+    for (const p of sig.returns.properties) {
+      parts.push(`| \`${escapeCode(p.name)}\` | \`${escapeCode(p.type)}\` | ${escapeCell(p.description ?? '-')} |`)
+    }
+    parts.push('\n</div>')
+  } else {
+    parts.push(`\`${escapeCode(sig.returns.type)}\``)
+    if (sig.returns.description) {
+      parts.push(`\n${escapeCell(sig.returns.description)}`)
+    }
+  }
+
+  // Explicitly referenced return children types
+  if (sig.returnChildren?.length) {
+    for (const child of sig.returnChildren) {
+      parts.push(buildChildTypeTable(child))
+    }
+  }
+
+  return parts.join('\n')
 }
 
 export function serializeFrontmatter(frontmatter: Record<string, unknown>): string {

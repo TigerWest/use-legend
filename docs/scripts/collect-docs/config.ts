@@ -62,3 +62,14 @@ export function toGeneratedRelativeDocPath(sourcePath: string, sourcePackageDir:
 
   return relativeFromSrc.replace(ext, ".gen.md").split(path.sep).join("/");
 }
+
+export const PACKAGE_ENTRIES: Record<string, string> = {
+  "@usels/core": path.resolve(PACKAGES_ROOT, "packages/core/src/index.ts"),
+  "@usels/web": path.resolve(PACKAGES_ROOT, "packages/web/src/index.ts"),
+  "@usels/integrations": path.resolve(PACKAGES_ROOT, "packages/integrations/src/index.ts"),
+  "@usels/tanstack-query": path.resolve(PACKAGES_ROOT, "packages/libraries/tanstack-query/src/index.ts"),
+};
+
+export function resolvePackageEntry(packageName: string): string | null {
+  return PACKAGE_ENTRIES[packageName] ?? null;
+}

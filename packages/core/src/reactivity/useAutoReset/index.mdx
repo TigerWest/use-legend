@@ -1,0 +1,92 @@
+---
+title: useAutoReset
+description: "Observable that automatically resets to a default value after a specified delay. Useful for temporary state like toast messages, form feedback, or UI status indicators. Each time the value changes, the reset timer restarts."
+category: Reactivity
+type-table:
+  import: "@usels/core"
+  name: UseAutoReset
+  params:
+    children:
+      - AutoResetOptions
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useObservable } from "@legendapp/state/react";
+    import { useAutoReset } from "@usels/core";
+
+    function Component() {
+      const default$ = useObservable("");
+      const message$ = useAutoReset(default$, { afterMs: 2000 });
+
+      message$.set("Saved!");
+      // message$.get() returns "Saved!" immediately
+      // After 2 seconds, message$.get() returns "" automatically
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createAutoReset } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const default$ = observable("");
+      const message$ = createAutoReset(default$, { afterMs: 2000 });
+
+      message$.set("Saved!");
+      // After 2 seconds, resets to ""
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Boolean flag auto-reset
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable } from "@legendapp/state/react";
+    import { useAutoReset } from "@usels/core";
+
+    function Component() {
+      const default$ = useObservable(false);
+      const showCopied$ = useAutoReset(default$, { afterMs: 1500 });
+
+      const handleCopy = () => {
+        navigator.clipboard.writeText("text");
+        showCopied$.set(true);
+        // Automatically resets to false after 1.5s
+      };
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createAutoReset } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const default$ = observable(false);
+      const showCopied$ = createAutoReset(default$, { afterMs: 1500 });
+
+      const handleCopy = () => {
+        navigator.clipboard.writeText("text");
+        showCopied$.set(true);
+      };
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

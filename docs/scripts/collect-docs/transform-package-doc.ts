@@ -6,10 +6,11 @@ import {
   SOURCE_PACKAGES,
   DOCS_DEMOS_ROOT,
   toGeneratedRelativeDocPath,
+  resolvePackageEntry,
 } from "./config";
 import { buildAutoSections, serializeFrontmatter } from "./markdown-sections";
-import { extractTypeDeclarations } from "./type-declarations";
-import type { GeneratedDoc } from "./types";
+import { extractFunctionSignature, extractNamedTypeProperties } from "./type-declarations";
+import type { FunctionSignature, GeneratedDoc } from "./types";
 
 export async function transformPackageDoc(
   doc: GeneratedDoc
@@ -17,23 +18,41 @@ export async function transformPackageDoc(
   const sourceContent = await fs.readFile(doc.sourcePath, "utf-8");
   const { data: frontmatter, content: body } = matter(sourceContent);
 
-  const dir = path.dirname(doc.sourcePath);
-  const basename = doc.filename;
-  const possibleTsFiles = [
-    path.join(dir, `${basename}.ts`),
-    path.join(dir, `${basename}.tsx`),
-    path.join(dir, "index.ts"),
-    path.join(dir, "index.tsx"),
-  ];
+  // Extract function signature if type-table frontmatter is present
+  const typeTableConfig = frontmatter["type-table"] as
+    | {
+        import: string;
+        name: string;
+        params?: { children?: string[] };
+        returns?: { children?: string[] };
+      }
+    | undefined;
 
-  let typeDeclarations = "";
-  for (const tsFile of possibleTsFiles) {
-    try {
-      await fs.access(tsFile);
-      typeDeclarations = extractTypeDeclarations(tsFile);
-      break;
-    } catch {
-      // file does not exist
+  let signature: FunctionSignature | null = null;
+
+  if (typeTableConfig) {
+    const entryFile = resolvePackageEntry(typeTableConfig.import);
+    if (entryFile) {
+      signature = extractFunctionSignature(entryFile, typeTableConfig.name);
+
+      // Extract explicitly referenced child types
+      if (signature) {
+        if (typeTableConfig.params?.children?.length) {
+          signature.paramChildren = typeTableConfig.params.children
+            .map((name) => extractNamedTypeProperties(entryFile, name))
+            .filter((c): c is NonNullable<typeof c> => c !== null);
+        }
+        if (typeTableConfig.returns?.children?.length) {
+          signature.returnChildren = typeTableConfig.returns.children
+            .map((name) => extractNamedTypeProperties(entryFile, name))
+            .filter((c): c is NonNullable<typeof c> => c !== null);
+        }
+      }
+    }
+    if (!signature) {
+      console.warn(
+        `[type-table] Could not extract signature for "${typeTableConfig.name}" from "${typeTableConfig.import}" in ${doc.sourcePath}`
+      );
     }
   }
 
@@ -49,10 +68,11 @@ export async function transformPackageDoc(
   };
 
   delete enhancedFrontmatter.order;
+  delete enhancedFrontmatter["type-table"];
 
   const autoSections = buildAutoSections({
-    typeDeclarations,
     sourceFile,
+    signature,
   });
 
   const sourcePackageDir = sourcePackageConfig?.dir ?? doc.sourcePackage;

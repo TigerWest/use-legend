@@ -1,0 +1,70 @@
+---
+title: useDebounced
+description: "Debounce an Observable value. Creates a read-only Observable that updates only after the source value stops changing for the specified delay."
+category: Reactivity
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useObservable } from "@legendapp/state/react";
+    import { useDebounced } from "@usels/core";
+
+    function Component() {
+      const source$ = useObservable("hello");
+      const debounced$ = useDebounced(source$, { ms: 300 });
+      // debounced$.get() updates 300ms after source$ stops changing
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createDebounced } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const source$ = observable("hello");
+      const debounced$ = createDebounced(source$, { ms: 300 });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### maxWait — cap maximum delay
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable } from "@legendapp/state/react";
+    import { useDebounced } from "@usels/core";
+
+    function Component() {
+      const source$ = useObservable(0);
+      const debounced$ = useDebounced(source$, { ms: 300, maxWait: 1000 });
+      // Forces update every 1000ms even with continuous source changes
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createDebounced } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const source$ = observable(0);
+      const debounced$ = createDebounced(source$, { ms: 300, maxWait: 1000 });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

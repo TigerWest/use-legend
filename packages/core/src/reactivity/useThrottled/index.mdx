@@ -1,0 +1,101 @@
+---
+title: useThrottled
+description: "Throttle an Observable value. Creates a read-only Observable that updates at most once per interval when the source value changes."
+category: Reactivity
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useObservable } from "@legendapp/state/react";
+    import { useThrottled } from "@usels/core";
+
+    function Component() {
+      const source$ = useObservable("hello");
+      const throttled$ = useThrottled(source$, { ms: 300 });
+      // throttled$.get() updates at most once per 300ms
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createThrottled } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const source$ = observable("hello");
+      const throttled$ = createThrottled(source$, { ms: 300 });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Leading edge only
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable } from "@legendapp/state/react";
+    import { useThrottled } from "@usels/core";
+
+    function Component() {
+      const source$ = useObservable("hello");
+      // Updates immediately on change, suppresses further updates within interval
+      const throttled$ = useThrottled(source$, { ms: 300, edges: ["leading"] });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createThrottled } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const source$ = observable("hello");
+      const throttled$ = createThrottled(source$, { ms: 300, edges: ["leading"] });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Trailing edge only
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable } from "@legendapp/state/react";
+    import { useThrottled } from "@usels/core";
+
+    function Component() {
+      const source$ = useObservable("hello");
+      // Does not update immediately — updates once after the interval ends
+      const throttled$ = useThrottled(source$, { ms: 300, edges: ["trailing"] });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createThrottled } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const source$ = observable("hello");
+      const throttled$ = createThrottled(source$, { ms: 300, edges: ["trailing"] });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

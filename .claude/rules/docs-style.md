@@ -182,10 +182,79 @@ If there are many usage patterns, you may add supplementary descriptions using #
 
 `collect-docs.ts` adds these automatically — do not write them manually:
 
-- `## Type Declarations` — extracted from `.d.ts` via TypeScript Compiler API (comments & imports removed)
+- `## Type` — Parameters/Returns tables (requires `type-table` frontmatter)
 - `## Source` — GitHub link
 - `## Contributors` — extracted from git log
 - `## Changelog` — extracted from git log
+
+### `type-table` Frontmatter
+
+Add `type-table` to frontmatter to auto-generate `## Type` with structured API tables.
+
+#### Basic usage
+
+```yaml
+---
+title: useAutoReset
+type-table:
+  import: "@usels/core"      # package name (resolves to entry file)
+  name: UseAutoReset          # exported function or type alias name
+---
+```
+
+This extracts the function signature and generates:
+- **Parameters** table — param name, type, JSDoc description
+- **Returns** — return type with JSDoc `@returns` description
+
+#### `children` — expand sub-types as tables
+
+When a parameter or return type has an options interface or complex return object,
+use `children` to explicitly reference which types should be expanded into sub-tables.
+
+```yaml
+---
+title: useDataHistory
+type-table:
+  import: "@usels/core"
+  name: UseDataHistory
+  params:
+    children:
+      - DataHistoryOptions    # → "### DataHistoryOptions" options table
+  returns:
+    children:
+      - DataHistoryReturn     # → "### DataHistoryReturn" properties table
+---
+```
+
+Each child type name is resolved from the same package entry file.
+The system extracts all properties (including inherited via `extends`) and generates:
+- For `params.children`: options table with Option / Type / Default / Description columns
+- For `returns.children`: properties table with Name / Type / Description columns
+
+#### Behavior rules
+
+| Scenario | Result |
+|----------|--------|
+| `type-table` present with `children` | Explicit children types expanded as sub-tables |
+| `type-table` present without `children` | Auto-detects `DeepMaybeObservable<T>` wrapper and expands inner type (fallback) |
+| No `type-table` in frontmatter | No `## Type` section generated |
+
+#### Available packages
+
+| `import` value | Entry file |
+|----------------|-----------|
+| `@usels/core` | `packages/core/src/index.ts` |
+| `@usels/web` | `packages/web/src/index.ts` |
+| `@usels/integrations` | `packages/integrations/src/index.ts` |
+| `@usels/tanstack-query` | `packages/libraries/tanstack-query/src/index.ts` |
+
+#### Tips
+
+- `name` should be the **exported** symbol — typically `UseXxx` (type alias of `typeof createXxx`)
+- JSDoc on the export (`@param`, `@returns`) is extracted for descriptions
+- `@default` tags on interface properties populate the Default column
+- Generic type parameters (e.g. `<Raw, Serialized>`) are preserved in display
+- `type-table` is stripped from the generated `.gen.mdx` frontmatter (build hint only)
 
 ## Prohibited
 
