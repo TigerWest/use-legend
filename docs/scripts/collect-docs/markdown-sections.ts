@@ -4,11 +4,14 @@ import type { ChildTypeInfo, FunctionSignature } from './types'
 export function buildAutoSections(meta: {
   sourceFile: string
   signature?: FunctionSignature | null
+  typeDeclarationsCode?: string | null
 }): string {
   const sections: string[] = []
 
   if (meta.signature) {
     sections.push(buildTypeSection(meta.signature))
+  } else if (meta.typeDeclarationsCode) {
+    sections.push(`## Type\n\n\`\`\`typescript\n${meta.typeDeclarationsCode}\n\`\`\``)
   }
 
   if (meta.sourceFile) {

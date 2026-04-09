@@ -9,7 +9,7 @@ import {
   resolvePackageEntry,
 } from "./config";
 import { buildAutoSections, serializeFrontmatter } from "./markdown-sections";
-import { extractFunctionSignature, extractNamedTypeProperties } from "./type-declarations";
+import { extractFunctionSignature, extractNamedTypeProperties, extractRawTypeDeclarations } from "./type-declarations";
 import type { FunctionSignature, GeneratedDoc } from "./types";
 
 export async function transformPackageDoc(
@@ -67,12 +67,33 @@ export async function transformPackageDoc(
     sourceFile,
   };
 
+  // Extract raw type declarations if type-declarations frontmatter is present
+  const typeDeclarationsConfig = frontmatter["type-declarations"] as
+    | { file: string; comments?: boolean }
+    | undefined;
+
+  let typeDeclarationsCode: string | null = null;
+
+  if (typeDeclarationsConfig) {
+    const docDir = path.dirname(doc.sourcePath);
+    const targetFile = path.resolve(docDir, typeDeclarationsConfig.file);
+    typeDeclarationsCode =
+      extractRawTypeDeclarations(targetFile, typeDeclarationsConfig.comments ?? false) || null;
+    if (!typeDeclarationsCode) {
+      console.warn(
+        `[type-declarations] Could not extract declarations from "${targetFile}" in ${doc.sourcePath}`
+      );
+    }
+  }
+
   delete enhancedFrontmatter.order;
   delete enhancedFrontmatter["type-table"];
+  delete enhancedFrontmatter["type-declarations"];
 
   const autoSections = buildAutoSections({
     sourceFile,
     signature,
+    typeDeclarationsCode,
   });
 
   const sourcePackageDir = sourcePackageConfig?.dir ?? doc.sourcePackage;

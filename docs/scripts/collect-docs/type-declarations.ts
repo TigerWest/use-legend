@@ -2,6 +2,49 @@ import * as ts from "typescript";
 import * as path from "path";
 import type { ChildTypeInfo, FunctionSignature, ParamInfo, PropertyInfo, ReturnInfo } from "./types";
 
+export function extractRawTypeDeclarations(
+  sourceFilePath: string,
+  includeComments: boolean
+): string {
+  try {
+    let declarationContent = "";
+    const compilerOptions: ts.CompilerOptions = {
+      target: ts.ScriptTarget.ESNext,
+      module: ts.ModuleKind.ESNext,
+      declaration: true,
+      emitDeclarationOnly: true,
+      skipLibCheck: true,
+    };
+    const host = ts.createCompilerHost(compilerOptions);
+    host.writeFile = (_fileName, content) => {
+      if (_fileName.endsWith(".d.ts")) declarationContent = content;
+    };
+    const program = ts.createProgram([sourceFilePath], compilerOptions, host);
+    program.emit();
+
+    let result = declarationContent;
+    if (!includeComments) {
+      result = result
+        .replace(/\/\*\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/[^\n]*/g, "");
+    }
+
+    return result
+      .split("\n")
+      .filter(
+        (line) =>
+          !line.startsWith("/// ") &&
+          !line.trim().startsWith("import ") &&
+          line.trim() !== "export {};" &&
+          line.trim() !== ""
+      )
+      .join("\n")
+      .trim();
+  } catch {
+    return "";
+  }
+}
+
 export function extractFunctionSignature(
   sourceFilePath: string,
   exportName: string
