@@ -5,9 +5,7 @@ import { createDebouncedHistory } from "./core";
 
 export { createDebouncedHistory, type DebouncedHistoryOptions } from "./core";
 
-// Aliases for hook consumers — single source of truth from core
-export type { DebouncedHistoryOptions as UseDebouncedHistoryOptions } from "./core";
-export type { DataHistoryReturn as UseDebouncedHistoryReturn } from "../useDataHistory/core";
+export type { DataHistoryReturn } from "../useDataHistory/core";
 
 /**
  * Track undo/redo history with debounced auto-commit.

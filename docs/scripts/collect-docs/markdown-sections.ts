@@ -24,8 +24,7 @@ function escapeCell(value: string): string {
   return value
     .replace(/\n/g, ' ')          // newlines break table rows
     .replace(/\|/g, '\\|')        // pipes break table columns
-    .replace(/</g, '&lt;')        // MDX parses <T> as JSX in plain text cells
-    .replace(/>/g, '&gt;')
+    .replace(/</g, '&lt;')        // MDX parses <T> as JSX — only < needs escaping, not >
 }
 
 /** Escape a string for use inside backtick code spans in table cells */

@@ -4,10 +4,7 @@ import { useScope, toObs } from "@primitives/useScope";
 import { createThrottledHistory } from "./core";
 
 export { createThrottledHistory, type ThrottledHistoryOptions } from "./core";
-
-// Aliases for hook consumers — single source of truth from core
-export type { ThrottledHistoryOptions as UseThrottledHistoryOptions } from "./core";
-export type { DataHistoryReturn as UseThrottledHistoryReturn } from "../useDataHistory/core";
+export type { DataHistoryReturn } from "../useDataHistory/core";
 
 /**
  * Track undo/redo history with throttled auto-commit.

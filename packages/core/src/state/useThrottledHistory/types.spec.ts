@@ -2,8 +2,7 @@
 import { describe, it, expectTypeOf } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { observable } from "@legendapp/state";
-import { useThrottledHistory } from ".";
-import type { UseThrottledHistoryReturn } from ".";
+import { DataHistoryReturn, useThrottledHistory } from ".";
 import type { ReadonlyObservable, UseHistoryRecord } from "../../types";
 
 describe("useThrottledHistory() — types", () => {
@@ -12,7 +11,7 @@ describe("useThrottledHistory() — types", () => {
       const source$ = observable(0);
       renderHook(() => {
         const result = useThrottledHistory(source$);
-        expectTypeOf(result).toEqualTypeOf<UseThrottledHistoryReturn<number>>();
+        expectTypeOf(result).toEqualTypeOf<DataHistoryReturn<number>>();
       });
     });
 
@@ -30,7 +29,7 @@ describe("useThrottledHistory() — types", () => {
       const source$ = observable(42);
       renderHook(() => {
         const result = useThrottledHistory(source$);
-        expectTypeOf(result).toEqualTypeOf<UseThrottledHistoryReturn<number>>();
+        expectTypeOf(result).toEqualTypeOf<DataHistoryReturn<number>>();
       });
     });
 
@@ -49,7 +48,7 @@ describe("useThrottledHistory() — types", () => {
           dump: (v) => v.length,
           parse: (n) => String(n),
         });
-        expectTypeOf(result).toEqualTypeOf<UseThrottledHistoryReturn<string, number>>();
+        expectTypeOf(result).toEqualTypeOf<DataHistoryReturn<string, number>>();
       });
     });
   });

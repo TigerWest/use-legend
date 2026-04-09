@@ -5,10 +5,6 @@ import { createManualHistory } from "./core";
 
 export { createManualHistory, type ManualHistoryOptions, type ManualHistoryReturn } from "./core";
 
-// Aliases for hook consumers — single source of truth from core
-export type { ManualHistoryOptions as UseManualHistoryOptions } from "./core";
-export type { ManualHistoryReturn as UseManualHistoryReturn } from "./core";
-
 /**
  * Manually manage undo/redo history for an Observable.
  * History is only recorded when `commit()` is called explicitly.

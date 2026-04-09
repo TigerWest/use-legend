@@ -5,10 +5,6 @@ import { createDataHistory } from "./core";
 
 export { createDataHistory, type DataHistoryOptions, type DataHistoryReturn } from "./core";
 
-// Aliases for hook consumers — single source of truth from core
-export type { DataHistoryOptions as UseDataHistoryOptions } from "./core";
-export type { DataHistoryReturn as UseDataHistoryReturn } from "./core";
-
 /**
  * Automatically track undo/redo history for an Observable.
  * Extends `useManualHistory` with auto-commit on source change, pause/resume, and transaction.

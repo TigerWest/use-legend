@@ -5,9 +5,6 @@ import { createLastChanged } from "./core";
 
 export { createLastChanged, type LastChangedOptions } from "./core";
 
-// Aliases for hook consumers — single source of truth from core
-export type { LastChangedOptions as UseLastChangedOptions } from "./core";
-
 /**
  * Track when a source value last changed.
  * Returns `{ timestamp$ }` — a read-only Observable containing the timestamp (`Date.now()`)
