@@ -1,12 +1,10 @@
 "use client";
-import { useConstant } from "@shared/useConstant";
-import { useLatest } from "@shared/useLatest";
-import { useUnmount } from "@shared/useUnmount";
-import { watch, toSelector, type WatchOptions, type WatchSource, type Effector } from "./core";
+import { useScope, onUnmount } from "@primitives/useScope";
+import { watch, toSelector, type WatchSource } from "./core";
 
 export { watch, type WatchOptions, type WatchSource, type Effector } from "./core";
 
-export type UseWatchOptions = WatchOptions;
+export type UseWatch = typeof watch;
 
 /**
  * Runs a reactive effect that skips the initial run on mount by default.
@@ -42,24 +40,18 @@ export type UseWatchOptions = WatchOptions;
  * });
  * ```
  */
-export function useWatch<T extends WatchSource>(
-  selector: T,
-  effect: Effector<T>,
-  options: UseWatchOptions = {}
-): void {
-  const selectorRef = useLatest(selector);
-  const effectRef = useLatest(effect);
-
-  const { dispose } = useConstant(() => {
-    // Stable selector fn closed over selectorRef — avoids re-creating a wrapper on every observe tick
-    const selectorFn = () => toSelector(selectorRef.current as WatchSource)();
-    return watch(
-      selectorFn,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (value) => (effectRef.current as (v: any) => void)(value),
-      options
-    );
-  });
-
-  useUnmount(dispose);
-}
+export const useWatch: UseWatch = (selector, effect, options = {}) => {
+  return useScope(
+    (p) => {
+      const disposable = watch(
+        () => toSelector(p.selector as WatchSource)(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (value) => (p.effect as (v: any) => void)(value),
+        options
+      );
+      onUnmount(disposable.dispose);
+      return disposable;
+    },
+    { selector, effect }
+  );
+};

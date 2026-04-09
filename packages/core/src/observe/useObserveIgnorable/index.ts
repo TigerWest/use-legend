@@ -1,21 +1,12 @@
 "use client";
-import { useConstant } from "@shared/useConstant";
-import { useLatest } from "@shared/useLatest";
-import { useUnmount } from "@shared/useUnmount";
-import { type WatchSource, type Effector } from "@observe/useWatch";
+import { useScope, onUnmount } from "@primitives/useScope";
+import { type WatchSource } from "@observe/useWatch";
 import { toSelector } from "@observe/useWatch/core";
-import type { ReadonlyObservable } from "../../types";
 import { observeIgnorable } from "./core";
-import type { WatchOptions } from "@observe/useWatch";
 
 export { observeIgnorable, type ObserveIgnorableReturn } from "./core";
 
-export type UseObserveIgnorableOptions = WatchOptions;
-
-export interface UseObserveIgnorableReturn {
-  ignoreUpdates: (updater: () => void) => void;
-  isIgnoring$: ReadonlyObservable<boolean>;
-}
+export type UseObserveIgnorable = typeof observeIgnorable;
 
 /**
  * Runs a reactive effect with an `ignoreUpdates` escape hatch to suppress circular triggers.
@@ -27,7 +18,7 @@ export interface UseObserveIgnorableReturn {
  * @param selector - Observable, array of Observables, or reactive read function.
  * @param effect   - Side-effect callback. Suppressed when triggered via `ignoreUpdates`.
  * @param options  - `{ immediate?, schedule? }`
- * @returns `{ ignoreUpdates, isIgnoring$ }`
+ * @returns `{ ignoreUpdates, isIgnoring$, dispose }`
  *
  * @example
  * ```tsx twoslash
@@ -46,24 +37,18 @@ export interface UseObserveIgnorableReturn {
  * ignoreUpdates(() => { source$.set(42); });
  * ```
  */
-export function useObserveIgnorable<T extends WatchSource>(
-  selector: T,
-  effect: Effector<T>,
-  options: UseObserveIgnorableOptions = {}
-): UseObserveIgnorableReturn {
-  const selectorRef = useLatest(selector);
-  const effectRef = useLatest(effect);
-
-  const { dispose, ignoreUpdates, isIgnoring$ } = useConstant(() => {
-    const selectorFn = () => toSelector(selectorRef.current as WatchSource)();
-    return observeIgnorable(
-      selectorFn,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (value) => (effectRef.current as (v: any) => void)(value),
-      options
-    );
-  });
-
-  useUnmount(dispose);
-  return { ignoreUpdates, isIgnoring$ };
-}
+export const useObserveIgnorable: UseObserveIgnorable = (selector, effect, options = {}) => {
+  return useScope(
+    (p) => {
+      const disposable = observeIgnorable(
+        () => toSelector(p.selector as WatchSource)(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (value) => (p.effect as (v: any) => void)(value),
+        options
+      );
+      onUnmount(disposable.dispose);
+      return disposable;
+    },
+    { selector, effect }
+  );
+};

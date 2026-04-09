@@ -1,11 +1,11 @@
 import {
-  observe,
   type ImmutableObservableBase,
   type Observable,
   type Selector,
   type ObserveEventCallback,
 } from "@legendapp/state";
 import type { Disposable } from "../../types";
+import { observe } from "@primitives/useScope";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObservable = { get(): any };
@@ -67,7 +67,7 @@ export function watch<T extends WatchSource>(
   const selectorFn = toSelector(selector);
   let skipFirst = !immediate;
 
-  const unsub = observe(
+  const dispose = observe(
     selectorFn,
     (e: ObserveEventCallback<unknown>) => {
       if (skipFirst) {
@@ -80,5 +80,7 @@ export function watch<T extends WatchSource>(
     observeImmediate !== undefined ? { immediate: observeImmediate } : undefined
   );
 
-  return { dispose: () => unsub() };
+  return {
+    dispose,
+  };
 }

@@ -121,8 +121,8 @@ export interface UseManualHistoryOptions<Raw, Serialized = Raw> {
   // ... identical to ManualHistoryOptions
 }
 
-// ✅ Good — re-export or alias core types directly
-export type { ManualHistoryOptions as UseManualHistoryOptions } from "./core";
+// ✅ Good — re-export core type
+export type { ManualHistoryOptions } from "./core";
 
 // Hook type derived from core function signature
 export type UseManualHistory = typeof createManualHistory;
@@ -479,8 +479,14 @@ Read mount-time-only values (e.g. `controls: boolean`) outside the factory. Pass
 > **Exception to `typeof createX`:** When the hook has a conditional/overloaded return type driven by a mount-time option (like `controls: boolean`), the return type diverges from core — use explicit overloads instead.
 
 ```ts
-export function useInterval(intervalValue: MaybeObservable<number>, options?: DeepMaybeObservable<UseIntervalOptions & { controls?: false }>): ReadonlyObservable<number>;
-export function useInterval(intervalValue: MaybeObservable<number>, options: DeepMaybeObservable<UseIntervalOptions & { controls: true }>): Readonly<UseIntervalReturn & Pausable>;
+export function useInterval(
+  intervalValue: MaybeObservable<number>,
+  options?: DeepMaybeObservable<UseIntervalOptions & { controls?: false }>
+): ReadonlyObservable<number>;
+export function useInterval(
+  intervalValue: MaybeObservable<number>,
+  options: DeepMaybeObservable<UseIntervalOptions & { controls: true }>
+): Readonly<UseIntervalReturn & Pausable>;
 export function useInterval(
   intervalValue: MaybeObservable<number>,
   options?: DeepMaybeObservable<UseIntervalOptions>

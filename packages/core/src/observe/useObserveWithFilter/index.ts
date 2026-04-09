@@ -1,14 +1,12 @@
 "use client";
-import { useConstant } from "@shared/useConstant";
-import { useLatest } from "@shared/useLatest";
-import { useUnmount } from "@shared/useUnmount";
-import { type WatchSource, type Effector } from "@observe/useWatch";
+import { useScope } from "@primitives/useScope";
+import { type WatchSource } from "@observe/useWatch";
 import { toSelector } from "@observe/useWatch/core";
-import { observeWithFilter, type ObserveWithFilterOptions } from "./core";
+import { observeWithFilter } from "./core";
 
 export { observeWithFilter, type ObserveWithFilterOptions } from "./core";
 
-export type UseObserveWithFilterOptions = ObserveWithFilterOptions;
+export type UseObserveWithFilter = typeof observeWithFilter;
 
 /**
  * Runs a reactive effect through an EventFilter, controlling when the effect fires.
@@ -36,23 +34,17 @@ export type UseObserveWithFilterOptions = ObserveWithFilterOptions;
  * );
  * ```
  */
-export function useObserveWithFilter<T extends WatchSource>(
-  selector: T,
-  effect: Effector<T>,
-  options: UseObserveWithFilterOptions
-): void {
-  const selectorRef = useLatest(selector);
-  const effectRef = useLatest(effect);
-
-  const { dispose } = useConstant(() => {
-    const selectorFn = () => toSelector(selectorRef.current as WatchSource)();
-    return observeWithFilter(
-      selectorFn,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (value) => (effectRef.current as (v: any) => void)(value),
-      options
-    );
-  });
-
-  useUnmount(dispose);
-}
+export const useObserveWithFilter: UseObserveWithFilter = (selector, effect, options) => {
+  return useScope(
+    (p) => {
+      const disposable = observeWithFilter(
+        () => toSelector(p.selector as WatchSource)(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (value) => (p.effect as (v: any) => void)(value),
+        options
+      );
+      return disposable;
+    },
+    { selector, effect }
+  );
+};

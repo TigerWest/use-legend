@@ -1,15 +1,12 @@
 "use client";
-import { type Selector } from "@legendapp/state";
-import { useConstant } from "@shared/useConstant";
-import { useLatest } from "@shared/useLatest";
-import { useUnmount } from "@shared/useUnmount";
-import { toSelector } from "@observe/useWatch/core";
+import { useScope, onUnmount } from "@primitives/useScope";
 import { type WatchSource } from "@observe/useWatch";
-import { whenever, type WheneverOptions, type Truthy } from "./core";
+import { toSelector } from "@observe/useWatch/core";
+import { whenever } from "./core";
 
 export { whenever, type WheneverOptions, type Truthy } from "./core";
 
-export type UseWheneverOptions = WheneverOptions;
+export type UseWhenever = typeof whenever;
 
 /**
  * Shorthand for watching a source and running an effect only when the value is truthy.
@@ -32,22 +29,18 @@ export type UseWheneverOptions = WheneverOptions;
  * });
  * ```
  */
-export function useWhenever<T>(
-  selector: Selector<T>,
-  effect: (value: Truthy<T>) => void,
-  options: UseWheneverOptions = {}
-): void {
-  const selectorRef = useLatest(selector);
-  const effectRef = useLatest(effect);
-
-  const { dispose } = useConstant(() =>
-    whenever(
-      () => toSelector<T>(selectorRef.current as WatchSource)(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (value) => (effectRef.current as (v: any) => void)(value),
-      options
-    )
+export const useWhenever: UseWhenever = (selector, effect, options = {}) => {
+  return useScope(
+    (p) => {
+      const disposable = whenever(
+        () => toSelector(p.selector as WatchSource)(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (value) => (p.effect as (v: any) => void)(value),
+        options
+      );
+      onUnmount(disposable.dispose);
+      return disposable;
+    },
+    { selector, effect }
   );
-
-  useUnmount(dispose);
-}
+};

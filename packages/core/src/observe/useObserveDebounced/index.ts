@@ -1,16 +1,12 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import { useConstant } from "@shared/useConstant";
-import { useLatest } from "@shared/useLatest";
-import { useUnmount } from "@shared/useUnmount";
-import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { type WatchSource, type Effector } from "@observe/useWatch";
+import { useScope, onUnmount } from "@primitives/useScope";
+import { type WatchSource } from "@observe/useWatch";
 import { toSelector } from "@observe/useWatch/core";
-import { observeDebounced, type ObserveDebouncedOptions } from "./core";
+import { observeDebounced } from "./core";
 
 export { observeDebounced, type ObserveDebouncedOptions } from "./core";
 
-export type UseObserveDebouncedOptions = ObserveDebouncedOptions;
+export type UseObserveDebounced = typeof observeDebounced;
 
 /**
  * Runs a reactive effect debounced — fires only after `ms` milliseconds of inactivity.
@@ -37,28 +33,18 @@ export type UseObserveDebouncedOptions = ObserveDebouncedOptions;
  * );
  * ```
  */
-export function useObserveDebounced<T extends WatchSource>(
-  selector: T,
-  effect: Effector<T>,
-  options: UseObserveDebouncedOptions = {}
-): void {
-  const { ms = 200, immediate, schedule, ...filterOptions } = options;
-  // ms is reactive — Observable<number> or plain number both supported
-  // Cast: default=200 ensures never undefined at runtime; useMaybeObservable returns Observable<T|undefined>
-  const ms$ = useMaybeObservable(ms) as Observable<number>;
-
-  const selectorRef = useLatest(selector);
-  const effectRef = useLatest(effect);
-
-  const { dispose } = useConstant(() => {
-    const selectorFn = () => toSelector(selectorRef.current as WatchSource)();
-    return observeDebounced(
-      selectorFn,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (value) => (effectRef.current as (v: any) => void)(value),
-      { ms: ms$, immediate, schedule, ...filterOptions }
-    );
-  });
-
-  useUnmount(dispose);
-}
+export const useObserveDebounced: UseObserveDebounced = (selector, effect, options = {}) => {
+  return useScope(
+    (p) => {
+      const disposable = observeDebounced(
+        () => toSelector(p.selector as WatchSource)(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (value) => (p.effect as (v: any) => void)(value),
+        options
+      );
+      onUnmount(disposable.dispose);
+      return disposable;
+    },
+    { selector, effect }
+  );
+};

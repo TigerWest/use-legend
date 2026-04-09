@@ -1,15 +1,12 @@
 "use client";
-import { useConstant } from "@shared/useConstant";
-import { useLatest } from "@shared/useLatest";
-import { useUnmount } from "@shared/useUnmount";
-import { type WatchSource, type Effector } from "@observe/useWatch";
+import { useScope, onUnmount } from "@primitives/useScope";
+import { type WatchSource } from "@observe/useWatch";
 import { toSelector } from "@observe/useWatch/core";
-import type { Pausable } from "../../types";
-import { observePausable, type ObservePausableOptions } from "./core";
+import { observePausable } from "./core";
 
 export { observePausable, type ObservePausableOptions } from "./core";
 
-export type UseObservePausableOptions = ObservePausableOptions;
+export type UseObservePausable = typeof observePausable;
 
 /**
  * Runs a reactive effect with built-in pause/resume controls.
@@ -20,7 +17,7 @@ export type UseObservePausableOptions = ObservePausableOptions;
  * @param selector - Observable, array of Observables, or reactive read function.
  * @param effect   - Side-effect callback. Suppressed while paused.
  * @param options  - `{ initialState?, immediate?, schedule? }`
- * @returns `{ isActive$, pause, resume }`
+ * @returns `{ isActive$, pause, resume, dispose }`
  *
  * @example
  * ```tsx twoslash
@@ -36,24 +33,18 @@ export type UseObservePausableOptions = ObservePausableOptions;
  * );
  * ```
  */
-export function useObservePausable<T extends WatchSource>(
-  selector: T,
-  effect: Effector<T>,
-  options: UseObservePausableOptions = {}
-): Pausable {
-  const selectorRef = useLatest(selector);
-  const effectRef = useLatest(effect);
-
-  const { dispose, ...pausable } = useConstant(() => {
-    const selectorFn = () => toSelector(selectorRef.current as WatchSource)();
-    return observePausable(
-      selectorFn,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (value) => (effectRef.current as (v: any) => void)(value),
-      options
-    );
-  });
-
-  useUnmount(dispose);
-  return pausable;
-}
+export const useObservePausable: UseObservePausable = (selector, effect, options = {}) => {
+  return useScope(
+    (p) => {
+      const disposable = observePausable(
+        () => toSelector(p.selector as WatchSource)(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (value) => (p.effect as (v: any) => void)(value),
+        options
+      );
+      onUnmount(disposable.dispose);
+      return disposable;
+    },
+    { selector, effect }
+  );
+};
