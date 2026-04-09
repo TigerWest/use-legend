@@ -1,14 +1,10 @@
-import type { Observable } from "@legendapp/state";
-import { useIsMounted, useObservable } from "@legendapp/state/react";
+"use client";
+import { useScope } from "@primitives/useScope";
+import { createWhenMounted } from "./core";
 
-export type UseWhenMountedReturn<T> = Observable<T | undefined>;
+export type { UseWhenMountedReturn } from "./core";
+export type UseWhenMounted = typeof createWhenMounted;
 
-/* @__NO_SIDE_EFFECTS__ */
-export function useWhenMounted<T>(callback: () => T): UseWhenMountedReturn<T> {
-  const isMounted = useIsMounted();
-
-  return useObservable(() => {
-    if (!isMounted.get()) return undefined;
-    return callback();
-  }) as unknown as Observable<T | undefined>;
-}
+export const useWhenMounted: UseWhenMounted = (callback) => {
+  return useScope((p) => createWhenMounted(() => (p.callback as typeof callback)()), { callback });
+};

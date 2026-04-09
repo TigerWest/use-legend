@@ -1,14 +1,11 @@
-import { Observable } from "@legendapp/state";
-import { useIsMounted, useObservable } from "@legendapp/state/react";
+"use client";
+import { useScope } from "@primitives/useScope";
+import { createSupported } from "./core";
 
-export type UseSupportedReturn = Observable<boolean>;
+export { createSupported } from "./core";
+export type { UseSupportedReturn } from "./core";
+export type UseSupported = typeof createSupported;
 
-/* @__NO_SIDE_EFFECTS__ */
-export function useSupported(callback: () => unknown): UseSupportedReturn {
-  const isMounted = useIsMounted();
-
-  return useObservable(() => {
-    if (!isMounted.get()) return false;
-    return Boolean(callback());
-  });
-}
+export const useSupported: UseSupported = (callback) => {
+  return useScope((p) => createSupported(() => (p.callback as typeof callback)()), { callback });
+};

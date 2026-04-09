@@ -1,0 +1,67 @@
+---
+title: useWhenMounted
+description: "Execute a callback and expose its return value as a reactive Observable<T | undefined> — only after the component has mounted. Returns undefined during SSR and before hydration, then re-evaluates with the actual callback value once mounted."
+category: Utilities
+---
+
+Execute a callback and expose its return value as a reactive `Observable<T | undefined>` — only after the component has mounted. Returns `undefined` during SSR and before hydration, then re-evaluates with the actual callback value once mounted.
+
+Unlike `useSupported`, the return value is not coerced to boolean — the full type `T` is preserved.
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useWhenMounted } from "@usels/core";
+
+    function Component() {
+      const windowWidth$ = useWhenMounted(() => window.innerWidth);
+      // undefined on SSR, actual width after mount
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createWhenMounted } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const windowWidth$ = createWhenMounted(() => window.innerWidth);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Deferred browser API access
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useWhenMounted } from "@usels/core";
+
+    function Component() {
+      const scrollY$ = useWhenMounted(() => window.scrollY);
+      const userAgent$ = useWhenMounted(() => navigator.userAgent);
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createWhenMounted } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const scrollY$ = createWhenMounted(() => window.scrollY);
+      const userAgent$ = createWhenMounted(() => navigator.userAgent);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

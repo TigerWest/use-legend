@@ -1,8 +1,6 @@
 "use client";
-import { useConstant } from "@shared/useConstant";
-import type { EventFilter } from "@shared/filters";
-import type { Pausable } from "../../types";
 import { createPausableFilter } from "./core";
+import { useConstant } from "@shared/useConstant";
 
 export { createPausableFilter, type PausableFilterOptions } from "./core";
 
@@ -34,9 +32,7 @@ export { createPausableFilter, type PausableFilterOptions } from "./core";
  * }
  * ```
  */
-export function usePausableFilter(
-  extendFilter?: EventFilter,
-  options?: { initialState?: "active" | "paused" }
-): Pausable & { eventFilter: EventFilter } {
+export type UsePausableFilter = typeof createPausableFilter;
+export const usePausableFilter: UsePausableFilter = (extendFilter, options) => {
   return useConstant(() => createPausableFilter(extendFilter, options));
-}
+};

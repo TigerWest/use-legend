@@ -1,0 +1,90 @@
+---
+title: useSupported
+description: SSR-safe browser feature detection as a reactive Observable
+category: Utilities
+type-table:
+  import: "@usels/core"
+  name: UseSupported
+---
+
+Check whether a browser API or feature is supported, returning a reactive `Observable<boolean>` that re-evaluates after the component mounts. Safe to use during SSR — the value is always `false` on the server and updates on the client after hydration.
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useSupported } from "@usels/core";
+
+    function Component() {
+      const isMatchMediaSupported$ = useSupported(() => "matchMedia" in window);
+      // false on SSR, true after mount if supported
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createSupported } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const isMatchMediaSupported$ = createSupported(() => "matchMedia" in window);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Conditional rendering
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { Show } from "@legendapp/state/react";
+    import { useSupported } from "@usels/core";
+
+    function Component() {
+      const isIntersectionObserverSupported$ = useSupported(
+        () => "IntersectionObserver" in window
+      );
+
+      return (
+        <Show
+          if={isIntersectionObserverSupported$}
+          else={<Fallback />}
+        >
+          <FeatureComponent />
+        </Show>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { Show } from "@legendapp/state/react";
+    import { createSupported } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const isIntersectionObserverSupported$ = createSupported(
+        () => "IntersectionObserver" in window
+      );
+
+      return (
+        <Show
+          if={isIntersectionObserverSupported$}
+          else={<Fallback />}
+        >
+          <FeatureComponent />
+        </Show>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

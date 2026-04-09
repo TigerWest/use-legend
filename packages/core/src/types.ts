@@ -64,14 +64,26 @@ export type Awaitable<T> = Promise<T> | T;
 export type PromisifyFn<T extends AnyFn> = (...args: Parameters<T>) => Promise<ReturnType<T>>;
 export type TimerHandle = ReturnType<typeof setTimeout> | undefined;
 
-/** Widens literal types to their base primitive (e.g. `""` → `string`, `0` → `number`). */
-export type WidenPrimitive<T> = T extends string
-  ? string
-  : T extends number
-    ? number
-    : T extends boolean
-      ? boolean
-      : T;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void
+  ? I
+  : never;
+type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
+
+/**
+ * Widens single literal types to their base primitive (e.g. `"x"` → `string`, `0` → `number`).
+ * Union types (e.g. `"a" | "b"`) are kept as-is — only single literals are widened.
+ */
+export type WidenPrimitive<T> =
+  IsUnion<T> extends true
+    ? T
+    : T extends string
+      ? string
+      : T extends number
+        ? number
+        : T extends boolean
+          ? boolean
+          : T;
 
 export interface Disposable {
   dispose: () => void;

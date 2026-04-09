@@ -1,4 +1,4 @@
-import type { AnyFn, Disposable, MaybeObservable, PromisifyFn } from "../../types";
+import type { AnyFn, MaybeObservable, PromisifyFn } from "../../types";
 import { createFilterWrapper, debounceFilter, type DebounceFilterOptions } from "@shared/filters";
 
 /**
@@ -17,12 +17,11 @@ export function createDebounceFn<T extends AnyFn>(
   fn: T,
   ms: MaybeObservable<number> = 200,
   options: DebounceFilterOptions = {}
-): Disposable & { debouncedFn: PromisifyFn<T> } {
+): { debouncedFn: PromisifyFn<T> } {
   const filter = debounceFilter(ms, options);
   const debouncedFn = createFilterWrapper(filter, fn) as unknown as PromisifyFn<T>;
 
   return {
     debouncedFn,
-    dispose: () => {},
   };
 }

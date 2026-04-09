@@ -1,25 +1,8 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { useWhenMounted } from ".";
-
-// Shared observable that controls the mocked isMounted state.
-// Initialized in beforeEach so each test starts with a fresh observable.
-let isMounted$: ReturnType<typeof observable<boolean>>;
-
-vi.mock("@legendapp/state/react", async () => {
-  const actual = await import("@legendapp/state/react");
-  return {
-    ...actual,
-    // Return the shared observable lazily — evaluated at call time, not setup time
-    useIsMounted: () => isMounted$,
-  };
-});
-
-beforeEach(() => {
-  isMounted$ = observable(true); // default: mounted
-});
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -40,10 +23,14 @@ describe("useWhenMounted() — return value", () => {
     expect(result.current.get()).toBe("hello");
   });
 
-  it("returns undefined when not mounted", () => {
-    isMounted$.set(false);
-    const { result } = renderHook(() => useWhenMounted(() => "hello"));
-    expect(result.current.get()).toBeUndefined();
+  it("returns undefined before mount (during render, before onMount fires)", () => {
+    let valDuringRender: unknown = "NOT_SET";
+    renderHook(() => {
+      const obs = useWhenMounted(() => "hello");
+      valDuringRender = obs.peek();
+      return obs;
+    });
+    expect(valDuringRender).toBeUndefined();
   });
 });
 
@@ -107,12 +94,16 @@ describe("useWhenMounted() — reactive re-evaluation", () => {
     expect(result.current.get()).toBe(10);
   });
 
-  it("transitions from undefined to callback value when isMounted becomes true", () => {
-    isMounted$.set(false);
-    const { result } = renderHook(() => useWhenMounted(() => "ready"));
-    expect(result.current.get()).toBeUndefined();
-
-    act(() => isMounted$.set(true));
+  it("transitions from undefined to callback value on mount", () => {
+    let valDuringRender: unknown = "NOT_SET";
+    const { result } = renderHook(() => {
+      const obs = useWhenMounted(() => "ready");
+      valDuringRender = obs.peek();
+      return obs;
+    });
+    // Before onMount fires (during render): undefined
+    expect(valDuringRender).toBeUndefined();
+    // After onMount fires: callback value
     expect(result.current.get()).toBe("ready");
   });
 });

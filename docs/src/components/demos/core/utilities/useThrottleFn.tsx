@@ -1,5 +1,6 @@
 import { useObservable } from "@legendapp/state/react";
 import { useThrottleFn } from "@usels/core";
+import { ActionButton, DemoPanel, DemoShell, StatCard, StatusBadge, demoClasses } from "../../_shared";
 
 export default function UseThrottleFnDemo() {
   const clickCount$ = useObservable(0);
@@ -10,21 +11,29 @@ export default function UseThrottleFnDemo() {
   }, 1000);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      <button
-        type="button"
-        onClick={() => {
-          clickCount$.set((c) => c + 1);
-          throttledIncrement();
-        }}
-        style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #ccc" }}
+    <DemoShell eyebrow="Utilities">
+      <DemoPanel
+        title="useThrottleFn"
+        description="Limits function execution to at most once per 1000ms, no matter how fast you click."
+        aside={<StatusBadge label="1000ms limit" tone="orange" />}
       >
-        Click me rapidly!
-      </button>
-      <div style={{ padding: "10px 14px", borderRadius: "6px" }}>
-        <div>Clicks: {clickCount$.get()}</div>
-        <div>Throttled: {throttledCount$.get()}</div>
-      </div>
-    </div>
+        <div className={demoClasses.actionRow}>
+          <ActionButton
+            tone="accent"
+            grow
+            onClick={() => {
+              clickCount$.set((c) => c + 1);
+              throttledIncrement();
+            }}
+          >
+            Click rapidly!
+          </ActionButton>
+        </div>
+        <div className={demoClasses.statsGrid}>
+          <StatCard label="Clicks" value={clickCount$.get()} />
+          <StatCard label="Throttled Calls" value={throttledCount$.get()} tone="orange" />
+        </div>
+      </DemoPanel>
+    </DemoShell>
   );
 }

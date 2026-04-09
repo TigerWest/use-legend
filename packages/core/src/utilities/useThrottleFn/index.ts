@@ -1,8 +1,7 @@
 "use client";
 import type { AnyFn, MaybeObservable, PromisifyFn } from "../../types";
 import { type ThrottleFilterOptions } from "@shared/filters";
-import { useConstant } from "@shared/useConstant";
-import { useLatest } from "@shared/useLatest";
+import { useScope } from "@primitives/useScope";
 import { createThrottleFn } from "./core";
 
 export { createThrottleFn } from "./core";
@@ -30,11 +29,15 @@ export function useThrottleFn<T extends AnyFn>(
   ms: MaybeObservable<number> = 200,
   options: ThrottleFilterOptions = {}
 ): PromisifyFn<T> {
-  const fnRef = useLatest(fn);
-
-  const { throttledFn } = useConstant(() =>
-    createThrottleFn(((...args: Parameters<T>) => fnRef.current(...args)) as T, ms, options)
+  return useScope(
+    (p) => {
+      const { throttledFn } = createThrottleFn(
+        ((...args: Parameters<T>) => (p.fn as T)(...args)) as T,
+        ms,
+        options
+      );
+      return throttledFn;
+    },
+    { fn }
   );
-
-  return throttledFn;
 }
