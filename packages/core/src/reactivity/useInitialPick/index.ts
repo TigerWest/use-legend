@@ -28,6 +28,7 @@ import { useConstant } from "@shared/useConstant";
  * @param defaults - Object mapping field names to their fallback values.
  *                   Each value must be `NonNullable<T[K]>` — guarantees the result is never null/undefined.
  * @returns A stable object with mount-time values for each specified key
+ * @deprecated
  */
 type Clean<T> = NonNullable<T>;
 type Defaults<T> = { [K in keyof Clean<T>]?: NonNullable<Clean<T>[K]> };

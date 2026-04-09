@@ -22,13 +22,6 @@ export interface DataHistoryOptions<Raw, Serialized = Raw> extends ManualHistory
    */
   eventFilter?: EventFilter;
   /**
-   * Watch nested changes on the source Observable.
-   * In Legend-State, `source$.get()` already tracks the full tree,
-   * so this option has no behavioral difference — included for VueUse API parity.
-   * @default false
-   */
-  deep?: boolean;
-  /**
    * Gate function called before each auto-commit.
    * Return `false` to skip recording the current value.
    */

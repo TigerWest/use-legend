@@ -26,6 +26,7 @@ export type SilentObservable<T> = Observable<T> & {
  * count$.peek();        // 5
  * count$.set(10);       // immediate: count$.get() === 10, listeners fire
  * ```
+ * @deprecated
  */
 export function useSilentObservable<T>(initialValue: T): SilentObservable<T> {
   const obs$ = useObservable<T>(initialValue);
