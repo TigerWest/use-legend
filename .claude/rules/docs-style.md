@@ -256,6 +256,34 @@ The system extracts all properties (including inherited via `extends`) and gener
 - Generic type parameters (e.g. `<Raw, Serialized>`) are preserved in display
 - `type-table` is stripped from the generated `.gen.mdx` frontmatter (build hint only)
 
+### `type-declarations` Frontmatter
+
+Use `type-declarations` when `type-table` cannot adequately represent the types — specifically:
+
+- **Multiple exports in one file**: when the source file exports several functions/types that all belong in the `## Type` section
+- **Complex overloads**: when the function has multiple call signatures that don't map cleanly to a single params table
+- **Non-function exports**: when the exported symbol is not a callable function (e.g., a class, namespace, or complex type alias)
+
+```yaml
+---
+title: useComputedWithControl
+type-declarations:
+  file: ./index.ts       # relative path to the .ts source file
+  comments: true         # include JSDoc comments in output (default: false)
+---
+```
+
+**Output:** renders a raw `typescript` code block under `## Type` using the emitted `.d.ts` declarations.
+
+**Decision rule:**
+
+| Situation | Use |
+|-----------|-----|
+| Single function, structured params/options | `type-table` |
+| Multiple exports, overloads, or complex generics | `type-declarations` |
+
+Do not use both `type-table` and `type-declarations` in the same file.
+
 ## Prohibited
 
 - Do not write `# Title` h1 heading (Starlight automatically displays the frontmatter title)
