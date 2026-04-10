@@ -1,5 +1,6 @@
 import { Show, useObservable } from "@legendapp/state/react";
 import { useIntervalFn } from "@usels/core";
+import { ActionButton, DemoPanel, DemoShell, StatusBadge, ValueToken } from "@demos/_shared";
 
 const greetings = ["Hello", "Hi", "Yo!", "Hey", "Hola", "Bonjour", "Salut!", "Ciao"];
 
@@ -11,64 +12,20 @@ export default function UseIntervalFnDemo() {
   }, 500);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-        fontFamily: "monospace",
-        fontSize: "14px",
-      }}
-    >
-      <div
-        style={{
-          padding: "10px 14px",
-          borderRadius: "6px",
-          border: "1px solid var(--sl-color-gray-5, #e2e8f0)",
-          background: "var(--sl-color-gray-6, #f1f5f9)",
-          textAlign: "center",
-        }}
+    <DemoShell eyebrow="Timer">
+      <DemoPanel
+        title="Interval Function"
+        description="Cycles through greetings every 500ms."
+        aside={<StatusBadge label={isActive$.get() ? "Running" : "Paused"} tone={isActive$.get() ? "green" : "orange"} />}
       >
-        <strong style={{ fontSize: "24px", color: "var(--sl-color-white, #1e293b)" }}>
-          {word$.get()}
-        </strong>
-      </div>
-      <Show
-        if={() => isActive$.get()}
-        else={
-          <button
-            type="button"
-            onClick={resume}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "6px",
-              border: "1px solid var(--sl-color-green, #22c55e)",
-              background: "var(--sl-color-green-low, #f0fdf4)",
-              color: "var(--sl-color-green, #22c55e)",
-              cursor: "pointer",
-              fontFamily: "monospace",
-            }}
-          >
-            Resume
-          </button>
-        }
-      >
-        <button
-          type="button"
-          onClick={pause}
-          style={{
-            padding: "6px 16px",
-            borderRadius: "6px",
-            border: "1px solid var(--sl-color-orange, #f97316)",
-            background: "var(--sl-color-orange-low, #fff7ed)",
-            color: "var(--sl-color-orange, #f97316)",
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
+        <ValueToken>{word$.get()}</ValueToken>
+        <Show
+          if={() => isActive$.get()}
+          else={<ActionButton onClick={resume} tone="green">Resume</ActionButton>}
         >
-          Pause
-        </button>
-      </Show>
-    </div>
+          <ActionButton onClick={pause} tone="orange">Pause</ActionButton>
+        </Show>
+      </DemoPanel>
+    </DemoShell>
   );
 }

@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { describe, it, expectTypeOf } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { observable } from "@legendapp/state";
 import type { Observable } from "@legendapp/state";
 import { useScope, toObs } from ".";
-import type { MaybeObservable } from "../../types";
+import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 
 describe("useScope() — types", () => {
   describe("overloads", () => {
@@ -29,6 +30,30 @@ describe("useScope() — types", () => {
           },
           { debounce: 200 },
           { name: "test" }
+        )
+      );
+    });
+
+    it("2 rest args with DeepMaybeObservable: each param infers unwrapped field types", () => {
+      interface ScalarProps {
+        interval: number;
+      }
+      interface OptProps {
+        callback?: (n: number) => void;
+        immediate?: boolean;
+      }
+      renderHook(() =>
+        useScope(
+          (scalars, opts) => {
+            expectTypeOf(scalars.interval).toBeNumber();
+            const s$ = toObs(scalars);
+            expectTypeOf(s$.interval).toEqualTypeOf<Observable<number>>();
+            const o$ = toObs(opts, { callback: "function" });
+            expectTypeOf(o$.immediate).toEqualTypeOf<Observable<boolean | undefined>>();
+            return {};
+          },
+          { interval: 1000 } as ScalarProps,
+          {} as DeepMaybeObservable<OptProps>
         )
       );
     });
@@ -224,6 +249,94 @@ describe("useScope() — types", () => {
           },
           { data: { id: 1 }, count: 0 }
         )
+      );
+    });
+  });
+
+  describe("interface props without index signature", () => {
+    interface MyOptions {
+      interval?: number;
+      immediate?: boolean;
+      onTick?: (n: number) => void;
+    }
+
+    it("interface props: toObs field resolves to correct Observable type", () => {
+      renderHook(() =>
+        useScope((p) => {
+          const p$ = toObs(p, { onTick: "function" });
+          expectTypeOf(p$.interval).toEqualTypeOf<Observable<number | undefined>>();
+          expectTypeOf(p$.immediate).toEqualTypeOf<Observable<boolean | undefined>>();
+          return {};
+        }, {} as MyOptions)
+      );
+    });
+
+    it("interface props: raw prop access returns correct type", () => {
+      renderHook(() =>
+        useScope((p) => {
+          expectTypeOf(p.interval).toEqualTypeOf<number | undefined>();
+          expectTypeOf(p.onTick).toEqualTypeOf<((n: number) => void) | undefined>();
+          return {};
+        }, {} as MyOptions)
+      );
+    });
+  });
+
+  describe("Observable props", () => {
+    interface MyOptions {
+      interval?: number;
+      label?: string;
+    }
+
+    it("Observable<P> props: factory receives ReactiveProps<P> with correct field types", () => {
+      const opts$ = observable<MyOptions>({});
+      renderHook(() =>
+        useScope((p) => {
+          expectTypeOf(p.interval).toEqualTypeOf<number | undefined>();
+          expectTypeOf(p.label).toEqualTypeOf<string | undefined>();
+          return {};
+        }, opts$)
+      );
+    });
+
+    it("Observable<P> props: toObs returns Observable with P field types", () => {
+      const opts$ = observable<MyOptions>({});
+      renderHook(() =>
+        useScope((p) => {
+          const p$ = toObs(p);
+          expectTypeOf(p$.interval).toEqualTypeOf<Observable<number | undefined>>();
+          expectTypeOf(p$.label).toEqualTypeOf<Observable<string | undefined>>();
+          return {};
+        }, opts$)
+      );
+    });
+  });
+
+  describe("DeepMaybeObservable props unwrap via InferBaseFromDeep", () => {
+    interface MyOptions {
+      interval?: number;
+      immediate?: boolean;
+      onTick?: (n: number) => void;
+    }
+
+    it("DeepMaybeObservable<P> props: toObs returns Observable with unwrapped P field types", () => {
+      renderHook(() =>
+        useScope((p) => {
+          const p$ = toObs(p, { onTick: "function" });
+          expectTypeOf(p$.interval).toEqualTypeOf<Observable<number | undefined>>();
+          expectTypeOf(p$.immediate).toEqualTypeOf<Observable<boolean | undefined>>();
+          return {};
+        }, {} as DeepMaybeObservable<MyOptions>)
+      );
+    });
+
+    it("DeepMaybeObservable<P> props: raw prop access returns unwrapped field types", () => {
+      renderHook(() =>
+        useScope((p) => {
+          expectTypeOf(p.interval).toEqualTypeOf<number | undefined>();
+          expectTypeOf(p.onTick).toEqualTypeOf<((n: number) => void) | undefined>();
+          return {};
+        }, {} as DeepMaybeObservable<MyOptions>)
       );
     });
   });

@@ -10,7 +10,7 @@ type UnwrapObs<T> = T extends ImmutableObservableBase<infer U> ? U : T;
  * Ensures `toObs(p).field` resolves to `Observable<T>` instead of `Observable<Observable<T> | T>`.
  * @public
  */
-export type PropsOf<P extends Record<string, unknown>> = {
+export type PropsOf<P extends object> = {
   [K in keyof P]: UnwrapObs<P[K]>;
 };
 
@@ -70,10 +70,11 @@ export type ApplyHints<P, H> = H extends ScopeHint
 const REACTIVE_PROPS_CTX = Symbol("reactivePropsCtx");
 
 /** @internal Per-instance context for the props proxy */
-export interface ScopePropsCtx<P extends Record<string, unknown>> {
+export interface ScopePropsCtx<P extends object> {
   propsRef: { current: P };
   props$: Observable<P> | null;
-  hints: NestedHintSpec<Record<string, unknown>> | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  hints: NestedHintSpec<any> | null;
   rawPrev: Record<string, unknown> | null;
 }
 
@@ -83,12 +84,10 @@ export interface ScopePropsCtx<P extends Record<string, unknown>> {
  * - `toObs(p)` — reactive Observable<P>
  * - `toObs(p, hints)` — reactive Observable<P> with per-field ObservableHint
  */
-export type ReactiveProps<P extends Record<string, unknown>> = Readonly<P>;
+export type ReactiveProps<P extends object> = Readonly<P>;
 
 /** @internal Create a stable ReactiveProps proxy backed by ctx.propsRef */
-export function createReactiveProxy<P extends Record<string, unknown>>(
-  ctx: ScopePropsCtx<P>
-): ReactiveProps<P> {
+export function createReactiveProxy<P extends object>(ctx: ScopePropsCtx<P>): ReactiveProps<P> {
   return new Proxy({} as ReactiveProps<P>, {
     get(_, key) {
       if (key === REACTIVE_PROPS_CTX) return ctx;
@@ -157,7 +156,7 @@ function applyHintToValue(
 }
 
 /** @internal Build initial observable value with hints applied */
-function buildInitialValue<P extends Record<string, unknown>>(
+function buildInitialValue<P extends object>(
   props: P,
   hints: NestedHintSpec<Record<string, unknown>> | null | undefined
 ): unknown {
@@ -170,7 +169,7 @@ function buildInitialValue<P extends Record<string, unknown>>(
  * Update `props$` with the latest props values, only setting fields that changed.
  * Also updates `ctx.propsRef.current` unconditionally (raw access path).
  */
-export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<P>, next: P): void {
+export function syncProps<P extends object>(ctx: ScopePropsCtx<P>, next: P): void {
   // Always keep ref current for raw access
   ctx.propsRef.current = next;
 
@@ -185,7 +184,7 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
     const val = applyHintToValue(hints, next);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ctx.props$ as any).set(val);
-    ctx.rawPrev = { ...next };
+    ctx.rawPrev = { ...next } as Record<string, unknown>;
     return;
   }
 
@@ -211,7 +210,7 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
     (ctx.props$ as any).assign(changed);
   }
 
-  ctx.rawPrev = { ...next };
+  ctx.rawPrev = { ...next } as Record<string, unknown>;
 }
 
 /**
@@ -237,7 +236,7 @@ export function syncProps<P extends Record<string, unknown>>(ctx: ScopePropsCtx<
  * }, props)
  * ```
  */
-export function toObs<P extends Record<string, unknown>, H extends NestedHintSpec<P> = never>(
+export function toObs<P extends object, H extends NestedHintSpec<P> = never>(
   p: ReactiveProps<P>,
   hints?: H
 ): Observable<[H] extends [never] ? PropsOf<P> : ApplyHints<PropsOf<P>, H>> {
@@ -252,7 +251,7 @@ export function toObs<P extends Record<string, unknown>, H extends NestedHintSpe
     if (hints) ctx.hints = hints;
     const initial = buildInitialValue(ctx.propsRef.current, ctx.hints);
     ctx.props$ = observable(initial) as unknown as Observable<P>;
-    ctx.rawPrev = { ...ctx.propsRef.current };
+    ctx.rawPrev = { ...ctx.propsRef.current } as Record<string, unknown>;
   } else if (hints) {
     // Subsequent call with new hints — update for future syncs
     ctx.hints = hints;

@@ -1,5 +1,7 @@
 import { observable } from "@legendapp/state";
-import type { AnyFn, Disposable, Stoppable } from "../../types";
+import { onMount, onUnmount } from "@primitives/useScope";
+import type { AnyFn, MaybeObservable, Stoppable } from "../../types";
+import { peek } from "@utilities/peek";
 
 export interface TimeoutFnOptions {
   /** If true, calls start() immediately. @default true */
@@ -13,14 +15,14 @@ export interface TimeoutFnOptions {
  * No React dependency — uses observable().
  *
  * @param cb - Callback to invoke after the delay.
- * @param getInterval - Getter that returns the delay in ms (read at each start() call).
+ * @param interval$ - Observable that returns the delay in ms (read at each start() call).
  * @param options - Mount-time-only options.
  */
-export function createTimeoutFn<CallbackFn extends AnyFn>(
-  cb: CallbackFn,
-  getInterval: () => number,
+export function createTimeoutFn(
+  cb: AnyFn,
+  interval$: MaybeObservable<number>,
   options?: TimeoutFnOptions
-): Disposable & Stoppable<Parameters<CallbackFn> | []> {
+): Stoppable {
   const isPending$ = observable(false);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const immediateCallback = options?.immediateCallback ?? false;
@@ -31,24 +33,23 @@ export function createTimeoutFn<CallbackFn extends AnyFn>(
     isPending$.set(false);
   };
 
-  const start = (...args: Parameters<CallbackFn> | []) => {
+  const start = (...args: unknown[]) => {
     stop();
     if (immediateCallback) cb();
     isPending$.set(true);
-    const ms = getInterval();
+    const ms = peek(interval$);
     timer = setTimeout(() => {
       isPending$.set(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- forwarding variadic args to callback
-      cb(...(args as any));
+      cb(...args);
     }, ms);
   };
 
-  if (options?.immediate ?? true) start();
+  onMount(() => {
+    if (options?.immediate ?? true) start();
+  });
+  onUnmount(() => {
+    stop();
+  });
 
-  return {
-    isPending$,
-    stop,
-    start,
-    dispose: () => stop(),
-  };
+  return { isPending$, stop, start };
 }

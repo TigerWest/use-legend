@@ -1,0 +1,87 @@
+---
+title: useFps
+description: Reactive frames-per-second counter using requestAnimationFrame
+category: Timer
+type-declarations:
+  file: ./index.ts
+  comments: true
+---
+
+Returns a `ReadonlyObservable<number>` that tracks the current frames-per-second, sampled every N frames to reduce noise.
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useFps } from "@usels/core";
+
+    function Component() {
+      const fps = useFps();
+      return <div>{fps.get()}</div>;
+      // fps.get() → current FPS (0 until first sample)
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createFps } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { fps$ } = createFps();
+      return <div>{fps$.get()}</div>;
+      // fps$.get() → current FPS (0 until first sample)
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Custom sampling rate
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useFps } from "@usels/core";
+
+    function Component() {
+      const fps = useFps({ every: 20 }); // sample every 20 frames (~333ms at 60fps)
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createFps } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { fps$ } = createFps({ every: 20 }); // sample every 20 frames (~333ms at 60fps)
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Notes
+
+### Initial value
+
+`fps` starts at `0` and updates only after the first `every` frames have elapsed.
+
+### Sampling formula
+
+```
+fps = round(1000 / (elapsed_ms / frame_count))
+```
+
+At 60fps with `every=10`, each sample covers ~166ms and yields ~60.
+
+### `every` is mount-time-only
+
+The sampling period is fixed at mount. Changing `every` dynamically has no effect.

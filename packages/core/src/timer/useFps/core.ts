@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import type { Disposable, Pausable } from "../../types";
+import type { Pausable } from "../../types";
 import { createRafFn } from "@timer/useRafFn/core";
 
 export interface FpsOptions {
@@ -16,9 +16,7 @@ export interface FpsOptions {
  * Core observable function for FPS measurement.
  * No React dependency — uses rafFn core internally.
  */
-export function createFps(
-  options?: FpsOptions
-): Disposable & Pausable & { fps$: Observable<number> } {
+export function createFps(options?: FpsOptions): Pausable & { fps$: Observable<number> } {
   const every = options?.every ?? 10;
   const fps$ = observable<number>(0);
   let last: number | null = null;

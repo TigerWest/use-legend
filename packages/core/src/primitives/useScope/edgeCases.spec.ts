@@ -174,7 +174,7 @@ describe("useScope() — props edge cases", () => {
       const spy = vi.fn();
       const { rerender } = renderHook(
         ({ props }: { props: Record<string, unknown> }) =>
-          useScope((p: any) => {
+          useScope((p) => {
             const obs$ = toObs(p);
             observe(() => spy(obs$.name?.get?.()));
             return {};
@@ -193,7 +193,7 @@ describe("useScope() — props edge cases", () => {
       const { result, rerender } = renderHook(
         ({ props }: { props: Record<string, unknown> }) =>
           useScope(
-            (p: any) => ({
+            (p) => ({
               read: () => {
                 captured = p.newKey;
               },
@@ -218,7 +218,7 @@ describe("useScope() — props edge cases", () => {
       renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               refs.push(p);
               return {};
             },

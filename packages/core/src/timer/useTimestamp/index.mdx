@@ -1,0 +1,143 @@
+---
+title: useTimestamp
+description: Reactive Unix timestamp (ms) that auto-updates on every animation frame or interval
+category: Timer
+type-table:
+  import: "@usels/core"
+  name: UseTimestamp
+  params:
+    children:
+      - TimestampOptions
+---
+
+Returns a `ReadonlyObservable<number>` containing the current Unix timestamp in milliseconds, updated continuously via `requestAnimationFrame` (default) or a fixed interval.
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useTimestamp } from "@usels/core";
+
+    function Component() {
+      const ts = useTimestamp();
+      return <div>{ts.get()}</div>;
+      // ts.get() → current Date.now(), updated every frame
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createTimestamp } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const ts = createTimestamp();
+      return <div>{ts.get()}</div>;
+      // ts.get() → current Date.now(), updated every frame
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With offset
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useTimestamp } from "@usels/core";
+    import { observable } from "@legendapp/state";
+
+    function Component() {
+      const offset$ = observable(5000);
+      const ts = useTimestamp({ offset: offset$ });
+      // ts.get() → Date.now() + 5000 — offset is reactive, updates each tick
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createTimestamp } from "@usels/core";
+    import { observable } from "@legendapp/state";
+
+    function Component() {
+      "use scope"
+      const ts = createTimestamp({ offset: observable(5000) });
+      // ts.get() → Date.now() + 5000 — offset is reactive, updates each tick
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With callback
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useTimestamp } from "@usels/core";
+
+    function Component() {
+      const ts = useTimestamp({
+        callback: (timestamp) => {
+          console.log("tick:", timestamp);
+        },
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createTimestamp } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const ts = createTimestamp({
+        callback: (timestamp) => {
+          console.log("tick:", timestamp);
+        },
+      });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With pause/resume controls
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useTimestamp } from "@usels/core";
+
+    function Component() {
+      const { timestamp$, isActive$, pause, resume } = useTimestamp({ controls: true });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createTimestamp } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { timestamp$, isActive$, pause, resume } = createTimestamp({ controls: true });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Notes
+
+### Reactive `offset`
+
+`offset` is read on every tick inside the update loop, so changing it (via Observable) takes effect on the next frame without restarting the scheduler.

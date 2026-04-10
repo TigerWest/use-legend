@@ -1,7 +1,8 @@
 import { observable } from "@legendapp/state";
-import type { Disposable, MaybeObservable, Pausable } from "../../types";
+import type { MaybeObservable, Pausable } from "../../types";
 import { peek } from "@utilities/peek";
 import { isClient } from "@shared/utils";
+import { onMount, onUnmount } from "@primitives/useScope";
 
 export interface RafFnCallbackArguments {
   /** Time in ms since the previous frame. 0 on the first frame after resume(). */
@@ -26,7 +27,7 @@ export interface RafFnOptions {
 export function createRafFn(
   fn: (args: RafFnCallbackArguments) => void,
   options?: RafFnOptions
-): Disposable & Pausable {
+): Pausable {
   const isActive$ = observable(false);
   let rafHandle: number | undefined;
   let lastTimestamp: DOMHighResTimeStamp = 0;
@@ -94,12 +95,17 @@ export function createRafFn(
     rafHandle = requestFrame(loop);
   };
 
-  if (options?.immediate ?? true) resume();
+  onMount(() => {
+    if (options?.immediate ?? true) resume();
+  });
+
+  onUnmount(() => {
+    pause();
+  });
 
   return {
     isActive$,
     pause,
     resume,
-    dispose: () => pause(),
   };
 }

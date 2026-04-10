@@ -1,37 +1,24 @@
 "use client";
-import { useMount } from "@legendapp/state/react";
-import { useLatest } from "@shared/useLatest";
-import { useConstant } from "@shared/useConstant";
-import type { AnyFn, MaybeObservable, Stoppable } from "../../types";
-import { get } from "@utilities/get";
+import { type Observable } from "@legendapp/state";
+import { useScope, toObs } from "@primitives/useScope";
+import type { AnyFn } from "../../types";
 import { createTimeoutFn } from "./core";
 
 export { createTimeoutFn } from "./core";
 export type { TimeoutFnOptions } from "./core";
 
-export type UseTimeoutFnOptions = import("./core").TimeoutFnOptions;
+export type UseTimeoutFn = typeof createTimeoutFn;
 
-export function useTimeoutFn<CallbackFn extends AnyFn>(
-  cb: CallbackFn,
-  interval: MaybeObservable<number>,
-  options?: UseTimeoutFnOptions
-): Stoppable<Parameters<CallbackFn> | []> {
-  const cbRef = useLatest(cb);
-  const intervalRef = useLatest(interval);
-
-  const result = useConstant(() =>
-    createTimeoutFn<CallbackFn>(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- forwarding variadic args to callback
-      ((...args: any[]) => cbRef.current(...args)) as CallbackFn,
-      () => get(intervalRef.current) as number,
-      { ...options, immediate: false }
-    )
+export const useTimeoutFn: UseTimeoutFn = (cb, interval, options) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p, { cb: "function" });
+      return createTimeoutFn(
+        (...args: unknown[]) => (p.cb as AnyFn)(...args),
+        p$.interval as Observable<number>,
+        options
+      );
+    },
+    { cb, interval }
   );
-
-  useMount(() => {
-    if (options?.immediate ?? true) result.start();
-    return () => result.dispose();
-  });
-
-  return { isPending$: result.isPending$, stop: result.stop, start: result.start };
-}
+};

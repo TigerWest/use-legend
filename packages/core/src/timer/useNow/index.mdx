@@ -1,0 +1,112 @@
+---
+title: useNow
+description: Reactive current Date that auto-updates on every animation frame or interval
+category: Timer
+type-declarations:
+  file: ./index.ts
+  comments: true
+---
+
+Returns a `ReadonlyObservable<Date>` that reflects the current time, updated continuously via `requestAnimationFrame` (default) or a fixed interval.
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useNow } from "@usels/core";
+
+    function Component() {
+      const now = useNow();
+      return <div>{now.get().toLocaleTimeString()}</div>;
+      // now.get() → current Date, updated every frame
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createNow } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { now$ } = createNow();
+      return <div>{now$.get().toLocaleTimeString()}</div>;
+      // now$.get() → current Date, updated every frame
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Interval-based (battery friendly)
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useNow } from "@usels/core";
+
+    function Component() {
+      const now = useNow({ interval: 1000 }); // updates every second
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createNow } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { now$ } = createNow({ interval: 1000 }); // updates every second
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With pause/resume controls
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useNow } from "@usels/core";
+
+    function Component() {
+      const { now$, isActive$, pause, resume } = useNow({ controls: true });
+
+      // pause()  → stops auto-update
+      // resume() → restarts
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createNow } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { now$, isActive$, pause, resume } = createNow();
+
+      // pause()  → stops auto-update
+      // resume() → restarts
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Notes
+
+### Scheduler selection
+
+The scheduler is chosen **once at mount** and cannot be changed dynamically:
+
+| `interval` value                    | Scheduler                          |
+| ----------------------------------- | ---------------------------------- |
+| `'requestAnimationFrame'` (default) | `useRafFn` — smooth, ~60fps        |
+| `number` (ms)                       | `useIntervalFn` — battery-friendly |

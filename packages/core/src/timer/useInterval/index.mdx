@@ -1,0 +1,187 @@
+---
+title: useInterval
+description: Reactive counter that increments on every interval tick
+category: Timer
+type-table:
+  import: "@usels/core"
+  name: UseInterval
+  params:
+    children:
+      - IntervalOptions
+  returns:
+    children:
+      - IntervalReturn
+---
+
+A thin wrapper around `useIntervalFn` that exposes a `ReadonlyObservable<number>` counter that increments on each tick.
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useInterval } from "@usels/core";
+
+    function Component() {
+      const counter = useInterval(1000);
+      return <div>{counter.get()}</div>;
+      // counter.get() → 0 initially, then 1, 2, 3... every second
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createInterval } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const counter = createInterval(1000);
+      return <div>{counter.get()}</div>;
+      // counter.get() → 0 initially, then 1, 2, 3... every second
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With callback
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useInterval } from "@usels/core";
+
+    function Component() {
+      useInterval(1000, {
+        callback: (count) => console.log("tick:", count),
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createInterval } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      createInterval(1000, {
+        callback: (count) => console.log("tick:", count),
+      });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With pause/resume/reset controls
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useInterval } from "@usels/core";
+
+    function Component() {
+      const { counter$, reset, isActive$, pause, resume } = useInterval(1000, {
+        controls: true,
+      });
+
+      // pause()  → stops ticking
+      // resume() → restarts
+      // reset()  → counter → 0
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createInterval } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { counter$, reset, isActive$, pause, resume } = createInterval(1000, {
+        controls: true,
+      });
+
+      // pause()  → stops ticking
+      // resume() → restarts
+      // reset()  → counter → 0
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Manual start (`immediate: false`)
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useInterval } from "@usels/core";
+
+    function Component() {
+      const { counter$, resume } = useInterval(1000, {
+        controls: true,
+        immediate: false,
+      });
+
+      // resume() → start manually
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createInterval } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { counter$, resume } = createInterval(1000, {
+        controls: true,
+        immediate: false,
+      });
+
+      // resume() → start manually
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Reactive interval
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useInterval } from "@usels/core";
+    import { observable } from "@legendapp/state";
+
+    function Component() {
+      const ms$ = observable(1000);
+      const counter = useInterval(ms$);
+
+      // ms$.set(500) → restarts with 500ms period
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createInterval } from "@usels/core";
+    import { observable } from "@legendapp/state";
+
+    function Component() {
+      "use scope"
+      const ms$ = observable(1000);
+      const counter = createInterval(ms$);
+
+      // ms$.set(500) → restarts with 500ms period
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

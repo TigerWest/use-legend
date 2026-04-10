@@ -1,7 +1,5 @@
 "use client";
-import { useMount } from "@legendapp/state/react";
-import { useLatest } from "@shared/useLatest";
-import { useConstant } from "@shared/useConstant";
+import { useScope } from "@primitives/useScope";
 import type { Pausable } from "../../types";
 import { createRafFn } from "./core";
 import type { RafFnCallbackArguments, RafFnOptions } from "./core";
@@ -12,20 +10,16 @@ export type { RafFnCallbackArguments, RafFnOptions } from "./core";
 export type UseRafFnCallbackArguments = RafFnCallbackArguments;
 export type UseRafFnOptions = RafFnOptions;
 
-export function useRafFn(
+export type UseRafFn = (
   fn: (args: RafFnCallbackArguments) => void,
   options?: RafFnOptions
-): Pausable {
-  const fnRef = useLatest(fn);
+) => Pausable;
 
-  const result = useConstant(() =>
-    createRafFn((args) => fnRef.current(args), { ...options, immediate: false })
+export const useRafFn: UseRafFn = (fn, options) => {
+  return useScope(
+    (p) => {
+      return createRafFn((args) => (p.fn as (args: RafFnCallbackArguments) => void)(args), options);
+    },
+    { fn }
   );
-
-  useMount(() => {
-    if (options?.immediate ?? true) result.resume();
-    return () => result.dispose();
-  });
-
-  return { isActive$: result.isActive$, pause: result.pause, resume: result.resume };
-}
+};

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
+import type { ImmutableObservableBase } from "@legendapp/state";
 import { effectScope } from "./effectScope";
 import { StoreRegistryContext, setActiveValue } from "@primitives/createStore/storeContext";
 import {
@@ -42,16 +43,35 @@ export type { ReactiveProps } from "./reactiveProps";
  * }, props)
  * ```
  */
+/**
+ * Extract base type P from DeepMaybeObservable<P> unions.
+ * Uses Extract to find Observable members → infer P, avoiding circular reference
+ * that occurs with direct DeepMaybeObservable<P> pattern matching.
+ * @internal
+ */
+
+type InferBaseFromDeep<T> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Extract<T, ImmutableObservableBase<any>> extends never
+    ? T
+    : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Extract<T, ImmutableObservableBase<any>> extends ImmutableObservableBase<infer U>
+      ? U
+      : T;
+
 export function useScope<T extends object>(fn: () => T): T;
-export function useScope<P extends Record<string, unknown>, T extends object>(
+export function useScope<P extends object, T extends object>(
   fn: (props: ReactiveProps<P>) => T,
-  props: P
+  props: ImmutableObservableBase<P>
 ): T;
-export function useScope<
-  Params extends [Record<string, unknown>, Record<string, unknown>, ...Record<string, unknown>[]],
-  T extends object,
->(
-  fn: (...params: { [K in keyof Params]: ReactiveProps<Params[K] & Record<string, unknown>> }) => T,
+export function useScope<Props extends object, T extends object>(
+  fn: (props: ReactiveProps<InferBaseFromDeep<Props> & object>) => T,
+  props: Props
+): T;
+export function useScope<Params extends [object, object, ...object[]], T extends object>(
+  fn: (
+    ...params: { [K in keyof Params]: ReactiveProps<InferBaseFromDeep<Params[K]> & object> }
+  ) => T,
   ...params: Params
 ): T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

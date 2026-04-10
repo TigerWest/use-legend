@@ -1,5 +1,6 @@
-import { observable, observe, type Observable } from "@legendapp/state";
-import type { AnyFn, Disposable, Pausable } from "../../types";
+import { observable, type Observable } from "@legendapp/state";
+import { observe, onMount, onUnmount } from "@primitives/useScope";
+import type { AnyFn, Pausable } from "../../types";
 
 export interface IntervalFnOptions {
   /** If true, calls resume() immediately. @default true */
@@ -16,7 +17,7 @@ export function createIntervalFn(
   fn: AnyFn,
   interval$: Observable<number>,
   options?: IntervalFnOptions
-): Disposable & Pausable {
+): Pausable {
   const isActive$ = observable(false);
   let timer: ReturnType<typeof setInterval> | undefined;
 
@@ -43,7 +44,7 @@ export function createIntervalFn(
 
   // Reactive: restart interval when interval$ changes while active.
   // Tracks only interval$ (isActive$ via peek — no dep).
-  const unsub = observe(() => {
+  observe(() => {
     const ms = interval$.get(); // register dep on interval$
     cleanupTimer();
     if (isActive$.peek()) {
@@ -51,15 +52,17 @@ export function createIntervalFn(
     }
   });
 
-  if (options?.immediate ?? true) resume();
+  onMount(() => {
+    if (options?.immediate ?? true) resume();
+  });
+
+  onUnmount(() => {
+    pause();
+  });
 
   return {
     isActive$,
     pause,
     resume,
-    dispose: () => {
-      pause();
-      unsub();
-    },
   };
 }

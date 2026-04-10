@@ -1,9 +1,6 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import { useMount } from "@legendapp/state/react";
-import { useLatest } from "@shared/useLatest";
-import { useConstant } from "@shared/useConstant";
-import { useMaybeObservable } from "@reactivity/useMaybeObservable";
+import { type Observable } from "@legendapp/state";
+import { useScope, toObs } from "@primitives/useScope";
 import type { AnyFn, MaybeObservable, Pausable } from "../../types";
 import { createIntervalFn } from "./core";
 import type { IntervalFnOptions } from "./core";
@@ -11,28 +8,22 @@ import type { IntervalFnOptions } from "./core";
 export { createIntervalFn } from "./core";
 export type { IntervalFnOptions } from "./core";
 
-export type UseIntervalFnOptions = IntervalFnOptions;
-
-export function useIntervalFn(
+export type UseIntervalFn = (
   cb: AnyFn,
-  interval: MaybeObservable<number> = 1000,
+  interval?: MaybeObservable<number>,
   options?: IntervalFnOptions
-): Pausable {
-  const interval$ = useMaybeObservable(interval);
-  const cbRef = useLatest(cb);
+) => Pausable;
 
-  const result = useConstant(() =>
-    createIntervalFn(
-      (...args: unknown[]) => cbRef.current(...args),
-      interval$ as unknown as Observable<number>,
-      { ...options, immediate: false }
-    )
+export const useIntervalFn: UseIntervalFn = (cb, interval = 1000, options) => {
+  return useScope(
+    (p) => {
+      const p$ = toObs(p, { cb: "function" });
+      return createIntervalFn(
+        (...args: unknown[]) => (p.cb as AnyFn)(...args),
+        p$.interval as Observable<number>,
+        options
+      );
+    },
+    { cb, interval }
   );
-
-  useMount(() => {
-    if (options?.immediate ?? true) result.resume();
-    return () => result.dispose();
-  });
-
-  return { isActive$: result.isActive$, pause: result.pause, resume: result.resume };
-}
+};

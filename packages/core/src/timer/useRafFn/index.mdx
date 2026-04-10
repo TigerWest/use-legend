@@ -1,0 +1,159 @@
+---
+title: useRafFn
+description: Call a function on every requestAnimationFrame with pause/resume control
+category: Timer
+type-table:
+  import: "@usels/core"
+  name: UseRafFn
+  params:
+    children:
+      - RafFnOptions
+---
+
+Execute a function on every animation frame (`requestAnimationFrame`) with reactive `isActive` state and pause/resume control.
+The callback receives `delta` (ms since last frame) and `timestamp` (ms since page load).
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRafFn } from "@usels/core";
+
+    function Component() {
+      const { isActive, pause, resume } = useRafFn(({ delta, timestamp }) => {
+        // called ~60 times/sec
+        console.log(`delta: ${delta}ms`);
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRafFn } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { isActive$, pause, resume } = createRafFn(({ delta, timestamp }) => {
+        // called ~60 times/sec
+        console.log(`delta: ${delta}ms`);
+      });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### FPS limit
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useRafFn } from "@usels/core";
+    import { observable } from "@legendapp/state";
+
+    function Component() {
+      const fps$ = observable(30);
+      useRafFn(({ delta }) => {}, { fpsLimit: fps$ });
+      // caps execution to 30fps; fps$.set(60) applies next frame
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRafFn } from "@usels/core";
+    import { observable } from "@legendapp/state";
+
+    function Component() {
+      "use scope"
+      const fps$ = observable(30);
+      createRafFn(({ delta }) => {}, { fpsLimit: fps$ });
+      // caps execution to 30fps; fps$.set(60) applies next frame
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Run once
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useRafFn } from "@usels/core";
+
+    function Component() {
+      useRafFn(
+        ({ timestamp }) => {
+          console.log("ran once at", timestamp);
+        },
+        { once: true }
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRafFn } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      createRafFn(
+        ({ timestamp }) => {
+          console.log("ran once at", timestamp);
+        },
+        { once: true }
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+> **Note:** `once: true` means "pause after the first frame **per resume cycle**". Calling `resume()` again starts a new cycle.
+
+## Notes
+
+### `delta` on the first frame
+
+`delta` is always `0` on the first frame after `resume()`. This avoids a production pitfall where the `DOMHighResTimeStamp` accumulates from page load (potentially thousands of ms), causing physics simulations to jump on the first frame.
+
+### `fpsLimit` valid values
+
+Only positive finite numbers limit the frame rate. All other values behave as **unlimited**:
+
+| `fpsLimit`       | Behavior                  |
+| ---------------- | ------------------------- |
+| `null` (default) | Unlimited                 |
+| `60`             | Capped at 60 fps          |
+| `0`              | Unlimited (not "stopped") |
+| `NaN`            | Unlimited                 |
+| `Infinity`       | Unlimited                 |
+| negative         | Unlimited                 |
+
+To stop the loop, use `pause()` instead of setting `fpsLimit` to a non-positive value.
+
+### Reactive `fpsLimit`
+
+Pass an `Observable` when you need to change the fps cap at runtime. A plain `number` is captured at mount time and **will not update** if the component re-renders with a new value (stale closure):
+
+```tsx
+// @noErrors
+import { useRafFn } from "@usels/core";
+import { observable } from "@legendapp/state";
+
+// ✅ Reactive — changes apply on the next frame
+const fps$ = observable(30);
+useRafFn(fn, { fpsLimit: fps$ });
+fps$.set(60); // takes effect immediately
+
+// ❌ Stale closure — re-render with a new number has no effect
+const [fps, setFps] = useState(30);
+useRafFn(fn, { fpsLimit: fps }); // captures 30 at mount, never updates
+```

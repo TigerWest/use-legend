@@ -1,9 +1,16 @@
 import { observable, type Observable } from "@legendapp/state";
-import type { Disposable, Pausable } from "../../types";
+import type { DeepMaybeObservable, Pausable } from "../../types";
 import { createRafFn } from "@timer/useRafFn/core";
 import { createIntervalFn } from "@timer/useIntervalFn/core";
 
 export interface TimestampOptions {
+  /** Expose pause/resume controls — mount-time-only */
+  controls?: boolean;
+  /**
+   * Offset (ms) added to the timestamp on every tick — reactive
+   * @default 0
+   */
+  offset?: number;
   /**
    * Update interval — determines scheduler type.
    * - 'requestAnimationFrame': rAF-based (default, smoother)
@@ -11,39 +18,41 @@ export interface TimestampOptions {
    * @default 'requestAnimationFrame'
    */
   interval?: "requestAnimationFrame" | number;
-  /** If true, starts immediately. @default true */
-  immediate?: boolean;
   /** Callback invoked on every update */
   callback?: (timestamp: number) => void;
 }
 
-/**
- * Core observable function for reactive timestamp.
- * No React dependency — uses rafFn/intervalFn core internally.
- * Unlike the hook version, conditionally creates only the needed scheduler.
- */
 export function createTimestamp(
-  offset$: Observable<number>,
-  options?: TimestampOptions
-): Disposable & Pausable & { timestamp$: Observable<number> } {
-  const interval = options?.interval ?? "requestAnimationFrame";
-  const isRaf = interval === "requestAnimationFrame";
-  const immediate = options?.immediate ?? true;
-  const callback = options?.callback;
+  options?: DeepMaybeObservable<TimestampOptions & { controls?: false }>
+): Observable<number>;
+export function createTimestamp(
+  options: DeepMaybeObservable<TimestampOptions & { controls: true }>
+): Pausable & { timestamp$: Observable<number> };
+export function createTimestamp(
+  options?: DeepMaybeObservable<TimestampOptions>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  const opts$ = observable(options);
 
-  const ts$ = observable<number>(Date.now() + (offset$.peek() ?? 0));
+  const exposeControls = opts$.peek()?.controls ?? false;
+  const interval = opts$.peek()?.interval ?? "requestAnimationFrame";
+  const isRaf = interval === "requestAnimationFrame";
+
+  const ts$ = observable<number>(Date.now() + (opts$.peek()?.offset ?? 0));
 
   const update = () => {
-    const value = Date.now() + (offset$.peek() ?? 0);
+    const opts = opts$.get() ?? {};
+    const value = Date.now() + (opts.offset ?? 0);
     ts$.set(value);
-    callback?.(value);
+    opts.callback?.(value);
   };
 
   const scheduler = isRaf
-    ? createRafFn(update, { immediate })
-    : createIntervalFn(update, observable(typeof interval === "number" ? interval : 1000), {
-        immediate,
-      });
+    ? createRafFn(update)
+    : createIntervalFn(update, observable(typeof interval === "number" ? interval : 1000));
 
-  return { timestamp$: ts$, ...scheduler };
+  if (exposeControls) {
+    return { timestamp$: ts$, ...scheduler };
+  }
+  return ts$;
 }

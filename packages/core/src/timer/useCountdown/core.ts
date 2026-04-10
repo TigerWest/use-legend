@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import type { Disposable, Fn, Pausable } from "../../types";
+import type { DeepMaybeObservable, Fn, MaybeObservable, Pausable } from "../../types";
 import { createIntervalFn } from "@timer/useIntervalFn/core";
 
 export interface CountdownOptions {
@@ -29,13 +29,14 @@ export interface CountdownReturn extends Pausable {
  * No React dependency — uses intervalFn core internally.
  */
 export function createCountdown(
-  initialCount$: Observable<number>,
-  options?: CountdownOptions
-): Disposable & CountdownReturn {
-  const interval = options?.interval ?? 1000;
-  const immediate = options?.immediate ?? true;
-  const onTick = options?.onTick;
-  const onComplete = options?.onComplete;
+  initialCount: MaybeObservable<number>,
+  options?: DeepMaybeObservable<CountdownOptions>
+): CountdownReturn {
+  const initialCount$ = observable(initialCount);
+  const opts$ = observable(options);
+
+  const interval = opts$.peek()?.interval ?? 1000;
+  const immediate = opts$.peek()?.immediate ?? true;
 
   const remaining$ = observable<number>(Math.max(0, initialCount$.peek()));
   let pauseFn: Fn | null = null;
@@ -44,10 +45,10 @@ export function createCountdown(
     const prev = remaining$.peek();
     const next = Math.max(0, prev - 1);
     remaining$.set(next);
-    onTick?.(next);
+    (opts$.get()?.onTick as ((n: number) => void) | undefined)?.(next);
     if (next <= 0) {
       pauseFn?.();
-      onComplete?.();
+      (opts$.get()?.onComplete as (() => void) | undefined)?.();
     }
   };
 
@@ -83,6 +84,5 @@ export function createCountdown(
     reset,
     stop,
     start,
-    dispose: controls.dispose,
   };
 }

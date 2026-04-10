@@ -1,9 +1,7 @@
 "use client";
-import { useMount } from "@legendapp/state/react";
+import { useScope } from "@primitives/useScope";
+import { peek } from "@utilities/peek";
 import type { DeepMaybeObservable, Pausable, ReadonlyObservable } from "../../types";
-import { useMaybeObservable } from "@reactivity/useMaybeObservable";
-import { useInitialPick } from "@reactivity/useInitialPick";
-import { useConstant } from "@shared/useConstant";
 import { createNow } from "./core";
 
 export { createNow } from "./core";
@@ -29,27 +27,21 @@ export function useNow(options: UseNowOptions<true>): { now$: ReadonlyObservable
 export function useNow(
   options?: DeepMaybeObservable<UseNowOptions<boolean>>
 ): ReadonlyObservable<Date> | ({ now$: ReadonlyObservable<Date> } & Pausable) {
-  const opts$ = useMaybeObservable(options);
+  const rawOpts = peek(options);
+  const exposeControls = rawOpts?.controls ?? false;
+  const interval = rawOpts?.interval ?? ("requestAnimationFrame" as const);
 
-  const { controls: exposeControls, interval } = useInitialPick(opts$, {
-    controls: false,
-    interval: "requestAnimationFrame" as const,
+  return useScope(() => {
+    const result = createNow({ interval });
+
+    if (exposeControls) {
+      return {
+        now$: result.now$ as ReadonlyObservable<Date>,
+        isActive$: result.isActive$,
+        pause: result.pause,
+        resume: result.resume,
+      };
+    }
+    return result.now$ as ReadonlyObservable<Date>;
   });
-
-  const result = useConstant(() => createNow({ interval, immediate: false }));
-
-  useMount(() => {
-    result.resume();
-    return () => result.dispose();
-  });
-
-  if (exposeControls) {
-    return {
-      now$: result.now$ as ReadonlyObservable<Date>,
-      isActive$: result.isActive$,
-      pause: result.pause,
-      resume: result.resume,
-    };
-  }
-  return result.now$ as ReadonlyObservable<Date>;
 }

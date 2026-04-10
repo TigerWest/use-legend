@@ -157,7 +157,7 @@ describe("useScope() — rerender stability with props", () => {
       const { result, rerender } = renderHook(
         ({ value }) =>
           useScope(
-            (p: any) => ({
+            (p) => ({
               read: () => {
                 captured = p.value;
               },
@@ -185,7 +185,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { result, rerender } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => ({
+            (p) => ({
               read: () => {
                 captured = p.count;
               },
@@ -210,7 +210,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { result, rerender } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => ({
+            (p) => ({
               handler: () => {
                 captured = p.count;
               },
@@ -232,7 +232,7 @@ describe("useScope() — withState (useState as props source)", () => {
 
       const { result, rerender } = renderHook(
         ({ onClick }) =>
-          useScope((p: any) => ({ trigger: () => (p.onClick as () => string)() }), { onClick }),
+          useScope((p) => ({ trigger: () => (p.onClick as () => string)() }), { onClick }),
         { initialProps: { onClick: fn1 } }
       );
 
@@ -254,7 +254,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { rerender } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p);
               observe(() => spy(obs$.count.get()));
               return {};
@@ -280,7 +280,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { rerender } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p);
               observe(() => spy(obs$.count.get()));
               return {};
@@ -304,7 +304,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { rerender } = renderHook(
         ({ count, name }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p);
               observe(() => countSpy(obs$.count.get()));
               return {};
@@ -327,7 +327,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { rerender } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p);
               observe(() => spy(obs$.count.get()));
               return {};
@@ -408,7 +408,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { rerender } = renderHook(
         ({ cfg }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p, { cfg: "opaque" });
               observe(() => {
                 obs$.cfg.get();
@@ -438,7 +438,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { rerender, unmount } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p);
               observe(() => obs$.count.get());
               return {};
@@ -457,7 +457,7 @@ describe("useScope() — withState (useState as props source)", () => {
       const { unmount } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p);
               observe(() => spy(obs$.count.get()));
               return {};

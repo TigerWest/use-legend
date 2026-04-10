@@ -205,7 +205,7 @@ describe("useScope() — React Strict Mode", () => {
       const { rerender } = renderHook(
         ({ count }) =>
           useScope(
-            (p: any) => {
+            (p) => {
               const obs$ = toObs(p);
               observe(() => spy(obs$.count.get()));
               return {};
@@ -227,7 +227,7 @@ describe("useScope() — React Strict Mode", () => {
       const { result, rerender } = renderHook(
         ({ value }) =>
           useScope(
-            (p: any) => ({
+            (p) => ({
               read: () => {
                 captured = p.value;
               },
@@ -270,7 +270,7 @@ describe("multi-params — Strict Mode", () => {
     const { rerender } = renderHook(
       ({ debounce, name }) =>
         useScope(
-          (timing: any, _opts: any) => {
+          (timing, _opts) => {
             const t$ = toObs(timing);
             observe(() => spy(t$.debounce.get()));
             return {};

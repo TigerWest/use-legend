@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import type { Disposable, Pausable } from "../../types";
+import type { Pausable } from "../../types";
 import { createRafFn } from "@timer/useRafFn/core";
 import { createIntervalFn } from "@timer/useIntervalFn/core";
 
@@ -20,9 +20,7 @@ export interface NowOptions {
  * Unlike the hook version, conditionally creates only the needed scheduler
  * (no need to satisfy React rules-of-hooks).
  */
-export function createNow(
-  options?: NowOptions
-): Disposable & Pausable & { now$: Observable<Date> } {
+export function createNow(options?: NowOptions): Pausable & { now$: Observable<Date> } {
   const interval = options?.interval ?? "requestAnimationFrame";
   const isRaf = interval === "requestAnimationFrame";
   const immediate = options?.immediate ?? true;

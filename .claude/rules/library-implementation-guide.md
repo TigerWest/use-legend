@@ -56,7 +56,7 @@ function createDebounced<T>(
 
   observe(() => {
     const val = source$.get();
-    const ms = opts$.delay.get(); // reactive — re-runs when opts$.delay changes
+    const ms = opts$.get().delay; // reactive — re-runs when opts$.delay changes
     // debounce logic...
     value$.set(val);
   });
@@ -87,26 +87,18 @@ function createDebounced<T>(
 import { useScope, toObs } from "@primitives/useScope";
 import { createDebounced } from "./core";
 
-export function useDebounced<T>(
-  value: MaybeObservable<T>,
-  ms: MaybeObservable<number> = 200,
-  options?: DeepMaybeObservable<DebounceOptions>
-): ReadonlyObservable<T> {
+export type UseDebounced = typeof createDebounced;
+export const useDebounced: UseDebounced = (source$, options) => {
   return useScope(
-    (args, opts) => {
-      const args$ = toObs(args);
-      const opts$ = toObs(opts, { onCallback: "function" });
-      // args$ and opts$ are Observable<Props> — pass directly as DeepMaybeObservable
-      const result = createDebounced(source$, args$, opts$);
-      onMount(() => {
-        /* post-mount setup */
-      });
-      return result.value$ as ReadonlyObservable<T>;
+    (p) => {
+      const p$ = toObs(p, { onCallback: "function" });
+      // p$ is Observable<Props> — passes directly as DeepMaybeObservable
+      // core wraps it with observable(p$) → prop changes propagate reactively
+      return createDebounced(source$, p$);
     },
-    { value, ms }, // reactive scalar args
-    options ?? {} // options pass-through
+    (options ?? {}) as Record<string, unknown>
   );
-}
+};
 ```
 
 ### Type Reuse — Derive Hook Types from Core
@@ -432,6 +424,28 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 }
 ```
 
+### ❌ Anti-pattern — peeking options outside `useScope`
+
+```ts
+// ❌ NEVER peek options outside the scope factory — even with peek()
+const rawOpts = isObservable(options) ? options.peek() : options; // ← outside scope
+const rawOpts = peek(options); // ← still outside scope, still wrong
+
+return useScope((p) => { ... }, { ...rawOpts });
+
+// ✅ Pass options directly into useScope — peek inside the factory if a mount-time snapshot is needed
+import { peek } from "@utilities/peek";
+
+return useScope((p, opts) => {
+  const exposeControls = peek(opts)?.controls ?? false; // ← peek inside scope
+  const opts$ = toObs(opts);
+  ...
+}, { cb, interval }, options); // options passed as-is
+```
+
+**Rule:** Never call `peek()` (or `isObservable` guard) on options *before* `useScope`. Always pass the value through and handle it inside the factory.
+
+
 ### Hook Standard Pattern — `useScope` + `toObs`
 
 For hooks where options contain reactive scalar fields (e.g. `MaybeObservable<number>`), use `useScope((p) => ...)` with `toObs(p)` to get a reactive Observable of the props. Pass `options` to the core as-is.
@@ -447,18 +461,17 @@ Replaces `useMaybeObservable`, `useLatest`, and `useConstant` with the `useScope
 export type UseIntervalFn = typeof createIntervalFn;
 
 export const useIntervalFn: UseIntervalFn = (cb, interval, options) => {
-  const rawOpts = isObservable(options) ? options.peek() : options;
-
   return useScope(
-    (p) => {
+    (p, opts) => {
       const p$ = toObs(p, { cb: "function" });
+      const opts$ = toObs(opts);
       // p$ is Observable<Props> — passes directly as DeepMaybeObservable
       // core wraps it with observable(p$) → prop changes propagate reactively
 
       const result = createIntervalFn(
         (...args: unknown[]) => p.cb?.(...args), // p.cb: raw latest, always fresh
         p$.interval as Observable<number>,
-        p$ // pass toObs(p) result directly to core
+        opts$
       );
 
       onMount(() => {
@@ -467,62 +480,39 @@ export const useIntervalFn: UseIntervalFn = (cb, interval, options) => {
 
       return result;
     },
-    { cb, interval, ...rawOpts }
+    { cb, interval },
+    options
   );
 };
 ```
 
 #### Pattern 2: DeepMaybeObservable options
 
-Read mount-time-only values (e.g. `controls: boolean`) outside the factory. Pass `toObs(p)` to core — core wraps it with `observable()` internally for reactive access.
+Read mount-time-only values (e.g. `controls: boolean`) inside the factory via `peek(opts)`. Pass `toObs(p)` to core — core wraps it with `observable()` internally for reactive access.
 
-> **Exception to `typeof createX`:** When the hook has a conditional/overloaded return type driven by a mount-time option (like `controls: boolean`), the return type diverges from core — use explicit overloads instead.
+> **MANDATORY: Always `export const useX: UseX = ...`.**
+> Function overload declarations (`export function useX(...)`) are **never allowed** in hook wrappers.
+> Even when `controls: boolean` affects internal behavior, the hook must be typed as `typeof createX`
+> and return the same type as the core function — no conditional overloads.
 
 ```ts
-export function useInterval(
-  intervalValue: MaybeObservable<number>,
-  options?: DeepMaybeObservable<UseIntervalOptions & { controls?: false }>
-): ReadonlyObservable<number>;
-export function useInterval(
-  intervalValue: MaybeObservable<number>,
-  options: DeepMaybeObservable<UseIntervalOptions & { controls: true }>
-): Readonly<UseIntervalReturn & Pausable>;
-export function useInterval(
-  intervalValue: MaybeObservable<number>,
-  options?: DeepMaybeObservable<UseIntervalOptions>
-): ReadonlyObservable<number> | Readonly<UseIntervalReturn & Pausable> {
-  const rawOpts = isObservable(options) ? options.peek() : options;
-  const exposeControls = rawOpts?.controls ?? false; // mount-time-only: read outside factory
+export type UseInterval = typeof createInterval;
 
+export const useInterval: UseInterval = (intervalValue, options) => {
   return useScope(
-    (p) => {
-      const p$ = toObs(p, { callback: "function" });
-      // p$ is Observable<Props> — passes as DeepMaybeObservable to core
-      // core calls observable(p$) internally → p changes reach observe() reactively
+    (scalars, opts) => {
+      const scalars$ = toObs(scalars, { callback: "function" });
+      const opts$ = toObs(opts);
 
-      const result = createInterval(
-        p$.interval as Observable<number>,
-        p$ // pass toObs(p) directly — core handles DeepMaybeObservable
+      return createInterval(
+        scalars$.interval as Observable<number>,
+        opts$
       );
-
-      onMount(() => {
-        if (p.immediate ?? true) result.resume();
-      });
-
-      if (exposeControls) {
-        return Object.freeze({
-          counter$: result.counter$ as ReadonlyObservable<number>,
-          reset: result.reset,
-          isActive$: result.isActive$,
-          pause: result.pause,
-          resume: result.resume,
-        });
-      }
-      return result.counter$ as ReadonlyObservable<number>;
     },
-    { interval: intervalValue, ...rawOpts }
+    { interval: intervalValue }, // primitive scalar → wrap
+    options                      // object → pass directly
   );
-}
+};
 ```
 
 #### Pattern 3: Multi-params pass-through
@@ -530,6 +520,35 @@ export function useInterval(
 When a hook accepts **multiple parameters**, each parameter needs its own independent ReactiveProps proxy.
 
 Pass parameters as separate rest args rather than merging them into one object — merging breaks per-parameter proxy tracking.
+
+##### Scope props wrapping rule — when to use `{ }` vs pass directly
+
+| Parameter type | How to pass to `useScope` |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| **Object / `DeepMaybeObservable<Options>`** | Pass as-is: `useScope((p) => {}, options)` |
+| **Observable** | Pass as-is: `useScope((p) => {}, someObs$)` |
+| **Primitive scalar** (`number`, `string`, `boolean`, `function`) | Wrap: `useScope((p) => {}, { value: primitiveArg })` |
+
+```ts
+// ❌ Bad — merging primitives + options loses per-parameter proxy tracking
+useScope(
+  (p) => { const p$ = toObs(p, { cb: "function" }); ... },
+  { cb, interval, ...rawOpts } // ← DON'T spread primitives and options together
+);
+
+// ✅ Good — primitives wrapped, object options passed separately
+useScope(
+  (scalars, opts) => {
+    const scalars$ = toObs(scalars, { cb: "function" });
+    const opts$ = toObs(opts);
+    ...
+  },
+  { cb, interval }, // primitive scalars → wrap in object
+  options           // object/observable → pass directly
+);
+```
+
+> **Rule of thumb:** Only wrap in `{ }` when you have bare primitive/function values that aren't already an object. Never spread `...rawOpts` into the same object as primitives.
 
 ```ts
 // hook signature: useDebouncedHistory(source$, timing, restOpts)
@@ -559,14 +578,13 @@ useScope(
       shouldCommit: "function",
     });
 
-    const result = createDebouncedHistory(source$, timing$.debounce as Observable<number>, {
+    return createDebouncedHistory(source$, timing$.debounce as Observable<number>, {
       ...rest$.peek(),
       maxWait: timing$.maxWait as Observable<number | undefined>,
     });
-    onUnmount(() => result.dispose());
-    return result;
   },
-  timing // timing param
+  timing,  // timing param
+  restOpts // restOpts param — separate proxy, not merged with timing
 );
 ```
 
@@ -672,26 +690,27 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 }
 ```
 
-### Passthrough Pattern (delegating to hooks with internal `useObserve`)
+### ❌ Anti-pattern — Calling hooks inside `useScope` factory
 
-When delegating to a hook that already tracks options reactively inside its own `useObserve`
-(e.g., `useIntersectionObserver`), normalize with `toObs(p)`, then pass
-the computed Observable child fields as references.
+Never call React hooks (e.g. `useXxx()`) inside the `useScope` factory.
+The factory runs synchronously during render, but hooks called inside a callback violate React rules of hooks ordering guarantees when the scope is re-evaluated.
 
 ```ts
-function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
+// ❌ NEVER — hook called inside useScope factory
+export const useMyHook: UseMyHook = (source$, options) => {
   return useScope((p) => {
-    const p$ = toObs(p, {
-      scrollTarget: "element",
-    });
-
-    // Pass computed Observable child fields — downstream useObserve tracks them
-    useIntersectionObserver(element, callback, {
-      rootMargin: p$.rootMargin,
-      root: p$.scrollTarget as unknown as MaybeElement | undefined,
-    });
+    const p$ = toObs(p);
+    useOtherHook(source$, p$); // ← React hook inside scope factory — forbidden
   }, options ?? {});
-}
+};
+
+// ✅ Call the core function directly instead
+export const useMyHook: UseMyHook = (source$, options) => {
+  return useScope((p) => {
+    const p$ = toObs(p);
+    return createOtherUtil(source$, p$); // ← core function — correct
+  }, (options ?? {}) as Record<string, unknown>);
+};
 ```
 
 ---
@@ -720,22 +739,25 @@ Mount-time reads are restricted to these cases:
 Read mount-time-only values **outside** the `useScope` factory, before it runs:
 
 ```ts
+import { peek } from "@utilities/peek";
+
 function useMyHook(
   intervalValue: MaybeObservable<number>,
   options?: DeepMaybeObservable<UseMyHookOptions>
 ) {
-  const rawOpts = isObservable(options) ? options.peek() : options;
-  const exposeControls = rawOpts?.controls ?? false; // read outside factory
-
   return useScope(
-    (p) => {
-      // exposeControls captured from outer scope — stable, mount-time value
+    (p, opts) => {
+      const exposeControls = peek(opts)?.controls ?? false; // ← peek inside scope
+      const p$ = toObs(p);
+      const opts$ = toObs(opts);
+
       if (exposeControls) {
-        return createWithControls(source$, p$);
+        return createWithControls(p$.interval as Observable<number>, opts$);
       }
-      return createSimple(source$, p$);
+      return createSimple(p$.interval as Observable<number>, opts$);
     },
-    { interval: intervalValue, ...rawOpts }
+    { interval: intervalValue },
+    options
   );
 }
 ```

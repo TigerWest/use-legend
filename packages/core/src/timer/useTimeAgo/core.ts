@@ -1,7 +1,8 @@
-import { observable, observe, type Observable } from "@legendapp/state";
+import { observable, type Observable } from "@legendapp/state";
 import { formatDistance } from "date-fns";
 import type { Locale } from "date-fns";
-import type { Disposable, Pausable } from "../../types";
+import type { DeepMaybeObservable, MaybeObservable, Pausable } from "../../types";
+import { observe, onMount } from "@primitives/useScope";
 import { createNow } from "@timer/useNow/core";
 
 export type UseTimeAgoUnitNamesDefault =
@@ -67,41 +68,57 @@ export function formatTimeAgo(
 
 export interface TimeAgoOptions {
   /**
-   * Update interval in ms — determines scheduler type.
+   * Update interval in ms — mount-time-only
    * @default 30_000
    */
   updateInterval?: number;
-  /** date-fns Locale for i18n */
+  /** date-fns Locale for i18n — mount-time-only */
   locale?: Locale;
-  /** Formatter for dates exceeding max */
+  /** Max diff before fullDateFormatter is used — reactive */
+  max?: UseTimeAgoUnitNamesDefault | number;
+  /** Formatter for dates exceeding max — function hint */
   fullDateFormatter?: (date: Date) => string;
-  /** If true, starts immediately. @default true */
-  immediate?: boolean;
+  /**
+   * Show detailed seconds for recent times.
+   * When false, times within 45s show "just now".
+   * @default false
+   */
+  showSecond?: boolean;
+  /** Expose pause/resume controls — mount-time-only */
+  controls?: boolean;
 }
 
-/**
- * Core observable function for reactive "time ago" strings.
- * No React dependency — uses now() core internally.
- */
 export function createTimeAgo(
-  time$: Observable<Date | number | string>,
-  max$: Observable<UseTimeAgoUnitNamesDefault | number | undefined>,
-  showSecond$: Observable<boolean | undefined>,
-  options?: TimeAgoOptions
-): Disposable & Pausable & { timeAgo$: Observable<string> } {
-  const updateInterval = options?.updateInterval ?? 30_000;
-  const locale = options?.locale;
-  const fullDateFormatter = options?.fullDateFormatter;
-  const immediate = options?.immediate ?? true;
+  time: MaybeObservable<Date | number | string>,
+  options?: DeepMaybeObservable<TimeAgoOptions & { controls?: false }>
+): Observable<string>;
+export function createTimeAgo(
+  time: MaybeObservable<Date | number | string>,
+  options: DeepMaybeObservable<TimeAgoOptions & { controls: true }>
+): Pausable & { timeAgo$: Observable<string> };
+export function createTimeAgo(
+  time: MaybeObservable<Date | number | string>,
+  options?: DeepMaybeObservable<TimeAgoOptions>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  const time$ = observable(time);
+  const opts$ = observable(options);
 
-  const nowResult = createNow({ interval: updateInterval, immediate });
+  const exposeControls = opts$.peek()?.controls ?? false;
+  const updateInterval = opts$.peek()?.updateInterval ?? 30_000;
+  const locale = opts$.peek()?.locale;
+
+  const nowResult = createNow({ interval: updateInterval, immediate: false });
   const timeAgo$ = observable<string>("");
 
-  const unsub = observe(() => {
+  onMount(() => {
+    nowResult.resume();
+  });
+
+  observe(() => {
     const currentNow = nowResult.now$.get();
     const target = time$.get();
-    const max = max$.get();
-    const showSecond = showSecond$.get() ?? false;
+    const { max, showSecond = false, fullDateFormatter } = opts$.get() ?? {};
 
     timeAgo$.set(
       formatTimeAgo(
@@ -112,14 +129,13 @@ export function createTimeAgo(
     );
   });
 
-  return {
-    timeAgo$,
-    isActive$: nowResult.isActive$,
-    pause: nowResult.pause,
-    resume: nowResult.resume,
-    dispose: () => {
-      nowResult.dispose();
-      unsub();
-    },
-  };
+  if (exposeControls) {
+    return {
+      timeAgo$,
+      isActive$: nowResult.isActive$,
+      pause: nowResult.pause,
+      resume: nowResult.resume,
+    };
+  }
+  return timeAgo$;
 }
