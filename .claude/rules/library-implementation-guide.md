@@ -900,11 +900,12 @@ export const useMyUtil: UseMyUtil = (source$) => {
 
 ```ts
 // useNow — only calls now$.set(new Date()) internally; caller is read-only
-export function useNow(options?: UseNowOptions<false>): ReadonlyObservable<Date>;
-export function useNow(options: UseNowOptions<true>): { now: ReadonlyObservable<Date> } & Pausable;
+export type UseNow = typeof createNow;
+export const useNow: UseNow = (options) => { ... };
 
 // useElementVisibility — isVisible$ is only modified by IntersectionObserver callback
-export function useElementVisibility(...): Observable<boolean>; // simple return allows Observable<T> too
+export type UseElementVisibility = typeof createElementVisibility;
+export const useElementVisibility: UseElementVisibility = (...) => { ... }; // simple return allows Observable<T> too
 ```
 
 > **Simple Observable return vs. object fields**

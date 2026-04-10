@@ -1,0 +1,109 @@
+---
+title: useResizeObserver
+description: "Observes one or more elements for size changes using the [ResizeObserver API](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver). Targets can be `Ref`, `MaybeElement`, or a plain `Element`."
+category: elements
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$, useResizeObserver } from "@usels/web";
+    import { useCallback } from "react";
+
+    function Component() {
+      const el$ = useRef$<HTMLDivElement>();
+
+      const handleResize = useCallback<ResizeObserverCallback>((entries) => {
+        const { width, height } = entries[0].contentRect;
+        console.log(width, height);
+      }, []);
+
+      useResizeObserver(el$, handleResize);
+
+      return <div ref={el$} />;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createResizeObserver } from "@usels/web";
+    import { createRef$ } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+
+      createResizeObserver(el$, (entries) => {
+        const { width, height } = entries[0].contentRect;
+        console.log(width, height);
+      });
+
+      return <div ref={el$} />;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With `border-box`
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    useResizeObserver(el$, handleResize, { box: "border-box" });
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    createResizeObserver(el$, handleResize, { box: "border-box" });
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Stopping observation manually
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    const { stop } = useResizeObserver(el$, handleResize);
+
+    stop();
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    const { stop } = createResizeObserver(el$, handleResize);
+
+    stop();
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Checking browser support
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    const { isSupported$ } = useResizeObserver(el$, handleResize);
+
+    console.log(isSupported$.get()); // Observable<boolean>
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    const { isSupported$ } = createResizeObserver(el$, handleResize);
+
+    console.log(isSupported$.get()); // Observable<boolean>
+    ```
+
+  </Fragment>
+</CodeTabs>

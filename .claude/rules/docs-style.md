@@ -78,21 +78,23 @@ Use `<Fragment slot="hook">` and `<Fragment slot="scope">` with standard code fe
 
 **Scope variant** uses the `"use scope"` directive inside the component function body to indicate scope-based APIs (`createXxx`, `observe`, `onMount`, `onUnmount`).
 
-**Scope variant — no React hooks allowed:** Inside `"use scope"`, React hooks (including `useObservable`, `useSelector`, etc.) cannot be called. Use `observable()`.
+**Scope variant — no React hooks allowed:** Inside `"use scope"`, React hooks (including `useObservable`, `useSelector`, `useRef$`, etc.) cannot be called. Use `observable()` or `createRef$()` instead.
 
 ```tsx
 // ❌ Bad — React hook inside "use scope"
 function Component() {
   "use scope";
   const count$ = useObservable(0); // hook not allowed
+  const el$ = useRef$<HTMLDivElement>(); // hook not allowed
 }
 
-// ✅ Good — observable() is not a hook
-import { observable } from "@usels/core";
+// ✅ Good — non-hook equivalents
+import { observable, createRef$ } from "@usels/core";
 
 function Component() {
   "use scope";
   const count$ = observable(0);
+  const el$ = createRef$<HTMLDivElement>();
 }
 ```
 
