@@ -156,6 +156,34 @@ describe("useOpaque()", () => {
     });
   });
 
+  describe("primitive values", () => {
+    it("does not throw when initialized with a number", () => {
+      expect(() => renderHook(() => useOpaque(0))).not.toThrow();
+    });
+
+    it("get() returns primitive number after init", () => {
+      const { result } = renderHook(() => useOpaque(42));
+      expect(result.current.get()).toBe(42);
+    });
+
+    it("does not throw when set() is called with a number", () => {
+      const { result } = renderHook(() => useOpaque(0));
+      act(() => {
+        result.current.set(1 as unknown as null);
+      });
+      expect(result.current.get()).toBe(1);
+    });
+
+    it("increments correctly when used as a counter", () => {
+      const { result } = renderHook(() => useOpaque(0));
+      act(() => {
+        const next = ((result.current.peek() as unknown as number) ?? 0) + 1;
+        result.current.set(next as unknown as null);
+      });
+      expect(result.current.get()).toBe(1);
+    });
+  });
+
   describe("rerender stability", () => {
     it("hook reference is stable across rerenders", () => {
       const { result, rerender } = renderHook(() => useOpaque<{ n: number }>());

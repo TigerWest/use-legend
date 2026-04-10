@@ -15,10 +15,15 @@ export type OpaqueObservable<T> = Omit<
   set(value: T | null): void;
 };
 
+/** ObservableHint.opaque() uses Object.defineProperty internally — only safe for objects/functions */
+const isWrappable = (v: unknown): boolean =>
+  v !== null && v !== undefined && (typeof v === "object" || typeof v === "function");
+
 export function createOpaque<T>(initialValue?: T | null): OpaqueObservable<T> {
+  const init = initialValue ?? null;
   const obs$ = observable<OpaqueObject<T | null>>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ObservableHint.opaque((initialValue ?? null) as any)
+    (isWrappable(init) ? ObservableHint.opaque(init as any) : init) as any
   );
 
   const unwrap = (val: OpaqueObject<T | null> | undefined): T | null =>
@@ -31,7 +36,7 @@ export function createOpaque<T>(initialValue?: T | null): OpaqueObservable<T> {
     peek: () => unwrap((obs$ as any).peek()),
     set: (value: T | null) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obs$ as any).set(ObservableHint.opaque(value as any));
+      (obs$ as any).set(isWrappable(value) ? ObservableHint.opaque(value as any) : value);
     },
 
     onChange: (handler: (value: T | null) => void) =>

@@ -6,7 +6,8 @@ import TimerWidget from "../demos/CounterDemo";
 const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline, actions = [] } = data.hero || {};
 
-const code = `import { useInterval } from '@usels/core'
+const hookCode = `import { useInterval } from '@usels/core'
+import { useRef } from "react"
 
 function Timer() {
   const count$ = useInterval(1000)
@@ -20,6 +21,22 @@ function Timer() {
     </div>
   )
 }`;
+
+const scopeCode = `import { createInterval, createRef$ } from '@usels/core'
+
+function Timer() {
+  "use scope"
+  const count$ = createInterval(1000)
+  const renders$ = createRef$(0);
+  renders$.current += 1;
+
+  return (
+    <div>
+      <div>{count$.get()}s</div>
+      <div>renders: {renders$.get()}</div>
+    </div>
+  )
+}`;
 ---
 
 <div
@@ -28,8 +45,17 @@ function Timer() {
   <!-- Right column: code block + live widget overlay -->
   <div class="not-content order-2 w-[min(95%,25rem)] mx-auto min-[50rem]:w-full">
     <div class="relative rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] demo-wrapper">
-      <Code code={code} lang="tsx" class="px-7 p-10 sm:px-10 text-xs rounded-md md:text-sm" />
-      <div class="absolute -top-12 right-0 sm:-top-16 sm:-right-4">
+      <div id="hero-code-hook">
+        <Code code={hookCode} lang="tsx" class="px-7 p-10 sm:px-10 text-xs rounded-md md:text-sm" />
+      </div>
+      <div id="hero-code-scope" style="display:none">
+        <Code
+          code={scopeCode}
+          lang="tsx"
+          class="px-5 p-10 sm:px-10 text-xs rounded-md md:text-sm"
+        />
+      </div>
+      <div class="absolute -bottom-12 right-0 sm:-bottom-16 sm:-right-4">
         <TimerWidget client:load />
       </div>
     </div>
@@ -71,6 +97,17 @@ function Timer() {
     }
   </div>
 </div>
+
+<script>
+  window.addEventListener("hero-mode-change", (e) => {
+    const event = e as CustomEvent<{ isHook: boolean }>;
+    const hookEl = document.getElementById("hero-code-hook");
+    const scopeEl = document.getElementById("hero-code-scope");
+    if (!hookEl || !scopeEl) return;
+    hookEl.style.display = event.detail.isHook ? "" : "none";
+    scopeEl.style.display = event.detail.isHook ? "none" : "";
+  });
+</script>
 
 <style>
   @layer starlight.core {

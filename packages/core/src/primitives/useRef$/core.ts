@@ -4,27 +4,43 @@ import type { Disposable } from "../../types";
 
 export const REF$_SYMBOL = Symbol("Ref$");
 
+/**
+ * Observable element ref type.
+ * T carries the nullability — use `Ref$<T | null>` for nullable refs.
+ *
+ * - `Ref$<T>` — `current`, `get()`, `peek()` return `T` (non-null)
+ * - `Ref$<T | null>` — `current`, `get()`, `peek()` return `T | null`
+ */
 export type Ref$<T> = ((node: T | null) => void) &
   ReadonlyObservable<T> & {
     readonly [REF$_SYMBOL]: true;
     /** returns element, registers tracking when called inside useObserve */
-    get(): T | null;
+    get(): T;
     /** returns element without registering tracking */
-    peek(): T | null;
+    peek(): T;
     /** imperatively set element */
     set(value: T | null): void;
     /** returns element without tracking — useRef-compatible read */
-    current: T | null;
+    current: T;
   };
 
 /**
  * Core (framework-agnostic) version of useRef$.
  * Creates an observable element ref with opaque wrapping.
  *
- * @param initialValue - Optional initial value (like React's useRef(initialValue)).
+ * - non-null value → `Ref$<T>`: `current`, `get()`, `peek()` return `T`
+ * - null / no arg → `Ref$<T | null>`: `current`, `get()`, `peek()` return `T | null`
+ *
+ * Nullability is expressed via the type parameter, mirroring `T | null` at the call site.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createRef$<T = any>(initialValue?: T | null): Ref$<T> {
+export function createRef$<T = any>(initialValue: null): Ref$<T | null>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createRef$<T = any>(initialValue: T): Ref$<T>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createRef$<T = any>(): Ref$<T | null>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createRef$<T = any>(initialValue?: T | null): Ref$<T | null> {
   const el$ = createOpaque<T>(initialValue);
 
   const fn = (node: T | null) => {
@@ -53,6 +69,6 @@ export function createRef$<T = any>(initialValue?: T | null): Ref$<T> {
 }
 
 /** Type guard for Ref$ — distinguishes it from Observable and raw values */
-export function isRef$(v: unknown): v is Ref$<Element> {
+export function isRef$(v: unknown): v is Ref$<Element | null> {
   return v != null && (v as any)[REF$_SYMBOL] === true; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
