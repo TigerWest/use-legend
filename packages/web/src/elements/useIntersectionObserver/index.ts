@@ -1,140 +1,18 @@
-import { useMount, useObservable, useObserveEffect, useUnmount } from "@legendapp/state/react";
-import { useRef } from "react";
-import {
-  useMaybeObservable,
-  get,
-  type DeepMaybeObservable,
-  type MaybeObservable,
-} from "@usels/core";
-import { isWindow } from "@usels/core/shared/index";
-import type { Supportable, Pausable } from "@usels/core";
-import type { MaybeEventTarget } from "../../types";
-import { normalizeTargets } from "@shared/normalizeTargets";
+"use client";
+import { useScope, toObs } from "@usels/core";
+import { createIntersectionObserver } from "./core";
 
-export interface UseIntersectionObserverOptions {
-  /** Whether to start observing immediately on mount. Default: true */
-  immediate?: boolean;
-  /** The element or document used as the viewport. Default: browser viewport */
-  root?: MaybeEventTarget;
-  /** Margin around the root. Accepts CSS-style values. Default: "0px" */
-  rootMargin?: string;
-  /** Threshold(s) at which to trigger the callback. Default: 0 */
-  threshold?: number | number[];
-}
+export { createIntersectionObserver } from "./core";
+export type { UseIntersectionObserverOptions, UseIntersectionObserverReturn } from "./core";
 
-export interface UseIntersectionObserverReturn extends Supportable, Pausable {
-  stop: () => void;
-  // isActive$, pause, resume → Pausable
-}
-
-/**
- * Reactive wrapper around the IntersectionObserver API.
- * Observes one or more elements for intersection changes with pause/resume/stop support.
- *
- * @param target - Element(s) to observe: Ref$, Observable, raw Element, or array of these
- * @param callback - Called when intersection state changes
- * @param options - IntersectionObserver options plus an `immediate` flag
- * @returns `{ isSupported$, isActive$, pause, resume, stop }`
- *
- * @example
- * ```tsx
- * const el$ = useRef$<HTMLDivElement>();
- * const { isActive$, pause, resume } = useIntersectionObserver(
- *   el$,
- *   (entries) => {
- *     entries.forEach(entry => console.log(entry.isIntersecting));
- *   },
- *   { threshold: 0.5 },
- * );
- * return <div ref={el$} />;
- * ```
- */
-export function useIntersectionObserver(
-  target: MaybeEventTarget | MaybeEventTarget[],
-  callback: IntersectionObserverCallback,
-  options?: DeepMaybeObservable<UseIntersectionObserverOptions>
-): UseIntersectionObserverReturn {
-  const opts$ = useMaybeObservable<UseIntersectionObserverOptions>(options, {
-    root: "element",
-    rootMargin: (value: MaybeObservable<string | undefined>) => get(value),
-  });
-  const isSupported$ = useObservable<boolean>(typeof IntersectionObserver !== "undefined");
-  const isActive$ = useObservable<boolean>(opts$.immediate.peek() !== false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const stoppedRef = useRef(false);
-  const mountedRef = useRef(false);
-
-  const cleanup = () => {
-    observerRef.current?.disconnect();
-    observerRef.current = null;
-  };
-
-  const setup = () => {
-    if (!isSupported$.peek() || !isActive$.peek()) return;
-    cleanup();
-
-    const rawRoot = opts$.root.peek();
-    const root =
-      rawRoot == null
-        ? (rawRoot as null | undefined)
-        : (() => {
-            const el = (rawRoot as unknown as { valueOf(): HTMLElement | Document }).valueOf();
-            return isWindow(el as unknown) ? null : el;
-          })();
-
-    const targets = normalizeTargets(target).filter((el): el is Element => el instanceof Element);
-    if (!targets.length) return;
-
-    observerRef.current = new IntersectionObserver(callback, {
-      root: root ?? undefined,
-      rootMargin: opts$.rootMargin.peek() as string | undefined,
-      threshold: (opts$.threshold.peek() as number | number[] | undefined) ?? 0,
-    });
-
-    targets.forEach((el) => observerRef.current?.observe(el));
-  };
-
-  useMount(() => {
-    mountedRef.current = true;
-  });
-  useUnmount(() => {
-    mountedRef.current = false;
-    cleanup();
-  });
-  useObserveEffect((e) => {
-    e.onCleanup = cleanup;
-    const root = opts$.root.get();
-    opts$.rootMargin.get();
-    isActive$.get();
-    normalizeTargets(target);
-    if (stoppedRef.current) return;
-    if (root === null) return;
-    setup();
-  });
-
-  const pause = () => {
-    if (!mountedRef.current) return;
-    cleanup();
-    isActive$.set(false);
-  };
-
-  const resume = () => {
-    if (stoppedRef.current || !mountedRef.current) return;
-    isActive$.set(true);
-  };
-
-  const stop = () => {
-    if (!mountedRef.current) return;
-    stoppedRef.current = true;
-    cleanup();
-    isActive$.set(false);
-  };
-
-  return {
-    isSupported$,
-    isActive$,
-    stop,
-    pause,
-    resume,
-  };
-}
+export type UseIntersectionObserver = typeof createIntersectionObserver;
+export const useIntersectionObserver: UseIntersectionObserver = (
+  target,
+  callback,
+  options = {}
+) => {
+  return useScope((opts) => {
+    const opts$ = toObs(opts, { root: "opaque" });
+    return createIntersectionObserver(target, callback, opts$);
+  }, options);
+};
