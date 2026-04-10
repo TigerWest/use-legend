@@ -1,7 +1,7 @@
 import { observable } from "@legendapp/state";
 import { Show, useObservable } from "@legendapp/state/react";
 import { createInterval, createRef$, useInterval } from "@usels/core";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { cx } from "./_shared";
 
 function HookTimer() {
@@ -46,41 +46,19 @@ function ScopeTimer() {
 export default function TimerWidget() {
   const isHook$ = useObservable(true);
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      isHook$.set((e as CustomEvent<{ isHook: boolean }>).detail.isHook);
+    };
+    window.addEventListener("hero-mode-change", handler);
+    return () => window.removeEventListener("hero-mode-change", handler);
+  }, []);
+
   return (
     <div className="flex flex-col items-center gap-2.5 rounded-xl border border-white/10 bg-black/60 px-3.5 py-2.5 md:px-5 md:py-4 backdrop-blur-sm">
       <Show if={isHook$} else={<ScopeTimer />}>
         <HookTimer />
       </Show>
-      <div className="flex gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5">
-        <button
-          type="button"
-          onClick={() => {
-            isHook$.set(true);
-            window.dispatchEvent(new CustomEvent("hero-mode-change", { detail: { isHook: true } }));
-          }}
-          className={cx(
-            "rounded-md px-2.5 py-1 text-[10px] font-bold leading-none transition-colors",
-            isHook$.get() ? "bg-white/15 text-white" : "text-white/30 hover:text-white/50"
-          )}
-        >
-          hook
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            isHook$.set(false);
-            window.dispatchEvent(
-              new CustomEvent("hero-mode-change", { detail: { isHook: false } })
-            );
-          }}
-          className={cx(
-            "rounded-md px-2.5 py-1 text-[10px] font-bold leading-none transition-colors",
-            isHook$.get() ? "text-white/30 hover:text-white/50" : "bg-white/15 text-white"
-          )}
-        >
-          scope
-        </button>
-      </div>
     </div>
   );
 }
