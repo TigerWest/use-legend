@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { describe, it, expectTypeOf } from "vitest";
-import type { Ref, RefObject } from "react";
 import { type Ref$, useRef$ } from ".";
 
 // ---------------------------------------------------------------------------
@@ -31,33 +30,28 @@ describe("useRef$() — types", () => {
   });
 
   // -------------------------------------------------------------------------
-  // overloads
+  // parameter types
   // -------------------------------------------------------------------------
 
-  describe("overloads", () => {
-    it("accepts callback ref as externalRef", () => {
-      type CallbackRef = (node: Element | null) => void;
-      expectTypeOf<typeof useRef$>().toBeCallableWith(undefined as unknown as CallbackRef);
-    });
-
-    it("accepts RefObject as externalRef", () => {
+  describe("parameter types", () => {
+    it("accepts an initial value", () => {
       expectTypeOf<typeof useRef$<HTMLDivElement>>().toBeCallableWith(
-        undefined as unknown as RefObject<HTMLDivElement | null>
+        document.createElement("div")
       );
     });
 
-    it("accepts null as externalRef (forwardRef null passthrough)", () => {
+    it("accepts null as initial value", () => {
       expectTypeOf<typeof useRef$<HTMLDivElement>>().toBeCallableWith(null);
     });
 
-    it("accepts no argument (standalone useRef replacement)", () => {
+    it("accepts no argument", () => {
       expectTypeOf<typeof useRef$>().toBeCallableWith();
     });
 
-    it("externalRef parameter type accepts Ref<T> or null", () => {
+    it("parameter type is T | null | undefined", () => {
       expectTypeOf<typeof useRef$<HTMLDivElement>>()
         .parameter(0)
-        .toEqualTypeOf<Ref<HTMLDivElement> | null | undefined>();
+        .toEqualTypeOf<HTMLDivElement | null | undefined>();
     });
   });
 

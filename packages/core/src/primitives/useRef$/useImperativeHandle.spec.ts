@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, renderHook, act } from "@testing-library/react";
 import { useObserve } from "@legendapp/state/react";
-import { createElement, createRef, forwardRef, useImperativeHandle, useRef } from "react";
+import { createElement, createRef, forwardRef, useImperativeHandle } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { useRef$ } from ".";
 import { peek } from "@utilities/peek";
@@ -163,36 +163,6 @@ describe("useRef$() + useImperativeHandle compatibility", () => {
   });
 
   // ─── Scenario 5 ───────────────────────────────────────────────────────────
-  it("useRef$ and useRef can coexist with useImperativeHandle on the same component", () => {
-    const observeSpy = vi.fn();
-
-    const Component = forwardRef<TestHandle, object>((_, ref) => {
-      // useRef for DOM — useRef$ wraps it for reactivity
-      const domRef = useRef<HTMLDivElement>(null);
-      const el$ = useRef$<HTMLDivElement>(domRef);
-
-      useImperativeHandle(ref, () => ({
-        focus: () => domRef.current?.focus(),
-        getValue: () => "shared-ref",
-      }));
-
-      useObserve(() => {
-        el$.get();
-        observeSpy();
-      });
-
-      return createElement("div", { ref: el$ });
-    });
-
-    const parentRef = createRef<TestHandle>();
-    render(createElement(Component, { ref: parentRef }));
-
-    // Observer fires: initial (null) + DOM assigned
-    expect(observeSpy).toHaveBeenCalledTimes(2);
-    expect(parentRef.current?.getValue()).toBe("shared-ref");
-  });
-
-  // ─── Scenario 6 ───────────────────────────────────────────────────────────
   it("parent ref is nulled on unmount (standard React useImperativeHandle cleanup)", () => {
     const Component = forwardRef<TestHandle, object>((_, ref) => {
       const el$ = useRef$<HTMLDivElement>();

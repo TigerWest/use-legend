@@ -4,13 +4,6 @@ import type { Disposable } from "../../types";
 
 export const REF$_SYMBOL = Symbol("Ref$");
 
-// Framework-agnostic external ref type (no React import)
-type ExternalRef<T> =
-  | ((node: T | null) => void)
-  | { current: T | null | undefined }
-  | null
-  | undefined;
-
 export type Ref$<T> = ((node: T | null) => void) &
   ReadonlyObservable<T> & {
     readonly [REF$_SYMBOL]: true;
@@ -28,20 +21,13 @@ export type Ref$<T> = ((node: T | null) => void) &
  * Core (framework-agnostic) version of useRef$.
  * Creates an observable element ref with opaque wrapping.
  *
- * @param getExternalRef - Optional getter returning an external ref to forward to.
- *   Pass `() => extRef.current` from useLatest in the hook layer.
+ * @param initialValue - Optional initial value (like React's useRef(initialValue)).
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createRef$<T = any>(getExternalRef?: () => ExternalRef<T>): Ref$<T> & Disposable {
-  const el$ = createOpaque<T>();
+export function createRef$<T = any>(initialValue?: T | null): Ref$<T> {
+  const el$ = createOpaque<T>(initialValue);
 
   const fn = (node: T | null) => {
-    const ext = getExternalRef?.();
-    if (typeof ext === "function") {
-      ext(node);
-    } else if (ext != null && "current" in ext) {
-      (ext as { current: T | null }).current = node;
-    }
     el$.set(node);
   };
 
@@ -52,7 +38,6 @@ export function createRef$<T = any>(getExternalRef?: () => ExternalRef<T>): Ref$
       if (prop === "peek") return () => el$.peek();
       if (prop === "set") return (value: T | null) => el$.set(value);
       if (prop === "current") return el$.peek();
-      if (prop === "dispose") return () => {};
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const val = (el$ as any)[prop];
       return typeof val === "function" ? val.bind(el$) : val;
