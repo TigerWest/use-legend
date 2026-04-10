@@ -1,6 +1,12 @@
 import * as ts from "typescript";
 import * as path from "path";
-import type { ChildTypeInfo, FunctionSignature, ParamInfo, PropertyInfo, ReturnInfo } from "./types";
+import type {
+  ChildTypeInfo,
+  FunctionSignature,
+  ParamInfo,
+  PropertyInfo,
+  ReturnInfo,
+} from "./types";
 
 export function extractRawTypeDeclarations(
   sourceFilePath: string,
@@ -24,9 +30,7 @@ export function extractRawTypeDeclarations(
 
     let result = declarationContent;
     if (!includeComments) {
-      result = result
-        .replace(/\/\*\*[\s\S]*?\*\//g, "")
-        .replace(/\/\/[^\n]*/g, "");
+      result = result.replace(/\/\*\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     }
 
     return result
@@ -109,12 +113,12 @@ export function extractFunctionSignature(
     // Extract JSDoc description — try target symbol first, then signature
     const description =
       ts.displayPartsToString(targetSymbol.getDocumentationComment(checker)) ||
-      ts.displayPartsToString(sig.getDocumentation()) ||
+      ts.displayPartsToString((sig as any)?.getDocumentation?.() ?? []) ||
       undefined;
 
     // Build JSDoc param descriptions from signature tags and target symbol tags
     const paramJsDocMap = new Map<string, string>();
-    for (const tag of sig.getJsDocTags()) {
+    for (const tag of sig.getJsDocTags?.() ?? []) {
       if (tag.name === "param" && tag.text) {
         const text = ts.displayPartsToString(tag.text).trim();
         const match = text.match(/^(\w+\$?)\s*[-–—]?\s*(.*)$/s);
@@ -135,10 +139,8 @@ export function extractFunctionSignature(
     }
 
     // Get @returns from signature or target symbol
-    const allJsDocTags = [...sig.getJsDocTags(), ...targetSymbol.getJsDocTags(checker)];
-    const returnsTag = allJsDocTags.find(
-      (tag) => tag.name === "returns" || tag.name === "return"
-    );
+    const allJsDocTags = [...(sig.getJsDocTags?.() ?? []), ...targetSymbol.getJsDocTags(checker)];
+    const returnsTag = allJsDocTags.find((tag) => tag.name === "returns" || tag.name === "return");
     const returnsDescription = returnsTag
       ? ts.displayPartsToString(returnsTag.text).trim() || undefined
       : undefined;
@@ -326,8 +328,7 @@ function extractProperties(type: ts.Type, checker: ts.TypeChecker): PropertyInfo
     const propType = checker.getTypeOfSymbol(prop);
     const optional = !!(prop.flags & ts.SymbolFlags.Optional);
 
-    const description =
-      ts.displayPartsToString(prop.getDocumentationComment(checker)) || undefined;
+    const description = ts.displayPartsToString(prop.getDocumentationComment(checker)) || undefined;
 
     // Extract @default from JSDoc tags
     const jsDocTags = prop.getJsDocTags(checker);
@@ -368,14 +369,7 @@ function extractReturnInfo(
   let properties: PropertyInfo[] | undefined;
 
   // Skip expansion for known generic wrappers
-  const SKIP_EXPAND = [
-    "Observable",
-    "ReadonlyObservable",
-    "Promise",
-    "Array",
-    "Map",
-    "Set",
-  ];
+  const SKIP_EXPAND = ["Observable", "ReadonlyObservable", "Promise", "Array", "Map", "Set"];
   const isGenericWrapper = SKIP_EXPAND.some(
     (name) => cleanTypeStr.startsWith(name + "<") || cleanTypeStr === name
   );

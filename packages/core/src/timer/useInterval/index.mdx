@@ -4,13 +4,10 @@ description: Reactive counter that increments on every interval tick
 category: Timer
 type-table:
   import: "@usels/core"
-  name: UseInterval
+  name: "UseInterval"
   params:
     children:
       - IntervalOptions
-  returns:
-    children:
-      - IntervalReturn
 ---
 
 A thin wrapper around `useIntervalFn` that exposes a `ReadonlyObservable<number>` counter that increments on each tick.
