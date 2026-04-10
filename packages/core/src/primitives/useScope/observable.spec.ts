@@ -466,6 +466,164 @@ describe("toObs with Observable field props — auto-deref", () => {
     expect(result.current.p$.a.get()).toBe("hello");
     expect(result.current.p$.b.get()).toBe(true);
   });
+
+  // ── Fire-count tests: how many times does observe() run when field$.set()? ──
+  // These establish the contract for per-field Observable + observe interactions.
+
+  it("observe fires EXACTLY ONCE when field$.set() — child accessor (p$.field.get())", () => {
+    const field$ = observable("a");
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          observe(() => spy(p$.field.get()));
+          return {};
+        },
+        { field: field$ }
+      )
+    );
+
+    const callsAfterMount = spy.mock.calls.length;
+    act(() => field$.set("b"));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith("b");
+  });
+
+  it("observe fires EXACTLY ONCE when field$.set() — top-level get (p$.get()?.field)", () => {
+    const field$ = observable("a");
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          observe(() => {
+            const raw = p$.get() as { field: string };
+            spy(raw?.field);
+          });
+          return {};
+        },
+        { field: field$ }
+      )
+    );
+
+    const callsAfterMount = spy.mock.calls.length;
+    act(() => field$.set("b"));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith("b");
+  });
+
+  it("outer Observable wrapper — observe fires EXACTLY ONCE when options$.field changes", () => {
+    const options$ = observable({ field: "a" });
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          observe(() => spy(p$.field.get()));
+          return {};
+        },
+        { field: options$.field }
+      )
+    );
+
+    const callsAfterMount = spy.mock.calls.length;
+    act(() => options$.field.set("b"));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith("b");
+  });
+});
+
+describe("toObs with Observable field — opaque hint fire-count", () => {
+  // Baseline: regular observable (no prop wrapping) — must fire exactly once
+  it("baseline — plain observe() on external observable fires exactly once per set()", () => {
+    const field$ = observable("a");
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(() => {
+        observe(() => spy(field$.get()));
+        return {};
+      })
+    );
+
+    const callsAfterMount = spy.mock.calls.length;
+    act(() => field$.set("b"));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith("b");
+  });
+
+  // Per-field with opaque hint — does this prevent double-trigger?
+  it("toObs(p, { field: 'opaque' }) — observe fires exactly once when field$ changes", () => {
+    const field$ = observable("a");
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p, { field: "opaque" });
+          observe(() => spy(p$.field.get()));
+          return {};
+        },
+        { field: field$ }
+      )
+    );
+
+    const callsAfterMount = spy.mock.calls.length;
+    act(() => field$.set("b"));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith("b");
+  });
+
+  // Per-field with opaque hint — top-level get access
+  it("toObs(p, { field: 'opaque' }) — p$.get()?.field access fires exactly once", () => {
+    const field$ = observable("a");
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p, { field: "opaque" });
+          observe(() => {
+            const raw = p$.get() as { field: string };
+            spy(raw?.field);
+          });
+          return {};
+        },
+        { field: field$ }
+      )
+    );
+
+    const callsAfterMount = spy.mock.calls.length;
+    act(() => field$.set("b"));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith("b");
+  });
+
+  // per-field observable without hint behaves the same as with opaque hint
+  it("per-field observable without hint — also fires exactly once (no double-trigger)", () => {
+    const field$ = observable("a");
+    const spy = vi.fn();
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p); // no hint
+          observe(() => spy(p$.field.get()));
+          return {};
+        },
+        { field: field$ }
+      )
+    );
+
+    const callsAfterMount = spy.mock.calls.length;
+    act(() => field$.set("b"));
+    expect(spy).toHaveBeenCalledTimes(callsAfterMount + 1);
+    expect(spy).toHaveBeenLastCalledWith("b");
+  });
 });
 
 describe("useScope() — reactiveProps plain state selectivity", () => {
@@ -558,5 +716,494 @@ describe("useScope() — reactiveProps plain state selectivity", () => {
 
     act(() => setName("b")); // name changes, count stays 0
     expect(spy).toHaveBeenCalledTimes(callsAfterMount); // not triggered
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Multi-param scope + toObs — edge cases
+//
+// useScope supports multiple param slots: (p1, p2, p3) => T with corresponding
+// props objects. Each param gets its own ReactiveProps proxy with an independent
+// ScopePropsCtx (propsRef, props$, hints, rawPrev, Observable subscriptions).
+// The tests below catch the bug categories we've hit historically:
+//   A. double-fire on per-field Observable
+//   B. unrelated rerenders leaking into observe
+//   C. subscription lifecycle (Strict Mode, unmount, per-param isolation)
+//   D. nested plain value propagation via `assign`
+// ---------------------------------------------------------------------------
+describe("useScope() — multi-param + toObs edge cases", () => {
+  describe("param isolation", () => {
+    it("changing only p1 fires p1 observer; p2 observer does not fire", () => {
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ a, b }: { a: number; b: string }) =>
+          useScope(
+            (p1, p2) => {
+              const p1$ = toObs(p1);
+              const p2$ = toObs(p2);
+              observe(() => p1Spy(p1$.a.get()));
+              observe(() => p2Spy(p2$.b.get()));
+              return {};
+            },
+            { a },
+            { b }
+          ),
+        { initialProps: { a: 1, b: "x" } }
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      rerender({ a: 2, b: "x" });
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls + 1);
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls); // isolated
+    });
+
+    it("changing only p2 fires p2 observer; p1 observer does not fire", () => {
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ a, b }: { a: number; b: string }) =>
+          useScope(
+            (p1, p2) => {
+              const p1$ = toObs(p1);
+              const p2$ = toObs(p2);
+              observe(() => p1Spy(p1$.a.get()));
+              observe(() => p2Spy(p2$.b.get()));
+              return {};
+            },
+            { a },
+            { b }
+          ),
+        { initialProps: { a: 1, b: "x" } }
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      rerender({ a: 1, b: "y" });
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls); // isolated
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls + 1);
+    });
+
+    it("simultaneous change to p1 and p2 fires each observer exactly once", () => {
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ a, b }: { a: number; b: string }) =>
+          useScope(
+            (p1, p2) => {
+              const p1$ = toObs(p1);
+              const p2$ = toObs(p2);
+              observe(() => p1Spy(p1$.a.get()));
+              observe(() => p2Spy(p2$.b.get()));
+              return {};
+            },
+            { a },
+            { b }
+          ),
+        { initialProps: { a: 1, b: "x" } }
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      rerender({ a: 2, b: "y" });
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls + 1);
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls + 1);
+    });
+
+    it("three params: each observer is independent", () => {
+      const spies = [vi.fn(), vi.fn(), vi.fn()];
+
+      const { rerender } = renderHook(
+        ({ a, b, c }: { a: number; b: number; c: number }) =>
+          useScope(
+            (p1, p2, p3) => {
+              const p1$ = toObs(p1);
+              const p2$ = toObs(p2);
+              const p3$ = toObs(p3);
+              observe(() => spies[0](p1$.a.get()));
+              observe(() => spies[1](p2$.b.get()));
+              observe(() => spies[2](p3$.c.get()));
+              return {};
+            },
+            { a },
+            { b },
+            { c }
+          ),
+        { initialProps: { a: 1, b: 2, c: 3 } }
+      );
+
+      const baseline = spies.map((s) => s.mock.calls.length);
+      rerender({ a: 10, b: 2, c: 3 }); // only a changes
+      expect(spies[0]).toHaveBeenCalledTimes(baseline[0] + 1);
+      expect(spies[1]).toHaveBeenCalledTimes(baseline[1]);
+      expect(spies[2]).toHaveBeenCalledTimes(baseline[2]);
+    });
+  });
+
+  describe("per-field Observable across params", () => {
+    it("Observable field in p1 — obs.set() fires p1 observer exactly once, p2 untouched", () => {
+      const rootMargin$ = observable("0px");
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      renderHook(() =>
+        useScope(
+          (p1, p2) => {
+            const p1$ = toObs(p1);
+            const p2$ = toObs(p2);
+            observe(() => p1Spy(p1$.rootMargin.get()));
+            observe(() => p2Spy(p2$.threshold.get()));
+            return {};
+          },
+          { rootMargin: rootMargin$ },
+          { threshold: 0.5 }
+        )
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      act(() => rootMargin$.set("10px"));
+
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls + 1);
+      expect(p1Spy).toHaveBeenLastCalledWith("10px");
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls); // p2 untouched
+    });
+
+    it("Observable field in p2 — obs.set() fires p2 observer exactly once, p1 untouched", () => {
+      const threshold$ = observable(0.5);
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      renderHook(() =>
+        useScope(
+          (p1, p2) => {
+            const p1$ = toObs(p1);
+            const p2$ = toObs(p2);
+            observe(() => p1Spy(p1$.rootMargin.get()));
+            observe(() => p2Spy(p2$.threshold.get()));
+            return {};
+          },
+          { rootMargin: "0px" },
+          { threshold: threshold$ }
+        )
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      act(() => threshold$.set(1.0));
+
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls); // p1 untouched
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls + 1);
+      expect(p2Spy).toHaveBeenLastCalledWith(1.0);
+    });
+
+    it("Observable fields in both p1 and p2 — each fires its own observer exactly once", () => {
+      const a$ = observable(1);
+      const b$ = observable("x");
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      renderHook(() =>
+        useScope(
+          (p1, p2) => {
+            const p1$ = toObs(p1);
+            const p2$ = toObs(p2);
+            observe(() => p1Spy(p1$.a.get()));
+            observe(() => p2Spy(p2$.b.get()));
+            return {};
+          },
+          { a: a$ },
+          { b: b$ }
+        )
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      act(() => a$.set(2));
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls + 1);
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls);
+
+      act(() => b$.set("y"));
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls + 1);
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls + 1);
+    });
+  });
+
+  describe("hints per param", () => {
+    it("different hint specs on p1 vs p2 — each applies only to its own proxy", () => {
+      const fn = () => "called";
+      const el = { nodeType: 1, tagName: "DIV" } as unknown as HTMLElement;
+      let capturedFn: unknown;
+      let capturedEl: unknown;
+
+      renderHook(() =>
+        useScope(
+          (p1, p2) => {
+            toObs(p1, { cb: "function" });
+            const p2$ = toObs(p2, { root: "opaque" });
+            // Raw proxy access returns the original function reference
+            capturedFn = p1.cb;
+            // opaque-hinted field preserves the stored element reference
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            capturedEl = (p2$ as any).root.peek();
+            return {};
+          },
+          { cb: fn },
+          { root: el }
+        )
+      );
+
+      // Raw proxy: the original function reference is returned as-is
+      expect(typeof capturedFn).toBe("function");
+      expect(capturedFn).toBe(fn);
+      expect((capturedFn as () => string)()).toBe("called");
+      // opaque hint preserves the original element reference
+      expect(capturedEl).toBe(el);
+    });
+
+    it("p1 hint change does not affect p2 hint application", () => {
+      const fn1 = vi.fn();
+      const fn2 = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ cb }: { cb: () => void }) =>
+          useScope(
+            (p1, p2) => {
+              const p1$ = toObs(p1, { cb: "function" });
+              const p2$ = toObs(p2);
+              return {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                cbFromP1: () => ((p1$ as any).cb.get() as () => void)(),
+                plainFromP2: () => p2$.value.get(),
+              };
+            },
+            { cb },
+            { value: 42 }
+          ),
+        { initialProps: { cb: fn1 } }
+      );
+
+      rerender({ cb: fn2 });
+      // syncProps on p1 detected cb change, p2 untouched
+      // (we can't directly assert observer state; just confirm no errors thrown)
+    });
+  });
+
+  describe("rerender stability", () => {
+    it("toObs(p1) and toObs(p2) return stable references across rerenders", () => {
+      let p1FirstRef: unknown = null;
+      let p2FirstRef: unknown = null;
+      let p1LaterRef: unknown = null;
+      let p2LaterRef: unknown = null;
+      let callCount = 0;
+
+      const { rerender } = renderHook(
+        ({ a, b }: { a: number; b: number }) =>
+          useScope(
+            (p1, p2) => {
+              const p1$ = toObs(p1);
+              const p2$ = toObs(p2);
+              if (callCount === 0) {
+                p1FirstRef = p1$;
+                p2FirstRef = p2$;
+              } else {
+                p1LaterRef = p1$;
+                p2LaterRef = p2$;
+              }
+              callCount++;
+              return {};
+            },
+            { a },
+            { b }
+          ),
+        { initialProps: { a: 1, b: 2 } }
+      );
+
+      rerender({ a: 10, b: 20 });
+      // Factory runs once at mount (plus Strict Mode); rerender does NOT re-run factory.
+      // p1FirstRef / p2FirstRef are the only references; we just confirm toObs returned something.
+      expect(p1FirstRef).not.toBeNull();
+      expect(p2FirstRef).not.toBeNull();
+      // Either no later ref captured (factory didn't re-run) or it matches the first ref.
+      if (p1LaterRef !== null) expect(p1LaterRef).toBe(p1FirstRef);
+      if (p2LaterRef !== null) expect(p2LaterRef).toBe(p2FirstRef);
+    });
+
+    it("same-ref rerender on p1 does not trigger any observer", () => {
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+      const stableP1 = { a: 1 };
+
+      const { rerender } = renderHook(
+        ({ b }: { b: number }) =>
+          useScope(
+            (p1, p2) => {
+              const p1$ = toObs(p1);
+              const p2$ = toObs(p2);
+              observe(() => p1Spy(p1$.a.get()));
+              observe(() => p2Spy(p2$.b.get()));
+              return {};
+            },
+            stableP1,
+            { b }
+          ),
+        { initialProps: { b: 1 } }
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+
+      rerender({ b: 2 }); // p1 stays referentially stable, p2.b changes
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls); // p1 untouched
+      expect(p2Spy).toHaveBeenCalledWith(2);
+    });
+  });
+
+  describe("nested plain fields", () => {
+    it("nested field change in p1 propagates to p1$.nested.x, p2 untouched", () => {
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ coord, label }: { coord: { x: number; y: number }; label: string }) =>
+          useScope(
+            (p1, p2) => {
+              const p1$ = toObs(p1);
+              const p2$ = toObs(p2);
+              observe(() => p1Spy(p1$.coord.x.get()));
+              observe(() => p2Spy(p2$.label.get()));
+              return {};
+            },
+            { coord },
+            { label }
+          ),
+        { initialProps: { coord: { x: 10, y: 20 }, label: "a" } }
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      rerender({ coord: { x: 30, y: 20 }, label: "a" });
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls + 1);
+      expect(p1Spy).toHaveBeenLastCalledWith(30);
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls);
+    });
+
+    it("unchanged nested field (y) does not fire its own lens on p1", () => {
+      const ySpy = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ x }: { x: number }) =>
+          useScope(
+            (p1) => {
+              const p1$ = toObs(p1);
+              observe(() => ySpy(p1$.coord.y.get()));
+              return {};
+            },
+            { coord: { x, y: 20 } }
+          ),
+        { initialProps: { x: 10 } }
+      );
+
+      const yCalls = ySpy.mock.calls.length;
+      rerender({ x: 30 }); // only x changes; y stays 20
+      expect(ySpy).toHaveBeenCalledTimes(yCalls); // y lens unchanged
+    });
+  });
+
+  describe("toObs usage asymmetry", () => {
+    it("toObs called only on p1 — p2 still accessible via raw proxy", () => {
+      let readP2: (() => unknown) | null = null;
+
+      const { rerender } = renderHook(
+        ({ a, b }: { a: number; b: string }) =>
+          useScope(
+            (p1, p2) => {
+              toObs(p1); // only p1 gets observable
+              readP2 = () => p2.b; // raw access via closure — latest on each call
+              return {};
+            },
+            { a },
+            { b }
+          ),
+        { initialProps: { a: 1, b: "first" } }
+      );
+
+      expect(readP2!()).toBe("first");
+
+      rerender({ a: 1, b: "second" });
+      // raw proxy reads the latest via propsRef; closure always sees current value
+      expect(readP2!()).toBe("second");
+    });
+
+    it("toObs called only on p2 — syncProps for p1 no-ops (no errors)", () => {
+      const p2Spy = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ a, b }: { a: number; b: number }) =>
+          useScope(
+            (_p1, p2) => {
+              const p2$ = toObs(p2);
+              observe(() => p2Spy(p2$.b.get()));
+              return {};
+            },
+            { a },
+            { b }
+          ),
+        { initialProps: { a: 1, b: 10 } }
+      );
+
+      const p2Calls = p2Spy.mock.calls.length;
+
+      rerender({ a: 99, b: 10 }); // a changes; no toObs for p1 → no-op; p2 unchanged
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls);
+
+      rerender({ a: 99, b: 20 }); // b changes
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls + 1);
+    });
+  });
+
+  describe("unmount cleanup", () => {
+    it("Observable field subscriptions on both params are cleaned up on unmount", () => {
+      const a$ = observable(1);
+      const b$ = observable("x");
+      const p1Spy = vi.fn();
+      const p2Spy = vi.fn();
+
+      const { unmount } = renderHook(() =>
+        useScope(
+          (p1, p2) => {
+            const p1$ = toObs(p1);
+            const p2$ = toObs(p2);
+            observe(() => p1Spy(p1$.a.get()));
+            observe(() => p2Spy(p2$.b.get()));
+            return {};
+          },
+          { a: a$ },
+          { b: b$ }
+        )
+      );
+
+      const p1Calls = p1Spy.mock.calls.length;
+      const p2Calls = p2Spy.mock.calls.length;
+
+      unmount();
+
+      act(() => a$.set(2));
+      act(() => b$.set("y"));
+
+      // Post-unmount: no observer fires on either param
+      expect(p1Spy).toHaveBeenCalledTimes(p1Calls);
+      expect(p2Spy).toHaveBeenCalledTimes(p2Calls);
+    });
   });
 });

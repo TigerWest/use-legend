@@ -1,6 +1,7 @@
-import { observable, ObservableHint, type Observable } from "@legendapp/state";
+import { observable, ObservableHint, isObservable, batch, type Observable } from "@legendapp/state";
 import type { ImmutableObservableBase } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
+import { onUnmount } from "./effectScope";
 
 /** @internal Strip Observable/ReadonlyObservable wrapper from a type (distributive over unions) */
 type UnwrapObs<T> = T extends ImmutableObservableBase<infer U> ? U : T;
@@ -66,8 +67,16 @@ export type ApplyHints<P, H> = H extends ScopeHint
     ? ApplyHintMap<P, H>
     : P;
 
-/** @internal Symbol to retrieve ScopePropsCtx from a ReactiveProps proxy */
-const REACTIVE_PROPS_CTX = Symbol("reactivePropsCtx");
+/**
+ * @internal Symbol to retrieve the lazy observable accessor from a ReactiveProps proxy.
+ * Accessing `proxy[REACTIVE_PROPS_GET_OBS]` returns a `(hints?) => Observable<P>` function
+ * that lazily initializes and returns the reactive observable for this scope.
+ */
+const REACTIVE_PROPS_GET_OBS = Symbol("reactivePropsGetObs");
+
+/** @internal Shape of the lazy observable accessor — used by `toObs`. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type GetObsFn<P extends object> = (hints?: NestedHintSpec<any>) => Observable<P>;
 
 /** @internal Per-instance context for the props proxy */
 export interface ScopePropsCtx<P extends object> {
@@ -86,11 +95,30 @@ export interface ScopePropsCtx<P extends object> {
  */
 export type ReactiveProps<P extends object> = Readonly<P>;
 
-/** @internal Create a stable ReactiveProps proxy backed by ctx.propsRef */
+/**
+ * @internal Create a stable ReactiveProps proxy backed by ctx.propsRef.
+ *
+ * The proxy exposes a lazy `_getObs()` accessor (via the internal symbol) that
+ * encapsulates the `ctx.props$` lifecycle — hint storage, initial value build,
+ * and Observable-field subscription setup — so `toObs` doesn't need to touch
+ * ctx internals directly.
+ */
 export function createReactiveProxy<P extends object>(ctx: ScopePropsCtx<P>): ReactiveProps<P> {
+  const getObs: GetObsFn<P> = (hints) => {
+    if (!ctx.props$) {
+      if (hints) ctx.hints = hints;
+      const initial = buildInitialValue(ctx);
+      ctx.props$ = observable(initial) as unknown as Observable<P>;
+      ctx.rawPrev = { ...ctx.propsRef.current } as Record<string, unknown>;
+    } else if (hints) {
+      ctx.hints = hints;
+    }
+    return ctx.props$ as Observable<P>;
+  };
+
   return new Proxy({} as ReactiveProps<P>, {
     get(_, key) {
-      if (key === REACTIVE_PROPS_CTX) return ctx;
+      if (key === REACTIVE_PROPS_GET_OBS) return getObs;
       if (typeof key === "symbol") return undefined;
       return ctx.propsRef.current[key as keyof P];
     },
@@ -155,61 +183,97 @@ function applyHintToValue(
   return val;
 }
 
-/** @internal Build initial observable value with hints applied */
-function buildInitialValue<P extends object>(
-  props: P,
-  hints: NestedHintSpec<Record<string, unknown>> | null | undefined
+/**
+ * @internal Resolve one top-level prop field to a plain value:
+ * - Observable → `peek()` (the Observable's changes are synced via `onChange` in
+ *   `buildInitialValue`; storing the peeked value avoids a `setToObservable` link
+ *   that would double-fire inside `observe()`).
+ * - Plain value → hint applied.
+ */
+function readField<P extends object>(
+  key: string,
+  val: unknown,
+  hints: NestedHintSpec<P> | null
 ): unknown {
-  if (!hints) return props;
-  return applyHintToValue(hints as ScopeHint | Record<string, unknown>, props);
+  if (isObservable(val)) return (val as Observable<unknown>).peek();
+  const fieldHint = (hints as Record<string, unknown> | null)?.[key];
+  return applyHintToValue(fieldHint as ScopeHint | Record<string, unknown> | undefined, val);
+}
+
+/**
+ * @internal Build the initial plain object that backs `ctx.props$`.
+ *
+ * Top-level Observable fields are subscribed via `onChange`; their current values
+ * are stored directly in the returned object. Nested Observables are NOT supported —
+ * put Observables at the top level of the props object.
+ */
+function buildInitialValue<P extends object>(ctx: ScopePropsCtx<P>): unknown {
+  const props = ctx.propsRef.current;
+  const hints = ctx.hints as NestedHintSpec<P> | null;
+
+  // scalar hint: apply to entire props object — no per-field processing
+  if (typeof hints === "string") return applyHintToValue(hints as ScopeHint, props);
+
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(props)) {
+    const val = (props as Record<string, unknown>)[key];
+    if (isObservable(val)) {
+      const obs = val as Observable<unknown>;
+      // Subscribe immediately; the returned unsubscribe fn is registered via
+      // `onUnmount` so the current scope cleans it up on dispose.
+      onUnmount(
+        obs.onChange(() => {
+          batch(() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (ctx.props$ as any)?.[key].set(obs.peek());
+          });
+        })
+      );
+    }
+    result[key] = readField(key, val, hints);
+  }
+  return result;
 }
 
 /**
  * @internal
- * Update `props$` with the latest props values, only setting fields that changed.
- * Also updates `ctx.propsRef.current` unconditionally (raw access path).
+ * Update `props$` with the latest props values, only setting top-level fields whose
+ * reference actually changed. Observable-valued fields are synced via `onChange` in
+ * `buildInitialValue`, so their stable reference short-circuits here via `Object.is`.
+ *
+ * For changed keys, `props$[key].set(nextVal)` uses Legend-State's built-in recursive
+ * diff: setting `props$.coord = { x: 30, y: 20 }` fires only `props$.coord.x` when
+ * `y` is unchanged. Nested plain updates flow through cleanly.
  */
 export function syncProps<P extends object>(ctx: ScopePropsCtx<P>, next: P): void {
-  // Always keep ref current for raw access
   ctx.propsRef.current = next;
-
-  // If no observable created (toObs not called), nothing to sync
-  if (!ctx.props$) return;
+  if (!ctx.props$) return; // toObs not called — nothing to sync
 
   const hints = ctx.hints as NestedHintSpec<P> | null;
-  const prev = ctx.rawPrev ?? {};
 
-  // scalar hint: replace entire observable value at once
   if (typeof hints === "string") {
-    const val = applyHintToValue(hints, next);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (ctx.props$ as any).set(val);
+    (ctx.props$ as any).set(applyHintToValue(hints, next));
     ctx.rawPrev = { ...next } as Record<string, unknown>;
     return;
   }
 
-  // field/nested hint: collect only changed keys → assign
+  const prev = ctx.rawPrev ?? {};
   const changed: Record<string, unknown> = {};
-
   for (const key of Object.keys(next)) {
-    if (Object.is(prev[key], next[key as keyof P])) continue;
-    const fieldHint = (hints as Record<string, unknown> | null)?.[key];
-    changed[key] = applyHintToValue(
-      fieldHint as ScopeHint | Record<string, unknown> | undefined,
-      next[key as keyof P]
-    );
+    const val = next[key as keyof P];
+    if (Object.is(prev[key], val)) continue;
+    changed[key] = readField(key, val, hints);
   }
-  // removed keys → set to undefined (skip if already undefined to avoid spurious assign)
   for (const key of Object.keys(prev)) {
-    if (!(key in next) && prev[key] !== undefined) changed[key] = undefined;
+    if (!(key in next) && prev[key] !== undefined) {
+      changed[key] = undefined;
+    }
   }
-
   if (Object.keys(changed).length > 0) {
-    // assign handles beginBatch/endBatch internally — no outer batch needed
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ctx.props$ as any).assign(changed);
   }
-
   ctx.rawPrev = { ...next } as Record<string, unknown>;
 }
 
@@ -241,23 +305,11 @@ export function toObs<P extends object, H extends NestedHintSpec<P> = never>(
   hints?: H
 ): Observable<[H] extends [never] ? PropsOf<P> : ApplyHints<PropsOf<P>, H>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ctx = (p as any)[REACTIVE_PROPS_CTX] as ScopePropsCtx<P> | undefined;
-  if (!ctx) {
+  const getObs = (p as any)[REACTIVE_PROPS_GET_OBS] as GetObsFn<P> | undefined;
+  if (!getObs) {
     throw new Error("[useScope] toObs() must be called with a ReactiveProps proxy from useScope");
   }
-
-  if (!ctx.props$) {
-    // First call — create observable with hints applied to initial props
-    if (hints) ctx.hints = hints;
-    const initial = buildInitialValue(ctx.propsRef.current, ctx.hints);
-    ctx.props$ = observable(initial) as unknown as Observable<P>;
-    ctx.rawPrev = { ...ctx.propsRef.current } as Record<string, unknown>;
-  } else if (hints) {
-    // Subsequent call with new hints — update for future syncs
-    ctx.hints = hints;
-  }
-
-  return ctx.props$ as unknown as Observable<
+  return getObs(hints) as unknown as Observable<
     [H] extends [never] ? PropsOf<P> : ApplyHints<PropsOf<P>, H>
   >;
 }
