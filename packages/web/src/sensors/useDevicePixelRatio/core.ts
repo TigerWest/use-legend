@@ -1,4 +1,4 @@
-import { observable } from "@legendapp/state";
+import { observable, type Observable } from "@legendapp/state";
 import {
   createSupported,
   onMount,
@@ -26,18 +26,17 @@ export function createDevicePixelRatio(
   options?: DeepMaybeObservable<UseDevicePixelRatioOptions>
 ): UseDevicePixelRatioReturn {
   const opts$ = observable(options);
+  const win$ = resolveWindowSource(opts$.window as unknown as Observable<unknown>);
 
   const isSupported$ = createSupported(() => {
-    const win = resolveWindowSource(opts$.get()?.window as unknown);
+    const win = win$.get();
     return !!win && "matchMedia" in win;
   });
 
-  const pixelRatio$ = observable<number>(
-    resolveWindowSource(opts$.peek()?.window as unknown)?.devicePixelRatio ?? 1
-  );
+  const pixelRatio$ = observable<number>(win$.peek()?.devicePixelRatio ?? 1);
 
   onMount(() => {
-    const win = resolveWindowSource(opts$.peek()?.window as unknown);
+    const win = win$.peek();
     if (!win || !win.matchMedia) return;
 
     let cleanup: (() => void) | undefined;

@@ -1,25 +1,20 @@
 import type { Observable, OpaqueObject } from "@legendapp/state";
-import { ObservableHint } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { useConstant } from "@usels/core/shared/useConstant";
 import { resolveWindowSource } from "@shared/configurable";
 
 /**
- * Resolves an `opts$.window` field (pre-processed by the `'opaque'` hint) into
- * a reactive `Window` observable. Delegates the actual `WindowSource` → `Window`
- * resolution to the framework-agnostic `resolveWindowSource` in `configurable.ts`,
- * then re-wraps the result with `ObservableHint.opaque()` so the computed
- * observable doesn't deep-proxy the `Window`.
+ * React hook wrapper around `resolveWindowSource`. Memoizes the computed
+ * observable across renders so legacy hook-layer code (outside of `useScope`)
+ * gets a stable reference.
  *
- * Reactive — automatically recomputes when iframe mounts/unmounts.
+ * New scope-based cores should call `resolveWindowSource(opts$.window)`
+ * directly inside their `useScope` factory instead.
  *
  * @internal web package only — not exported from public API.
  */
 export function useResolvedWindow(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legend-State Observable variance
   resolved$: Observable<any>
-) {
-  return useObservable<OpaqueObject<Window> | null>(() => {
-    const win = resolveWindowSource(resolved$.get());
-    return win ? ObservableHint.opaque(win) : null;
-  });
+): Observable<OpaqueObject<Window> | null> {
+  return useConstant(() => resolveWindowSource(resolved$ as Observable<unknown>));
 }

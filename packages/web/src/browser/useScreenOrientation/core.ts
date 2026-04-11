@@ -1,4 +1,4 @@
-import { batch, observable } from "@legendapp/state";
+import { batch, observable, type Observable } from "@legendapp/state";
 import {
   createSupported,
   onMount,
@@ -44,17 +44,18 @@ export function createScreenOrientation(
   options?: DeepMaybeObservable<UseScreenOrientationOptions>
 ): UseScreenOrientationReturn {
   const opts$ = observable(options);
+  const win$ = resolveWindowSource(opts$.window as unknown as Observable<unknown>);
 
   const orientation$ = observable<OrientationType | undefined>(undefined);
   const angle$ = observable<number>(0);
 
   const isSupported$ = createSupported(() => {
-    const win = resolveWindowSource(opts$.get()?.window as unknown);
+    const win = win$.get();
     return !!win && "orientation" in win.screen;
   });
 
   onMount(() => {
-    const win = resolveWindowSource(opts$.peek()?.window as unknown);
+    const win = win$.peek();
     if (!win?.screen?.orientation) return;
     const orientation = win.screen.orientation;
 
@@ -72,7 +73,7 @@ export function createScreenOrientation(
 
   const lockOrientation = (type: OrientationLockType): Promise<void> => {
     if (!isSupported$.peek()) return Promise.reject(new Error("Not supported"));
-    const win = resolveWindowSource(opts$.peek()?.window as unknown);
+    const win = win$.peek();
     const o = win!.screen.orientation as ScreenOrientation & {
       lock: (type: OrientationLockType) => Promise<void>;
     };
@@ -81,7 +82,7 @@ export function createScreenOrientation(
 
   const unlockOrientation = (): void => {
     if (!isSupported$.peek()) return;
-    const win = resolveWindowSource(opts$.peek()?.window as unknown);
+    const win = win$.peek();
     win!.screen.orientation.unlock();
   };
 

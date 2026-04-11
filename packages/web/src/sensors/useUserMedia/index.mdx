@@ -10,25 +10,52 @@ sidebar:
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useUserMedia } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useUserMedia } from "@usels/web";
 
-function CameraFeed() {
-  const { isSupported$, stream$, enabled$, start, stop } = useUserMedia({
-    constraints: { audio: false, video: true },
-  });
+    function CameraFeed() {
+      const { isSupported$, stream$, enabled$, start, stop } = useUserMedia({
+        constraints: { audio: false, video: true },
+      });
 
-  return (
-    <div>
-      <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
-      <p>Streaming: {enabled$.get() ? "Yes" : "No"}</p>
-      <button onClick={() => start()}>Start</button>
-      <button onClick={() => stop()}>Stop</button>
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Streaming: {enabled$.get() ? "Yes" : "No"}</p>
+          <button onClick={() => start()}>Start</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createUserMedia } from "@usels/web";
+
+    function CameraFeed() {
+      "use scope";
+      const { isSupported$, stream$, enabled$, start, stop } = createUserMedia({
+        constraints: { audio: false, video: true },
+      });
+
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Streaming: {enabled$.get() ? "Yes" : "No"}</p>
+          <button onClick={() => start()}>Start</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Auto-start on mount
 
@@ -86,4 +113,4 @@ restart(); // uses updated constraints
 
 ## Notes
 
-**`options` is `DeepMaybeObservable`.** Each option field can be a plain value or an `Observable`. `constraints` are read at each `start()` / `restart()` call time. `immediate` is mount-time-only.
+**`options` is `DeepMaybeObservable`.** Each option field can be a plain value or an `Observable`. `constraints` are read at each `start()` / `restart()` call time. `immediate` is read at mount-time.

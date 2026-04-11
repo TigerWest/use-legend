@@ -10,23 +10,49 @@ sidebar:
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useSpeechSynthesis } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useSpeechSynthesis } from "@usels/web";
 
-function TextToSpeech() {
-  const { isSupported$, isPlaying$, status$, speak, stop } = useSpeechSynthesis("Hello world");
+    function TextToSpeech() {
+      const { isSupported$, isPlaying$, status$, speak, stop } = useSpeechSynthesis("Hello world");
 
-  return (
-    <div>
-      <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
-      <p>Status: {status$.get()}</p>
-      <button onClick={() => speak()}>Speak</button>
-      <button onClick={() => stop()}>Stop</button>
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Status: {status$.get()}</p>
+          <button onClick={() => speak()}>Speak</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createSpeechSynthesis } from "@usels/web";
+
+    function TextToSpeech() {
+      "use scope";
+      const { isSupported$, isPlaying$, status$, speak, stop } =
+        createSpeechSynthesis("Hello world");
+
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Status: {status$.get()}</p>
+          <button onClick={() => speak()}>Speak</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### With voice options
 

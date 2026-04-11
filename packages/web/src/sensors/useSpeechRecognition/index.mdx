@@ -10,24 +10,50 @@ sidebar:
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useSpeechRecognition } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useSpeechRecognition } from "@usels/web";
 
-function SpeechToText() {
-  const { isSupported$, isListening$, result$, start, stop } = useSpeechRecognition();
+    function SpeechToText() {
+      const { isSupported$, isListening$, result$, start, stop } = useSpeechRecognition();
 
-  return (
-    <div>
-      <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
-      <p>Listening: {isListening$.get() ? "Yes" : "No"}</p>
-      <p>Transcript: {result$.get()}</p>
-      <button onClick={() => start()}>Start</button>
-      <button onClick={() => stop()}>Stop</button>
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Listening: {isListening$.get() ? "Yes" : "No"}</p>
+          <p>Transcript: {result$.get()}</p>
+          <button onClick={() => start()}>Start</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createSpeechRecognition } from "@usels/web";
+
+    function SpeechToText() {
+      "use scope";
+      const { isSupported$, isListening$, result$, start, stop } = createSpeechRecognition();
+
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Listening: {isListening$.get() ? "Yes" : "No"}</p>
+          <p>Transcript: {result$.get()}</p>
+          <button onClick={() => start()}>Start</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### With options
 

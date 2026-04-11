@@ -1,4 +1,4 @@
-import { observable, ObservableHint } from "@legendapp/state";
+import { observable, ObservableHint, type Observable } from "@legendapp/state";
 import {
   createSupported,
   onMount,
@@ -42,6 +42,7 @@ export function createElementByPoint<M extends boolean = false>(
 ): UseElementByPointReturn<M> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const opts$ = observable(options) as any;
+  const win$ = resolveWindowSource(opts$.window as Observable<unknown>);
 
   const isSupported$ = createSupported(
     () => !!defaultDocument && "elementFromPoint" in defaultDocument
@@ -61,7 +62,7 @@ export function createElementByPoint<M extends boolean = false>(
   };
 
   onMount(() => {
-    const win = resolveWindowSource(opts$.peek()?.window as unknown);
+    const win = win$.peek();
     if (!defaultDocument || !win) return;
 
     let rafId: number | undefined;
