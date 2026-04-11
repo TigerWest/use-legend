@@ -2,25 +2,61 @@
 title: useMouseInElement
 description: "Tracks the mouse cursor position relative to a DOM element and reports whether the cursor is inside or outside it. Observes `mousemove`, `document` `mouseleave`, [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver), [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) (`style`/`class` attribute changes), and `window` `scroll`/`resize` events to keep values accurate as the element moves or resizes. All return values are reactive `Observable<number | boolean>`."
 category: Elements
+type-table:
+  import: "@usels/web"
+  name: "UseMouseInElement"
+  params:
+    children:
+      - UseMouseInElementOptions
+  returns:
+    children:
+      - UseMouseInElementReturn
 ---
 
 ## Demo
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useRef$, useMouseInElement } from "@usels/core";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$ } from "@usels/core";
+    import { useMouseInElement } from "@usels/web";
 
-function Component() {
-  const el$ = useRef$<HTMLDivElement>();
-  const { elementX$, elementY$, isOutside$ } = useMouseInElement(el$);
+    function Component() {
+      const el$ = useRef$<HTMLDivElement>();
+      const { elementX$, elementY$, isOutside$ } = useMouseInElement(el$);
 
-  return (
-    <div ref={el$}>{isOutside$.get() ? "outside" : `${elementX$.get()}, ${elementY$.get()}`}</div>
-  );
-}
-```
+      return (
+        <div ref={el$}>
+          {isOutside$.get() ? "outside" : `${elementX$.get()}, ${elementY$.get()}`}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createMouseInElement } from "@usels/web";
+
+    function Component() {
+      "use scope";
+      const el$ = createRef$<HTMLDivElement>();
+      const { elementX$, elementY$, isOutside$ } = createMouseInElement(el$);
+
+      return (
+        <div ref={el$}>
+          {isOutside$.get() ? "outside" : `${elementX$.get()}, ${elementY$.get()}`}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Disable outside tracking
 
@@ -44,7 +80,8 @@ const { elementX$, elementY$ } = useMouseInElement(el$, {
 
 ```tsx
 // @noErrors
-import { useRef$, Ref$, useMouseInElement } from "@usels/core";
+import { useRef$, Ref$ } from "@usels/core";
+import { useMouseInElement } from "@usels/web";
 declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
 const { elementX$, elementY$, stop } = useMouseInElement(el$);
@@ -59,7 +96,8 @@ The raw `clientX` / `clientY` values are also exposed as `x$` and `y$`.
 
 ```tsx
 // @noErrors
-import { useRef$, Ref$, useMouseInElement } from "@usels/core";
+import { useRef$, Ref$ } from "@usels/core";
+import { useMouseInElement } from "@usels/web";
 declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
 const { x$, y$, elementX$, elementY$ } = useMouseInElement(el$);
