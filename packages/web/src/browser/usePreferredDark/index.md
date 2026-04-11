@@ -1,7 +1,7 @@
 ---
 title: usePreferredDark
 description: "Reactive dark theme preference. Returns `Observable<boolean>` that tracks whether the user prefers a dark color scheme via the `(prefers-color-scheme: dark)` media query."
-category: browser
+category: Browser
 ---
 
 A thin wrapper around [`useMediaQuery`](/web/browser/useMediaQuery).

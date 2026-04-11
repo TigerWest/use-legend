@@ -1,7 +1,7 @@
 ---
 title: useMediaQuery
 description: "Tracks a CSS media query string as a reactive `Observable<boolean>`. Subscribes to `MediaQueryList` change events and updates automatically. SSR-safe: accepts an optional `ssrWidth` to statically evaluate `min-width`/`max-width` queries on the server."
-category: browser
+category: Browser
 ---
 
 ## Demo

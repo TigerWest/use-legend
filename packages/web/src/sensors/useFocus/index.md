@@ -1,7 +1,7 @@
 ---
 title: useFocus
 description: "Reactive utility that tracks whether a DOM element has focus, with two-way binding — read the current focus state and programmatically focus or blur the element."
-category: sensors
+category: Sensors
 sidebar:
   order: 5
 ---

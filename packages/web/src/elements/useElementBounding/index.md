@@ -1,7 +1,7 @@
 ---
 title: useElementBounding
 description: "Tracks the bounding rect of a DOM element — `x`, `y`, `top`, `right`, `bottom`, `left`, `width`, `height` — as reactive `Observable<number>` values. Uses [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver) for size changes, [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) for `style`/`class` attribute changes, and `scroll`/`resize` window events for position changes. `requestAnimationFrame` is used by default so CSS transform animations are captured accurately."
-category: elements
+category: Elements
 ---
 
 ## Demo

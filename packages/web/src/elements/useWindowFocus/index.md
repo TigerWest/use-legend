@@ -1,7 +1,7 @@
 ---
 title: useWindowFocus
 description: "Tracks whether the browser window currently has focus as a reactive `Observable<boolean>`. Updates automatically when the user switches tabs, clicks away, or returns to the window. SSR-safe: returns `false` when `document` is not available."
-category: elements
+category: Elements
 ---
 
 ## Demo

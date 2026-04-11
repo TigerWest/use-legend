@@ -1,7 +1,7 @@
 ---
 title: useWindowSize
 description: "Tracks the browser window dimensions as reactive `Observable<number>` values for width and height. Supports `inner`, `outer`, and `visual` viewport modes, and updates on resize and orientation change. SSR-safe: returns `initialWidth`/`initialHeight` (default `0`) when `window` is not available."
-category: elements
+category: Elements
 ---
 
 ## Demo

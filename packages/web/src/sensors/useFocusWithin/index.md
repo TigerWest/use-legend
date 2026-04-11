@@ -1,7 +1,7 @@
 ---
 title: useFocusWithin
 description: "Reactive utility that tracks whether focus is within a container element or any of its descendants. Works like the CSS `:focus-within` pseudo-class but as a reactive `Observable<boolean>`."
-category: sensors
+category: Sensors
 sidebar:
   order: 5
 ---

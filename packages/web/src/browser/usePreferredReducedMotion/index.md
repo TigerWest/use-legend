@@ -1,7 +1,7 @@
 ---
 title: usePreferredReducedMotion
 description: "Reactive reduced motion preference. Returns a `ReadonlyObservable` tracking the user's motion preference (`'reduce'` or `'no-preference'`) via the `prefers-reduced-motion` media query."
-category: browser
+category: Browser
 ---
 
 ## Demo
