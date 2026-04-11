@@ -1,7 +1,16 @@
 import { useRef$ } from "@usels/core";
 import { useAnimate } from "@usels/web";
+import {
+  ActionButton,
+  DemoPanel,
+  DemoShell,
+  StatCard,
+  StatusBadge,
+  demoClasses,
+} from "../../_shared";
+import { useObservable } from "@legendapp/state/react";
 
-export default function UseAnimateDemo() {
+export default function Demo() {
   const el$ = useRef$<HTMLDivElement>();
   const {
     play,
@@ -28,145 +37,64 @@ export default function UseAnimateDemo() {
     }
   );
 
+  const isRunning$ = useObservable(() => playState$.get() === "running");
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        fontFamily: "monospace",
-        fontSize: "14px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          height: "120px",
-          borderRadius: "6px",
-          overflow: "hidden",
-          border: "1px solid var(--sl-color-gray-5, #e2e8f0)",
-          background: "var(--sl-color-gray-6, #f1f5f9)",
-        }}
+    <DemoShell eyebrow="Browser">
+      <DemoPanel
+        title="Web Animations API"
+        description="Reactive wrapper around element.animate() with play / pause / reverse controls."
+        aside={
+          <StatusBadge
+            label={playState$.get() ?? "idle"}
+            tone={isRunning$.get() ? "green" : "neutral"}
+          />
+        }
       >
-        <div
-          ref={el$}
-          style={{
-            width: "100%",
-            height: "100%",
-            background:
-              "linear-gradient(135deg, var(--sl-color-accent, #6366f1), var(--sl-color-blue, #3b82f6))",
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-          padding: "10px 14px",
-          borderRadius: "6px",
-          border: "1px solid var(--sl-color-gray-5, #e2e8f0)",
-          background: "var(--sl-color-gray-6, #f1f5f9)",
-        }}
-      >
-        <div>
-          <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>playState: </span>
-          <span style={{ color: "var(--sl-color-white, #1e293b)" }}>{playState$.get()}</span>
+        <div className="relative h-30 w-full overflow-hidden rounded-2xl border border-(--sl-color-hairline-light) bg-(--sl-color-gray-6)">
+          <div
+            ref={el$}
+            className="h-full w-full"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--sl-color-accent), var(--sl-color-blue, #3b82f6))",
+            }}
+          />
         </div>
-        <div>
-          <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>currentTime: </span>
-          <span style={{ color: "var(--sl-color-white, #1e293b)" }}>
-            {currentTime$.get() != null ? `${Number(currentTime$.get()).toFixed(0)}ms` : "null"}
-          </span>
+
+        <div className={demoClasses.statsGrid}>
+          <StatCard label="playState" value={playState$.get() ?? "—"} tone="accent" />
+          <StatCard
+            label="currentTime"
+            value={currentTime$.get() != null ? `${Number(currentTime$.get()).toFixed(0)}ms` : "—"}
+            tone="accent"
+          />
+          <StatCard label="playbackRate" value={`${playbackRate$.get()}x`} tone="accent" />
+          <StatCard
+            label="pending"
+            value={String(pending$.get())}
+            tone={pending$.get() ? "orange" : "neutral"}
+          />
         </div>
-        <div>
-          <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>playbackRate: </span>
-          <span style={{ color: "var(--sl-color-white, #1e293b)" }}>{playbackRate$.get()}</span>
+
+        <div className={demoClasses.actionRow}>
+          <ActionButton
+            onClick={isRunning$.get() ? pause : play}
+            tone={isRunning$.get() ? "orange" : "green"}
+          >
+            {isRunning$.get() ? "Pause" : "Play"}
+          </ActionButton>
+          <ActionButton onClick={reverse} tone="neutral">
+            Reverse
+          </ActionButton>
+          <ActionButton onClick={finish} tone="neutral">
+            Finish
+          </ActionButton>
+          <ActionButton onClick={cancel} tone="neutral">
+            Cancel
+          </ActionButton>
         </div>
-        <div>
-          <span style={{ color: "var(--sl-color-gray-3, #94a3b8)" }}>pending: </span>
-          <span style={{ color: "var(--sl-color-white, #1e293b)" }}>{String(pending$.get())}</span>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        <button
-          type="button"
-          onClick={playState$.get() === "running" ? pause : play}
-          style={{
-            padding: "6px 16px",
-            borderRadius: "6px",
-            border: `1px solid ${playState$.get() === "running" ? "var(--sl-color-orange, #f97316)" : "var(--sl-color-green, #22c55e)"}`,
-            background:
-              playState$.get() === "running"
-                ? "var(--sl-color-orange-low, #fff7ed)"
-                : "var(--sl-color-green-low, #f0fdf4)",
-            color:
-              playState$.get() === "running"
-                ? "var(--sl-color-orange, #f97316)"
-                : "var(--sl-color-green, #22c55e)",
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
-        >
-          {playState$.get() === "running" ? "Pause" : "Play"}
-        </button>
-
-        <button
-          type="button"
-          onClick={reverse}
-          style={{
-            padding: "6px 16px",
-            margin: 0,
-            borderRadius: "6px",
-            border: "1px solid var(--sl-color-accent, #6366f1)",
-            background: "transparent",
-            color: "var(--sl-color-accent, #6366f1)",
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
-        >
-          Reverse
-        </button>
-
-        <button
-          type="button"
-          onClick={finish}
-          style={{
-            padding: "6px 16px",
-            margin: 0,
-            borderRadius: "6px",
-            border: "1px solid var(--sl-color-blue, #3b82f6)",
-            background: "transparent",
-            color: "var(--sl-color-blue, #3b82f6)",
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
-        >
-          Finish
-        </button>
-
-        <button
-          type="button"
-          onClick={cancel}
-          style={{
-            padding: "6px 16px",
-            margin: 0,
-            borderRadius: "6px",
-            border: "1px solid var(--sl-color-red, #ef4444)",
-            background: "transparent",
-            color: "var(--sl-color-red, #ef4444)",
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
+      </DemoPanel>
+    </DemoShell>
   );
 }

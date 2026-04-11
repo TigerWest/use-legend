@@ -218,20 +218,6 @@ const [useAppStore] = createStore("app", () => {
 // app/toggleTheme → { theme$: "dark" }
 ```
 
-### `createStore` (deprecated)
-
-`createStore` is preserved as a deprecated backward-compatible wrapper that returns a single hook function instead of a tuple.
-
-```tsx
-import { createStore } from "@usels/core";
-
-// @deprecated — use createStore() instead
-const useCountStore = createStore("count", () => {
-  const count$ = observable(0);
-  return { count$ };
-});
-```
-
 ## StoreProvider
 
 `StoreProvider` is required. It isolates stores per provider instance for SSR safety.

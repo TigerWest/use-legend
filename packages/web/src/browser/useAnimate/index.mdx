@@ -1,0 +1,208 @@
+---
+title: useAnimate
+description: "Reactive [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) wrapper. Drives `element.animate()` with Observable-based reactive state for `playState`, `currentTime`, `playbackRate`, and `pending`."
+category: Browser
+type-table:
+  import: "@usels/web"
+  name: "UseAnimate"
+  params:
+    children:
+      - UseAnimateOptions
+  returns:
+    children:
+      - UseAnimateReturn
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$ } from "@usels/core";
+    import { useAnimate } from "@usels/web";
+
+    function Component() {
+      const el$ = useRef$<HTMLSpanElement>();
+      const { playState$, play, pause } = useAnimate(
+        el$,
+        { transform: "rotate(360deg)" },
+        1000
+      );
+
+      return (
+        <div>
+          <span ref={el$} style={{ display: "inline-block" }}>useAnimate</span>
+          <p>{playState$.get()}</p>
+          <button onClick={play}>Play</button>
+          <button onClick={pause}>Pause</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createAnimate } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const el$ = createRef$<HTMLSpanElement>();
+      const { playState$, play, pause } = createAnimate(
+        el$,
+        { transform: "rotate(360deg)" },
+        1000
+      );
+
+      return (
+        <div>
+          <span ref={el$} style={{ display: "inline-block" }}>useAnimate</span>
+          <p>{playState$.get()}</p>
+          <button onClick={play}>Play</button>
+          <button onClick={pause}>Pause</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Custom Keyframes
+
+Array, object, or Observable keyframes are all supported.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useRef$ } from "@usels/core";
+    import { useAnimate } from "@usels/web";
+    import { useObservable } from "@legendapp/state/react";
+
+    function Component() {
+      const el$ = useRef$<HTMLDivElement>();
+
+      // Object form (PropertyIndexedKeyframes)
+      useAnimate(el$, { transform: "rotate(360deg)" }, 1000);
+
+      // Array form
+      useAnimate(el$, [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], 1000);
+
+      // Observable — effect updates when value changes
+      const keyframes$ = useObservable([
+        { clipPath: "circle(20% at 0% 30%)" },
+        { clipPath: "circle(20% at 50% 80%)" },
+      ]);
+      useAnimate(el$, keyframes$, 1000);
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+    import { createRef$ } from "@usels/core";
+    import { createAnimate } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+
+      // Object form (PropertyIndexedKeyframes)
+      createAnimate(el$, { transform: "rotate(360deg)" }, 1000);
+
+      // Array form
+      createAnimate(el$, [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], 1000);
+
+      // Observable — effect updates when value changes
+      const keyframes$ = observable([
+        { clipPath: "circle(20% at 0% 30%)" },
+        { clipPath: "circle(20% at 50% 80%)" },
+      ]);
+      createAnimate(el$, keyframes$, 1000);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Options
+
+Pass a number as duration shorthand, or an options object with full configuration.
+
+```typescript
+useAnimate(el$, keyframes, {
+  duration: 1000,
+  immediate: true, // auto-play on mount (default: true)
+  commitStyles: false, // commit styles on finish (default: false)
+  persist: false, // persist animation (default: false)
+  onReady(animate) {
+    console.log("ready", animate);
+  },
+  onError(e) {
+    console.error(e);
+  },
+});
+```
+
+### Delaying Start
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useRef$ } from "@usels/core";
+    import { useAnimate } from "@usels/web";
+
+    function Component() {
+      const el$ = useRef$<HTMLDivElement>();
+      const { play } = useAnimate(
+        el$,
+        { opacity: [0, 1] },
+        {
+          duration: 1000,
+          immediate: false,
+        }
+      );
+
+      return (
+        <>
+          <div ref={el$} />
+          <button onClick={play}>Start Animation</button>
+        </>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createAnimate } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+      const { play } = createAnimate(
+        el$,
+        { opacity: [0, 1] },
+        {
+          duration: 1000,
+          immediate: false,
+        }
+      );
+
+      return (
+        <>
+          <div ref={el$} />
+          <button onClick={play}>Start Animation</button>
+        </>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

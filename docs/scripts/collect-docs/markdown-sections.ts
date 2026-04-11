@@ -22,12 +22,23 @@ export function buildAutoSections(meta: {
   return sections.join('\n\n')
 }
 
-/** Escape a string for use inside a markdown table cell (plain text, not code) */
+/** Escape a string for use inside a markdown table cell (plain text, not code).
+ *  MDX does not parse JSX inside inline code spans (`…`), so we only escape
+ *  MDX-significant characters in the plain-text segments between backticks.
+ */
 function escapeCell(value: string): string {
-  return value
+  // Split on backticks: even indices are plain text, odd indices are inline code spans
+  const parts = value.split('`')
+  for (let i = 0; i < parts.length; i += 2) {
+    parts[i] = parts[i]
+      .replace(/</g, '&lt;')      // MDX parses <T> as JSX — only < needs escaping, not >
+      .replace(/\{/g, '&#123;')   // MDX parses {expr} as JSX expression — acorn fails on things like { a: 1, b: 2 }
+      .replace(/\}/g, '&#125;')
+  }
+  return parts
+    .join('`')
     .replace(/\n/g, ' ')          // newlines break table rows
     .replace(/\|/g, '\\|')        // pipes break table columns
-    .replace(/</g, '&lt;')        // MDX parses <T> as JSX — only < needs escaping, not >
 }
 
 /** Escape a string for use inside backtick code spans in table cells */
