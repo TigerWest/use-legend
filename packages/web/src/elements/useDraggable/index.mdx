@@ -1,7 +1,16 @@
 ---
 title: useDraggable
-description: "Makes any element draggable using Pointer Events. Returns Observable values for position (`x, `y), drag state (`isDragging), and a ready-to-use CSS style string (`style)."
+description: "Makes any element draggable using Pointer Events. Returns Observable values for position (`x$`, `y$`), drag state (`isDragging$`), and a ready-to-use CSS style string (`style$`)."
 category: Elements
+type-table:
+  import: "@usels/web"
+  name: "UseDraggable"
+  params:
+    children:
+      - UseDraggableOptions
+  returns:
+    children:
+      - UseDraggableReturn
 ---
 
 ## Demo
@@ -10,21 +19,46 @@ category: Elements
 
 ### Basic drag
 
-```tsx twoslash
-// @noErrors
-import { useRef$, useDraggable } from "@usels/core";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$ } from "@usels/core";
+    import { useDraggable } from "@usels/web";
 
-function DraggableBox() {
-  const el$ = useRef$<HTMLDivElement>();
-  const { x$, y$ } = useDraggable(el$);
+    function DraggableBox() {
+      const el$ = useRef$<HTMLDivElement>();
+      const { x$, y$ } = useDraggable(el$);
 
-  return (
-    <div ref={el$} style={{ position: "fixed", left: `${x$.get()}px`, top: `${y$.get()}px` }}>
-      Drag me
-    </div>
-  );
-}
-```
+      return (
+        <div ref={el$} style={{ position: "fixed", left: `${x$.get()}px`, top: `${y$.get()}px` }}>
+          Drag me
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createDraggable } from "@usels/web";
+
+    function DraggableBox() {
+      "use scope";
+      const el$ = createRef$<HTMLDivElement>();
+      const { x$, y$ } = createDraggable(el$);
+
+      return (
+        <div ref={el$} style={{ position: "fixed", left: `${x$.get()}px`, top: `${y$.get()}px` }}>
+          Drag me
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Axis restriction
 
@@ -41,7 +75,8 @@ Attach drag to a specific handle element instead of the whole target.
 
 ```tsx
 // @noErrors
-import { useRef$, useDraggable } from "@usels/core";
+import { useRef$ } from "@usels/core";
+import { useDraggable } from "@usels/web";
 
 function WithHandle() {
   const el$ = useRef$<HTMLDivElement>();

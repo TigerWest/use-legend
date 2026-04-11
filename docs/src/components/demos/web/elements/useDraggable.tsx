@@ -11,31 +11,50 @@ export default function Demo() {
 
   const disabled$ = useObservable(false);
 
-  const drag1 = useDraggable(el1$, { preventDefault: true, initialValue: { x: 20, y: 20 } });
-  const drag2 = useDraggable(el2$, {
+  // Destructure each drag result into `$`-suffixed locals so the auto-wrap
+  // babel plugin detects the observable reads inside JSX and sets up the
+  // fine-grained reactivity boundaries.
+  const {
+    x$: x1$,
+    y$: y1$,
+    isDragging$: isDragging1$,
+  } = useDraggable(el1$, { preventDefault: true, initialValue: { x: 20, y: 20 } });
+  const {
+    x$: x2$,
+    y$: y2$,
+    isDragging$: isDragging2$,
+  } = useDraggable(el2$, {
     preventDefault: true,
     axis: "x",
     initialValue: { x: 20, y: 120 },
   });
-  const drag3 = useDraggable(el3$, {
+  const {
+    x$: x3$,
+    y$: y3$,
+    isDragging$: isDragging3$,
+  } = useDraggable(el3$, {
     preventDefault: true,
     axis: "y",
     initialValue: { x: 130, y: 120 },
   });
-  const drag4 = useDraggable(el4$, {
+  const {
+    x$: x4$,
+    y$: y4$,
+    isDragging$: isDragging4$,
+  } = useDraggable(el4$, {
     preventDefault: true,
     disabled: disabled$,
     initialValue: { x: 240, y: 120 },
   });
 
   const draggingLabel$ = useObservable(() =>
-    drag1.isDragging$.get()
+    isDragging1$.get()
       ? "Basic"
-      : drag2.isDragging$.get()
+      : isDragging2$.get()
         ? "X only"
-        : drag3.isDragging$.get()
+        : isDragging3$.get()
           ? "Y only"
-          : drag4.isDragging$.get()
+          : isDragging4$.get()
             ? "Disabled toggle"
             : null
   );
@@ -64,20 +83,20 @@ export default function Demo() {
             ref={el1$}
             style={{
               position: "absolute",
-              left: drag1.x$.get(),
-              top: drag1.y$.get(),
+              left: x1$.get(),
+              top: y1$.get(),
               width: 80,
               height: 80,
-              background: drag1.isDragging$.get() ? "#4338ca" : "#6366f1",
+              background: isDragging1$.get() ? "#4338ca" : "#6366f1",
               borderRadius: 8,
-              cursor: drag1.isDragging$.get() ? "grabbing" : "grab",
+              cursor: isDragging1$.get() ? "grabbing" : "grab",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#fff",
               userSelect: "none",
               touchAction: "none",
-              opacity: drag1.isDragging$.get() ? 0.85 : 1,
+              opacity: isDragging1$.get() ? 0.85 : 1,
               fontSize: 11,
               fontWeight: 600,
             }}
@@ -88,20 +107,20 @@ export default function Demo() {
             ref={el2$}
             style={{
               position: "absolute",
-              left: drag2.x$.get(),
-              top: drag2.y$.get(),
+              left: x2$.get(),
+              top: y2$.get(),
               width: 80,
               height: 80,
-              background: drag2.isDragging$.get() ? "#059669" : "#10b981",
+              background: isDragging2$.get() ? "#059669" : "#10b981",
               borderRadius: 8,
-              cursor: drag2.isDragging$.get() ? "grabbing" : "grab",
+              cursor: isDragging2$.get() ? "grabbing" : "grab",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#fff",
               userSelect: "none",
               touchAction: "none",
-              opacity: drag2.isDragging$.get() ? 0.85 : 1,
+              opacity: isDragging2$.get() ? 0.85 : 1,
               fontSize: 11,
               fontWeight: 600,
             }}
@@ -112,20 +131,20 @@ export default function Demo() {
             ref={el3$}
             style={{
               position: "absolute",
-              left: drag3.x$.get(),
-              top: drag3.y$.get(),
+              left: x3$.get(),
+              top: y3$.get(),
               width: 80,
               height: 80,
-              background: drag3.isDragging$.get() ? "#d97706" : "#f59e0b",
+              background: isDragging3$.get() ? "#d97706" : "#f59e0b",
               borderRadius: 8,
-              cursor: drag3.isDragging$.get() ? "grabbing" : "grab",
+              cursor: isDragging3$.get() ? "grabbing" : "grab",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#fff",
               userSelect: "none",
               touchAction: "none",
-              opacity: drag3.isDragging$.get() ? 0.85 : 1,
+              opacity: isDragging3$.get() ? 0.85 : 1,
               fontSize: 11,
               fontWeight: 600,
             }}
@@ -136,19 +155,19 @@ export default function Demo() {
             ref={el4$}
             style={{
               position: "absolute",
-              left: drag4.x$.get(),
-              top: drag4.y$.get(),
+              left: x4$.get(),
+              top: y4$.get(),
               width: 80,
               height: 80,
               background: disabled$.get()
                 ? "#9ca3af"
-                : drag4.isDragging$.get()
+                : isDragging4$.get()
                   ? "#be123c"
                   : "#f43f5e",
               borderRadius: 8,
               cursor: disabled$.get()
                 ? "not-allowed"
-                : drag4.isDragging$.get()
+                : isDragging4$.get()
                   ? "grabbing"
                   : "grab",
               display: "flex",
@@ -157,7 +176,7 @@ export default function Demo() {
               color: "#fff",
               userSelect: "none",
               touchAction: "none",
-              opacity: disabled$.get() ? 0.5 : drag4.isDragging$.get() ? 0.85 : 1,
+              opacity: disabled$.get() ? 0.5 : isDragging4$.get() ? 0.85 : 1,
               fontSize: 11,
               fontWeight: 600,
             }}
