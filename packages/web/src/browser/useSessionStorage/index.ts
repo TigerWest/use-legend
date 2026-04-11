@@ -1,12 +1,13 @@
 "use client";
 
-import type { Observable } from "@legendapp/state";
-import { ObservablePersistSessionStorage } from "@legendapp/state/persist-plugins/local-storage";
-import { useStorage } from "@usels/core";
+import { useScope } from "@usels/core";
+import { createSessionStorage } from "./core";
+
+export { createSessionStorage } from "./core";
 
 /**
- * Reactive `sessionStorage` binding. Thin wrapper around `useStorage`
- * with `ObservablePersistSessionStorage` as the persist plugin.
+ * Reactive `sessionStorage` binding. Thin wrapper around `createSessionStorage`
+ * scoped to the component lifecycle via `useScope`.
  *
  * @param key - Storage key.
  * @param defaults - Initial value and type inference source.
@@ -18,13 +19,7 @@ import { useStorage } from "@usels/core";
  * step$.set(2); // persisted to sessionStorage for this tab
  * ```
  */
-export function useSessionStorage<T>(key: string, defaults: T): Observable<T>;
-
-export function useSessionStorage(
-  key: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  defaults: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Observable<any> {
-  return useStorage(key, defaults, { plugin: ObservablePersistSessionStorage }).data$;
-}
+export type UseSessionStorage = typeof createSessionStorage;
+export const useSessionStorage: UseSessionStorage = (key, defaults) => {
+  return useScope(() => createSessionStorage(key, defaults));
+};

@@ -1,73 +1,60 @@
 import { useSessionStorage } from "@usels/web";
+import {
+  ActionButton,
+  DemoPanel,
+  DemoShell,
+  StatCard,
+  StatusBadge,
+  ValueToken,
+  demoClasses,
+} from "../../_shared";
 
-const row: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "10px",
-  padding: "8px 14px",
-  borderRadius: "6px",
-  border: "1px solid var(--sl-color-gray-5, #e2e8f0)",
-  background: "var(--sl-color-gray-6, #f8fafc)",
-};
+const TOTAL_STEPS = 5;
 
-const label: React.CSSProperties = {
-  color: "var(--sl-color-gray-3, #64748b)",
-  fontSize: "12px",
-};
-
-const value: React.CSSProperties = {
-  fontFamily: "monospace",
-  fontSize: "13px",
-  fontWeight: "bold",
-  color: "var(--sl-color-text, #0f172a)",
-};
-
-const btn: React.CSSProperties = {
-  padding: "6px 16px",
-  borderRadius: "6px",
-  border: "1px solid var(--sl-color-accent, #6366f1)",
-  background: "transparent",
-  color: "var(--sl-color-accent, #6366f1)",
-  cursor: "pointer",
-  fontFamily: "monospace",
-};
-
-export default function UseSessionStorageDemo() {
-  const step$ = useSessionStorage("demo-step", 1);
+export default function Demo() {
+  const step$ = useSessionStorage("demo-wizard-step", 1);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-        fontFamily: "monospace",
-        fontSize: "13px",
-      }}
-    >
-      <div style={row}>
-        <span style={label}>wizard step</span>
-        <span style={value}>{step$.get()} / 5</span>
-      </div>
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button type="button" style={btn} onClick={() => step$.set(Math.max(1, step$.get() - 1))}>
-          Back
-        </button>
-        <button type="button" style={btn} onClick={() => step$.set(Math.min(5, step$.get() + 1))}>
-          Next
-        </button>
-        <button
-          type="button"
-          style={{
-            ...btn,
-            borderColor: "var(--sl-color-red, #ef4444)",
-            color: "var(--sl-color-red, #ef4444)",
-          }}
-          onClick={() => step$.set(1)}
-        >
-          Reset
-        </button>
-      </div>
-    </div>
+    <DemoShell eyebrow="Browser">
+      <DemoPanel
+        title="useSessionStorage"
+        description="Persisted only for this browser session. Closes with the tab, survives reloads."
+        aside={<StatusBadge label="Session" tone="orange" />}
+      >
+        <div className="flex flex-wrap items-center gap-2.5">
+          <StatCard label="Key" value={<ValueToken>demo-wizard-step</ValueToken>} />
+          <StatCard
+            label="Step"
+            value={
+              <ValueToken>
+                {step$.get()} / {TOTAL_STEPS}
+              </ValueToken>
+            }
+            tone="accent"
+          />
+        </div>
+        <div className={demoClasses.actionRow}>
+          <ActionButton
+            onClick={() => step$.set(Math.max(1, step$.get() - 1))}
+            disabled={step$.get() <= 1}
+            tone="neutral"
+            grow
+          >
+            Back
+          </ActionButton>
+          <ActionButton
+            onClick={() => step$.set(Math.min(TOTAL_STEPS, step$.get() + 1))}
+            disabled={step$.get() >= TOTAL_STEPS}
+            tone="accent"
+            grow
+          >
+            Next
+          </ActionButton>
+          <ActionButton onClick={() => step$.set(1)} tone="neutral" grow>
+            Reset
+          </ActionButton>
+        </div>
+      </DemoPanel>
+    </DemoShell>
   );
 }

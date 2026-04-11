@@ -1,12 +1,13 @@
 "use client";
 
-import type { Observable } from "@legendapp/state";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
-import { useStorage } from "@usels/core";
+import { useScope } from "@usels/core";
+import { createLocalStorage } from "./core";
+
+export { createLocalStorage } from "./core";
 
 /**
- * Reactive `localStorage` binding. Thin wrapper around `useStorage`
- * with `ObservablePersistLocalStorage` as the persist plugin.
+ * Reactive `localStorage` binding. Thin wrapper around `createLocalStorage`
+ * scoped to the component lifecycle via `useScope`.
  *
  * @param key - Storage key.
  * @param defaults - Initial value and type inference source.
@@ -18,13 +19,7 @@ import { useStorage } from "@usels/core";
  * name$.set('Alice'); // persisted to localStorage
  * ```
  */
-export function useLocalStorage<T>(key: string, defaults: T): Observable<T>;
-
-export function useLocalStorage(
-  key: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  defaults: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Observable<any> {
-  return useStorage(key, defaults, { plugin: ObservablePersistLocalStorage }).data$;
-}
+export type UseLocalStorage = typeof createLocalStorage;
+export const useLocalStorage: UseLocalStorage = (key, defaults) => {
+  return useScope(() => createLocalStorage(key, defaults));
+};

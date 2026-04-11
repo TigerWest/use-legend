@@ -1,0 +1,68 @@
+---
+title: useLocalStorage
+description: "Reactive `localStorage` binding. Thin wrapper around `createStorage` with `ObservablePersistLocalStorage` as the persist plugin."
+category: browser
+---
+
+See [useStorage](/core/sync/usestorage) and [Legend-State persist & sync](https://legendapp.com/open-source/state/v3/sync/persist-sync/) for advanced usage.
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useLocalStorage } from "@usels/web";
+
+    function Component() {
+      const count$ = useLocalStorage("count", 0);
+
+      return (
+        <button onClick={() => count$.set(count$.get() + 1)}>Count: {count$.get()}</button>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createLocalStorage } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const count$ = createLocalStorage("count", 0);
+
+      return (
+        <button onClick={() => count$.set(count$.get() + 1)}>Count: {count$.get()}</button>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Persisting object values
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    const profile$ = useLocalStorage("profile", { name: "", age: 0 });
+
+    profile$.name.set("Alice");
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    function Component() {
+      "use scope"
+      const profile$ = createLocalStorage("profile", { name: "", age: 0 });
+
+      profile$.name.set("Alice");
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
