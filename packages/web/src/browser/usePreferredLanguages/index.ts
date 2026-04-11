@@ -1,36 +1,17 @@
 "use client";
-import type { ReadonlyObservable } from "@usels/core";
-import { useMaybeObservable } from "@usels/core";
-import { useObservable, useMount } from "@legendapp/state/react";
-import { useEventListener } from "@browser/useEventListener";
-import { type ConfigurableWindow, defaultNavigator } from "@shared/configurable";
-import { useResolvedWindow } from "../../internal/useResolvedWindow";
+import { useScope, toObs } from "@usels/core";
+import { createPreferredLanguages } from "./core";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface UsePreferredLanguagesOptions extends ConfigurableWindow {}
+export { createPreferredLanguages } from "./core";
+export type { UsePreferredLanguagesOptions, UsePreferredLanguagesReturn } from "./core";
 
-export type UsePreferredLanguagesReturn = ReadonlyObservable<readonly string[]>;
-
-/*@__NO_SIDE_EFFECTS__*/
-export function usePreferredLanguages(
-  options?: UsePreferredLanguagesOptions
-): UsePreferredLanguagesReturn {
-  const opts$ = useMaybeObservable<UsePreferredLanguagesOptions>(options, { window: "element" });
-  const window$ = useResolvedWindow(opts$.window);
-  const languages$ = useObservable<readonly string[]>([]);
-
-  useMount(() => {
-    languages$.set(defaultNavigator?.languages ?? ["en"]);
-  });
-
-  useEventListener(
-    window$,
-    "languagechange",
-    () => {
-      languages$.set(defaultNavigator?.languages ?? ["en"]);
+export type UsePreferredLanguages = typeof createPreferredLanguages;
+export const usePreferredLanguages: UsePreferredLanguages = (options = {}) => {
+  return useScope(
+    (opts) => {
+      const opts$ = toObs(opts, { window: "opaque" });
+      return createPreferredLanguages(opts$);
     },
-    { passive: true }
+    options as Record<string, unknown>
   );
-
-  return languages$;
-}
+};

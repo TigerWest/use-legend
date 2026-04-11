@@ -1,0 +1,44 @@
+---
+title: usePreferredLanguages
+description: "Reactive browser languages. Returns a `ReadonlyObservable<readonly string[]>` tracking the user's preferred languages via `navigator.languages`, updating on the `languagechange` event."
+category: Browser
+type-table:
+  import: "@usels/web"
+  name: "UsePreferredLanguages"
+  params:
+    children:
+      - UsePreferredLanguagesOptions
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { usePreferredLanguages } from "@usels/web";
+
+    function Component() {
+      const languages$ = usePreferredLanguages();
+
+      return <p>Languages: {languages$.get().join(", ")}</p>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createPreferredLanguages } from "@usels/web";
+
+    function Component() {
+      "use scope";
+      const languages$ = createPreferredLanguages();
+
+      return <p>Languages: {languages$.get().join(", ")}</p>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
