@@ -1,85 +1,17 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import { useObservable, useObserveEffect } from "@legendapp/state/react";
-import { useMaybeObservable, type DeepMaybeObservable } from "@usels/core";
-import type { MaybeEventTarget } from "../../types";
-import { useIntersectionObserver } from "@elements/useIntersectionObserver";
-import type { UseIntersectionObserverOptions } from "@elements/useIntersectionObserver";
-import { normalizeTargets } from "@shared/normalizeTargets";
+import { useScope, toObs } from "@usels/core";
+import { createElementVisibility } from "./core";
 
-export interface UseElementVisibilityOptions {
-  /** Initial visibility value. Default: false */
-  initialValue?: boolean;
-  /** Element used as the viewport for intersection. Maps to IntersectionObserver `root`. */
-  scrollTarget?: MaybeEventTarget;
-  /** Margin around the root. Accepts CSS-style values. Default: "0px" */
-  rootMargin?: string;
-  /** Threshold(s) at which to trigger. Default: 0 */
-  threshold?: number | number[];
-  /**
-   * Stop observing after the element becomes visible for the first time. Default: false.
-   * Must be set at mount time; changing dynamically has no effect.
-   */
-  once?: boolean;
-}
+export { createElementVisibility } from "./core";
+export type { UseElementVisibilityOptions } from "./core";
 
-/**
- * Tracks whether a DOM element is visible within the viewport (or a specified scroll container).
- * Returns a reactive `Observable<boolean>` that updates automatically as visibility changes.
- *
- * `options` accepts a `DeepMaybeObservable<UseElementVisibilityOptions>`:
- * - A plain object with per-field values
- * - A plain object with per-field `Observable<T>` values
- * - The entire options object wrapped in `Observable<UseElementVisibilityOptions>`
- *
- * @param element - The element to observe
- * @param options - Optional configuration — plain, per-field Observable, or fully Observable
- * @returns `Observable<boolean>` — true when element is intersecting
- *
- * @example
- * ```tsx
- * const el$ = useRef$<HTMLDivElement>();
- * const isVisible$ = useElementVisibility(el$);
- * return <div ref={el$} />;
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function useElementVisibility(
-  element: MaybeEventTarget,
-  options?: DeepMaybeObservable<UseElementVisibilityOptions>
-): Observable<boolean> {
-  const opts$ = useMaybeObservable<UseElementVisibilityOptions>(options, {
-    scrollTarget: "element",
-  });
-
-  const isVisible$ = useObservable<boolean>(opts$.initialValue.peek() ?? false);
-
-  const { stop } = useIntersectionObserver(
-    element,
-    (entries) => {
-      if (entries.length === 0) return;
-      const latest = entries.reduce((a, b) => (a.time > b.time ? a : b));
-      isVisible$.set(latest.isIntersecting);
-
-      if (opts$.once.peek() && latest.isIntersecting) {
-        // eslint-disable-next-line react-hooks/immutability -- React Compiler false positive: stop() is initialized at runtime before this callback can fire
-        stop();
-      }
+export type UseElementVisibility = typeof createElementVisibility;
+export const useElementVisibility: UseElementVisibility = (element, options = {}) => {
+  return useScope(
+    (opts) => {
+      const opts$ = toObs(opts, { scrollTarget: "opaque" });
+      return createElementVisibility(element, opts$);
     },
-    {
-      root: opts$.scrollTarget,
-      rootMargin: opts$.rootMargin,
-      threshold: opts$.threshold,
-    } as DeepMaybeObservable<UseIntersectionObserverOptions>
+    options as Record<string, unknown>
   );
-
-  // Reset visibility when target element is removed
-  useObserveEffect(() => {
-    const targets = normalizeTargets(element);
-    if (!targets.length) {
-      isVisible$.set(opts$.initialValue.peek() ?? false);
-    }
-  });
-
-  return isVisible$;
-}
+};

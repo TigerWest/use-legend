@@ -200,7 +200,7 @@ describe("useElementVisibility — reactivity comparison", () => {
     expect(capturedInit?.rootMargin).toBe("20px");
   });
 
-  it("outer Observable options$.rootMargin child-field set → known Legend-State limitation (0×, not reactive)", () => {
+  it("outer Observable options$.rootMargin child-field set → IO recreated (scope pattern propagates child-field mutations)", () => {
     const el = document.createElement("div");
     const options$ = observable({ rootMargin: "0px" });
 
@@ -214,14 +214,17 @@ describe("useElementVisibility — reactivity comparison", () => {
       options$.rootMargin.set("20px");
     });
 
-    // KNOWN LIMITATION: options$.rootMargin.set("20px") is a child-field mutation.
-    // options$.get() inside useObservable's compute fn does reference-equality tracking —
-    // the parent options$ object reference is unchanged, so the dep does NOT fire.
-    // opts_EV$ does NOT recompute → opts_EV$.rootMargin stays "0px" → 0× IO recreation.
+    // Scope-based pattern: the hook wrapper's `toObs` iterates the outer Observable
+    // fields and subscribes to each child observable via `onChange`, so
+    // `options$.rootMargin.set("20px")` propagates into the internal `props$`,
+    // through the linked `opts$` in the core, into the computed `ioOpts$`,
+    // and finally to `createIntersectionObserver`'s observe — which recreates
+    // the IntersectionObserver with the new rootMargin.
     //
-    // Workaround: use options$.set({ rootMargin: "20px" }) (whole-object replace)
-    // OR pass rootMargin as a per-field Observable: { rootMargin: observable("0px") }.
-    expect(MockIntersectionObserver).toHaveBeenCalledTimes(0);
+    // This is a behavior improvement over the legacy `useMaybeObservable`
+    // implementation which ignored child-field mutations on outer Observables.
+    expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
+    expect(capturedInit?.rootMargin).toBe("20px");
   });
 });
 

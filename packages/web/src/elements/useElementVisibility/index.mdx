@@ -1,0 +1,162 @@
+---
+title: useElementVisibility
+description: "Tracks whether a DOM element is visible within the viewport (or a specified scroll container). Returns a reactive `Observable<boolean>` that updates automatically via the [IntersectionObserver API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)."
+category: Elements
+type-table:
+  import: "@usels/web"
+  name: "UseElementVisibility"
+  children:
+    - UseElementVisibilityOptions
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$ } from "@usels/core";
+    import { useElementVisibility } from "@usels/web";
+
+    function Component() {
+      const el$ = useRef$<HTMLDivElement>();
+      const isVisible$ = useElementVisibility(el$);
+
+      return <div ref={el$} />;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createElementVisibility } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+      const isVisible$ = createElementVisibility(el$);
+
+      return <div ref={el$} />;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With initial value
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    const isVisible$ = useElementVisibility(el$, { initialValue: true });
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    const isVisible$ = createElementVisibility(el$, { initialValue: true });
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Stop after first visible
+
+Use `once: true` to automatically stop observing after the element becomes visible for the first time:
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    const isVisible$ = useElementVisibility(el$, { once: true });
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    const isVisible$ = createElementVisibility(el$, { once: true });
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Custom scroll container
+
+Pass a `scrollTarget` to observe intersection within a scrollable container instead of the viewport:
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    const container$ = useRef$<HTMLDivElement>();
+    const isVisible$ = useElementVisibility(el$, { scrollTarget: container$ });
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    const container$ = createRef$<HTMLDivElement>();
+    const isVisible$ = createElementVisibility(el$, { scrollTarget: container$ });
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Threshold and rootMargin
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    const isVisible$ = useElementVisibility(el$, {
+      threshold: 0.5,
+      rootMargin: "0px 0px -100px 0px",
+    });
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    const isVisible$ = createElementVisibility(el$, {
+      threshold: 0.5,
+      rootMargin: "0px 0px -100px 0px",
+    });
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Reactive options
+
+All options accept `Observable<T>` for reactive control:
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { observable } from "@legendapp/state";
+
+    const threshold$ = observable<number | number[]>(0.5);
+    const rootMargin$ = observable("0px");
+
+    const isVisible$ = useElementVisibility(el$, {
+      threshold: threshold$,
+      rootMargin: rootMargin$,
+    });
+
+    // later — update reactively
+    threshold$.set(0.75);
+    rootMargin$.set("-50px 0px");
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@legendapp/state";
+
+    const threshold$ = observable<number | number[]>(0.5);
+    const rootMargin$ = observable("0px");
+
+    const isVisible$ = createElementVisibility(el$, {
+      threshold: threshold$,
+      rootMargin: rootMargin$,
+    });
+
+    // later — update reactively
+    threshold$.set(0.75);
+    rootMargin$.set("-50px 0px");
+    ```
+
+  </Fragment>
+</CodeTabs>
