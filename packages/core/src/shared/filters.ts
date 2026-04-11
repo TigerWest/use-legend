@@ -1,11 +1,11 @@
 // ---------------------------------------------------------------------------
 // TIER 0-D: EventFilter system
-// VueUse shared/utils/filters.ts → LSA 변환
+// reference by VueUse shared/utils/filters.ts
 // MaybeRefOrGetter<number> → MaybeObservable<number> (toValue() → get())
 // toRef(bool) → observable(bool), readonly(ref) → Legend State Observable
 // ---------------------------------------------------------------------------
 
-import { debounce, throttle } from "es-toolkit";
+import { debounce, throttle } from "es-toolkit/function";
 import type { AnyFn, Awaitable, MaybeObservable } from "../types";
 import { peek } from "@utilities/peek";
 import { noop } from "./utils";

@@ -47,6 +47,19 @@ export type DeepMaybeObservable<T> =
     };
 
 /**
+ * Component props helper for observable pass-through components.
+ *
+ * Every prop except `children` is treated as a readonly Observable by default.
+ * Pass additional `PlainKeys` for callbacks or other props that should stay as-is.
+ */
+export type ObservableProps<
+  T extends object,
+  PlainKeys extends keyof T = Extract<keyof T, "children">,
+> = {
+  [K in keyof T]: K extends PlainKeys ? T[K] : ReadonlyObservable<T[K]>;
+};
+
+/**
  * A single history record containing a serialized snapshot and its timestamp.
  */
 export interface UseHistoryRecord<T> {

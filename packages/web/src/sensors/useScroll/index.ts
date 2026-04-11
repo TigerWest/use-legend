@@ -4,7 +4,7 @@ import { useMount, useObservable, useObserve } from "@legendapp/state/react";
 import { useRef } from "react";
 import { useLatest } from "@usels/core/shared/useLatest";
 import { useConstant } from "@usels/core/shared/useConstant";
-import { throttle } from "es-toolkit";
+import { throttle } from "es-toolkit/function";
 import { type DeepMaybeObservable, get, peek, useMaybeObservable } from "@usels/core";
 import type { MaybeEventTarget } from "../../types";
 import { isWindow } from "@usels/core/shared/index";
