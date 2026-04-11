@@ -6,7 +6,7 @@ import {
   type ReadonlyObservable,
   type Supportable,
 } from "@usels/core";
-import { defaultWindow, type ConfigurableWindow } from "@shared/configurable";
+import { resolveWindowSource, type ConfigurableWindow } from "@shared/configurable";
 
 export type OrientationType =
   | "portrait-primary"
@@ -34,24 +34,6 @@ export interface UseScreenOrientationReturn extends Supportable {
 }
 
 /**
- * Resolves a window option value (plain `Window`, `OpaqueObject<Window>`, or
- * `OpaqueObject<HTMLIFrameElement>`) into a real `Window` reference.
- *
- * Falls back to `defaultWindow` when the value is null/undefined.
- */
-function resolveWindow(raw: unknown): Window | undefined {
-  if (raw == null) return defaultWindow;
-  const val =
-    typeof (raw as { valueOf?: () => unknown }).valueOf === "function"
-      ? (raw as { valueOf: () => unknown }).valueOf()
-      : raw;
-  if (typeof HTMLIFrameElement !== "undefined" && val instanceof HTMLIFrameElement) {
-    return val.contentWindow ?? undefined;
-  }
-  return val as Window;
-}
-
-/**
  * Framework-agnostic reactive wrapper around the
  * [Screen Orientation API](https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation).
  *
@@ -67,12 +49,12 @@ export function createScreenOrientation(
   const angle$ = observable<number>(0);
 
   const isSupported$ = createSupported(() => {
-    const win = resolveWindow(opts$.get()?.window as unknown);
+    const win = resolveWindowSource(opts$.get()?.window as unknown);
     return !!win && "orientation" in win.screen;
   });
 
   onMount(() => {
-    const win = resolveWindow(opts$.peek()?.window as unknown);
+    const win = resolveWindowSource(opts$.peek()?.window as unknown);
     if (!win?.screen?.orientation) return;
     const orientation = win.screen.orientation;
 
@@ -90,7 +72,7 @@ export function createScreenOrientation(
 
   const lockOrientation = (type: OrientationLockType): Promise<void> => {
     if (!isSupported$.peek()) return Promise.reject(new Error("Not supported"));
-    const win = resolveWindow(opts$.peek()?.window as unknown);
+    const win = resolveWindowSource(opts$.peek()?.window as unknown);
     const o = win!.screen.orientation as ScreenOrientation & {
       lock: (type: OrientationLockType) => Promise<void>;
     };
@@ -99,7 +81,7 @@ export function createScreenOrientation(
 
   const unlockOrientation = (): void => {
     if (!isSupported$.peek()) return;
-    const win = resolveWindow(opts$.peek()?.window as unknown);
+    const win = resolveWindowSource(opts$.peek()?.window as unknown);
     win!.screen.orientation.unlock();
   };
 

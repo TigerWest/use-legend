@@ -1,17 +1,14 @@
 import type { Observable, OpaqueObject } from "@legendapp/state";
 import { ObservableHint } from "@legendapp/state";
 import { useObservable } from "@legendapp/state/react";
-import { defaultWindow } from "@shared/configurable";
-
-const opaqueDefaultWindow = defaultWindow ? ObservableHint.opaque(defaultWindow) : null;
+import { resolveWindowSource } from "@shared/configurable";
 
 /**
- * Resolves an `opts$.window` field (pre-processed by `'element'` hint) into a
- * reactive `Window` observable.
- *
- * - `OpaqueObject<Window>` → return as-is (already opaque from `'element'` hint)
- * - `OpaqueObject<HTMLIFrameElement>` → `.valueOf().contentWindow` → `opaque()`
- * - `null` / `undefined` → `opaque(defaultWindow)`
+ * Resolves an `opts$.window` field (pre-processed by the `'opaque'` hint) into
+ * a reactive `Window` observable. Delegates the actual `WindowSource` → `Window`
+ * resolution to the framework-agnostic `resolveWindowSource` in `configurable.ts`,
+ * then re-wraps the result with `ObservableHint.opaque()` so the computed
+ * observable doesn't deep-proxy the `Window`.
  *
  * Reactive — automatically recomputes when iframe mounts/unmounts.
  *
@@ -22,17 +19,7 @@ export function useResolvedWindow(
   resolved$: Observable<any>
 ) {
   return useObservable<OpaqueObject<Window> | null>(() => {
-    const raw = resolved$.get();
-    if (!raw) return opaqueDefaultWindow;
-
-    // iframe → extract contentWindow
-    const val = typeof raw.valueOf === "function" ? raw.valueOf() : raw;
-    if (val instanceof HTMLIFrameElement) {
-      const win = val.contentWindow;
-      return win ? ObservableHint.opaque(win) : null;
-    }
-
-    // Already OpaqueObject<Window> from 'element' hint
-    return raw;
+    const win = resolveWindowSource(resolved$.get());
+    return win ? ObservableHint.opaque(win) : null;
   });
 }
