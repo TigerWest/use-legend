@@ -1,31 +1,10 @@
-import type { Observable, OpaqueObject } from "@legendapp/state";
-import { ObservableHint } from "@legendapp/state";
-import { useMount, useObservable, useObserve } from "@legendapp/state/react";
-import { get } from "@usels/core";
-import type { MaybeEventTarget } from "../../types";
+"use client";
+import { useScope } from "@usels/core";
+import { createParentElement } from "./core";
 
-export function useParentElement(
-  element?: MaybeEventTarget
-): Observable<OpaqueObject<HTMLElement | SVGElement> | null> {
-  const parent$ = useObservable<OpaqueObject<HTMLElement | SVGElement> | null>(null);
+export { createParentElement } from "./core";
 
-  /**
-   * NOTE: plain element (non-Observable, non-Ref$)을 전달한 경우,
-   * 해당 요소가 DOM 내에서 다른 부모로 이동하더라도 자동으로 갱신되지 않습니다.
-   * 동적 감지가 필요하면 Ref$ 또는 Observable<Element>를 사용하세요.
-   */
-  const update = () => {
-    if (!element) return;
-    const el = get(element);
-    // Document / Window 는 parentElement 프로퍼티가 없으므로 null → SSR-safe
-    const parent = (el as HTMLElement | null)?.parentElement ?? null;
-    parent$.set(
-      parent ? ObservableHint.opaque(parent as unknown as HTMLElement | SVGElement) : null
-    );
-  };
-
-  useMount(update);
-  useObserve(update, { immediate: false });
-
-  return parent$;
-}
+export type UseParentElement = typeof createParentElement;
+export const useParentElement: UseParentElement = (element) => {
+  return useScope(() => createParentElement(element));
+};

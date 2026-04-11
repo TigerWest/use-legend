@@ -1,64 +1,14 @@
-import { useObservable, useMount, useObserve } from "@legendapp/state/react";
-import { useRef } from "react";
-import type { Supportable } from "@usels/core";
-import type { MaybeEventTarget } from "../../types";
-import { normalizeTargets } from "@shared/normalizeTargets";
+"use client";
+import { useScope, toObs } from "@usels/core";
+import { createMutationObserver } from "./core";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentional alias to allow future extension without breaking API
-export interface UseMutationObserverOptions extends MutationObserverInit {}
+export { createMutationObserver } from "./core";
+export type { UseMutationObserverOptions, UseMutationObserverReturn } from "./core";
 
-export interface UseMutationObserverReturn extends Supportable {
-  stop: () => void;
-  resume: () => void;
-  takeRecords: () => MutationRecord[];
-}
-
-export function useMutationObserver(
-  target: MaybeEventTarget | MaybeEventTarget[],
-  callback: MutationCallback,
-  options?: UseMutationObserverOptions
-): UseMutationObserverReturn {
-  const isSupported$ = useObservable<boolean>(typeof MutationObserver !== "undefined");
-  const observerRef = useRef<MutationObserver | null>(null);
-  const isMounted = useRef(false);
-
-  const cleanup = () => {
-    observerRef.current?.disconnect();
-    observerRef.current = null;
-  };
-
-  const setup = () => {
-    if (!isSupported$.peek() || !isMounted.current) return;
-    cleanup();
-
-    const targets = normalizeTargets(target);
-    const uniqueTargets = [...new Set(targets)];
-
-    if (!uniqueTargets.length) return;
-
-    observerRef.current = new MutationObserver(callback);
-    uniqueTargets.forEach((el) => {
-      observerRef.current!.observe(el as Node, options);
-    });
-  };
-
-  useMount(() => {
-    isMounted.current = true;
-    setup();
-    return () => {
-      isMounted.current = false;
-      cleanup();
-    };
-  });
-
-  useObserve(() => {
-    normalizeTargets(target);
-    setup();
-  });
-
-  const takeRecords = (): MutationRecord[] => {
-    return observerRef.current?.takeRecords() ?? [];
-  };
-
-  return { isSupported$, stop: cleanup, resume: setup, takeRecords };
-}
+export type UseMutationObserver = typeof createMutationObserver;
+export const useMutationObserver: UseMutationObserver = (target, callback, options = {}) => {
+  return useScope((opts) => {
+    const opts$ = toObs(opts);
+    return createMutationObserver(target, callback, opts$);
+  }, options);
+};
