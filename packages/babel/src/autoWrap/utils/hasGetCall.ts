@@ -1,7 +1,7 @@
 import type { NodePath } from "@babel/core";
 import type { Node } from "@babel/types";
 import type { PluginOptions } from "../types";
-import { getRootObject } from "./getRootObject";
+import { hasDollarSegmentInChain } from "./getRootObject";
 
 function isGetCallNode(node: Node, opts: PluginOptions): boolean {
   if (node.type === "CallExpression") {
@@ -11,8 +11,7 @@ function isGetCallNode(node: Node, opts: PluginOptions): boolean {
     if (callee.property.name !== "get") return false;
     if (args.length !== 0) return false;
     if (!opts.allGet) {
-      const root = getRootObject(callee.object);
-      if (!root || !root.name?.endsWith("$")) return false;
+      if (!hasDollarSegmentInChain(callee.object)) return false;
     }
     return true;
   }
@@ -23,8 +22,7 @@ function isGetCallNode(node: Node, opts: PluginOptions): boolean {
     if (callee.property?.name !== "get") return false;
     if (args.length !== 0) return false;
     if (!opts.allGet) {
-      const root = getRootObject(callee.object);
-      if (!root || !root.name?.endsWith("$")) return false;
+      if (!hasDollarSegmentInChain(callee.object)) return false;
     }
     return true;
   }

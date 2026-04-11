@@ -1,4 +1,4 @@
-export { getRootObject } from "./getRootObject";
+export { getRootObject, hasDollarSegmentInChain } from "./getRootObject";
 export { hasGetCall } from "./hasGetCall";
 export { hasAttributeGetCall } from "./hasAttributeGetCall";
 export { isInsideReactiveContext } from "./isInsideReactiveContext";
