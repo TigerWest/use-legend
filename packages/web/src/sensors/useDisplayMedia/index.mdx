@@ -10,23 +10,48 @@ sidebar:
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useDisplayMedia } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useDisplayMedia } from "@usels/web";
 
-function ScreenShare() {
-  const { isSupported$, stream$, enabled$, start, stop } = useDisplayMedia();
+    function ScreenShare() {
+      const { isSupported$, stream$, enabled$, start, stop } = useDisplayMedia();
 
-  return (
-    <div>
-      <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
-      <p>Sharing: {enabled$.get() ? "Yes" : "No"}</p>
-      <button onClick={() => start()}>Share Screen</button>
-      <button onClick={() => stop()}>Stop</button>
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Sharing: {enabled$.get() ? "Yes" : "No"}</p>
+          <button onClick={() => start()}>Share Screen</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDisplayMedia } from "@usels/web";
+
+    function ScreenShare() {
+      "use scope";
+      const { isSupported$, stream$, enabled$, start, stop } = createDisplayMedia();
+
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Sharing: {enabled$.get() ? "Yes" : "No"}</p>
+          <button onClick={() => start()}>Share Screen</button>
+          <button onClick={() => stop()}>Stop</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### With audio capture
 

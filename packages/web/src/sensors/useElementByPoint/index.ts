@@ -1,96 +1,25 @@
 "use client";
-import type { ReadonlyObservable, Pausable, Supportable } from "@usels/core";
-import type { DeepMaybeObservable } from "@usels/core";
-import { useSupported, useMaybeObservable } from "@usels/core";
-import { useObservable, useMount } from "@legendapp/state/react";
-import { ObservableHint } from "@legendapp/state";
-import { useConstant } from "@usels/core/shared/useConstant";
-import { type ConfigurableWindow, defaultDocument } from "@shared/configurable";
-import { useResolvedWindow } from "../../internal/useResolvedWindow";
+import { useScope, toObs } from "@usels/core";
+import { createElementByPoint } from "./core";
 
-export interface UseElementByPointOptions<M extends boolean = false> extends ConfigurableWindow {
-  /** X coordinate */
-  x: number;
-  /** Y coordinate */
-  y: number;
-  /** Whether to return multiple elements (uses elementsFromPoint) */
-  multiple?: M;
-}
+export { createElementByPoint } from "./core";
+export type { UseElementByPointOptions, UseElementByPointReturn } from "./core";
 
-export type UseElementByPointReturn<M extends boolean = false> = Pausable &
-  Supportable & {
-    /** Element(s) at the specified point */
-    element$: ReadonlyObservable<M extends true ? Element[] : Element | null>;
-  };
-
-/*@__NO_SIDE_EFFECTS__*/
-export function useElementByPoint<M extends boolean = false>(
-  options: DeepMaybeObservable<UseElementByPointOptions<M>>
-): UseElementByPointReturn<M> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const opts$ = useMaybeObservable(options, { window: "element" }) as any;
-  const window$ = useResolvedWindow(opts$.window);
-
-  const isSupported$ = useSupported(
-    () => !!defaultDocument && "elementFromPoint" in defaultDocument
+/**
+ * Reactive element-at-point tracker.
+ *
+ * Continuously polls `document.elementFromPoint()` on each animation frame and
+ * updates `element$` whenever the element under the specified coordinates
+ * changes. Supports single or multiple element detection modes.
+ */
+export type UseElementByPoint = typeof createElementByPoint;
+export const useElementByPoint: UseElementByPoint = (options) => {
+  return useScope(
+    (opts) => {
+      const opts$ = toObs(opts, { window: "opaque" });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return createElementByPoint(opts$ as any);
+    },
+    options as Record<string, unknown>
   );
-
-  const multiple = useConstant(() => !!opts$.multiple?.peek());
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const element$ = useObservable<any>(multiple ? [] : null);
-  const isActive$ = useObservable(true);
-
-  const pause = useConstant(() => () => {
-    isActive$.set(false);
-  });
-
-  const resume = useConstant(() => () => {
-    isActive$.set(true);
-  });
-
-  useMount(() => {
-    const win = window$.peek();
-    if (!defaultDocument || !win) return;
-
-    let rafId: number | undefined;
-
-    const loop = () => {
-      if (isActive$.peek()) {
-        const cx = opts$.x.get() as number;
-        const cy = opts$.y.get() as number;
-        if (multiple) {
-          const newElements = defaultDocument!.elementsFromPoint(cx, cy);
-          const prev = element$.peek() as Element[];
-          if (
-            newElements.length !== prev.length ||
-            newElements.some((el: Element, i: number) => el !== prev[i])
-          ) {
-            element$.set(ObservableHint.opaque(newElements));
-          }
-        } else {
-          const el = defaultDocument!.elementFromPoint(cx, cy);
-          if (el !== element$.peek()) {
-            element$.set(el ? ObservableHint.opaque(el) : null);
-          }
-        }
-      }
-      rafId = win.requestAnimationFrame(loop);
-    };
-
-    rafId = win.requestAnimationFrame(loop);
-
-    return () => {
-      if (rafId !== undefined) {
-        win.cancelAnimationFrame(rafId);
-      }
-    };
-  });
-
-  return {
-    isSupported$,
-    element$,
-    isActive$,
-    pause,
-    resume,
-  } as UseElementByPointReturn<M>;
-}
+};
