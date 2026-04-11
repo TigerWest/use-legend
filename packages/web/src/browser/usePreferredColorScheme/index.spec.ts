@@ -8,11 +8,19 @@ type QueryState = "dark" | "light" | "none";
 function createQueryAwareMockMatchMedia(initialState: QueryState = "none") {
   let currentState: QueryState = initialState;
 
-  const listenerMap = new Map<string, Map<string, EventListener[]>>();
+  // Real browsers return a NEW MediaQueryList instance per matchMedia() call,
+  // each with its own listener list. Change events fire on EVERY extant
+  // instance for the matching query, so the mock must track all of them and
+  // dispatch to each.
+  type MqlInstance = {
+    query: string;
+    listeners: Map<string, EventListener[]>;
+  };
+  const allMqls: MqlInstance[] = [];
 
   function getMql(query: string): MediaQueryList {
     const listeners = new Map<string, EventListener[]>();
-    listenerMap.set(query, listeners);
+    allMqls.push({ query, listeners });
 
     return {
       get matches() {
@@ -42,7 +50,7 @@ function createQueryAwareMockMatchMedia(initialState: QueryState = "none") {
 
   const triggerChange = (newState: QueryState) => {
     currentState = newState;
-    for (const [query, listeners] of listenerMap.entries()) {
+    for (const { query, listeners } of allMqls) {
       const matches =
         (query === "(prefers-color-scheme: dark)" && newState === "dark") ||
         (query === "(prefers-color-scheme: light)" && newState === "light");
