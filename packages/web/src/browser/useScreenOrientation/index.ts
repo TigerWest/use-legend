@@ -1,80 +1,29 @@
 "use client";
-import type { ReadonlyObservable, Supportable } from "@usels/core";
-import { useSupported, useMaybeObservable } from "@usels/core";
-import { useObservable, useMount } from "@legendapp/state/react";
-import { batch } from "@legendapp/state";
-import { type ConfigurableWindow } from "@shared/configurable";
-import { useResolvedWindow } from "../../internal/useResolvedWindow";
+import { useScope, toObs } from "@usels/core";
+import { createScreenOrientation } from "./core";
 
-export type OrientationType =
-  | "portrait-primary"
-  | "portrait-secondary"
-  | "landscape-primary"
-  | "landscape-secondary";
+export { createScreenOrientation } from "./core";
+export type {
+  OrientationType,
+  OrientationLockType,
+  UseScreenOrientationOptions,
+  UseScreenOrientationReturn,
+} from "./core";
 
-export type OrientationLockType =
-  | "any"
-  | "natural"
-  | "landscape"
-  | "portrait"
-  | "portrait-primary"
-  | "portrait-secondary"
-  | "landscape-primary"
-  | "landscape-secondary";
-
-export type UseScreenOrientationOptions = ConfigurableWindow;
-
-export interface UseScreenOrientationReturn extends Supportable {
-  orientation$: ReadonlyObservable<OrientationType | undefined>;
-  angle$: ReadonlyObservable<number>;
-  lockOrientation: (type: OrientationLockType) => Promise<void>;
-  unlockOrientation: () => void;
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-export function useScreenOrientation(
-  options?: UseScreenOrientationOptions
-): UseScreenOrientationReturn {
-  const opts$ = useMaybeObservable<UseScreenOrientationOptions>(options, { window: "element" });
-  const window$ = useResolvedWindow(opts$.window);
-
-  const isSupported$ = useSupported(() => {
-    const win = window$.get();
-    return !!win && "orientation" in win.screen;
-  });
-
-  const orientation$ = useObservable<OrientationType | undefined>(undefined);
-  const angle$ = useObservable<number>(0);
-
-  useMount(() => {
-    const win = window$.peek();
-    if (!win?.screen?.orientation) return;
-    const orientation = win.screen.orientation;
-
-    const update = () => {
-      batch(() => {
-        orientation$.set(orientation.type as OrientationType);
-        angle$.set(orientation.angle);
-      });
-    };
-
-    update();
-    orientation.addEventListener("change", update);
-    return () => orientation.removeEventListener("change", update);
-  });
-
-  const lockOrientation = (type: OrientationLockType): Promise<void> => {
-    if (!isSupported$.peek()) return Promise.reject(new Error("Not supported"));
-    const o = window$.peek()!.screen.orientation as ScreenOrientation & {
-      lock: (type: OrientationLockType) => Promise<void>;
-    };
-    return o.lock(type);
-  };
-
-  const unlockOrientation = (): void => {
-    if (!isSupported$.peek()) return;
-    window$.peek()!.screen.orientation.unlock();
-  };
-
-  return { isSupported$, orientation$, angle$, lockOrientation, unlockOrientation };
-}
+/**
+ * Reactive wrapper around the
+ * [Screen Orientation API](https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation).
+ *
+ * Tracks the current screen orientation type and angle, and provides methods
+ * to lock and unlock orientation.
+ */
+export type UseScreenOrientation = typeof createScreenOrientation;
+export const useScreenOrientation: UseScreenOrientation = (options = {}) => {
+  return useScope(
+    (opts) => {
+      const opts$ = toObs(opts, { window: "opaque" });
+      return createScreenOrientation(opts$);
+    },
+    options as Record<string, unknown>
+  );
+};

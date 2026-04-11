@@ -8,6 +8,7 @@ import {
   ValueToken,
   demoClasses,
 } from "../../_shared";
+import { Memo } from "@legendapp/state/react";
 
 const THEMES = ["light", "dark", "system"] as const;
 
@@ -26,16 +27,18 @@ export default function Demo() {
           <StatCard label="Value" value={<ValueToken>{theme$.get()}</ValueToken>} tone="accent" />
         </div>
         <div className={demoClasses.actionRow}>
-          {THEMES.map((t) => (
-            <ActionButton
-              key={t}
-              onClick={() => theme$.set(t)}
-              tone={t === theme$.get() ? "accent" : "neutral"}
-              grow
-            >
-              {t}
-            </ActionButton>
-          ))}
+          <Memo>
+            {THEMES.map((t) => (
+              <ActionButton
+                key={t}
+                onClick={() => theme$.set(t)}
+                tone={t === theme$.get() ? "accent" : "neutral"}
+                grow
+              >
+                {t}
+              </ActionButton>
+            ))}
+          </Memo>
         </div>
       </DemoPanel>
     </DemoShell>

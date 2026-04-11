@@ -2,6 +2,11 @@
 title: useIntersectionObserver
 description: "Reactive wrapper around the [IntersectionObserver API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API). Observes one or more elements for intersection changes with pause/resume/stop support. Targets can be `Ref, `MaybeElement`, or a plain `Element`."
 category: elements
+type-table:
+  import: "@usels/web"
+  name: "UseIntersectionObserver"
+  children:
+    - UseIntersectionObserverOptions
 ---
 
 ## Demo
