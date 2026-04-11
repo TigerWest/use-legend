@@ -1,0 +1,19 @@
+{
+  "presets": [
+    [
+      "next/babel",
+      { "preset-env": { "exclude": ["@babel/plugin-transform-unicode-property-regex"] } }
+    ]
+  ],
+  "plugins": [
+    [
+      "@usels/babel-plugin",
+      {
+        "autoWrap": {
+          "importSource": "@usels/core"
+        },
+        "autoScope": { "importSource": "@usels/core" }
+      }
+    ]
+  ]
+}
