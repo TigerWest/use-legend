@@ -1,0 +1,41 @@
+---
+title: usePreferredReducedMotion
+description: "Reactive reduced motion preference. Returns a `ReadonlyObservable` tracking the user's motion preference (`'reduce'` or `'no-preference'`) via the `prefers-reduced-motion` media query."
+category: Browser
+type-table:
+  import: "@usels/web"
+  name: "UsePreferredReducedMotion"
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { usePreferredReducedMotion } from "@usels/web";
+
+    function Component() {
+      const motion$ = usePreferredReducedMotion();
+
+      return <p>Motion: {motion$.get()}</p>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createPreferredReducedMotion } from "@usels/web";
+
+    function Component() {
+      "use scope";
+      const motion$ = createPreferredReducedMotion();
+
+      return <p>Motion: {motion$.get()}</p>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

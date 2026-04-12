@@ -1,0 +1,41 @@
+---
+title: usePreferredReducedTransparency
+description: "Reactive reduced transparency preference. Returns a `ReadonlyObservable` tracking the user's transparency preference (`'reduce'` or `'no-preference'`) via the `prefers-reduced-transparency` media query."
+category: Browser
+type-table:
+  import: "@usels/web"
+  name: "UsePreferredReducedTransparency"
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { usePreferredReducedTransparency } from "@usels/web";
+
+    function Component() {
+      const transparency$ = usePreferredReducedTransparency();
+
+      return <p>Transparency: {transparency$.get()}</p>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createPreferredReducedTransparency } from "@usels/web";
+
+    function Component() {
+      "use scope";
+      const transparency$ = createPreferredReducedTransparency();
+
+      return <p>Transparency: {transparency$.get()}</p>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
