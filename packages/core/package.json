@@ -2,19 +2,19 @@
   "name": "@usels/core",
   "version": "0.9.0",
   "description": "Observable-native React utility hooks for Legend-State, inspired by VueUse and react-use",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/esm/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "types": "./dist/esm/index.d.mts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.mjs",
-      "require": "./dist/*.js"
+      "types": "./dist/esm/*.d.mts",
+      "import": "./dist/esm/*.mjs",
+      "require": "./dist/cjs/*.js"
     }
   },
   "dependencies": {
@@ -22,11 +22,12 @@
     "es-toolkit": "^1.0.0"
   },
   "scripts": {
-    "build": "tsup && tsc-alias -p tsconfig.json",
+    "build": "rimraf dist && tsup && tsc-alias -p tsconfig.json --dir dist/esm && tsc-alias -p tsconfig.json --dir dist/cjs",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist node_modules"
   },
   "peerDependencies": {
     "@legendapp/state": "^2.0.0 || ^3.0.0-beta.0",
@@ -49,6 +50,7 @@
     "@vitest/coverage-istanbul": "^4.0.18",
     "jsdom": "^25.0.0",
     "playwright": "^1.58.2",
+    "rimraf": "^5.0.0",
     "tsc-alias": "^1.8.16",
     "tsup": "^8.3.5",
     "typescript": "^5.7.3",

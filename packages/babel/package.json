@@ -2,22 +2,23 @@
   "name": "@usels/babel-plugin",
   "version": "0.9.0",
   "description": "Babel plugin to auto-wrap Legend-State observable .get() calls in JSX with <Auto> component",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/esm/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "types": "./dist/esm/index.d.mts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.js"
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "rimraf dist && tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist node_modules"
   },
   "peerDependencies": {
     "@babel/core": ">=7.0.0"
@@ -31,6 +32,7 @@
     "@babel/types": "^7.24.0",
     "@types/babel__core": "^7.20.0",
     "babel-plugin-tester": "^11.0.4",
+    "rimraf": "^5.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "vitest": "^1.2.2"

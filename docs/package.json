@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "collect-docs": "tsx scripts/collect-docs.ts",
-    "twoslash:check": "tsx scripts/check-twoslash.ts"
+    "twoslash:check": "tsx scripts/check-twoslash.ts",
+    "clean": "rimraf dist node_modules .astro"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.0",
@@ -43,6 +44,7 @@
     "chokidar": "^4.0.3",
     "concurrently": "^9.1.0",
     "gray-matter": "^4.0.3",
+    "rimraf": "^5.0.0",
     "tsx": "^4.19.2",
     "twoslash": "^0.2.12",
     "typescript": "^5.0.0"

@@ -1,10 +1,23 @@
 import { defineConfig } from 'tsup';
 
-export default defineConfig({
+const shared = {
   entry: ['src/index.ts'],
-  format: ['cjs', 'esm'],
-  dts: true,
   external: ['@babel/core', '@babel/types', '@babel/traverse'],
-  clean: true,
   sourcemap: true,
-});
+  clean: false,
+};
+
+export default defineConfig([
+  {
+    ...shared,
+    format: ['esm'],
+    outDir: 'dist/esm',
+    dts: true,
+  },
+  {
+    ...shared,
+    format: ['cjs'],
+    outDir: 'dist/cjs',
+    dts: false,
+  },
+]);
