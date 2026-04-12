@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
+import { useCallback } from "react";
 import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ObservableHint, observable } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
+import { useScope, toObs, onMount } from "@usels/core";
 import { useOnLongPress } from ".";
 
 // Polyfill PointerEvent for jsdom
@@ -156,6 +158,55 @@ describe("useOnLongPress() — rerender stability", () => {
 
       expect(stop1).toBe(stop2);
       cleanup();
+    });
+  });
+
+  describe("toObs — cbs$ observable tracking", () => {
+    it("cbs$ emits change when handler function reference changes", () => {
+      const changeSpy = vi.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ handler }: { handler: (e: PointerEvent) => void }) =>
+          useScope(
+            (cbs) => {
+              const cbs$ = toObs(cbs, { handler: "function" });
+              onMount(() => (cbs$.handler as any).onChange(() => changeSpy()));
+              return {};
+            },
+            { handler }
+          ),
+        { initialProps: { handler: handler1 } }
+      );
+
+      rerender({ handler: handler2 });
+      expect(changeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("cbs$ does not emit change when useCallback returns same handler reference", () => {
+      const changeSpy = vi.fn();
+      const handler = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ count }: { count: number }) => {
+          void count;
+          const stableHandler = useCallback(() => handler(), []);
+          return useScope(
+            (cbs) => {
+              const cbs$ = toObs(cbs, { handler: "function" });
+              onMount(() => (cbs$.handler as any).onChange(() => changeSpy()));
+              return {};
+            },
+            { handler: stableHandler }
+          );
+        },
+        { initialProps: { count: 0 } }
+      );
+
+      rerender({ count: 1 });
+      rerender({ count: 2 });
+      expect(changeSpy).not.toHaveBeenCalled();
     });
   });
 });

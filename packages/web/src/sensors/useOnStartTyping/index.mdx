@@ -1,0 +1,51 @@
+---
+title: useOnStartTyping
+description: "Fires a callback when the user starts typing on non-editable elements. Useful for implementing search-on-type or keyboard shortcut activation."
+category: Sensors
+type-table:
+  import: "@usels/web"
+  name: useOnStartTyping
+---
+
+Fires a callback when the user begins typing a character key while no editable element (input, textarea, or contenteditable) is focused. Useful for search-on-type UX or keyboard shortcut activation.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useOnStartTyping } from "@usels/web";
+    import { useRef } from "react";
+
+    function SearchOnType() {
+      const inputRef = useRef<HTMLInputElement>(null);
+
+      useOnStartTyping((event) => {
+        inputRef.current?.focus();
+      });
+
+      return <input ref={inputRef} placeholder="Start typing anywhere..." />;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable, createRef$ } from "@legendapp/state";
+    import { createOnStartTyping } from "@usels/web";
+
+    function SearchOnType() {
+      "use scope"
+      const inputRef = createRef$<HTMLInputElement>();
+
+      createOnStartTyping((event) => {
+        inputRef.current?.focus();
+      });
+
+      return <input ref={inputRef} placeholder="Start typing anywhere..." />;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
