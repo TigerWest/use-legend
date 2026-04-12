@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { effectScope, getCurrentScope, onBeforeMount, onMount, onUnmount } from "./effectScope";
+import { observable } from "@legendapp/state";
 
 // Each test gets a clean global scope state via the module's internal variable.
 // Tests must not leave _currentScope dirty — all scope.run() calls restore it.
@@ -211,6 +212,121 @@ describe("effectScope", () => {
 
     it("outside a scope: no-op, no error", () => {
       expect(() => onUnmount(() => {})).not.toThrow();
+    });
+  });
+
+  describe("_observers pause/resume", () => {
+    it("_pauseAll calls unsub on every active observer record and clears the handle", () => {
+      const scope = effectScope();
+      const unsubA = vi.fn();
+      const unsubB = vi.fn();
+      // direct internal push — observe() migration happens in Task 2
+      scope._observers.push({ args: [() => {}], unsub: unsubA });
+      scope._observers.push({ args: [() => {}], unsub: unsubB });
+
+      scope._pauseAll();
+
+      expect(unsubA).toHaveBeenCalledTimes(1);
+      expect(unsubB).toHaveBeenCalledTimes(1);
+      expect(scope._observers[0].unsub).toBeUndefined();
+      expect(scope._observers[1].unsub).toBeUndefined();
+    });
+
+    it("_pauseAll is idempotent — calling twice does not throw or double-unsub", () => {
+      const scope = effectScope();
+      const unsub = vi.fn();
+      scope._observers.push({ args: [() => {}], unsub });
+
+      scope._pauseAll();
+      scope._pauseAll();
+
+      expect(unsub).toHaveBeenCalledTimes(1);
+    });
+
+    it("_resumeAll re-invokes legendObserve with stored args and stores the new unsub", () => {
+      const scope = effectScope();
+      const val$ = observable(0);
+      const spy = vi.fn();
+      // register via internal push — mimic what observe() will do in Task 2
+      const record: {
+        args: Parameters<typeof import("@legendapp/state").observe>;
+        unsub?: () => void;
+      } = {
+        args: [() => spy(val$.get())],
+        unsub: undefined,
+      };
+      scope._observers.push(record);
+
+      // pause state → resume should create a fresh subscription
+      scope._resumeAll();
+      expect(typeof record.unsub).toBe("function");
+
+      spy.mockClear();
+      val$.set(1);
+      expect(spy).toHaveBeenCalledWith(1);
+    });
+
+    it("_resumeAll is a no-op on already-active observers (does not double-subscribe)", () => {
+      const scope = effectScope();
+      const val$ = observable(0);
+      const spy = vi.fn();
+      const record: {
+        args: Parameters<typeof import("@legendapp/state").observe>;
+        unsub?: () => void;
+      } = {
+        args: [() => spy(val$.get())],
+        unsub: undefined,
+      };
+      scope._observers.push(record);
+      scope._resumeAll(); // first activation
+
+      spy.mockClear();
+      scope._resumeAll(); // second call — must not re-subscribe
+      val$.set(1);
+
+      // exactly one subscription → spy fires exactly once for the set
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it("dispose() unsubs all observers in reverse order and clears _observers", () => {
+      const scope = effectScope();
+      const order: string[] = [];
+      scope._observers.push({ args: [() => {}], unsub: () => order.push("a") });
+      scope._observers.push({ args: [() => {}], unsub: () => order.push("b") });
+      scope._observers.push({ args: [() => {}], unsub: () => order.push("c") });
+
+      scope.dispose();
+
+      expect(order).toEqual(["c", "b", "a"]);
+      expect(scope._observers).toHaveLength(0);
+    });
+
+    it("dispose() drains both _disposables and _observers (observers first, then disposables)", () => {
+      const scope = effectScope();
+      const order: string[] = [];
+      scope.run(() => {
+        getCurrentScope()!._addDispose(() => order.push("disposable-1"));
+        getCurrentScope()!._addDispose(() => order.push("disposable-2"));
+      });
+      scope._observers.push({ args: [() => {}], unsub: () => order.push("observer-1") });
+      scope._observers.push({ args: [() => {}], unsub: () => order.push("observer-2") });
+
+      scope.dispose();
+
+      // observers reversed, then disposables reversed
+      expect(order).toEqual(["observer-2", "observer-1", "disposable-2", "disposable-1"]);
+    });
+
+    it("dispose() cascades _pauseAll through children", () => {
+      const parent = effectScope();
+      const childUnsub = vi.fn();
+      parent.run(() => {
+        const child = effectScope();
+        child._observers.push({ args: [() => {}], unsub: childUnsub });
+      });
+
+      parent.dispose();
+      expect(childUnsub).toHaveBeenCalledTimes(1);
     });
   });
 });

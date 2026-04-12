@@ -102,7 +102,7 @@ export function useScope(fn: any, ...rest: any[]): any {
     const _prev = setActiveValue(_registry);
     let result: unknown;
     try {
-      result = scope.run(() => fn(...proxies));
+      result = scope.run(() => fn(...proxies)); // factory runs exactly once, ever
     } finally {
       setActiveValue(_prev);
     }
@@ -113,33 +113,18 @@ export function useScope(fn: any, ...rest: any[]): any {
     syncProps(stateRef.current.ctxList[i], rest[i]);
   }
 
-  // ── Strict Mode: re-create disposed scope ─────────────────────────
+  // onBeforeMount — fires on every useLayoutEffect mount (twice in Strict Mode,
+  // matching React's useLayoutEffect double-invoke).
   useLayoutEffect(() => {
-    if (!stateRef.current!.scope.active) {
-      const prev = stateRef.current!;
-      const scope = effectScope();
-      const ctxList: ScopePropsCtx<Record<string, unknown>>[] = prev.ctxList.map((prevCtx) => ({
-        propsRef: prevCtx.propsRef, // reuse — syncProps keeps this current
-        props$: null,
-        hints: null,
-        rawPrev: null,
-      }));
-      const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
-      const _prev = setActiveValue(_registry);
-      try {
-        scope.run(() => fn(...proxies)); // re-register observers/lifecycle; result discarded
-      } finally {
-        setActiveValue(_prev);
-      }
-      stateRef.current = { scope, result: prev.result, ctxList };
-    }
     for (const cb of stateRef.current!.scope._beforeMountCbs) cb();
   }, []);
 
-  // ── mount / unmount ───────────────────────────────────────────────
+  // mount / unmount — observers pause on cleanup (sync unsub), resume on next mount.
+  // factory is NEVER re-run, even in Strict Mode.
   // eslint-disable-next-line use-legend/prefer-use-observe
   useEffect(() => {
     const { scope } = stateRef.current!;
+    scope._resumeAll(); // no-op on first mount; restores observers after Strict Mode remount
     const cleanups: Array<() => void> = [];
     for (const cb of scope._mountCbs) {
       const cleanup = cb();
@@ -147,7 +132,7 @@ export function useScope(fn: any, ...rest: any[]): any {
     }
     return () => {
       for (let i = cleanups.length - 1; i >= 0; i--) cleanups[i]();
-      scope.dispose();
+      scope._pauseAll(); // sync unsubscribe; records preserved for next resume
     };
   }, []);
 

@@ -1,7 +1,7 @@
 import { observable, ObservableHint, isObservable, batch, type Observable } from "@legendapp/state";
 import type { ImmutableObservableBase } from "@legendapp/state";
 import type { OpaqueObject } from "@legendapp/state";
-import { onUnmount } from "./effectScope";
+import { onMount } from "./effectScope";
 
 /** @internal Strip Observable/ReadonlyObservable wrapper from a type (distributive over unions) */
 type UnwrapObs<T> = T extends ImmutableObservableBase<infer U> ? U : T;
@@ -219,16 +219,18 @@ function buildInitialValue<P extends object>(ctx: ScopePropsCtx<P>): unknown {
     const val = (props as Record<string, unknown>)[key];
     if (isObservable(val)) {
       const obs = val as Observable<unknown>;
-      // Subscribe immediately; the returned unsubscribe fn is registered via
-      // `onUnmount` so the current scope cleans it up on dispose.
-      onUnmount(
-        obs.onChange(() => {
+      // Subscribe on every useEffect mount — not at factory time — so that
+      // React Strict Mode's simulated unmount/remount gets a fresh subscription
+      // instead of a spent unsub. The returned cleanup is the current-cycle unsub.
+      onMount(() => {
+        const unsub = obs.onChange(() => {
           batch(() => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (ctx.props$ as any)?.[key].set(obs.peek());
           });
-        })
-      );
+        });
+        return unsub;
+      });
     }
     result[key] = readField(key, val, hints);
   }

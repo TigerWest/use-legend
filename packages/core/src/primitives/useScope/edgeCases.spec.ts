@@ -91,21 +91,37 @@ describe("useScope() — edge cases", () => {
     });
   });
 
-  describe("nested scopes inside useScope factory", () => {
-    it("child effectScope created inside factory is disposed on component unmount", () => {
-      const childDispose = vi.fn();
+  describe("cleanup callbacks inside useScope factory", () => {
+    it("onUnmount callback fires on component unmount", () => {
+      const cleanup = vi.fn();
 
       const { unmount } = renderHook(() =>
         useScope(() => {
-          const child = effectScope();
-          child.run(() => getCurrentScope()!._addDispose(childDispose));
+          onUnmount(cleanup);
           return {};
         })
       );
 
-      expect(childDispose).not.toHaveBeenCalled();
+      expect(cleanup).not.toHaveBeenCalled();
       unmount();
-      expect(childDispose).toHaveBeenCalledTimes(1);
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+
+    it("nested effectScope inside factory runs exactly once (factory-once)", () => {
+      const childCreated = vi.fn();
+
+      renderHook(() =>
+        useScope(() => {
+          // Nested effectScope is created during the single factory run.
+          // Users who need lifecycle cleanup should use onMount/onUnmount,
+          // not _addDispose on a nested scope.
+          const child = effectScope();
+          childCreated(child);
+          return {};
+        })
+      );
+
+      expect(childCreated).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -164,6 +180,49 @@ describe("useScope() — edge cases", () => {
       // both spies should not have been called after unmount
       expect(spyA).toHaveBeenCalledTimes(1); // only initial
       expect(spyB).toHaveBeenCalledTimes(1); // only initial
+    });
+  });
+
+  describe("observe() — manual unsub integration with _observers track", () => {
+    it("observe() inside an effectScope.run() registers a record on _observers", () => {
+      const scope = effectScope();
+      const val$ = observable(0);
+      scope.run(() => observe(() => val$.get()));
+
+      expect(scope._observers).toHaveLength(1);
+      expect(scope._observers[0].args).toBeDefined();
+      expect(typeof scope._observers[0].unsub).toBe("function");
+    });
+
+    it("calling the returned unsub removes the record from _observers", () => {
+      const scope = effectScope();
+      const val$ = observable(0);
+      let unsubHandle!: () => void;
+      scope.run(() => {
+        unsubHandle = observe(() => val$.get());
+      });
+      expect(scope._observers).toHaveLength(1);
+
+      unsubHandle();
+      expect(scope._observers).toHaveLength(0);
+    });
+
+    it("manually unsubscribed observer is NOT resurrected by _resumeAll", () => {
+      const scope = effectScope();
+      const val$ = observable(0);
+      const spy = vi.fn();
+      let unsubHandle!: () => void;
+      scope.run(() => {
+        unsubHandle = observe(() => spy(val$.get()));
+      });
+
+      unsubHandle(); // remove from _observers
+      scope._pauseAll(); // no-op for the removed record
+      scope._resumeAll(); // must NOT re-register the removed observer
+      spy.mockClear();
+      val$.set(1);
+
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 });

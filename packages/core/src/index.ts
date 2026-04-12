@@ -1,8 +1,5 @@
 export * from "./types";
 
-// Re-export Legend-State React reactive components so that the `@usels/babel-plugin`
-// autoWrap transform can emit a single `import { Memo, ... } from "@usels/core"` — users
-// don't need to import from `@legendapp/state/react` separately.
 export { Memo, Show, For, Computed, Switch, Reactive, observer } from "@legendapp/state/react";
 
 export * from "@primitives/useScope";

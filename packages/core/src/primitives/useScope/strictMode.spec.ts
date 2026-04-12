@@ -16,11 +16,11 @@ describe("useScope() — React Strict Mode", () => {
   const wrapper = StrictMode;
 
   describe("factory re-execution", () => {
-    it("factory runs twice in Strict Mode (once per mount)", () => {
+    it("factory runs exactly once in Strict Mode", () => {
       const factory = vi.fn(() => ({}));
       renderHook(() => useScope(factory), { wrapper });
-      // Strict Mode: mount → cleanup → remount = 2 factory calls
-      expect(factory).toHaveBeenCalledTimes(2);
+      // factory-once contract: Strict Mode simulated remount does NOT re-run the factory
+      expect(factory).toHaveBeenCalledTimes(1);
     });
 
     it("factory runs exactly once in non-Strict Mode", () => {
@@ -96,6 +96,28 @@ describe("useScope() — React Strict Mode", () => {
       });
       expect(spyA).toHaveBeenCalledWith(1);
       expect(spyB).toHaveBeenCalledWith(2);
+    });
+  });
+
+  describe("factory-local observables — regression for pre-factory-once bug", () => {
+    it("observable created inside the factory stays reactive after Strict Mode remount", () => {
+      const spy = vi.fn();
+
+      const { result } = renderHook(
+        () =>
+          useScope(() => {
+            const count$ = observable(0);
+            observe(() => spy(count$.get()));
+            return { count$ };
+          }),
+        { wrapper }
+      );
+
+      // After Strict Mode settle: returned count$ is the SAME instance the observer tracks
+      spy.mockClear();
+      act(() => result.current.count$.set(7));
+
+      expect(spy).toHaveBeenCalledWith(7);
     });
   });
 
@@ -240,6 +262,28 @@ describe("useScope() — React Strict Mode", () => {
       rerender({ value: 42 });
       result.current.read();
       expect(captured).toBe(42);
+    });
+
+    it("per-field Observable prop propagates child mutations after Strict Mode remount", () => {
+      const val$ = observable(0);
+      const spy = vi.fn();
+
+      renderHook(
+        () =>
+          useScope(
+            (p) => {
+              const p$ = toObs(p);
+              observe(() => spy(p$.val.get()));
+              return {};
+            },
+            { val: val$ }
+          ),
+        { wrapper }
+      );
+
+      spy.mockClear();
+      act(() => val$.set(42));
+      expect(spy).toHaveBeenCalledWith(42);
     });
 
     it("props path onMount cleanup fires on actual unmount after Strict Mode", () => {
