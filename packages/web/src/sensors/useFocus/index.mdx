@@ -4,31 +4,67 @@ description: "Reactive utility that tracks whether a DOM element has focus, with
 category: Sensors
 sidebar:
   order: 5
+type-table:
+  import: "@usels/web"
+  name: "UseFocus"
+  params:
+    children:
+      - UseFocusOptions
+  returns:
+    children:
+      - UseFocusReturn
 ---
 
 ## Demo
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useRef$ } from "@usels/core";
-import { useFocus } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$ } from "@usels/core";
+    import { useFocus } from "@usels/web";
 
-function Component() {
-  const input$ = useRef$<HTMLInputElement>();
-  const { focused$ } = useFocus(input$);
+    function Component() {
+      const input$ = useRef$<HTMLInputElement>();
+      const { focused$ } = useFocus(input$);
 
-  return (
-    <div>
-      <input ref={input$} placeholder="Click to focus" />
-      <p>Focused: {focused$.get() ? "Yes" : "No"}</p>
-      <button onClick={() => focused$.set(true)}>Focus</button>
-      <button onClick={() => focused$.set(false)}>Blur</button>
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          <input ref={input$} placeholder="Click to focus" />
+          <p>Focused: {focused$.get() ? "Yes" : "No"}</p>
+          <button onClick={() => focused$.set(true)}>Focus</button>
+          <button onClick={() => focused$.set(false)}>Blur</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createFocus } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const input$ = createRef$<HTMLInputElement>();
+      const { focused$ } = createFocus(input$);
+
+      return (
+        <div>
+          <input ref={input$} placeholder="Click to focus" />
+          <p>Focused: {focused$.get() ? "Yes" : "No"}</p>
+          <button onClick={() => focused$.set(true)}>Focus</button>
+          <button onClick={() => focused$.set(false)}>Blur</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Auto Focus on Mount
 

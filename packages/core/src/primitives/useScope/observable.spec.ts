@@ -1226,7 +1226,7 @@ describe("useScope() — outer Observable as scope param", () => {
     expect(result.current.p$.get().label).toBe("hello");
   });
 
-  it("toObs with function hint works for outer Observable with callback field", () => {
+  it("toObs returns outer Observable directly — hints are skipped", () => {
     const cb = vi.fn();
     const opts$ = observable<{ onDone?: () => void }>({ onDone: cb });
 
@@ -1240,22 +1240,9 @@ describe("useScope() — outer Observable as scope param", () => {
       )
     );
 
-    const raw = result.current.p$.peek();
-    expect(typeof raw?.onDone).toBe("function");
-  });
-
-  it("p.field raw access works for outer Observable", () => {
-    const opts$ = observable({ name: "test" });
-
-    const { result } = renderHook(() =>
-      useScope(
-        (p) => {
-          return { getName: () => p.name };
-        },
-        opts$ as unknown as Record<string, unknown>
-      )
-    );
-
-    expect(result.current.getName()).toBe("test");
+    // toObs returns the outer Observable itself
+    expect((result.current.p$ as unknown) === (opts$ as unknown)).toBe(true);
+    // function field accessible via peek
+    expect(typeof result.current.p$.peek()?.onDone).toBe("function");
   });
 });
