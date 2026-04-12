@@ -116,6 +116,7 @@ function Component() {
       return <div>{value$.get()}</div>;
     }
     ```
+
   </Fragment>
   <Fragment slot="scope">
     ```tsx
@@ -129,6 +130,7 @@ function Component() {
       return <div>{value$.get()}</div>;
     }
     ```
+
   </Fragment>
 </CodeTabs>
 ````
@@ -222,9 +224,10 @@ type-table:
   params:
     children:
       - DataHistoryOptions    # → "### DataHistoryOptions" options table
-  returns:
-    children:
-      - DataHistoryReturn     # → "### DataHistoryReturn" properties table
+  # returns:        # only apply when return has a complicate object property, not the own Return Type
+  #  children:
+  #    - DataHistoryReturnChild     # → "### Return(DataHistoryReturn)" and "### DataHistoryReturnChild" properties table,
+  #    - DataHistoryReturn     # → ❌ Bad "### Return" and "### DataHistoryReturn" properties same table,
 ---
 ```
 
@@ -457,3 +460,4 @@ pnpm collect-docs
 ````
 
 After modifying documentation, you must run this, or it will be reflected automatically in `pnpm dev` (watch mode).
+`````

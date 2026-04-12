@@ -8,9 +8,6 @@ type-table:
   params:
     children:
       - OfflineFirstOptions
-  returns:
-    children:
-      - OfflineFirstReturn
 ---
 
 Combines remote sync with local persistence and automatic retry. Data is available immediately from local cache, then updated from the remote source. Failed remote operations are persisted locally and retried automatically.

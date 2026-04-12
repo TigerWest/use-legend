@@ -8,9 +8,6 @@ type-table:
   params:
     children:
       - RemoteOptions
-  returns:
-    children:
-      - RemoteReturn
 ---
 
 Creates an `Observable<T>` that fetches from and optionally pushes to a remote source. No local persistence — data lives only in memory. Returns decomposed state including loading and error observables.
