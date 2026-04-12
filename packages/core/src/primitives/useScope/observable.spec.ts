@@ -1207,3 +1207,55 @@ describe("useScope() — multi-param + toObs edge cases", () => {
     });
   });
 });
+
+describe("useScope() — outer Observable as scope param", () => {
+  it("toObs sees fields of an outer Observable passed as scope param", () => {
+    const opts$ = observable({ count: 10, label: "hello" });
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          return { p$ };
+        },
+        opts$ as unknown as Record<string, unknown>
+      )
+    );
+
+    expect(result.current.p$.get().count).toBe(10);
+    expect(result.current.p$.get().label).toBe("hello");
+  });
+
+  it("toObs with function hint works for outer Observable with callback field", () => {
+    const cb = vi.fn();
+    const opts$ = observable<{ onDone?: () => void }>({ onDone: cb });
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p, { onDone: "function" });
+          return { p$ };
+        },
+        opts$ as unknown as Record<string, unknown>
+      )
+    );
+
+    const raw = result.current.p$.peek();
+    expect(typeof raw?.onDone).toBe("function");
+  });
+
+  it("p.field raw access works for outer Observable", () => {
+    const opts$ = observable({ name: "test" });
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          return { getName: () => p.name };
+        },
+        opts$ as unknown as Record<string, unknown>
+      )
+    );
+
+    expect(result.current.getName()).toBe("test");
+  });
+});

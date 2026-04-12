@@ -1,7 +1,15 @@
-import { observable, ObservableHint, isObservable, batch, type Observable } from "@legendapp/state";
+import { observable, isObservable, batch, type Observable } from "@legendapp/state";
 import type { ImmutableObservableBase } from "@legendapp/state";
-import type { OpaqueObject } from "@legendapp/state";
 import { onMount } from "./effectScope";
+import {
+  applyHintToValue,
+  type ScopeHint,
+  type NestedHintSpec,
+  type ApplyHints,
+} from "@shared/hints";
+
+// Re-export hint types for existing consumers
+export type { ScopeHint, NestedHintSpec, ApplyHints } from "@shared/hints";
 
 /** @internal Strip Observable/ReadonlyObservable wrapper from a type (distributive over unions) */
 type UnwrapObs<T> = T extends ImmutableObservableBase<infer U> ? U : T;
@@ -14,58 +22,6 @@ type UnwrapObs<T> = T extends ImmutableObservableBase<infer U> ? U : T;
 export type PropsOf<P extends object> = {
   [K in keyof P]: UnwrapObs<P[K]>;
 };
-
-/** @internal Leaf hint for a single field in toObs */
-export type ScopeHint = "opaque" | "plain" | "function";
-
-/** @internal depth-3 hint map */
-type HintMap3<P> = { [K in keyof P]?: ScopeHint };
-
-/** @internal depth-2 hint map */
-type HintMap2<P> = {
-  [K in keyof P]?: ScopeHint | (P[K] extends Record<string, unknown> ? HintMap3<P[K]> : never);
-};
-
-/** @internal depth-1 hint map (top-level fields) */
-type HintMap1<P> = {
-  [K in keyof P]?: ScopeHint | (P[K] extends Record<string, unknown> ? HintMap2<P[K]> : never);
-};
-
-/**
- * Hint spec for `toObs`: scalar hint or up to 3-level nested hint map.
- * Supported hints: `'opaque'` | `'plain'` | `'function'`
- * @public
- */
-export type NestedHintSpec<P> = ScopeHint | HintMap1<P>;
-
-/** @internal Apply a leaf hint to a type — only opaque changes the TS type */
-type ApplyLeafHint<T, H extends ScopeHint> = H extends "opaque" ? OpaqueObject<T & object> : T;
-
-/** @internal Recursively apply a hint map to a props type */
-type ApplyHintMap<P, M> = {
-  [K in keyof P]: K extends keyof M
-    ? M[K] extends ScopeHint
-      ? ApplyLeafHint<P[K], M[K] & ScopeHint>
-      : M[K] extends Record<string, unknown>
-        ? P[K] extends Record<string, unknown>
-          ? ApplyHintMap<P[K], M[K]>
-          : P[K]
-        : P[K]
-    : P[K];
-};
-
-/**
- * Transform a props type according to a `NestedHintSpec`.
- * - scalar `'opaque'` → entire props wrapped in `OpaqueObject`
- * - map `{ field: 'opaque' }` → only that field wrapped
- * - nested `{ field: { sub: 'opaque' } }` → only that sub-field wrapped
- * @public
- */
-export type ApplyHints<P, H> = H extends ScopeHint
-  ? ApplyLeafHint<P, H & ScopeHint>
-  : H extends Record<string, unknown>
-    ? ApplyHintMap<P, H>
-    : P;
 
 /**
  * @internal Symbol to retrieve the lazy observable accessor from a ReactiveProps proxy.
@@ -106,10 +62,16 @@ export type ReactiveProps<P extends object> = Readonly<P>;
 export function createReactiveProxy<P extends object>(ctx: ScopePropsCtx<P>): ReactiveProps<P> {
   const getObs: GetObsFn<P> = (hints) => {
     if (!ctx.props$) {
-      if (hints) ctx.hints = hints;
-      const initial = buildInitialValue(ctx);
-      ctx.props$ = observable(initial) as unknown as Observable<P>;
-      ctx.rawPrev = { ...ctx.propsRef.current } as Record<string, unknown>;
+      if (isObservable(ctx.propsRef.current)) {
+        // Outer Observable — use directly, like observable(observable) returning itself.
+        // Hints are skipped: the caller controls the Observable structure.
+        ctx.props$ = ctx.propsRef.current as unknown as Observable<P>;
+      } else {
+        if (hints) ctx.hints = hints;
+        const initial = buildInitialValue(ctx);
+        ctx.props$ = observable(initial) as unknown as Observable<P>;
+        ctx.rawPrev = { ...ctx.propsRef.current } as Record<string, unknown>;
+      }
     } else if (hints) {
       ctx.hints = hints;
     }
@@ -137,52 +99,6 @@ export function createReactiveProxy<P extends object>(ctx: ScopePropsCtx<P>): Re
   });
 }
 
-/** @internal Detect React elements (objects with $$typeof symbol) */
-function isReactElement(val: unknown): boolean {
-  return val !== null && typeof val === "object" && "$$typeof" in (val as object);
-}
-
-/** @internal Recursively apply a ScopeHint or nested hint map to a value */
-function applyHintToValue(
-  hint: ScopeHint | Record<string, unknown> | undefined,
-  val: unknown
-): unknown {
-  if (val == null) return val;
-
-  if (typeof hint === "string") {
-    switch (hint) {
-      case "opaque":
-        return ObservableHint.opaque(val as object);
-      case "plain":
-        return ObservableHint.plain(val as object);
-      case "function":
-        return ObservableHint.function(val);
-      default:
-        return val;
-    }
-  }
-
-  if (hint && typeof hint === "object") {
-    // nested hint map — only transform hinted keys, copy rest as-is
-    if (typeof val !== "object" || Array.isArray(val)) return val;
-    const src = val as Record<string, unknown>;
-    const out: Record<string, unknown> = { ...src };
-    for (const key of Object.keys(hint)) {
-      out[key] = applyHintToValue(
-        hint[key] as ScopeHint | Record<string, unknown> | undefined,
-        src[key]
-      );
-    }
-    return out;
-  }
-
-  // no hint — auto-detect
-  if (typeof val === "function") return ObservableHint.function(val);
-  if (isReactElement(val)) return ObservableHint.opaque(val as object);
-  if (Array.isArray(val) && val.some(isReactElement)) return ObservableHint.opaque(val as object);
-  return val;
-}
-
 /**
  * @internal Resolve one top-level prop field to a plain value:
  * - Observable → `peek()` (the Observable's changes are synced via `onChange` in
@@ -203,6 +119,7 @@ function readField<P extends object>(
 /**
  * @internal Build the initial plain object that backs `ctx.props$`.
  *
+ * Only called for plain-object scope params (not outer Observables).
  * Top-level Observable fields are subscribed via `onChange`; their current values
  * are stored directly in the returned object. Nested Observables are NOT supported —
  * put Observables at the top level of the props object.
@@ -251,6 +168,9 @@ export function syncProps<P extends object>(ctx: ScopePropsCtx<P>, next: P): voi
   ctx.propsRef.current = next;
   if (!ctx.props$) return; // toObs not called — nothing to sync
 
+  // Outer Observable IS ctx.props$ — nothing to sync, it's the source of truth.
+  if (isObservable(next)) return;
+
   const hints = ctx.hints as NestedHintSpec<P> | null;
 
   if (typeof hints === "string") {
@@ -284,6 +204,9 @@ export function syncProps<P extends object>(ctx: ScopePropsCtx<P>, next: P): voi
  *
  * The observable is created lazily on first call. Subsequent calls return the same instance.
  * Hints are stored and applied on every subsequent `syncProps` call (each render).
+ *
+ * When the scope param is an outer Observable, `toObs` returns it directly — like
+ * `observable(observable)` returning itself. Hints are skipped in this case.
  *
  * @param p - The ReactiveProps proxy from `useScope`
  * @param hints - Optional hint spec: scalar `'opaque'`|`'plain'`|`'function'` or per-field/nested map

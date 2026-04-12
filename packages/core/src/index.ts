@@ -33,6 +33,7 @@ export * from "@state/createProvider";
 export * from "@state/useLastChanged";
 
 export * from "@shared/filters";
+export * from "@shared/observable";
 
 export * from "@timer/useTimeoutFn";
 export * from "@timer/useIntervalFn";
