@@ -54,6 +54,13 @@ export function createRef$<T = any>(initialValue?: T | null): Ref$<T | null> {
       if (prop === "peek") return () => el$.peek();
       if (prop === "set") return (value: T | null) => el$.set(value);
       if (prop === "current") return el$.peek();
+      // Forward Function.prototype methods (bind, call, apply) to the
+      // target function. React DEV mode calls ref.bind(null) inside
+      // safelyDetachRef — without this, the Proxy would fall through to
+      // el$ (Observable) which doesn't have .bind.
+      if (prop === "bind" || prop === "call" || prop === "apply") {
+        return (fn as any)[prop].bind(fn); // eslint-disable-line @typescript-eslint/no-explicit-any
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const val = (el$ as any)[prop];
       return typeof val === "function" ? val.bind(el$) : val;

@@ -4,26 +4,57 @@ description: "Tracks the mouse/pointer cursor position reactively. Supports mult
 category: Sensors
 sidebar:
   order: 2
+type-table:
+  import: "@usels/web"
+  name: "UseMouse"
+  params:
+    children:
+      - UseMouseOptions
+  returns:
+    children:
+      - UseMouseReturn
 ---
 
 ## Demo
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useMouse } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useMouse } from "@usels/web";
 
-function Component() {
-  const { x$, y$, sourceType$ } = useMouse();
+    function Component() {
+      const { x$, y$, sourceType$ } = useMouse();
 
-  return (
-    <div>
-      {x$.get()}, {y$.get()} — {sourceType$.get()}
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          {x$.get()}, {y$.get()} — {sourceType$.get()}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createMouse } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { x$, y$, sourceType$ } = createMouse();
+
+      return (
+        <div>
+          {x$.get()}, {y$.get()} — {sourceType$.get()}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Coordinate types
 
