@@ -4,26 +4,54 @@ description: "Tracks mouse/touch press state reactively. Returns an observable b
 category: Sensors
 sidebar:
   order: 2
+type-table:
+  import: "@usels/web"
+  name: "UseMousePressed"
+  params:
+    children:
+      - UseMousePressedOptions
 ---
 
 ## Demo
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useMousePressed } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useMousePressed } from "@usels/web";
 
-function Component() {
-  const { pressed$, sourceType$ } = useMousePressed();
+    function Component() {
+      const { pressed$, sourceType$ } = useMousePressed();
 
-  return (
-    <div>
-      {pressed$.get() ? "Pressed" : "Released"} — {sourceType$.get() ?? "none"}
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          {pressed$.get() ? "Pressed" : "Released"} — {sourceType$.get() ?? "none"}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createMousePressed } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { pressed$, sourceType$ } = createMousePressed();
+
+      return (
+        <div>
+          {pressed$.get() ? "Pressed" : "Released"} — {sourceType$.get() ?? "none"}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### With target element
 

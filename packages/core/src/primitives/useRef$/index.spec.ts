@@ -125,6 +125,49 @@ describe("useRef$()", () => {
     expect(observeSpy).toHaveBeenCalledTimes(2);
   });
 
+  describe("Function.prototype methods", () => {
+    it("bind returns a function (React DEV safelyDetachRef calls ref.bind(null))", () => {
+      const { result } = renderHook(() => useRef$<HTMLDivElement>());
+      const ref = result.current;
+
+      expect(typeof ref.bind).toBe("function");
+
+      const bound = ref.bind(null);
+      expect(typeof bound).toBe("function");
+    });
+
+    it("bound ref still sets the element", () => {
+      const { result } = renderHook(() => useRef$<HTMLDivElement>());
+      const ref = result.current;
+      const bound = ref.bind(null);
+      const div = document.createElement("div");
+
+      act(() => bound(div));
+
+      expect(ref.get()).toBe(div);
+    });
+
+    it("call invokes the ref callback", () => {
+      const { result } = renderHook(() => useRef$<HTMLDivElement>());
+      const ref = result.current;
+      const div = document.createElement("div");
+
+      act(() => ref.call(null, div));
+
+      expect(ref.get()).toBe(div);
+    });
+
+    it("apply invokes the ref callback", () => {
+      const { result } = renderHook(() => useRef$<HTMLDivElement>());
+      const ref = result.current;
+      const div = document.createElement("div");
+
+      act(() => ref.apply(null, [div]));
+
+      expect(ref.get()).toBe(div);
+    });
+  });
+
   describe("initialValue", () => {
     it("get() returns initialValue when provided", () => {
       const div = document.createElement("div");

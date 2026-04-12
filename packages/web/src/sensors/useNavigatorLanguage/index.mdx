@@ -1,0 +1,56 @@
+---
+title: useNavigatorLanguage
+description: "Reactively tracks the browser's preferred language via `navigator.language`. Automatically updates when the user changes their language preference."
+category: Sensors
+sidebar:
+  order: 10
+type-table:
+  import: "@usels/web"
+  name: "UseNavigatorLanguage"
+  params:
+    children:
+      - UseNavigatorLanguageOptions
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useNavigatorLanguage } from "@usels/web";
+
+    function LanguageDisplay() {
+      const { isSupported$, language$ } = useNavigatorLanguage();
+
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Language: {language$.get()}</p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createNavigatorLanguage } from "@usels/web";
+
+    function LanguageDisplay() {
+      "use scope"
+      const { isSupported$, language$ } = createNavigatorLanguage();
+
+      return (
+        <div>
+          <p>Supported: {isSupported$.get() ? "Yes" : "No"}</p>
+          <p>Language: {language$.get()}</p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

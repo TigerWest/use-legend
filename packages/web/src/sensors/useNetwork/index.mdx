@@ -4,22 +4,46 @@ description: "Reactive network status tracking. Provides online/offline state vi
 category: Sensors
 sidebar:
   order: 8
+type-table:
+  import: "@usels/web"
+  name: "UseNetwork"
+  params:
+    children:
+      - UseNetworkOptions
 ---
 
 ## Demo
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useNetwork } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useNetwork } from "@usels/web";
 
-function Component() {
-  const { isOnline$ } = useNetwork();
+    function Component() {
+      const { isOnline$ } = useNetwork();
 
-  return <div>{isOnline$.get() ? "Online" : "Offline"}</div>;
-}
-```
+      return <div>{isOnline$.get() ? "Online" : "Offline"}</div>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createNetwork } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { isOnline$ } = createNetwork();
+
+      return <div>{isOnline$.get() ? "Online" : "Offline"}</div>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Basic usage
 
