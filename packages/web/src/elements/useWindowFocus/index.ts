@@ -1,22 +1,16 @@
 "use client";
-import type { Observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
-import { useMount } from "@legendapp/state/react";
-import { useEventListener } from "@browser/useEventListener";
-import { defaultDocument } from "@shared/configurable";
+import { useScope } from "@usels/core";
+import { createWindowFocus } from "./core";
 
-/*@__NO_SIDE_EFFECTS__*/
-export function useWindowFocus(): Observable<boolean> {
-  // Always initialize with false to match SSR output and avoid hydration mismatch.
-  // The actual value is synced after mount.
-  const focused$ = useObservable<boolean>(false);
+export { createWindowFocus } from "./core";
+export type { UseWindowFocusReturn } from "./core";
 
-  useMount(() => {
-    focused$.set(defaultDocument?.hasFocus() ?? false);
-  });
-
-  useEventListener("focus", () => focused$.set(true), { passive: true });
-  useEventListener("blur", () => focused$.set(false), { passive: true });
-
-  return focused$;
-}
+/**
+ * Tracks whether the browser window currently has focus as a reactive
+ * `Observable<boolean>`. Updates automatically on focus/blur events.
+ * SSR-safe: returns `false` when `document` is not available.
+ */
+export type UseWindowFocus = typeof createWindowFocus;
+export const useWindowFocus: UseWindowFocus = () => {
+  return useScope(() => createWindowFocus());
+};

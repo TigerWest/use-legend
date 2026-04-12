@@ -1,0 +1,49 @@
+---
+title: useWindowFocus
+description: "Tracks whether the browser window currently has focus as a reactive `Observable<boolean>`. Updates automatically when the user switches tabs, clicks away, or returns to the window. SSR-safe: returns `false` when `document` is not available."
+category: Elements
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useWindowFocus } from "@usels/web";
+
+    function Component() {
+      const focused$ = useWindowFocus();
+
+      return <p>Window is {focused$.get() ? "focused" : "blurred"}</p>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createWindowFocus } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const focused$ = createWindowFocus();
+
+      return <p>Window is {focused$.get() ? "focused" : "blurred"}</p>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Pausing work when the window loses focus
+
+```tsx
+const focused$ = useWindowFocus();
+
+useObserve(() => {
+  if (!focused$.get()) pausePolling();
+  else resumePolling();
+});
+```

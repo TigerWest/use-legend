@@ -2,6 +2,7 @@
 import { useScope } from "@primitives/useScope";
 import { createPermissionAware } from "./core";
 
+export { createPermissionAware } from "./core";
 export type { PermissionAwareOptions as UsePermissionAwareOptions } from "./core";
 export type UsePermissionAware = typeof createPermissionAware;
 
