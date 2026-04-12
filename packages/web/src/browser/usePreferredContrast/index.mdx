@@ -1,0 +1,41 @@
+---
+title: usePreferredContrast
+description: "Reactive contrast preference. Returns a `ReadonlyObservable` tracking the user's preferred contrast level (`'more'`, `'less'`, `'custom'`, or `'no-preference'`) via `prefers-contrast` media queries."
+category: Browser
+type-table:
+  import: "@usels/web"
+  name: "UsePreferredContrast"
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { usePreferredContrast } from "@usels/web";
+
+    function Component() {
+      const contrast$ = usePreferredContrast();
+
+      return <p>Contrast: {contrast$.get()}</p>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createPreferredContrast } from "@usels/web";
+
+    function Component() {
+      "use scope";
+      const contrast$ = createPreferredContrast();
+
+      return <p>Contrast: {contrast$.get()}</p>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

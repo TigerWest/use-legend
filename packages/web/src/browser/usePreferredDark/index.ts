@@ -1,11 +1,18 @@
 "use client";
-import type { UseMediaQueryOptions } from "@browser/useMediaQuery";
-import { useMediaQuery } from "@browser/useMediaQuery";
-import type { Observable } from "@legendapp/state";
+import { useScope, toObs } from "@usels/core";
+import { createPreferredDark } from "./core";
 
-export type UsePreferredDarkReturn = Observable<boolean>;
+export { createPreferredDark } from "./core";
+export type { UsePreferredDarkReturn } from "./core";
+export type { UseMediaQueryOptions } from "../useMediaQuery/core";
 
-/*@__NO_SIDE_EFFECTS__*/
-export function usePreferredDark(options?: UseMediaQueryOptions): UsePreferredDarkReturn {
-  return useMediaQuery("(prefers-color-scheme: dark)", options);
-}
+export type UsePreferredDark = typeof createPreferredDark;
+export const usePreferredDark: UsePreferredDark = (options = {}) => {
+  return useScope(
+    (opts) => {
+      const opts$ = toObs(opts, { window: "opaque" });
+      return createPreferredDark(opts$);
+    },
+    options as Record<string, unknown>
+  );
+};

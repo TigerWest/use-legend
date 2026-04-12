@@ -1,24 +1,11 @@
 "use client";
-import type { ReadonlyObservable } from "@usels/core";
-import { useMediaQuery } from "@browser/useMediaQuery";
-import { useObservable } from "@legendapp/state/react";
+import { useScope } from "@usels/core";
+import { createPreferredContrast } from "./core";
 
-export type ContrastPreference = "more" | "less" | "custom" | "no-preference";
+export { createPreferredContrast } from "./core";
+export type { ContrastPreference, UsePreferredContrastReturn } from "./core";
 
-export type UsePreferredContrastReturn = ReadonlyObservable<ContrastPreference>;
-
-/*@__NO_SIDE_EFFECTS__*/
-export function usePreferredContrast(): UsePreferredContrastReturn {
-  const isMore$ = useMediaQuery("(prefers-contrast: more)");
-  const isLess$ = useMediaQuery("(prefers-contrast: less)");
-  const isCustom$ = useMediaQuery("(prefers-contrast: custom)");
-
-  const contrast$ = useObservable<ContrastPreference>(() => {
-    if (isMore$.get()) return "more";
-    if (isLess$.get()) return "less";
-    if (isCustom$.get()) return "custom";
-    return "no-preference";
-  });
-
-  return contrast$;
-}
+export type UsePreferredContrast = typeof createPreferredContrast;
+export const usePreferredContrast: UsePreferredContrast = () => {
+  return useScope(() => createPreferredContrast());
+};
