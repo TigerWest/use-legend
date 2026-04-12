@@ -1,0 +1,62 @@
+---
+title: useOnElementRemoval
+description: "Fires a callback when the target element or any ancestor containing it is removed from the DOM. Uses [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) internally."
+category: Sensors
+sidebar:
+  order: 6
+type-table:
+  import: "@usels/web"
+  name: "UseOnElementRemoval"
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$ } from "@usels/core";
+    import { useObservable } from "@legendapp/state/react";
+    import { useOnElementRemoval } from "@usels/web";
+
+    function RemovalDetector() {
+      const el$ = useRef$<HTMLDivElement>();
+      const removed$ = useObservable(false);
+
+      useOnElementRemoval(el$, () => removed$.set(true));
+
+      return (
+        <div>
+          {!removed$.get() && <div ref={el$}>Watch me!</div>}
+          {removed$.get() && <p>Element was removed!</p>}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable, createRef$ } from "@usels/core";
+    import { createOnElementRemoval } from "@usels/web";
+
+    function RemovalDetector() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+      const removed$ = observable(false);
+
+      createOnElementRemoval(el$, () => removed$.set(true));
+
+      return (
+        <div>
+          {!removed$.get() && <div ref={el$}>Watch me!</div>}
+          {removed$.get() && <p>Element was removed!</p>}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>

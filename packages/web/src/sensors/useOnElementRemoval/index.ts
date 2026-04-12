@@ -1,53 +1,22 @@
 "use client";
-import type { DeepMaybeObservable } from "@usels/core";
-import type { MaybeEventTarget } from "../../types";
-import { get, useMaybeObservable, useWhenever } from "@usels/core";
-import { type ConfigurableDocumentOrShadowRoot, defaultDocument } from "@shared/configurable";
-import { useLatest } from "@usels/core/shared/useLatest";
-import { useMutationObserver } from "@elements/useMutationObserver";
-import { useRef } from "react";
+import { useScope } from "@usels/core";
+import { createOnElementRemoval } from "./core";
 
-export type UseOnElementRemovalOptions = ConfigurableDocumentOrShadowRoot;
+export { createOnElementRemoval } from "./core";
+export type { UseOnElementRemovalOptions } from "./core";
 
-export function useOnElementRemoval(
-  target: MaybeEventTarget,
-  callback: (mutations: MutationRecord[]) => void,
-  options?: DeepMaybeObservable<UseOnElementRemovalOptions>
-): void {
-  const opts$ = useMaybeObservable(options, { document: "element" });
-  const callbackRef = useLatest(callback);
-
-  const elRef = useRef<Element | Document | Window | null>(null);
-
-  useWhenever(
-    () => get(target) as Element | Document | Window | null,
-    (el) => {
-      elRef.current = el;
+export type UseOnElementRemoval = typeof createOnElementRemoval;
+export const useOnElementRemoval: UseOnElementRemoval = (target, callback, options) => {
+  useScope(
+    (p) => {
+      // Callback freshness via scope props — latest closure on each mutation batch.
+      const fresh = (mutations: MutationRecord[]) => {
+        const latest = p.callback as typeof callback | undefined;
+        latest?.(mutations);
+      };
+      createOnElementRemoval(target, fresh, options);
+      return {};
     },
-    {
-      immediate: true,
-    }
+    { callback }
   );
-
-  const root = (opts$.document?.peek() ?? defaultDocument) as MaybeEventTarget;
-
-  useMutationObserver(
-    root,
-    (mutations) => {
-      const el = elRef.current;
-      if (!el) return;
-
-      for (const mutation of mutations) {
-        for (let i = 0; i < mutation.removedNodes.length; i++) {
-          const removed = mutation.removedNodes[i];
-          if (removed === el || (removed instanceof Element && removed.contains(el as Node))) {
-            callbackRef.current(mutations);
-            elRef.current = null;
-            return;
-          }
-        }
-      }
-    },
-    { childList: true, subtree: true }
-  );
-}
+};
