@@ -4,27 +4,53 @@ description: "Lock and unlock scrolling on a target element or `document.body`. 
 category: Sensors
 sidebar:
   order: 4
+type-table:
+  import: "@usels/web"
+  name: "UseScrollLock"
 ---
 
 ## Demo
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useScrollLock } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useScrollLock } from "@usels/web";
 
-function Component() {
-  const { isLocked$, lock, unlock, toggle } = useScrollLock();
+    function Component() {
+      const { isLocked$, lock, unlock, toggle } = useScrollLock();
 
-  return (
-    <div>
-      <p>Scroll is {isLocked$.get() ? "locked" : "unlocked"}</p>
-      <button onClick={toggle}>Toggle scroll lock</button>
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          <p>Scroll is {isLocked$.get() ? "locked" : "unlocked"}</p>
+          <button onClick={toggle}>Toggle scroll lock</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createScrollLock } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { isLocked$, toggle } = createScrollLock();
+
+      return (
+        <div>
+          <p>Scroll is {isLocked$.get() ? "locked" : "unlocked"}</p>
+          <button onClick={toggle}>Toggle scroll lock</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### With target element
 

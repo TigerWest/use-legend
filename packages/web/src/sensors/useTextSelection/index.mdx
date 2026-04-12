@@ -4,6 +4,12 @@ description: "Reactively tracks the current text selection on the page. Listens 
 category: Sensors
 sidebar:
   order: 6
+type-table:
+  import: "@usels/web"
+  name: "UseTextSelection"
+  params:
+    children:
+      - UseTextSelectionOptions
 ---
 
 `rects$` is computed lazily — `getBoundingClientRect()` is only called when `rects$` is actually accessed, avoiding unnecessary reflows when bounding rectangles are not needed.
@@ -12,23 +18,48 @@ sidebar:
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useTextSelection } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useTextSelection } from "@usels/web";
 
-function SelectionTracker() {
-  const { text$, rects$, ranges$ } = useTextSelection();
+    function SelectionTracker() {
+      const { text$, rects$, ranges$ } = useTextSelection();
 
-  return (
-    <div>
-      <p>Select some text on the page</p>
-      <p>Selected: {text$.get() || "Nothing selected"}</p>
-      <p>Ranges: {ranges$.get().length}</p>
-      <p>Rects: {rects$.get().length}</p>
-    </div>
-  );
-}
-```
+      return (
+        <div>
+          <p>Select some text on the page</p>
+          <p>Selected: {text$.get() || "Nothing selected"}</p>
+          <p>Ranges: {ranges$.get().length}</p>
+          <p>Rects: {rects$.get().length}</p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createTextSelection } from "@usels/web";
+
+    function SelectionTracker() {
+      "use scope"
+      const { text$, rects$, ranges$ } = createTextSelection();
+
+      return (
+        <div>
+          <p>Select some text on the page</p>
+          <p>Selected: {text$.get() || "Nothing selected"}</p>
+          <p>Ranges: {ranges$.get().length}</p>
+          <p>Rects: {rects$.get().length}</p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Highlight selected area
 
@@ -75,16 +106,4 @@ Use `debounce` when you only care about the selection after the user has finishe
 
 ```typescript
 const { text$ } = useTextSelection({ debounce: 200 }); // fires 200ms after selection stops
-```
-
-Both `throttle` and `debounce` accept a plain number or a reactive `Observable<number>` for dynamic control.
-
-```typescript
-import { observable } from "@legendapp/state";
-
-const delay$ = observable(100);
-const { text$ } = useTextSelection({ throttle: delay$ });
-
-// change throttle interval at runtime
-delay$.set(50);
 ```
