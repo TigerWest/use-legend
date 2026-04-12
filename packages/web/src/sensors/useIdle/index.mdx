@@ -1,0 +1,74 @@
+---
+title: useIdle
+description: "Tracks whether the user is inactive (idle). Monitors user interaction events like mouse movement, keyboard input, touch, and window resize. After a configurable timeout with no activity, the idle state becomes true."
+category: Sensors
+sidebar:
+  order: 10
+type-table:
+  import: "@usels/web"
+  name: "UseIdle"
+  params:
+    children:
+      - UseIdleOptions
+  returns:
+    children:
+      - UseIdleReturn
+---
+
+## Demo
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useIdle } from "@usels/web";
+
+    function IdleTracker() {
+      const { idle$, lastActive$, reset } = useIdle({ timeout: 5000 });
+
+      return (
+        <div>
+          <p>Idle: {idle$.get() ? "Yes" : "No"}</p>
+          <p>Last active: {new Date(lastActive$.get()).toLocaleTimeString()}</p>
+          <button onClick={reset}>Reset</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createIdle } from "@usels/web";
+
+    function IdleTracker() {
+      "use scope"
+      const { idle$, lastActive$, reset } = createIdle({ timeout: 5000 });
+
+      return (
+        <div>
+          <p>Idle: {idle$.get() ? "Yes" : "No"}</p>
+          <p>Last active: {new Date(lastActive$.get()).toLocaleTimeString()}</p>
+          <button onClick={reset}>Reset</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Custom Events
+
+```tsx
+// @noErrors
+import { useIdle } from "@usels/web";
+
+// Only track mouse and keyboard events
+const { idle$ } = useIdle({
+  timeout: 10000,
+  events: ["mousemove", "keydown"],
+});
+```

@@ -24,7 +24,9 @@ export default function Demo() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          <ActionButton onClick={reset} tone="accent" grow>Reset Timer</ActionButton>
+          <ActionButton onClick={reset} tone="accent" grow>
+            Reset Timer
+          </ActionButton>
         </div>
       </DemoPanel>
     </DemoShell>
