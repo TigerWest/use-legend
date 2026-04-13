@@ -90,8 +90,7 @@ export function createWindowSize(
   // Re-measure when type or includeScrollbar changes (skip initial run)
   let isFirstTypeChange = true;
   observe(() => {
-    opts$.get()?.type;
-    opts$.get()?.includeScrollbar;
+    opts$.get();
     if (isFirstTypeChange) {
       isFirstTypeChange = false;
       return;
