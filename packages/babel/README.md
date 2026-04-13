@@ -7,7 +7,7 @@ A Babel plugin that automatically wraps Legend-State observable `.get()` calls i
 <div>{count$.get()}</div>
 
 // Plugin transforms to
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 <div><Memo>{() => count$.get()}</Memo></div>
 ```
 
@@ -117,7 +117,7 @@ function App() {
 }
 
 // Output
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 function App() {
   return (
     <div>
@@ -179,7 +179,7 @@ When a JSX element has `.get()` in its props, the **entire element** is wrapped 
 <Component value={obs$.get()} />
 
 // Output
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 <Memo>{() => <Component value={obs$.get()} />}</Memo>
 ```
 
@@ -259,7 +259,7 @@ Combined — `Show` with `.get()` attribute AND children:
 <Show if={obs$.get()}>{count$.get()}</Show>
 
 // Output
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 <Memo>{() => <Show if={obs$.get()}>{() => count$.get()}</Show>}</Memo>
 // ↑ children wrapped first, then whole element wrapped for attribute
 ```
