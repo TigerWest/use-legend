@@ -129,7 +129,7 @@ pluginTester({
     "does NOT wrap inside custom reactive component": {
       code: `
         function App() {
-          return <CustomReactive>{() => count$.get()}</CustomReactive>;
+          return <CustomReactive>{() => <span>{count$.get()}</span>}</CustomReactive>;
         }
       `,
     },

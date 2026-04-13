@@ -1,7 +1,7 @@
 import type { NodePath } from "@babel/core";
 import type { JSXElement, JSXOpeningElement, JSXAttribute } from "@babel/types";
 import type { PluginOptions } from "../types";
-import { hasGetCall } from "./hasGetCall";
+import { collectGetCallSources } from "./getCallSources";
 
 // React runtime special props — exclude from wrapping detection
 // key: list reconciliation would break if Auto has no key
@@ -17,6 +17,14 @@ export function hasAttributeGetCall(
   jsxElementPath: NodePath<JSXElement>,
   opts: PluginOptions
 ): boolean {
+  return collectAttributeGetCallSources(jsxElementPath, opts).size > 0;
+}
+
+export function collectAttributeGetCallSources(
+  jsxElementPath: NodePath<JSXElement>,
+  opts: PluginOptions
+): Set<string> {
+  const sources = new Set<string>();
   const openingEl = jsxElementPath.get("openingElement") as NodePath<JSXOpeningElement>;
   const attributes = openingEl.get("attributes") as NodePath[];
 
@@ -24,7 +32,7 @@ export function hasAttributeGetCall(
     // Handle spread attributes: {...obs$.get()} or {...{ value: obs$.get() }}
     if (attrPath.isJSXSpreadAttribute()) {
       const argPath = attrPath.get("argument") as NodePath;
-      if (hasGetCall(argPath, opts)) return true;
+      for (const source of collectGetCallSources(argPath, opts)) sources.add(source);
       continue;
     }
 
@@ -43,8 +51,8 @@ export function hasAttributeGetCall(
     // Skip JSXEmptyExpression ({})
     if (exprPath.isJSXEmptyExpression()) continue;
 
-    if (hasGetCall(exprPath, opts)) return true;
+    for (const source of collectGetCallSources(exprPath, opts)) sources.add(source);
   }
 
-  return false;
+  return sources;
 }

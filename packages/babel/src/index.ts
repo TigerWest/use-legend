@@ -40,6 +40,8 @@ export default function useLsPlugin({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       JSXElement: autoWrap.JSXElement as any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      JSXFragment: autoWrap.JSXFragment as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       JSXExpressionContainer: autoWrap.JSXExpressionContainer as any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       FunctionDeclaration: autoScope.FunctionDeclaration as any,

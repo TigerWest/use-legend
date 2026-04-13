@@ -214,7 +214,7 @@ describe("useScope() - component children rerender", () => {
       return createElement(
         "div",
         { "data-marker": marker, "data-testid": "child" },
-        createElement(Memo, null, () => props.el.get())
+        createElement(Memo, { children: () => props.el.get() })
       );
     });
 

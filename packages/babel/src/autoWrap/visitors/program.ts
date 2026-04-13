@@ -10,20 +10,13 @@ export function createProgramVisitor(t: typeof BabelTypes) {
       state.autoImportNeeded = false;
       state.autoImportSource = opts.importSource ?? "@usels/core";
       state.autoComponentName = opts.componentName ?? "Memo";
-      state.reactiveComponents = new Set([
-        state.autoComponentName,
-        "For",
-        "Show",
-        "Memo",
-        "Computed",
-        "Switch",
-        ...(opts.reactiveComponents ?? []),
-      ]);
+      state.reactiveComponents = new Set(opts.reactiveComponents ?? []);
       state.observerNames = new Set(["observer", ...(opts.observerNames ?? [])]);
       state.autoWrapChildrenComponents =
         opts.wrapReactiveChildren !== false
           ? new Set(["Memo", "Show", "Computed", ...(opts.wrapReactiveChildrenComponents ?? [])])
           : new Set(opts.wrapReactiveChildrenComponents ?? []);
+      state.generatedMemoSources = new WeakMap();
     },
 
     exit(path: NodePath<Program>, state: PluginState) {

@@ -41,6 +41,28 @@ pluginTester({
       `,
     },
 
+    "keeps JSX descendants inside Show eligible for Memo": {
+      code: `
+        function App() {
+          return <Show if={cond$}><span>{count$.get()}</span></Show>;
+        }
+      `,
+      output: `
+        import { Memo } from "@usels/core";
+        function App() {
+          return (
+            <Show if={cond$}>
+              {() => (
+                <span>
+                  <Memo>{() => count$.get()}</Memo>
+                </span>
+              )}
+            </Show>
+          );
+        }
+      `,
+    },
+
     "wraps Computed children in () => arrow function": {
       code: `
         function App() {
@@ -123,6 +145,40 @@ pluginTester({
       output: `
         function App() {
           return <Memo>{() => <span>{count$.get()}</span>}</Memo>;
+        }
+      `,
+    },
+
+    "wraps direct JSX fragment child in arrow function": {
+      code: `
+        function App() {
+          return <Memo><><span>{count$.get()}</span></></Memo>;
+        }
+      `,
+      output: `
+        function App() {
+          return (
+            <Memo>
+              {() => (
+                <>
+                  <span>{count$.get()}</span>
+                </>
+              )}
+            </Memo>
+          );
+        }
+      `,
+    },
+
+    "wraps text-leading children in arrow function": {
+      code: `
+        function App() {
+          return <Memo>Count: {count$.get()}</Memo>;
+        }
+      `,
+      output: `
+        function App() {
+          return <Memo>{() => <>Count: {count$.get()}</>}</Memo>;
         }
       `,
     },
@@ -210,18 +266,38 @@ pluginTester({
       `,
     },
 
-    "does NOT wrap Show children when feature is disabled": {
+    "still memo-wraps Show reactive children when function-child wrapping is disabled": {
       code: `
         function App() {
           return <Show if={cond$}>{count$.get()}</Show>;
         }
       `,
+      output: `
+        import { Memo } from "@usels/core";
+        function App() {
+          return (
+            <Show if={cond$}>
+              <Memo>{() => count$.get()}</Memo>
+            </Show>
+          );
+        }
+      `,
     },
 
-    "does NOT wrap Computed children when feature is disabled": {
+    "still memo-wraps Computed reactive children when function-child wrapping is disabled": {
       code: `
         function App() {
           return <Computed>{count$.get()}</Computed>;
+        }
+      `,
+      output: `
+        import { Memo } from "@usels/core";
+        function App() {
+          return (
+            <Computed>
+              <Memo>{() => count$.get()}</Memo>
+            </Computed>
+          );
         }
       `,
     },

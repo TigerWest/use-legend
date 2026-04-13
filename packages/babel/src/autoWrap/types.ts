@@ -7,7 +7,7 @@ export interface PluginOptions {
   allGet?: boolean;
   /** Additional method names to detect (default: ["get"]) */
   methodNames?: string[];
-  /** Skip additional reactive component names (merged with defaults: Auto, For, Show, Memo, Computed, Switch) */
+  /** Additional component names to treat as user-authored opaque reactive boundaries */
   reactiveComponents?: string[];
   /** Observer HOC function names (default: ["observer"]) */
   observerNames?: string[];
@@ -31,5 +31,6 @@ export interface PluginState {
   reactiveComponents: Set<string>;
   observerNames: Set<string>;
   autoWrapChildrenComponents: Set<string>;
+  generatedMemoSources: WeakMap<import("@babel/types").JSXElement, Set<string>>;
   opts: PluginOptions;
 }

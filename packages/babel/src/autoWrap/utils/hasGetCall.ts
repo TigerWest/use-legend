@@ -1,33 +1,6 @@
 import type { NodePath } from "@babel/core";
-import type { Node } from "@babel/types";
 import type { PluginOptions } from "../types";
-import { hasDollarSegmentInChain } from "./getRootObject";
-
-function isGetCallNode(node: Node, opts: PluginOptions): boolean {
-  if (node.type === "CallExpression") {
-    const { callee, arguments: args } = node;
-    if (callee.type !== "MemberExpression") return false;
-    if (callee.property.type !== "Identifier") return false;
-    if (callee.property.name !== "get") return false;
-    if (args.length !== 0) return false;
-    if (!opts.allGet) {
-      if (!hasDollarSegmentInChain(callee.object)) return false;
-    }
-    return true;
-  }
-  if (node.type === "OptionalCallExpression") {
-    const { callee, arguments: args } = node;
-    if (callee.type !== "OptionalMemberExpression") return false;
-    if (callee.property?.type !== "Identifier") return false;
-    if (callee.property?.name !== "get") return false;
-    if (args.length !== 0) return false;
-    if (!opts.allGet) {
-      if (!hasDollarSegmentInChain(callee.object)) return false;
-    }
-    return true;
-  }
-  return false;
-}
+import { getCallSourceKey } from "./getCallSources";
 
 /**
  * Checks if a NodePath contains a zero-argument .get() call on a $-suffixed observable.
@@ -57,7 +30,7 @@ export function hasGetCall(exprPath: NodePath, opts: PluginOptions): boolean {
   }
 
   // Check the root node itself first (traverse does NOT visit it)
-  if (isGetCallNode(exprPath.node, opts)) {
+  if (getCallSourceKey(exprPath.node, opts) !== null) {
     return true;
   }
 
@@ -82,14 +55,14 @@ export function hasGetCall(exprPath: NodePath, opts: PluginOptions): boolean {
     },
 
     OptionalCallExpression(innerPath) {
-      if (isGetCallNode(innerPath.node, opts)) {
+      if (getCallSourceKey(innerPath.node, opts) !== null) {
         found = true;
         innerPath.stop();
       }
     },
 
     CallExpression(innerPath) {
-      if (isGetCallNode(innerPath.node, opts)) {
+      if (getCallSourceKey(innerPath.node, opts) !== null) {
         found = true;
         innerPath.stop();
       }

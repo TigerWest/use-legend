@@ -64,7 +64,15 @@ pluginTester({
       output: `
         import { Memo } from "@usels/core";
         function App() {
-          return <Memo>{() => <div className={theme$.get()}>{count$.get()}</div>}</Memo>;
+          return (
+            <Memo>
+              {() => (
+                <div className={theme$.get()}>
+                  <Memo>{() => count$.get()}</Memo>
+                </div>
+              )}
+            </Memo>
+          );
         }
       `,
     },

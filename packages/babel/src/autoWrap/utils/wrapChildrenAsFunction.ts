@@ -51,6 +51,7 @@ function buildArrowBody(t: typeof BabelTypes, children: JSXChild[]): Expression 
   if (children.length === 1) {
     const child = children[0];
     if (child.type === "JSXElement") return child as JSXElement;
+    if (child.type === "JSXFragment") return child as JSXFragment as Expression;
     if (child.type === "JSXExpressionContainer") {
       const expr = (child as JSXExpressionContainer).expression;
       if (expr.type !== "JSXEmptyExpression") return expr as Expression;
@@ -77,15 +78,6 @@ export function wrapChildrenAsFunction(t: typeof BabelTypes, node: JSXElement): 
 
   if (children.length === 0) return null;
   if (areChildrenAlreadyFunction(children)) return null;
-
-  // Only wrap if first child is a JSXElement or a non-function expression
-  const firstChild = children[0];
-  const needsWrapping =
-    firstChild.type === "JSXElement" ||
-    (firstChild.type === "JSXExpressionContainer" &&
-      !ALREADY_FUNCTION_TYPES.has((firstChild as JSXExpressionContainer).expression.type));
-
-  if (!needsWrapping) return null;
 
   const elementName = node.openingElement.name.name;
   const body = buildArrowBody(t, children);

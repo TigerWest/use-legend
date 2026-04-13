@@ -21,18 +21,46 @@ pluginTester({
       `,
     },
 
-    "does NOT wrap inside <For>": {
+    "wraps inside <For> callback when the callback reads observable sources": {
       code: `
         function App() {
-          return <For each={list$}>{(item) => <div>{item.name.get()}</div>}</For>;
+          return <For each={list$}>{(item$) => <div>{item$.name.get()}</div>}</For>;
+        }
+      `,
+      output: `
+        import { Memo } from "@usels/core";
+        function App() {
+          return (
+            <For each={list$}>
+              {(item$) => (
+                <div>
+                  <Memo>{() => item$.name.get()}</Memo>
+                </div>
+              )}
+            </For>
+          );
         }
       `,
     },
 
-    "does NOT wrap inside <Show>": {
+    "wraps inside <Show> because only manual Memo is opaque": {
       code: `
         function App() {
           return <Show if={isVisible$}>{() => <span>{label$.get()}</span>}</Show>;
+        }
+      `,
+      output: `
+        import { Memo } from "@usels/core";
+        function App() {
+          return (
+            <Show if={isVisible$}>
+              {() => (
+                <span>
+                  <Memo>{() => label$.get()}</Memo>
+                </span>
+              )}
+            </Show>
+          );
         }
       `,
     },
@@ -45,18 +73,42 @@ pluginTester({
       `,
     },
 
-    "does NOT wrap inside <Computed>": {
+    "wraps inside <Computed> because only manual Memo is opaque": {
       code: `
         function App() {
           return <Computed>{() => <p>{count$.get()}</p>}</Computed>;
         }
       `,
+      output: `
+        import { Memo } from "@usels/core";
+        function App() {
+          return (
+            <Computed>
+              {() => (
+                <p>
+                  <Memo>{() => count$.get()}</Memo>
+                </p>
+              )}
+            </Computed>
+          );
+        }
+      `,
     },
 
-    "does NOT wrap inside <Switch>": {
+    "wraps inside <Switch> because only manual Memo is opaque": {
       code: `
         function App() {
           return <Switch value={val$}>{count$.get()}</Switch>;
+        }
+      `,
+      output: `
+        import { Memo } from "@usels/core";
+        function App() {
+          return (
+            <Switch value={val$}>
+              <Memo>{() => count$.get()}</Memo>
+            </Switch>
+          );
         }
       `,
     },

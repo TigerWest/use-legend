@@ -120,7 +120,13 @@ pluginTester({
           return (
             <div>
               <Memo>{() => count$.get()}</Memo>
-              <Memo>{() => <span className={color$.get()}>{label$.get()}</span>}</Memo>
+              <Memo>
+                {() => (
+                  <span className={color$.get()}>
+                    <Memo>{() => label$.get()}</Memo>
+                  </span>
+                )}
+              </Memo>
             </div>
           );
         }
@@ -179,7 +185,13 @@ pluginTester({
           return (
             <ul>
               {items.map((item$) => (
-                <Memo>{() => <li className={item$.class.get()}>{item$.name.get()}</li>}</Memo>
+                <Memo>
+                  {() => (
+                    <li className={item$.class.get()}>
+                      <Memo>{() => item$.name.get()}</Memo>
+                    </li>
+                  )}
+                </Memo>
               ))}
             </ul>
           );

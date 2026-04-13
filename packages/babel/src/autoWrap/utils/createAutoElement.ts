@@ -1,5 +1,5 @@
 import type { types as BabelTypes } from "@babel/core";
-import type { Expression, JSXElement } from "@babel/types";
+import type { Expression, JSXElement, JSXFragment } from "@babel/types";
 
 /**
  * Creates an AST node for: <ComponentName>{() => expression}</ComponentName>
@@ -8,7 +8,7 @@ import type { Expression, JSXElement } from "@babel/types";
  */
 export function createAutoElement(
   t: typeof BabelTypes,
-  expression: Expression | JSXElement,
+  expression: Expression | JSXElement | JSXFragment,
   componentName: string
 ): JSXElement {
   const arrowFn = t.arrowFunctionExpression([], expression as Expression);

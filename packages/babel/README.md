@@ -39,9 +39,10 @@ import { Memo } from "@legendapp/state/react";
 2. **Auto-wraps JSX attributes** — element with `.get()` in props → entire element wrapped in `<Memo>`
 3. **Auto-wraps reactive children** — `<Memo>{expr}</Memo>` → `<Memo>{() => expr}</Memo>` (replaces `@legendapp/state/babel`)
 4. **Auto-adds import** — `import { Memo } from "@legendapp/state/react"` added automatically
-5. **No double-wrapping** — skips already-reactive contexts (`Memo`, `Show`, `Computed`, `For`, `observer()`)
+5. **Source-aware boundaries** — generated `Memo` boundaries can nest when child JSX reads different sources
 6. **Safe detection** — only wraps `$`-suffixed observables by default, skips `Map.get('key')`
 7. **Supports optional chaining** — `obs$?.get()` and `obs$.items[0].get()` detected correctly
+8. **Respects manual Memo** — user-authored `<Memo>` is treated as an explicit boundary; only its children are normalized to a function
 
 ---
 
@@ -129,7 +130,7 @@ function App() {
 }
 ```
 
-Multiple `.get()` calls in a single expression are wrapped together:
+Multiple `.get()` calls in an unsplittable expression are wrapped together:
 
 ```jsx
 // Input
@@ -139,7 +140,7 @@ Multiple `.get()` calls in a single expression are wrapped together:
 <p><Memo>{() => a$.get() + " " + b$.get()}</Memo></p>
 ```
 
-Ternary and conditional expressions:
+Ternary and conditional expressions split branch reads when that preserves render semantics:
 
 ```jsx
 // Input
@@ -151,6 +152,20 @@ Ternary and conditional expressions:
 <div><Memo>{() => isActive$.get() ? "ON" : "OFF"}</Memo></div>
 <div><Memo>{() => show$.get() && <Modal />}</Memo></div>
 <div><Memo>{() => isVisible$.get() ? <A /> : <B />}</Memo></div>
+```
+
+When a condition and its branches read different sources, the condition becomes the outer boundary and each reactive branch can get its own nested boundary:
+
+```jsx
+// Input
+<div>{a$.get() ? b$.get() : c$.get()}</div>
+
+// Output
+<div>
+  <Memo>
+    {() => (a$.get() ? <Memo>{() => b$.get()}</Memo> : <Memo>{() => c$.get()}</Memo>)}
+  </Memo>
+</div>
 ```
 
 ---
@@ -178,7 +193,7 @@ Multiple attributes with `.get()` are wrapped together in one `<Memo>`:
 <Memo>{() => <Component value={obs$.get()} label={name$.get()} />}</Memo>
 ```
 
-Attributes + children together — whole element is wrapped:
+Attributes + children together — the element is wrapped for the prop source, and child reads can keep their own boundary when they read a different source:
 
 ```jsx
 // Input
@@ -189,7 +204,7 @@ Attributes + children together — whole element is wrapped:
 // Output
 <Memo>{() =>
   <div className={theme$.get()}>
-    {count$.get()}
+    <Memo>{() => count$.get()}</Memo>
   </div>
 }</Memo>
 ```
@@ -249,6 +264,40 @@ import { Memo } from "@legendapp/state/react";
 // ↑ children wrapped first, then whole element wrapped for attribute
 ```
 
+#### Manual Memo policy
+
+User-authored `<Memo>` is treated as a manual render boundary. The plugin still normalizes non-function children to `() =>`, but it does not create additional generated `Memo` boundaries inside that manual `Memo`.
+
+```jsx
+// Input
+<Memo>
+  <>
+    <span>{count$.get()}</span>
+    <strong>{total$.get()}</strong>
+  </>
+</Memo>
+
+// Output
+<Memo>
+  {() => (
+    <>
+      <span>{count$.get()}</span>
+      <strong>{total$.get()}</strong>
+    </>
+  )}
+</Memo>
+```
+
+This preserves the scope the user chose. It also means a broad manual `Memo` groups all reads inside that boundary. If fine-grained rendering is more important, either let the plugin generate the boundaries or keep manual `Memo` scopes narrow.
+
+```jsx
+// Input
+<Memo>{a$.get() ? b$.get() : c$.get()}</Memo>
+
+// Output: children are normalized, but branches are not split inside manual Memo
+<Memo>{() => a$.get() ? b$.get() : c$.get()}</Memo>
+```
+
 ---
 
 ## Skip Cases
@@ -259,7 +308,7 @@ The plugin intentionally skips these cases:
 |------|---------|--------|
 | `.get()` with arguments | `map.get('key')` | `Map.prototype.get` takes args |
 | No `$` suffix | `store.get()` | Not a Legend-State observable (use `allGet: true` to override) |
-| Already inside reactive context | `<Memo>{() => count$.get()}</Memo>` | Already reactive — no double-wrapping |
+| Inside user-authored `Memo` | `<Memo>{() => count$.get()}</Memo>` | Manual `Memo` is an explicit boundary; children normalization still applies |
 | Inside `observer()` HOC | `observer(() => <div>{obs$.get()}</div>)` | Whole component is reactive |
 | Already a function child | `<Memo>{() => ...}</Memo>` | Already wrapped |
 | Identifier/reference child | `<Memo>{renderFn}</Memo>` | Function reference — already correct |
@@ -299,8 +348,7 @@ interface PluginOptions {
   methodNames?: string[];
 
   /**
-   * Additional reactive component names to skip
-   * Merged with defaults: Auto, For, Show, Memo, Computed, Switch
+   * Additional component names to treat as user-authored opaque reactive boundaries
    */
   reactiveComponents?: string[];
 
@@ -344,7 +392,7 @@ interface PluginOptions {
   wrapReactiveChildren: false,
 }]
 
-// Add custom reactive components to skip list
+// Add custom reactive components to treat as manual boundaries
 ['@usels/babel-plugin-legend-memo', {
   reactiveComponents: ['MyObserver', 'ReactiveContainer'],
 }]
@@ -427,7 +475,8 @@ const MyComponent = observer(() => {
 ### ✅ Do: Use `For` for reactive lists
 
 ```tsx
-// For handles list reactivity — plugin skips inside For
+// For handles list mapping. JSX returned from the item renderer is still eligible
+// for source-aware Memo wrapping unless it is inside a manual Memo or observer().
 <For each={items$}>
   {(item$) => (
     <li key={item$.id.get()}>
@@ -437,27 +486,39 @@ const MyComponent = observer(() => {
 </For>
 ```
 
-### ❌ Don't: Manually add `<Memo>` around expressions (already handled)
+### ✅ Do: Keep manual `<Memo>` boundaries narrow when you need them
 
 ```tsx
-// ❌ Redundant — plugin already wraps expressions
+// Manual Memo is respected as a boundary.
+// The plugin will normalize children to () => but won't split inside it.
+<Memo>
+  <PriceRow price$={price$} total$={total$} />
+</Memo>
+```
+
+### ❌ Don't: Manually add broad `<Memo>` around expressions the plugin can handle
+
+```tsx
+// ❌ Redundant, and it groups both reads into one manual boundary
 <div>
-  <Memo>{() => count$.get()}</Memo>
+  <Memo>
+    {count$.get()} / {total$.get()}
+  </Memo>
 </div>
 
 // ✅ Just write the expression
 <div>
-  {count$.get()}
+  {count$.get()} / {total$.get()}
 </div>
 ```
 
-### ❌ Don't: Manually write `() =>` inside Memo/Show/Computed
+### ✅ Prefer: Let the plugin add `() =>` inside Memo/Show/Computed
 
 ```tsx
-// ❌ Redundant — plugin auto-wraps children
+// Redundant — plugin auto-wraps children
 <Memo>{() => count$.get()}</Memo>
 
-// ✅ Plugin handles this
+// Prefer this unless you are intentionally passing a function/reference child
 <Memo>{count$.get()}</Memo>
 ```
 

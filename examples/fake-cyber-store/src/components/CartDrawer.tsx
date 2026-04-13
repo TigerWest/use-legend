@@ -9,15 +9,8 @@ import type { CartLine } from "@/types";
 
 export function CartDrawer() {
   "use scope";
-  const {
-    cartCount$,
-    cartLines$,
-    clearCart,
-    closeCart,
-    isCartHydrated$,
-    isCartOpen$,
-    subtotal$,
-  } = getCyberStore();
+  const { cartCount$, cartLines$, clearCart, closeCart, isCartHydrated$, isCartOpen$, subtotal$ } =
+    getCyberStore();
 
   return (
     <Show if={isCartOpen$}>
