@@ -232,7 +232,7 @@ function TodoApp() {
 
 export default function DefineStoreDemo() {
   return (
-    <StoreProvider _devtools>
+    <StoreProvider dangerouslyUseInProduction>
       <TodoApp />
     </StoreProvider>
   );

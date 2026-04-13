@@ -19,7 +19,7 @@ interface StoreDefinition {
 
 export interface StoreProviderProps {
   children: React.ReactNode;
-  _devtools?: boolean;
+  dangerouslyUseInProduction?: boolean;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- intentional: conditional type matching requires `any` */
@@ -104,7 +104,7 @@ function resolveStore<T>(name: string, setup: () => T, value: StoreRegistryValue
         scope._beforeMountCbs.length = 0;
       }
 
-      if (process.env.NODE_ENV !== "production" || value.devtools) {
+      if (process.env.NODE_ENV !== "production" || value.dangerouslyUseInProduction) {
         const store = instance as Record<string, unknown>;
         wrapStoreActions(name, store, value.actionTrackers);
         void import("./devtools")

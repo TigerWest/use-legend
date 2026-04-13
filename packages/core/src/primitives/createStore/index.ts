@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { EffectScope } from "../useScope/effectScope";
+import type { StoreProviderProps } from "./core";
 import type { ActionTracker, StoreRegistryValue } from "./storeContext";
 import { StoreRegistryContext } from "./storeContext";
 
@@ -30,15 +31,15 @@ export function useStoreRegistry(): StoreRegistryValue | null {
  * the initial render (before StoreProvider's useEffect runs). Stores accessed
  * after mount will NOT have their onMount callbacks executed.
  */
-export const StoreProvider: React.FC<{
-  children: React.ReactNode;
-  _devtools?: boolean;
-}> = ({ children, _devtools = false }) => {
+export const StoreProvider: React.FC<StoreProviderProps> = ({
+  children,
+  dangerouslyUseInProduction = false,
+}) => {
   const [value] = React.useState<StoreRegistryValue>(() => ({
     registry: new Map<string, unknown>(),
     scopes: new Map<string, EffectScope>(),
     mounted: false,
-    devtools: _devtools,
+    dangerouslyUseInProduction,
     actionTrackers: new Map<string, ActionTracker>(),
   }));
 
@@ -82,7 +83,7 @@ export const StoreProvider: React.FC<{
 
       // Clean up registry — always clear synchronously to prevent stale hits
       // (scopes.clear() is already synchronous above; registry must match)
-      if (process.env.NODE_ENV !== "production" || value.devtools) {
+      if (process.env.NODE_ENV !== "production" || value.dangerouslyUseInProduction) {
         const registrySnapshot = new Map(value.registry);
         value.registry.clear();
         void import("./devtools").then(({ cleanupDevTools }) => {

@@ -45,6 +45,13 @@ describe("createStore() — types", () => {
         children: null,
       });
     });
+
+    it("StoreProvider accepts dangerouslyUseInProduction prop", () => {
+      expectTypeOf(StoreProvider).toBeCallableWith({
+        children: null,
+        dangerouslyUseInProduction: true,
+      });
+    });
   });
 
   describe("generic inference", () => {

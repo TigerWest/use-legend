@@ -199,13 +199,14 @@ function App() {
 ### Redux DevTools integration
 
 Stores auto-connect to Redux DevTools Extension in development mode.
+Pass `dangerouslyUseInProduction` to `StoreProvider` only when you explicitly want the same DevTools integration in production.
 
 - **Action entries** (`storeName/actionName`) — logged when an action function is called.
 - **State entries** (`storeName/__state`) — logged when observables change outside an action. Multiple synchronous changes are batched into one entry.
 
 ```tsx
 import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, StoreProvider } from "@usels/core";
 
 const [useAppStore] = createStore("app", () => {
   const theme$ = observable<"light" | "dark">("light");
@@ -216,6 +217,14 @@ const [useAppStore] = createStore("app", () => {
 // DevTools timeline:
 // @@INIT          → { theme$: "light" }
 // app/toggleTheme → { theme$: "dark" }
+
+function App() {
+  return (
+    <StoreProvider dangerouslyUseInProduction>
+      <MainContent />
+    </StoreProvider>
+  );
+}
 ```
 
 ## StoreProvider

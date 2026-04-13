@@ -14,7 +14,7 @@ function StoreMount({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <StoreProvider _devtools>
+    <StoreProvider dangerouslyUseInProduction>
       <StoreMount>{children}</StoreMount>
     </StoreProvider>
   );

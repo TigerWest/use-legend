@@ -13,7 +13,7 @@ export interface StoreRegistryValue {
   registry: Map<string, unknown>;
   scopes: Map<string, EffectScope>;
   mounted: boolean;
-  devtools: boolean;
+  dangerouslyUseInProduction: boolean;
   actionTrackers: Map<string, ActionTracker>;
 }
 

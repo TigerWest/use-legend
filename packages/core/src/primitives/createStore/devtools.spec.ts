@@ -14,7 +14,7 @@ function createTestValue(): StoreRegistryValue {
     registry: new Map<string, unknown>(),
     scopes: new Map(),
     mounted: false,
-    devtools: false,
+    dangerouslyUseInProduction: false,
     actionTrackers: new Map(),
   };
 }
