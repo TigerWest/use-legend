@@ -1,8 +1,8 @@
-import pluginTester from 'babel-plugin-tester';
-import plugin from '../../src';
+import pluginTester from "babel-plugin-tester";
+import plugin from "../../src";
 
 const babelOptions = {
-  plugins: ['@babel/plugin-syntax-jsx'],
+  plugins: ["@babel/plugin-syntax-jsx"],
   configFile: false,
   babelrc: false,
 };
@@ -11,16 +11,16 @@ pluginTester({
   plugin,
   pluginOptions: {},
   babelOptions,
-  title: 'basic transforms',
+  title: "basic transforms",
   tests: {
-    'wraps $-suffixed observable .get() in JSX child': {
+    "wraps $-suffixed observable .get() in JSX child": {
       code: `
         function App() {
           return <div>{count$.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -31,14 +31,14 @@ pluginTester({
       `,
     },
 
-    'wraps chained .get() (user$.profile.name.get())': {
+    "wraps chained .get() (user$.profile.name.get())": {
       code: `
         function App() {
           return <span>{user$.profile.name.get()}</span>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <span>
@@ -49,14 +49,14 @@ pluginTester({
       `,
     },
 
-    'wraps complex expression with multiple .get() in one Auto': {
+    "wraps complex expression with multiple .get() in one Auto": {
       code: `
         function App() {
           return <p>{a$.get() + " " + b$.get()}</p>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <p>
@@ -67,14 +67,14 @@ pluginTester({
       `,
     },
 
-    'wraps ternary containing .get()': {
+    "wraps ternary containing .get()": {
       code: `
         function App() {
           return <div>{isActive$.get() ? "ON" : "OFF"}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -85,14 +85,14 @@ pluginTester({
       `,
     },
 
-    'wraps logical AND conditional rendering': {
+    "wraps logical AND conditional rendering": {
       code: `
         function App() {
           return <div>{show$.get() && <Modal />}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -103,14 +103,14 @@ pluginTester({
       `,
     },
 
-    'wraps JSX-containing expression (ternary with JSX)': {
+    "wraps JSX-containing expression (ternary with JSX)": {
       code: `
         function App() {
           return <div>{isVisible$.get() ? <A /> : <B />}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -121,14 +121,14 @@ pluginTester({
       `,
     },
 
-    'wraps span child that contains .get()': {
+    "wraps span child that contains .get()": {
       code: `
         function App() {
           return <div><span>{name$.get()}</span><p>static</p></div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -142,15 +142,15 @@ pluginTester({
       `,
     },
 
-    'does not add import if already present': {
+    "does not add import if already present": {
       code: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return <div>{count$.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -161,7 +161,7 @@ pluginTester({
       `,
     },
 
-    'does not add import when no transforms occur': {
+    "does not add import when no transforms occur": {
       code: `
         function App() {
           return <div>hello world</div>;
@@ -169,7 +169,7 @@ pluginTester({
       `,
     },
 
-    'does not transform JSX without .get()': {
+    "does not transform JSX without .get()": {
       code: `
         function App() {
           return <div>{someValue}</div>;
@@ -177,7 +177,7 @@ pluginTester({
       `,
     },
 
-    'does not transform non-JSX .get()': {
+    "does not transform non-JSX .get()": {
       code: `const x = count$.get();`,
     },
   },

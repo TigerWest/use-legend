@@ -1,185 +1,198 @@
 ---
 title: Getting Started
-description: Install use-legend and explore observable-native React hooks built on Legend-State.
+description: Install use-legend and build with local scopes, global stores, and fine-grained observable reads.
 ---
 
-`use-legend` is a collection of observable-native React utility hooks inspired by [VueUse](https://vueuse.org/) and [react-use](https://github.com/streamich/react-use). While those libraries target Vue's reactivity system and React's `useState`/`useEffect` respectively, `use-legend` is built from the ground up for [Legend-State](https://legendapp.com/open-source/state/) observables — delivering fine-grained reactivity without whole-component re-renders.
+`use-legend` starts from local state, then lets you promote state to a shared
+store when it becomes app or domain state.
 
-## Installation
+- Use `"use scope"` for component-local observables and scoped effects.
+- Use `createStore()` for provider-scoped global state.
+- Use `create*` and `use*` APIs for timers, browser APIs, sensors, sync, and
+  integrations without changing the state model.
+
+These examples assume the Vite plugin is configured. The plugin transforms
+`"use scope"` into `useScope(...)` and wraps JSX `.get()` reads with `Memo`
+boundaries, so only the read expression updates.
+
+## Install
 
 ```bash
-# Web + required peer deps
-npm install @usels/web @legendapp/state@beta react
-
-
-# Auto Memo transform plugin (recommended)
-npm install -D @usels/vite-plugin-legend-memo
+pnpm add @usels/core @usels/web react
+pnpm add -D @usels/vite-plugin @usels/babel-plugin @babel/core
 ```
 
----
+Use `@usels/core` for local scopes, global stores, reactivity, timers, and sync
+primitives. Add `@usels/web` when you need browser, element, or sensor APIs.
 
-## What makes these hooks different?
+## Configure Vite
 
-`use-legend` hooks don't use `useState` internally. Instead, they return **Legend-State observables** — fine-grained reactive values that update without re-rendering the entire component tree.
-
----
-
-## Auto Memo — Vite & Babel plugin
-
-Legend-State's `<Memo>` subscribes to its function child with fine-grained reactivity. Writing this wrapper by hand is repetitive — the plugin automates it at build time.
-
-```tsx
-// Without the plugin — manual wrapping required
-<button>
-  <Memo>{() => count$.get()}</Memo> times
-</button>
-
-// With the plugin — write count$.get() as-is
-<button>
-  {count$.get()} times  {/* compiled to the same output above */}
-</button>
-```
-
-### Vite setup
-
-```typescript
+```ts
 // vite.config.ts
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { autoWrap } from '@usels/vite-plugin-legend-memo';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import useLegend from "@usels/vite-plugin";
 
 export default defineConfig({
-  plugins: [
-    autoWrap(), // must come before react()
-    react(),
-  ],
+  plugins: [useLegend(), react()],
 });
 ```
 
-> `autoWrap()` runs with `enforce: "pre"`, so it transforms JSX before `@vitejs/plugin-react`'s esbuild pass.
+Place `useLegend()` before `react()`. It runs before JSX is compiled.
 
-### Babel-only setup
+If you are not using Vite, configure the underlying Babel plugin instead:
 
-```bash
-npm install -D @usels/babel-plugin-legend-memo
-```
-
-```javascript
+```js
 // babel.config.js
 module.exports = {
-  plugins: ['@usels/babel-plugin-legend-memo'],
+  plugins: ["@usels/babel-plugin"],
 };
 ```
 
-### Detection rules
+## Start With Local Scope
 
-| Expression | Transformed | Reason |
-|------------|:-----------:|--------|
-| `count$.get()` | ✅ | `$`-suffixed variable, no arguments |
-| `user$.name.get()` | ✅ | nested paths are detected |
-| `obs$?.get()` | ✅ | optional chaining supported |
-| `list$.get(0)` | ❌ | has arguments (key access) |
-| `count.get()` | ❌ | no `$` suffix |
-| `.get()` inside `observer` | ❌ | already inside a reactive context |
-
-> Set `allGet: true` to detect every `.get()` call regardless of the `$` suffix.
-
----
-
-## Explore the hooks
-
-> The examples below assume `@usels/vite-plugin-legend-memo` is configured. Every `count$.get()` expression is automatically compiled into `<Memo>{() => count$.get()}</Memo>` — only that expression re-renders when the observable changes, not the parent component.
-
-### Observable element ref — `useRef$`
-
-The foundation of `use-ls`. `useRef$` works like React's `useRef` but returns a `Ref$` — an observable that any `use-ls` hook can react to automatically.
+Use `"use scope"` when state belongs to one component or one custom hook.
 
 ```tsx
-import { useRef$, useEventListener } from '@usels/web';
-import { observable } from '@legendapp/state';
+import { observable } from "@usels/core";
 
-function ClickCounter() {
-  const button$ = useRef$<HTMLButtonElement>();
+function Counter() {
+  "use scope";
+
   const count$ = observable(0);
+  const increment = () => count$.set((value) => value + 1);
 
-  useEventListener(button$, 'click', () => {
-    count$.set(c => c + 1);
+  return <button onClick={increment}>Clicked {count$.get()} times</button>;
+}
+```
+
+`count$` and `increment` are created once for that component mount. When
+`count$` changes, the text that reads `count$.get()` updates through a
+fine-grained boundary instead of making the whole component the default update
+unit.
+
+## Add Scoped Effects
+
+Use scope-aware `observe()`, `onMount()`, `onUnmount()`, and `onBeforeMount()`
+inside a scope. They are registered to the current scope and cleaned up when the
+component unmounts.
+
+```tsx
+import { createDebounced, observable, observe } from "@usels/core";
+
+function ProductSearch({ onSearch }: { onSearch: (query: string) => void }) {
+  "use scope";
+
+  const draft$ = observable("");
+  const debounced$ = createDebounced(draft$, { ms: 150 });
+
+  observe(() => {
+    onSearch(debounced$.get());
   });
 
   return (
-    <button ref={button$}>
-      Clicked {count$.get()} times
-    </button>
+    <input
+      value={draft$.get()}
+      onChange={(event) => draft$.set(event.currentTarget.value)}
+      placeholder="Search products"
+    />
   );
 }
 ```
 
-When `button$` mounts or is replaced, `useEventListener` re-registers automatically. `count$` is managed as a Legend-State observable — no `useState` needed.
+Use `toObs()` when props need reactive tracking inside the scope factory. Plain
+prop reads stay available as latest-value reads.
 
----
+## Promote Shared State To A Store
 
-### Element size — `useElementSize`
-
-Tracks an element's dimensions as an observable. No manual `ResizeObserver` setup required.
+Use `createStore()` when state needs a provider boundary and shared access across
+multiple components.
 
 ```tsx
-import { useRef$, useElementSize } from '@usels/web';
+import { createStore, observable, StoreProvider } from "@usels/core";
 
-function SizeDisplay() {
-  const el$ = useRef$<HTMLDivElement>();
-  const size$ = useElementSize(el$);
+const [useProductStore, getProductStore] = createStore("products", () => {
+  const query$ = observable("");
+  const cart$ = observable<Record<string, number>>({});
 
-  return (
-    <div ref={el$} style={{ resize: 'both', overflow: 'auto', padding: 16 }}>
-      {`${size$.width.get().toFixed(0)} × ${size$.height.get().toFixed(0)}`}
-    </div>
+  const cartCount$ = observable(() =>
+    Object.values(cart$.get()).reduce((sum, quantity) => sum + quantity, 0)
   );
+
+  const setQuery = (query: string) => query$.set(query);
+
+  const addToCart = (id: string, quantity = 1) => {
+    cart$.set((cart) => ({
+      ...cart,
+      [id]: (cart[id] ?? 0) + quantity,
+    }));
+  };
+
+  return { query$, cart$, cartCount$, setQuery, addToCart };
+});
+
+function App() {
+  return (
+    <StoreProvider>
+      <CartButton />
+    </StoreProvider>
+  );
+}
+
+function CartButton() {
+  const { cartCount$, addToCart } = useProductStore();
+
+  return <button onClick={() => addToCart("keyboard")}>Cart {cartCount$.get()}</button>;
 }
 ```
 
-`size$.width` and `size$.height` update whenever the element resizes. Only the expression that reads the observable re-renders.
+`createStore(name, setup)` returns `[useStore, getStore]`.
 
----
+- Use `useStore()` in React components.
+- Use `getStore()` inside another store setup function or inside a `"use scope"`
+  factory rendered under `StoreProvider`.
+- Use `StoreProvider` to isolate store instances for SSR, tests, embedded roots,
+  and app boundaries.
 
-### Scroll position — `useScroll`
+## Combine Store And Scope
 
-Tracks an element's scroll position as an observable.
+A common pattern is to keep fast-changing draft state local, then sync the stable
+result into a global store.
 
 ```tsx
-import { useRef$, useScroll } from '@usels/web';
+import { createDebounced, observable, observe } from "@usels/core";
 
-function ScrollTracker() {
-  const container$ = useRef$<HTMLDivElement>();
-  const scroll$ = useScroll(container$);
+function StoreBackedSearch() {
+  "use scope";
+
+  const { setQuery } = getProductStore();
+  const draft$ = observable("");
+  const query$ = createDebounced(draft$, { ms: 150 });
+
+  observe(() => {
+    setQuery(query$.get());
+  });
 
   return (
-    <div ref={container$} style={{ height: 300, overflowY: 'scroll' }}>
-      <div style={{ height: 1000, paddingTop: 16 }}>
-        {`scrollY: ${scroll$.y.get().toFixed(0)}px`}
-      </div>
-    </div>
+    <input
+      value={draft$.get()}
+      onChange={(event) => draft$.set(event.currentTarget.value)}
+      placeholder="Search products"
+    />
   );
 }
 ```
 
-To track the entire window's scroll position, use `useWindowScroll()` instead.
+This keeps keystroke-level UI state local to the component while the shared store
+receives debounced domain state.
 
----
+## What To Use Next
 
-### Media query — `useMediaQuery`
-
-Returns a CSS media query result as an observable boolean. Breakpoint logic can be lifted out of components into shared observables.
-
-```tsx
-import { useMediaQuery } from '@usels/web';
-
-function Layout() {
-  const isMobile$ = useMediaQuery('(max-width: 768px)');
-
-  return (
-    {isMobile$.get() ? <MobileNav /> : <DesktopNav />}
-  );
-}
-```
-
----
+| Need                               | Use                                           |
+| ---------------------------------- | --------------------------------------------- |
+| Local component state and effects  | `"use scope"`, `useScope`, `observe`, `toObs` |
+| Shared app or domain state         | `createStore()`, `StoreProvider`              |
+| Derived values                     | `observable(() => ...)`                       |
+| Lists and conditionals             | `For`, `Show`, `Memo`                         |
+| Browser, element, and sensor state | `@usels/web` `create*` and `use*` APIs        |
+| Data fetching integration          | `@usels/tanstack-query`                       |

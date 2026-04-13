@@ -30,18 +30,15 @@
     "reactive"
   ],
   "dependencies": {
-    "@tanstack/query-core": "^5.90.20",
-    "@usels/core": "workspace:*"
+    "@legendapp/state": "3.0.0-beta.44",
+    "@tanstack/query-core": "^5.90.20"
   },
   "peerDependencies": {
-    "@legendapp/state": "^2.0.0 || ^3.0.0-beta.0",
+    "@usels/core": "^0.9.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
-    "@legendapp/state": {
-      "optional": true
-    },
     "react": {
       "optional": true
     },
@@ -50,7 +47,6 @@
     }
   },
   "devDependencies": {
-    "@legendapp/state": "3.0.0-beta.44",
     "@tanstack/query-core": "^5.90.20",
     "@tanstack/react-query": "^5.60.0",
     "@testing-library/jest-dom": "^6.6.0",
@@ -58,6 +54,7 @@
     "@types/node": "^25.3.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@usels/core": "workspace:*",
     "@vitest/browser": "^4.0.18",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-istanbul": "^4.0.18",

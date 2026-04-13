@@ -1,8 +1,8 @@
-import pluginTester from 'babel-plugin-tester';
-import plugin from '../../src';
+import pluginTester from "babel-plugin-tester";
+import plugin from "../../src";
 
 const babelOptions = {
-  plugins: ['@babel/plugin-syntax-jsx'],
+  plugins: ["@babel/plugin-syntax-jsx"],
   configFile: false,
   babelrc: false,
 };
@@ -11,9 +11,9 @@ pluginTester({
   plugin,
   pluginOptions: {},
   babelOptions,
-  title: 'skip / edge cases',
+  title: "skip / edge cases",
   tests: {
-    'does NOT wrap inside existing <Memo>': {
+    "does NOT wrap inside existing <Memo>": {
       code: `
         function App() {
           return <Memo>{() => count$.get()}</Memo>;
@@ -21,7 +21,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap inside <For>': {
+    "does NOT wrap inside <For>": {
       code: `
         function App() {
           return <For each={list$}>{(item) => <div>{item.name.get()}</div>}</For>;
@@ -29,7 +29,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap inside <Show>': {
+    "does NOT wrap inside <Show>": {
       code: `
         function App() {
           return <Show if={isVisible$}>{() => <span>{label$.get()}</span>}</Show>;
@@ -37,7 +37,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap inside <Memo>': {
+    "does NOT wrap inside <Memo>": {
       code: `
         function App() {
           return <Memo>{() => <p>{count$.get()}</p>}</Memo>;
@@ -45,7 +45,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap inside <Computed>': {
+    "does NOT wrap inside <Computed>": {
       code: `
         function App() {
           return <Computed>{() => <p>{count$.get()}</p>}</Computed>;
@@ -53,7 +53,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap inside <Switch>': {
+    "does NOT wrap inside <Switch>": {
       code: `
         function App() {
           return <Switch value={val$}>{count$.get()}</Switch>;
@@ -61,7 +61,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap inside observer() HOC': {
+    "does NOT wrap inside observer() HOC": {
       code: `const Comp = observer(() => <div>{obs$.get()}</div>);`,
     },
 
@@ -73,7 +73,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap Map.get(variable) with variable arg': {
+    "does NOT wrap Map.get(variable) with variable arg": {
       code: `
         function App() {
           return <div>{map.get(id)}</div>;
@@ -81,7 +81,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap store.get() without $ suffix (allGet:false default)': {
+    "does NOT wrap store.get() without $ suffix (allGet:false default)": {
       code: `
         function App() {
           return <div>{store.get()}</div>;
@@ -89,7 +89,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap .get() inside onClick arrow function': {
+    "does NOT wrap .get() inside onClick arrow function": {
       code: `
         function App() {
           return <button onClick={() => count$.get()}>click</button>;
@@ -97,7 +97,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap .get() inside onChange regular function': {
+    "does NOT wrap .get() inside onChange regular function": {
       code: `
         function App() {
           return <input onChange={function() { obs$.get(); }} />;
@@ -116,7 +116,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap .get() inside useMemo callback': {
+    "does NOT wrap .get() inside useMemo callback": {
       code: `
         function App() {
           return <div>{useMemo(() => obs$.get(), [])}</div>;
@@ -124,7 +124,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap .get() inside useCallback callback': {
+    "does NOT wrap .get() inside useCallback callback": {
       code: `
         function App() {
           return <div>{useCallback(() => obs$.get(), [])}</div>;
@@ -132,14 +132,14 @@ pluginTester({
       `,
     },
 
-    'wraps obs$?.get() optional call': {
+    "wraps obs$?.get() optional call": {
       code: `
         function App() {
           return <div>{obs$?.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -150,14 +150,14 @@ pluginTester({
       `,
     },
 
-    'wraps obs$.items[0].get() with computed access': {
+    "wraps obs$.items[0].get() with computed access": {
       code: `
         function App() {
           return <div>{obs$.items[0].get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -168,14 +168,14 @@ pluginTester({
       `,
     },
 
-    'wraps only the child with .get(), leaves siblings untouched': {
+    "wraps only the child with .get(), leaves siblings untouched": {
       code: `
         function App() {
           return <div>{count$.get()}<p>static</p></div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -187,14 +187,14 @@ pluginTester({
       `,
     },
 
-    'wraps .get() inside Fragment': {
+    "wraps .get() inside Fragment": {
       code: `
         function App() {
           return <>{count$.get()}<p>hello</p></>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <>
@@ -206,14 +206,14 @@ pluginTester({
       `,
     },
 
-    'wraps .get() inside .map() callback JSX child': {
+    "wraps .get() inside .map() callback JSX child": {
       code: `
         function App() {
           return <ul>{items.map(item$ => <li>{item$.name.get()}</li>)}</ul>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <ul>

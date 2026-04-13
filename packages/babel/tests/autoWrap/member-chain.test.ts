@@ -1,8 +1,8 @@
-import pluginTester from 'babel-plugin-tester';
-import plugin from '../../src';
+import pluginTester from "babel-plugin-tester";
+import plugin from "../../src";
 
 const babelOptions = {
-  plugins: ['@babel/plugin-syntax-jsx'],
+  plugins: ["@babel/plugin-syntax-jsx"],
   configFile: false,
   babelrc: false,
 };
@@ -11,16 +11,16 @@ pluginTester({
   plugin,
   pluginOptions: {},
   babelOptions,
-  title: 'member-chain $ detection',
+  title: "member-chain $ detection",
   tests: {
-    'wraps drag.x$.get() where only a mid-chain segment ends in $': {
+    "wraps drag.x$.get() where only a mid-chain segment ends in $": {
       code: `
         function App() {
           return <div>{drag.x$.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -31,14 +31,14 @@ pluginTester({
       `,
     },
 
-    'wraps deeply-nested drag.nested.x$.get()': {
+    "wraps deeply-nested drag.nested.x$.get()": {
       code: `
         function App() {
           return <div>{drag.nested.x$.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -49,14 +49,14 @@ pluginTester({
       `,
     },
 
-    'wraps drag.x$?.get() optional call with mid-chain $': {
+    "wraps drag.x$?.get() optional call with mid-chain $": {
       code: `
         function App() {
           return <div>{drag.x$?.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -67,14 +67,14 @@ pluginTester({
       `,
     },
 
-    'wraps items[0].x$.get() where computed root is non-$': {
+    "wraps items[0].x$.get() where computed root is non-$": {
       code: `
         function App() {
           return <div>{items[0].x$.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -85,7 +85,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap plain.value.get() with no $ anywhere': {
+    "does NOT wrap plain.value.get() with no $ anywhere": {
       code: `
         function App() {
           return <div>{plain.value.get()}</div>;
@@ -93,14 +93,14 @@ pluginTester({
       `,
     },
 
-    'wraps obs$.get() (regression — root $)': {
+    "wraps obs$.get() (regression — root $)": {
       code: `
         function App() {
           return <div>{obs$.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>

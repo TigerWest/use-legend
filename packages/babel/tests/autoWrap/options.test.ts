@@ -1,17 +1,17 @@
-import pluginTester from 'babel-plugin-tester';
-import plugin from '../../src';
+import pluginTester from "babel-plugin-tester";
+import plugin from "../../src";
 
 const babelOptions = {
-  plugins: ['@babel/plugin-syntax-jsx'],
+  plugins: ["@babel/plugin-syntax-jsx"],
   configFile: false,
   babelrc: false,
 };
 
 pluginTester({
   plugin,
-  pluginOptions: { autoWrap: { componentName: 'Reactive', importSource: '@usels/core' } },
+  pluginOptions: { autoWrap: { componentName: "Reactive", importSource: "@usels/core" } },
   babelOptions,
-  title: 'componentName option',
+  title: "componentName option",
   tests: {
     'uses custom componentName "Reactive"': {
       code: `
@@ -35,9 +35,9 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { autoWrap: { importSource: '@my/lib' } },
+  pluginOptions: { autoWrap: { importSource: "@my/lib" } },
   babelOptions,
-  title: 'importSource option',
+  title: "importSource option",
   tests: {
     'uses custom importSource "@my/lib"': {
       code: `
@@ -57,7 +57,7 @@ pluginTester({
       `,
     },
 
-    'does not duplicate import when already imported from @my/lib': {
+    "does not duplicate import when already imported from @my/lib": {
       code: `
         import { Memo } from "@my/lib";
         function App() {
@@ -82,16 +82,16 @@ pluginTester({
   plugin,
   pluginOptions: { autoWrap: { allGet: true } },
   babelOptions,
-  title: 'allGet option',
+  title: "allGet option",
   tests: {
-    'with allGet:true, wraps store.get() without $ suffix': {
+    "with allGet:true, wraps store.get() without $ suffix": {
       code: `
         function App() {
           return <div>{store.get()}</div>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -102,7 +102,7 @@ pluginTester({
       `,
     },
 
-    'with allGet:true, still ignores .get() with args': {
+    "with allGet:true, still ignores .get() with args": {
       code: `
         function App() {
           return <div>{map.get("key")}</div>;
@@ -110,7 +110,7 @@ pluginTester({
       `,
     },
 
-    'with allGet:true, still ignores .get() inside function boundary': {
+    "with allGet:true, still ignores .get() inside function boundary": {
       code: `
         function App() {
           return <button onClick={() => store.get()}>click</button>;
@@ -122,11 +122,11 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { autoWrap: { reactiveComponents: ['CustomReactive'] } },
+  pluginOptions: { autoWrap: { reactiveComponents: ["CustomReactive"] } },
   babelOptions,
-  title: 'reactiveComponents option',
+  title: "reactiveComponents option",
   tests: {
-    'does NOT wrap inside custom reactive component': {
+    "does NOT wrap inside custom reactive component": {
       code: `
         function App() {
           return <CustomReactive>{() => count$.get()}</CustomReactive>;
@@ -138,9 +138,9 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { autoWrap: { observerNames: ['reactive'] } },
+  pluginOptions: { autoWrap: { observerNames: ["reactive"] } },
   babelOptions,
-  title: 'observerNames option',
+  title: "observerNames option",
   tests: {
     'does NOT wrap inside custom observer HOC "reactive"': {
       code: `const Comp = reactive(() => <div>{obs$.get()}</div>);`,

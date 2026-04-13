@@ -8,7 +8,7 @@ export function createProgramVisitor(t: typeof BabelTypes) {
     enter(_path: NodePath<Program>, state: PluginState) {
       const opts = state.opts ?? {};
       state.autoImportNeeded = false;
-      state.autoImportSource = opts.importSource ?? "@legendapp/state/react";
+      state.autoImportSource = opts.importSource ?? "@usels/core";
       state.autoComponentName = opts.componentName ?? "Memo";
       state.reactiveComponents = new Set([
         state.autoComponentName,

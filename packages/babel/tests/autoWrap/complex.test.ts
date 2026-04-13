@@ -1,8 +1,8 @@
-import pluginTester from 'babel-plugin-tester';
-import plugin from '../../src';
+import pluginTester from "babel-plugin-tester";
+import plugin from "../../src";
 
 const babelOptions = {
-  plugins: ['@babel/plugin-syntax-jsx'],
+  plugins: ["@babel/plugin-syntax-jsx"],
   configFile: false,
   babelrc: false,
 };
@@ -11,9 +11,9 @@ pluginTester({
   plugin,
   pluginOptions: {},
   babelOptions,
-  title: 'complex use cases',
+  title: "complex use cases",
   tests: {
-    'wraps three independent reactive siblings with separate Memos': {
+    "wraps three independent reactive siblings with separate Memos": {
       code: `
         function App() {
           return (
@@ -26,7 +26,7 @@ pluginTester({
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -39,14 +39,14 @@ pluginTester({
       `,
     },
 
-    'wraps nullish coalescing expression containing .get()': {
+    "wraps nullish coalescing expression containing .get()": {
       code: `
         function App() {
           return <p>{name$.get() ?? 'Anonymous'}</p>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <p>
@@ -57,14 +57,14 @@ pluginTester({
       `,
     },
 
-    'wraps function call with .get() as argument': {
+    "wraps function call with .get() as argument": {
       code: `
         function App() {
           return <p>{formatDate(date$.get())}</p>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <p>
@@ -75,7 +75,7 @@ pluginTester({
       `,
     },
 
-    'wraps .get() inside 3-level nested JSX': {
+    "wraps .get() inside 3-level nested JSX": {
       code: `
         function App() {
           return (
@@ -88,7 +88,7 @@ pluginTester({
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -103,7 +103,7 @@ pluginTester({
       `,
     },
 
-    'wraps reactive expression and reactive-attribute sibling independently': {
+    "wraps reactive expression and reactive-attribute sibling independently": {
       code: `
         function App() {
           return (
@@ -115,7 +115,7 @@ pluginTester({
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <div>
@@ -127,14 +127,14 @@ pluginTester({
       `,
     },
 
-    'wraps .get() in arrow function component body': {
+    "wraps .get() in arrow function component body": {
       code: `
         const App = () => (
           <div>{value$.get()}</div>
         );
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         const App = () => (
           <div>
             <Memo>{() => value$.get()}</Memo>
@@ -143,14 +143,14 @@ pluginTester({
       `,
     },
 
-    'wraps logical OR fallback expression with .get()': {
+    "wraps logical OR fallback expression with .get()": {
       code: `
         function App() {
           return <p>{user$.name.get() || 'Guest'}</p>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <p>
@@ -161,7 +161,7 @@ pluginTester({
       `,
     },
 
-    'wraps .map() items that have reactive attribute and content': {
+    "wraps .map() items that have reactive attribute and content": {
       code: `
         function App() {
           return (
@@ -174,7 +174,7 @@ pluginTester({
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <ul>
@@ -187,14 +187,14 @@ pluginTester({
       `,
     },
 
-    'wraps .get() inside JSXElement child within attribute': {
+    "wraps .get() inside JSXElement child within attribute": {
       code: `
         function App() {
           return <Panel aside={<Token>{count$.get()}</Token>}>content</Panel>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <Panel
@@ -211,14 +211,14 @@ pluginTester({
       `,
     },
 
-    'wraps function call with .get() arg inside JSXElement child within attribute': {
+    "wraps function call with .get() arg inside JSXElement child within attribute": {
       code: `
         function App() {
           return <Panel aside={<Token>{formatDate(date$.get())}</Token>}>content</Panel>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <Panel
@@ -235,14 +235,14 @@ pluginTester({
       `,
     },
 
-    'wraps .get() inside doubly nested attribute JSXElements': {
+    "wraps .get() inside doubly nested attribute JSXElements": {
       code: `
         function App() {
           return <Panel aside={<Token some={<OtherToken>{formatDate(date$.get())}</OtherToken>}></Token>}>content</Panel>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <Panel
@@ -263,14 +263,14 @@ pluginTester({
       `,
     },
 
-    'wraps .get() inside arrow function returning JSXElement in attribute': {
+    "wraps .get() inside arrow function returning JSXElement in attribute": {
       code: `
         function App() {
           return <Panel aside={() => <Token>{date$.get()}</Token>}>content</Panel>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <Panel
@@ -287,14 +287,14 @@ pluginTester({
       `,
     },
 
-    'wraps .get() in deeply nested JSXElement within attribute': {
+    "wraps .get() in deeply nested JSXElement within attribute": {
       code: `
         function App() {
           return <Panel aside={<Outer><Inner>{obs$.get()}</Inner></Outer>}>content</Panel>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return (
             <Panel

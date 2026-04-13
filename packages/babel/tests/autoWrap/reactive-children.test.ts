@@ -1,8 +1,8 @@
-import pluginTester from 'babel-plugin-tester';
-import plugin from '../../src';
+import pluginTester from "babel-plugin-tester";
+import plugin from "../../src";
 
 const babelOptions = {
-  plugins: ['@babel/plugin-syntax-jsx'],
+  plugins: ["@babel/plugin-syntax-jsx"],
   configFile: false,
   babelrc: false,
 };
@@ -11,11 +11,11 @@ pluginTester({
   plugin,
   pluginOptions: {},
   babelOptions,
-  title: 'reactive children auto-wrapping (Memo / Show / Computed)',
+  title: "reactive children auto-wrapping (Memo / Show / Computed)",
   tests: {
     // --- Basic wrapping ---
 
-    'wraps Memo children in () => arrow function': {
+    "wraps Memo children in () => arrow function": {
       code: `
         function App() {
           return <Memo>{count$.get()}</Memo>;
@@ -28,7 +28,7 @@ pluginTester({
       `,
     },
 
-    'wraps Show children in () => arrow function': {
+    "wraps Show children in () => arrow function": {
       code: `
         function App() {
           return <Show if={cond$}>{count$.get()}</Show>;
@@ -41,7 +41,7 @@ pluginTester({
       `,
     },
 
-    'wraps Computed children in () => arrow function': {
+    "wraps Computed children in () => arrow function": {
       code: `
         function App() {
           return <Computed>{count$.get()}</Computed>;
@@ -56,7 +56,7 @@ pluginTester({
 
     // --- Skip cases (children already function / reference) ---
 
-    'does NOT re-wrap already arrow function children': {
+    "does NOT re-wrap already arrow function children": {
       code: `
         function App() {
           return <Memo>{() => count$.get()}</Memo>;
@@ -64,7 +64,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap Identifier children (already a reference)': {
+    "does NOT wrap Identifier children (already a reference)": {
       code: `
         function App() {
           return <Memo>{renderFn}</Memo>;
@@ -72,7 +72,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap MemberExpression children (already a reference)': {
+    "does NOT wrap MemberExpression children (already a reference)": {
       code: `
         function App() {
           return <Memo>{obj.render}</Memo>;
@@ -80,7 +80,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap FunctionExpression children': {
+    "does NOT wrap FunctionExpression children": {
       code: `
         function App() {
           return <Memo>{function() { return count$.get(); }}</Memo>;
@@ -101,7 +101,7 @@ pluginTester({
 
     // --- Direct JSX element child ---
 
-    'wraps direct JSX element child in arrow function': {
+    "wraps direct JSX element child in arrow function": {
       code: `
         function App() {
           return <Memo><div>hello</div></Memo>;
@@ -114,7 +114,7 @@ pluginTester({
       `,
     },
 
-    'wraps direct JSX element with .get() inside': {
+    "wraps direct JSX element with .get() inside": {
       code: `
         function App() {
           return <Memo><span>{count$.get()}</span></Memo>;
@@ -129,7 +129,7 @@ pluginTester({
 
     // --- Multiple children → Fragment ---
 
-    'wraps multiple children in Fragment arrow function': {
+    "wraps multiple children in Fragment arrow function": {
       code: `
         function App() {
           return <Memo><A /><B /></Memo>;
@@ -153,14 +153,14 @@ pluginTester({
 
     // --- Combined: children wrapping + attribute .get() → full Memo wrap ---
 
-    'combined: Show with .get() attribute wraps children AND whole element in Memo': {
+    "combined: Show with .get() attribute wraps children AND whole element in Memo": {
       code: `
         function App() {
           return <Show if={obs$.get()}>{count$.get()}</Show>;
         }
       `,
       output: `
-        import { Memo } from "@legendapp/state/react";
+        import { Memo } from "@usels/core";
         function App() {
           return <Memo>{() => <Show if={obs$.get()}>{() => count$.get()}</Show>}</Memo>;
         }
@@ -169,7 +169,7 @@ pluginTester({
 
     // --- Memo empty children → no transform ---
 
-    'does NOT transform Memo with no children': {
+    "does NOT transform Memo with no children": {
       code: `
         function App() {
           return <Memo></Memo>;
@@ -179,7 +179,7 @@ pluginTester({
 
     // --- Nested complex expression ---
 
-    'wraps Show children that contain complex expression': {
+    "wraps Show children that contain complex expression": {
       code: `
         function App() {
           return <Show if={cond$}>{a$.get() + b$.get()}</Show>;
@@ -200,9 +200,9 @@ pluginTester({
   plugin,
   pluginOptions: { autoWrap: { wrapReactiveChildren: false } },
   babelOptions,
-  title: 'wrapReactiveChildren: false — disables auto-wrapping',
+  title: "wrapReactiveChildren: false — disables auto-wrapping",
   tests: {
-    'does NOT wrap Memo children when feature is disabled': {
+    "does NOT wrap Memo children when feature is disabled": {
       code: `
         function App() {
           return <Memo>{count$.get()}</Memo>;
@@ -210,7 +210,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap Show children when feature is disabled': {
+    "does NOT wrap Show children when feature is disabled": {
       code: `
         function App() {
           return <Show if={cond$}>{count$.get()}</Show>;
@@ -218,7 +218,7 @@ pluginTester({
       `,
     },
 
-    'does NOT wrap Computed children when feature is disabled': {
+    "does NOT wrap Computed children when feature is disabled": {
       code: `
         function App() {
           return <Computed>{count$.get()}</Computed>;
@@ -232,11 +232,11 @@ pluginTester({
 
 pluginTester({
   plugin,
-  pluginOptions: { autoWrap: { wrapReactiveChildrenComponents: ['Custom'] } },
+  pluginOptions: { autoWrap: { wrapReactiveChildrenComponents: ["Custom"] } },
   babelOptions,
-  title: 'wrapReactiveChildrenComponents — extends default set',
+  title: "wrapReactiveChildrenComponents — extends default set",
   tests: {
-    'wraps children of custom reactive component': {
+    "wraps children of custom reactive component": {
       code: `
         function App() {
           return <Custom>{count$.get()}</Custom>;
@@ -249,7 +249,7 @@ pluginTester({
       `,
     },
 
-    'still wraps default Memo children alongside custom': {
+    "still wraps default Memo children alongside custom": {
       code: `
         function App() {
           return <Memo>{count$.get()}</Memo>;

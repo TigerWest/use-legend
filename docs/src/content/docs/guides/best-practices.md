@@ -35,7 +35,7 @@ const el$ = useRef$<HTMLDivElement>();
 
 // All of these react to el$ — when the element mounts, unmounts,
 // or is replaced, each hook re-registers automatically.
-useEventListener(el$, 'click', handleClick);
+useEventListener(el$, "click", handleClick);
 useElementSize(el$);
 useScroll(el$);
 useIntersectionObserver(el$, callback);
@@ -60,6 +60,7 @@ Call `.get()` as deep as possible in the observable tree. This narrows the subsc
 ```tsx
 <span>{size$.width.get()}</span>
 ```
+
 ---
 
 ## 4. Use Legend-State components for conditional & list rendering
@@ -90,16 +91,16 @@ The Vite/Babel plugin transforms `count$.get()` into `<Memo>{() => count$.get()}
 
 ```typescript
 // vite.config.ts
-import { autoWrap } from '@usels/vite-plugin-legend-memo';
+import useLegend from "@usels/vite-plugin";
 
 export default defineConfig({
   plugins: [
-    autoWrap(), // must come before react()
+    useLegend(), // must come before react()
     react(),
   ],
 });
 ```
 
-> See [Getting Started](/use-legend/guides/getting-started/#auto-memo--vite--babel-plugin) for full setup instructions.
+> See [Getting Started](/use-legend/guides/getting-started/#configure-vite) for full setup instructions.
 
 ---

@@ -1,7 +1,13 @@
-// Re-export everything from core (사용자는 @usels/web만 설치)
-export * from "@usels/core";
-
 export * from "./types";
+
+export {
+  ObservablePersistLocalStorage,
+  ObservablePersistSessionStorage,
+} from "@legendapp/state/persist-plugins/local-storage";
+export {
+  ObservablePersistIndexedDB,
+  observablePersistIndexedDB,
+} from "@legendapp/state/persist-plugins/indexeddb";
 
 // Browser
 export * from "./browser/useEventListener";

@@ -1,6 +1,46 @@
 export * from "./types";
 
-export { Memo, Show, For, Computed, Switch, Reactive, observer } from "@legendapp/state/react";
+export {
+  batch,
+  beginBatch,
+  computed,
+  endBatch,
+  isObservable,
+  linked,
+  ObservableHint,
+  setSilently,
+  syncState,
+  when,
+  whenReady,
+  type ImmutableObservableBase,
+  type Observable,
+  type ObservablePrimitive,
+  type ObserveEventCallback,
+  type OpaqueObject,
+  type Selector,
+} from "@legendapp/state";
+
+export {
+  Memo,
+  Show,
+  For,
+  Computed,
+  Switch,
+  Reactive,
+  useMount,
+  useObservable,
+  useObserve,
+  useObserveEffect,
+  useUnmount,
+} from "@legendapp/state/react";
+
+export {
+  configureObservableSync,
+  configureSynced,
+  syncObservable,
+  synced,
+  type PersistOptions,
+} from "@legendapp/state/sync";
 
 export * from "@primitives/useScope";
 export * from "@primitives/useRef$";

@@ -3,7 +3,7 @@ import type { Program } from "@babel/types";
 import type { PluginState } from "../types";
 
 /**
- * Adds `import { Memo } from "@legendapp/state/react"` (or configured source/name)
+ * Adds `import { Memo } from "@usels/core"` (or configured source/name)
  * to the top of the file, if not already imported.
  */
 export function addAutoImport(

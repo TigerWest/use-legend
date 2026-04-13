@@ -1,7 +1,7 @@
 export interface PluginOptions {
   /** Wrapper component name (default: "Memo") */
   componentName?: string;
-  /** Import source (default: "@legendapp/state/react") */
+  /** Import source (default: "@usels/core") */
   importSource?: string;
   /** If true, detect all .get() calls regardless of $ suffix (default: false) */
   allGet?: boolean;

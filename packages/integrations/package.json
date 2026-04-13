@@ -28,18 +28,12 @@
     "observable",
     "reactive"
   ],
-  "dependencies": {
-    "@usels/core": "workspace:*"
-  },
   "peerDependencies": {
-    "@legendapp/state": "^2.0.0 || ^3.0.0-beta.0",
+    "@usels/core": "^0.9.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
-    "@legendapp/state": {
-      "optional": true
-    },
     "react": {
       "optional": true
     },
@@ -48,12 +42,12 @@
     }
   },
   "devDependencies": {
-    "@legendapp/state": "3.0.0-beta.44",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
     "@types/node": "^25.3.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@usels/core": "workspace:*",
     "jsdom": "^25.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
