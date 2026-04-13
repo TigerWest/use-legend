@@ -43,8 +43,10 @@ function Timer() {
   class="grid items-center gap-16 pb-4 min-[50rem]:grid-cols-[5fr_5fr] min-[50rem]:gap-[4%] min-[50rem]:py-[clamp(2.5rem,calc(1rem+10vmin),10rem)]"
 >
   <!-- Right column: code block + live widget overlay -->
-  <div class="not-content order-2 w-[min(95%,25rem)] mx-auto min-[50rem]:w-full">
-    <div class="relative rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] demo-wrapper">
+  <div class="not-content order-2 mx-auto w-[min(95%,27rem)] max-w-full min-w-0 min-[50rem]:w-full">
+    <div
+      class="relative max-w-full min-w-0 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] demo-wrapper"
+    >
       <div
         class="absolute top-2 left-2 z-10 flex gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5"
         id="hero-tabs"
@@ -60,19 +62,19 @@ function Timer() {
           >scope</button
         >
       </div>
-      <div class="code-stack">
-        <div id="hero-code-hook">
+      <div class="grid max-w-full min-w-0">
+        <div id="hero-code-hook" class="max-w-full min-w-0 [grid-area:1_/_1]">
           <Code
             code={hookCode}
             lang="tsx"
-            class="px-7 p-10 sm:px-10 text-xs rounded-md md:text-sm"
+            class="box-border w-full max-w-full min-w-0 overflow-x-auto px-7 p-10 text-xs rounded-md max-[640px]:whitespace-pre-wrap max-[640px]:[overflow-wrap:anywhere] max-[640px]:[word-break:break-word] sm:px-10 md:text-sm"
           />
         </div>
-        <div id="hero-code-scope" style="visibility:hidden">
+        <div id="hero-code-scope" class="max-w-full min-w-0 [grid-area:1_/_1]" style="visibility:hidden">
           <Code
             code={scopeCode}
             lang="tsx"
-            class="px-5 p-10 sm:px-10 text-xs rounded-md md:text-sm"
+            class="box-border w-full max-w-full min-w-0 overflow-x-auto px-5 p-10 text-xs rounded-md max-[640px]:whitespace-pre-wrap max-[640px]:[overflow-wrap:anywhere] max-[640px]:[word-break:break-word] sm:px-10 md:text-sm"
           />
         </div>
       </div>
@@ -148,26 +150,3 @@ function Timer() {
     window.dispatchEvent(new CustomEvent("hero-mode-change", { detail: { isHook: false } }));
   });
 </script>
-
-<style>
-  @layer starlight.core {
-    /* strip expressive-code chrome to look embedded */
-    .demo-wrapper :global(.expressive-code) {
-      --ec-brdRad: 1rem;
-    }
-
-    .code-stack {
-      display: grid;
-    }
-    .code-stack > * {
-      grid-area: 1 / 1;
-    }
-
-    @media (max-width: 640px) {
-      .demo-wrapper :global(.expressive-code pre) {
-        white-space: pre-wrap;
-        word-break: break-all;
-      }
-    }
-  }
-</style>
