@@ -157,7 +157,11 @@ describe("useNetwork()", () => {
       expect(onlineRemoved).toBe(true);
       expect(offlineAdded).toBe(true);
       expect(offlineRemoved).toBe(true);
-      expect(conn.removeEventListener).toHaveBeenCalledWith("change", expect.any(Function));
+      expect(conn.removeEventListener).toHaveBeenCalledWith(
+        "change",
+        expect.any(Function),
+        undefined
+      );
     });
 
     it("does not respond to events after unmount", async () => {

@@ -1,9 +1,10 @@
-import { observable } from "@legendapp/state";
+import { observable, ObservableHint } from "@legendapp/state";
 import { createSupported, onMount } from "@usels/core";
 import type { DeepMaybeObservable, ReadonlyObservable, Supportable } from "@usels/core";
 import { type ConfigurableWindow, defaultNavigator, defaultWindow } from "@shared/configurable";
 import type { MaybeEventTarget } from "../../types";
 import { createEventListener } from "../../browser/useEventListener/core";
+import { createWhenMounted } from "@usels/core/utilities/useWhenMounted/core";
 
 export type NetworkType =
   | "bluetooth"
@@ -77,25 +78,21 @@ export function createNetwork(_options?: DeepMaybeObservable<UseNetworkOptions>)
     saveData$.set(conn.saveData);
     type$.set(conn.type ?? "unknown");
   };
+  const _conn$ = createWhenMounted(() => {
+    const con =
+      isSupported$.get() && defaultNavigator
+        ? (defaultNavigator as { connection?: NetworkInformation }).connection
+        : null;
+    return con ? ObservableHint.opaque(con) : null;
+  });
 
   onMount(() => {
     if (!defaultWindow) return;
     isOnline$.set(defaultNavigator?.onLine ?? true);
     updateConnectionInfo();
-
-    const conn =
-      isSupported$.peek() && defaultNavigator
-        ? ((defaultNavigator as { connection?: NetworkInformation }).connection ?? null)
-        : null;
-    if (conn) {
-      conn.addEventListener("change", updateConnectionInfo);
-    }
-    return () => {
-      if (conn) {
-        conn.removeEventListener("change", updateConnectionInfo);
-      }
-    };
   });
+
+  createEventListener(_conn$, "change", updateConnectionInfo);
 
   createEventListener(
     (defaultWindow as MaybeEventTarget) ?? null,
