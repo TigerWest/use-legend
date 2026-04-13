@@ -1,5 +1,11 @@
 import { observable, type Observable } from "@legendapp/state";
-import { observe, peek, type DeepMaybeObservable, type ReadonlyObservable, type Awaitable } from "@usels/core";
+import {
+  observe,
+  peek,
+  type DeepMaybeObservable,
+  type ReadonlyObservable,
+  type Awaitable,
+} from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
 import { resolveWindowSource, type ConfigurableWindow } from "@shared/configurable";
 import type { MaybeEventTarget } from "../../types";
@@ -103,10 +109,7 @@ export function createInfiniteScroll(
     isLoading$.set(true);
     try {
       const interval = opts$.peek()?.interval ?? 100;
-      await Promise.all([
-        onLoadMore(direction),
-        new Promise((r) => setTimeout(r, interval)),
-      ]);
+      await Promise.all([onLoadMore(direction), new Promise((r) => setTimeout(r, interval))]);
     } finally {
       isLoading$.set(false);
       setTimeout(() => {

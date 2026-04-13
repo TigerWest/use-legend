@@ -7,7 +7,7 @@ A Vite plugin that applies [`@usels/babel-plugin-legend-memo`](../babel) during 
 <div>{count$.get()}</div>
 
 // Plugin transforms to this automatically
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 <div><Memo>{() => count$.get()}</Memo></div>
 ```
 
@@ -198,7 +198,7 @@ interface PluginOptions {
 <div>{count$.get()}</div>
 
 // Output
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 <div><Memo>{() => count$.get()}</Memo></div>
 ```
 

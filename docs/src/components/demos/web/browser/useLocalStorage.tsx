@@ -8,7 +8,7 @@ import {
   ValueToken,
   demoClasses,
 } from "../../_shared";
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 
 const THEMES = ["light", "dark", "system"] as const;
 

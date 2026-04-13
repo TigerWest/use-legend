@@ -4,7 +4,7 @@ import type { Observable } from "@legendapp/state";
 import { formatCurrency } from "@/components/format";
 import { getCyberStore } from "@/store/cyberStore";
 import type { CartLine } from "@/types";
-import { Memo } from "@legendapp/state/react";
+import { Memo } from "@usels/core";
 
 export function CartLineItem({ line$ }: { line$: Observable<CartLine> }) {
   "use scope";
