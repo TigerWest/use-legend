@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useMouse, useRef$, type UseMouseCoordType } from "@usels/web";
+import { useMouse, type UseMouseCoordType } from "@usels/web";
+import { useRef$ } from "@usels/core";
 import { DemoShell, DemoPanel, StatCard, StatusBadge, demoClasses } from "../../_shared";
 
 function MouseTracker({ type }: { type: UseMouseCoordType }) {

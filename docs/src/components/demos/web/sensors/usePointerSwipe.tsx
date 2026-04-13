@@ -1,5 +1,6 @@
 "use client";
-import { usePointerSwipe, useRef$, type UseSwipeDirection } from "@usels/web";
+import { useRef$ } from "@usels/core";
+import { usePointerSwipe, type UseSwipeDirection } from "@usels/web";
 import { DemoShell, DemoPanel, StatCard, StatusBadge, demoClasses } from "../../_shared";
 
 const directionTone = (dir: UseSwipeDirection) => {

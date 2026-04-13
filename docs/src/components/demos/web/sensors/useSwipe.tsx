@@ -1,5 +1,6 @@
 "use client";
-import { useSwipe, useRef$, type UseSwipeDirection } from "@usels/web";
+import { useRef$ } from "@usels/core";
+import { useSwipe, type UseSwipeDirection } from "@usels/web";
 import { DemoShell, DemoPanel, StatCard, StatusBadge, demoClasses } from "../../_shared";
 
 const directionTone = (dir: UseSwipeDirection) => {
@@ -16,10 +17,7 @@ export default function UseSwipeDemo() {
 
   return (
     <DemoShell eyebrow="Sensors">
-      <DemoPanel
-        title="useSwipe"
-        description="Detect touch swipe gestures using TouchEvents."
-      >
+      <DemoPanel title="useSwipe" description="Detect touch swipe gestures using TouchEvents.">
         <div
           className={demoClasses.statsGrid}
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))" }}

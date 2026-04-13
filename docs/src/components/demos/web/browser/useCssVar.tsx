@@ -1,4 +1,5 @@
-import { useCssVar, useRef$ } from "@usels/web";
+import { useCssVar } from "@usels/web";
+import { useRef$ } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatCard, ValueToken } from "../../_shared";
 import { useObservable } from "@legendapp/state/react";
 
