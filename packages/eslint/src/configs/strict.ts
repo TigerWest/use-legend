@@ -9,8 +9,6 @@ export const strict: TSESLint.FlatConfig.Config = {
     "use-legend/observable-naming": "error",
     "use-legend/no-observable-in-jsx": "error",
     "use-legend/hook-return-naming": "error",
-    "use-legend/no-enable-api": "error",
-    "use-legend/no-reactive-hoc": "error",
     "use-legend/prefer-show-for-conditional": "error",
     "use-legend/prefer-for-component": "error",
     "use-legend/prefer-use-observable": "error",
