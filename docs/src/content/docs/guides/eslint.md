@@ -3,7 +3,8 @@ title: ESLint Plugin
 description: Catch Legend-State misuse at lint time with @usels/eslint-plugin.
 ---
 
-`@usels/eslint-plugin` provides ESLint rules that enforce Legend-State best practices — catching common bugs and style violations before they reach runtime.
+`@usels/eslint-plugin` provides ESLint rules for observable naming, JSX reads,
+hook returns, and fine-grained render boundaries.
 
 ---
 
@@ -21,7 +22,7 @@ npm install -D @usels/eslint-plugin eslint@^9
 
 ### Recommended config
 
-Enables all rules. Phase 1 rules are errors; Phase 2 rules are warnings.
+Enables the default `use-legend` observable conventions.
 
 ```js
 // eslint.config.js
@@ -32,7 +33,7 @@ export default [legendPlugin.configs.recommended];
 
 ### Strict config
 
-All rules at `error` severity.
+Enables every rule at `error` severity.
 
 ```js
 // eslint.config.js
@@ -56,12 +57,11 @@ export default [
       "use-legend/observable-naming": "error",
       "use-legend/no-observable-in-jsx": "error",
       "use-legend/hook-return-naming": "warn",
-      "use-legend/no-enable-api": "warn",
-      "use-legend/no-reactive-hoc": "warn",
-      "use-legend/prefer-show-for-conditional": "warn",
       "use-legend/prefer-for-component": "warn",
+      "use-legend/prefer-show-for-conditional": "warn",
       "use-legend/prefer-use-observable": "warn",
       "use-legend/prefer-use-observe": "warn",
+      "use-legend/no-get-in-non-reactive": "warn",
     },
   },
 ];
@@ -71,24 +71,16 @@ export default [
 
 ## Rules
 
-### Phase 1 — Errors (high confidence)
-
-| Rule                                            | Description                                     |
-| ----------------------------------------------- | ----------------------------------------------- |
-| [`observable-naming`](#observable-naming)       | Variables holding observables must end with `$` |
-| [`no-observable-in-jsx`](#no-observable-in-jsx) | Call `.get()` on observables in JSX expressions |
-
-### Phase 2 — Warnings (style & best practice)
-
-| Rule                                                          | Description                                               |
-| ------------------------------------------------------------- | --------------------------------------------------------- |
-| [`hook-return-naming`](#hook-return-naming)                   | Preserve `$` suffix when renaming destructured fields     |
-| [`no-enable-api`](#no-enable-api)                             | Avoid global `enable*` configuration APIs                 |
-| [`no-reactive-hoc`](#no-reactive-hoc)                         | Use `<Show>`/`<For>`/`<Memo>` instead of HOCs             |
-| [`prefer-show-for-conditional`](#prefer-show-for-conditional) | Use `<Show>` over `&&`/ternary with observable conditions |
-| [`prefer-for-component`](#prefer-for-component)               | Use `<For>` over `.map()` on observable arrays            |
-| [`prefer-use-observable`](#prefer-use-observable)             | Use `useObservable` over `useState`                       |
-| [`prefer-use-observe`](#prefer-use-observe)                   | Use `useObserve`/`useObserveEffect` over `useEffect`      |
+| Rule                                                          | Recommended | Strict  | Description                                                      |
+| ------------------------------------------------------------- | ----------- | ------- | ---------------------------------------------------------------- |
+| [`observable-naming`](#observable-naming)                     | `error`     | `error` | Variables holding observables must end with `$`                  |
+| [`no-observable-in-jsx`](#no-observable-in-jsx)               | `error`     | `error` | Call `.get()` on observables in JSX expressions                  |
+| [`hook-return-naming`](#hook-return-naming)                   | `warn`      | `error` | Preserve `$` suffix when renaming destructured observable fields |
+| [`prefer-for-component`](#prefer-for-component)               | `warn`      | `error` | Use `<For>` over `.map()` on observable arrays                   |
+| [`prefer-use-observable`](#prefer-use-observable)             | `warn`      | `error` | Prefer `useObservable` over React `useState`                     |
+| [`prefer-use-observe`](#prefer-use-observe)                   | `warn`      | `error` | Prefer `useObserve` / `useObserveEffect` over React `useEffect`  |
+| [`no-get-in-non-reactive`](#no-get-in-non-reactive)           | `warn`      | `error` | Avoid one-time `.get()` snapshots in component or hook bodies    |
+| [`prefer-show-for-conditional`](#prefer-show-for-conditional) | `off`       | `error` | Use `<Show>` over `&&` / ternary with observable conditions      |
 
 ---
 
@@ -123,7 +115,7 @@ const data$ = observable({ name: "foo" });
 ```ts
 "use-legend/observable-naming": ["error", {
   "trackFunctions": { /* per-package function names */ },
-  "allowPattern": null  // regex to exempt specific names
+  "allowPattern": null
 }]
 ```
 
@@ -133,7 +125,8 @@ const data$ = observable({ name: "foo" });
 
 ### `no-observable-in-jsx`
 
-Observables used directly in JSX render `[object Object]`. Always call `.get()`.
+Observables used directly in JSX render `[object Object]`. Always call `.get()`
+or pass the observable to a component prop that intentionally accepts it.
 
 ```tsx
 // ❌ Error — renders "[object Object]"
@@ -189,75 +182,10 @@ const { x$: posX$, isDragging$: dragging$ } = useDraggable(target$);
 
 ---
 
-### `no-enable-api`
-
-Legend-State's `enable*` APIs mutate global state and conflict with fine-grained reactivity patterns.
-
-```ts
-// ❌ Warning
-import { enable$GetSet } from "@legendapp/state/config/enable$GetSet";
-enable$GetSet(); // conflicts with $ suffix convention
-
-import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-enableReactTracking({ auto: true }); // whole-component re-renders
-
-// ✅ Good — use explicit .get() / .set()
-const value = count$.get();
-count$.set(value + 1);
-```
-
-**Flagged APIs:** `enable$GetSet`, `enable_PeekAssign`, `enableReactTracking`, `enableReactUse`, `enableReactComponents`, `enableReactNativeComponents`
-
-[Full docs →](https://github.com/TigerWest/use-legend/blob/main/packages/eslint/docs/rules/no-enable-api.md)
-
----
-
-### `no-reactive-hoc`
-
-HOCs like `observer()` make the entire component reactive, causing whole-component re-renders.
-
-```tsx
-// ❌ Warning — whole component re-renders
-import { observer } from "@usels/core";
-const MyComponent = observer(() => <div>{count$.get()}</div>);
-
-// ✅ Good — only Memo re-renders
-function MyComponent() {
-  return (
-    <div>
-      <Memo>{() => count$.get()}</Memo>
-    </div>
-  );
-}
-```
-
-[Full docs →](https://github.com/TigerWest/use-legend/blob/main/packages/eslint/docs/rules/no-reactive-hoc.md)
-
----
-
-### `prefer-show-for-conditional`
-
-`&&` / `||` / ternary with an observable condition causes the parent component to re-render. Use `<Show>` for fine-grained updates.
-
-```tsx
-// ❌ Warning
-{isLoading$.get() && <Spinner />}
-{isActive$ ? <A /> : <B />}
-
-// ✅ Good
-<Show if={isLoading$}><Spinner /></Show>
-<Show if={isActive$} else={<B />}><A /></Show>
-```
-
-> Note: Complex comparisons like `{count$.get() > 0 && <Badge />}` are not detected by this rule. Use `<Show if={() => count$.get() > 0}>` manually for these cases.
-
-[Full docs →](https://github.com/TigerWest/use-legend/blob/main/packages/eslint/docs/rules/prefer-show-for-conditional.md)
-
----
-
 ### `prefer-for-component`
 
-`.get().map()` on an observable array re-renders all items on any change. `<For>` re-renders only the changed item.
+`.get().map()` on an observable array re-renders all items on any change. `<For>`
+re-renders only the changed item.
 
 ```tsx
 // ❌ Warning
@@ -275,22 +203,29 @@ function MyComponent() {
 
 ### `prefer-use-observable`
 
-`useState` causes full component re-renders. `useObservable` provides fine-grained reactivity and eliminates setter functions.
+Prefer `useObservable` over React's `useState` when local state should participate
+in fine-grained observable updates.
 
 ```tsx
 // ❌ Warning
 const [count, setCount] = useState(0);
+const [user, setUser] = useState({ name: "" });
 
 // ✅ Good
 const count$ = useObservable(0);
-count$.set((c) => c + 1); // no setter needed
+const user$ = useObservable({ name: "" });
+
+count$.set((count) => count + 1);
+user$.name.set("Ada");
 ```
 
-Use `allowPatterns` to exempt UI-only state:
+**Options:**
 
 ```ts
 "use-legend/prefer-use-observable": ["warn", {
-  "allowPatterns": ["^is[A-Z]", "^(open|show|visible)"]
+  "importSources": ["react"],
+  "replacements": ["@legendapp/state/react", "@usels/core"],
+  "allowPatterns": []
 }]
 ```
 
@@ -300,27 +235,96 @@ Use `allowPatterns` to exempt UI-only state:
 
 ### `prefer-use-observe`
 
-All `useEffect` calls are flagged. `useObserve`/`useObserveEffect` auto-track observable dependencies — no dependency array needed.
+Prefer `useObserve` or `useObserveEffect` over React's `useEffect` in observable
+code. The rule is import-based and flags `useEffect` calls from configured
+sources.
 
 ```tsx
-// ❌ Warning — all useEffect calls flagged
+// ❌ Warning
 useEffect(() => {
-  document.title = user$.name.get();
-}, [user$.name.get()]);
+  document.title = title$.get();
+}, [title$.get()]);
 
-// ✅ Good — auto-tracks user$.name
+// ✅ Good
 useObserve(() => {
-  document.title = user$.name.get();
+  document.title = title$.get();
 });
 
-// ✅ Good — with cleanup
+// ✅ Good — cleanup support
 useObserveEffect(() => {
-  const unsub = count$.onChange(syncToServer);
-  return unsub;
+  const unsubscribe = socket$.onChange(({ value }) => connect(value));
+  return () => unsubscribe();
 });
 ```
 
+**Options:**
+
+```ts
+"use-legend/prefer-use-observe": ["warn", {
+  "importSources": ["react"],
+  "replacements": ["@legendapp/state/react", "@usels/core"],
+  "includeLayoutEffect": false,
+  "allowlist": []
+}]
+```
+
 [Full docs →](https://github.com/TigerWest/use-legend/blob/main/packages/eslint/docs/rules/prefer-use-observe.md)
+
+---
+
+### `no-get-in-non-reactive`
+
+Calling `.get()` directly in a React component or hook body takes a one-time
+snapshot. Later observable changes are ignored unless the read happens in a
+reactive context.
+
+```tsx
+// ❌ Warning — one-time snapshot
+function Counter() {
+  const count = count$.get();
+  return <span>{count}</span>;
+}
+
+// ✅ Good — render-time reactive boundary
+function Counter() {
+  return <Memo>{() => count$.get()}</Memo>;
+}
+
+// ✅ Good — derived observable
+function useDoubleCount() {
+  return useObservable(() => count$.get() * 2);
+}
+
+// ✅ Good — side effect tracking
+function useLogCount() {
+  useObserve(() => {
+    console.log(count$.get());
+  });
+}
+```
+
+---
+
+### `prefer-show-for-conditional`
+
+`&&` / `||` / ternary with an observable condition causes the parent component to
+re-render. Use `<Show>` for fine-grained conditional updates.
+
+```tsx
+// ❌ Warning
+{isLoading$.get() && <Spinner />}
+{isActive$ ? <A /> : <B />}
+
+// ✅ Good
+<Show if={isLoading$}><Spinner /></Show>
+<Show if={isActive$} else={<B />}><A /></Show>
+```
+
+> Note: Complex comparisons like `{count$.get() > 0 && <Badge />}` are not
+> detected by this rule. Use `<Show if={() => count$.get() > 0}>` manually for
+> these cases.
+
+[Full docs →](https://github.com/TigerWest/use-legend/blob/main/packages/eslint/docs/rules/prefer-show-for-conditional.md)
 
 ---
 
@@ -335,30 +339,42 @@ export default [legendPlugin.configs.recommended];
 
 | Rule                          | Severity |
 | ----------------------------- | -------- |
-| `observable-naming`           | error    |
-| `no-observable-in-jsx`        | error    |
-| `hook-return-naming`          | warn     |
-| `no-enable-api`               | warn     |
-| `no-reactive-hoc`             | warn     |
-| `prefer-show-for-conditional` | warn     |
-| `prefer-for-component`        | warn     |
-| `prefer-use-observable`       | warn     |
-| `prefer-use-observe`          | warn     |
+| `observable-naming`           | `error`  |
+| `no-observable-in-jsx`        | `error`  |
+| `hook-return-naming`          | `warn`   |
+| `prefer-show-for-conditional` | `off`    |
+| `prefer-for-component`        | `warn`   |
+| `prefer-use-observable`       | `warn`   |
+| `prefer-use-observe`          | `warn`   |
+| `no-get-in-non-reactive`      | `warn`   |
 
 ### `strict`
 
-All rules at `error` severity. Recommended for greenfield projects fully committed to fine-grained reactivity.
+All rules at `error` severity. Recommended for greenfield projects fully
+committed to fine-grained reactivity.
 
 ```js
 import legendPlugin from "@usels/eslint-plugin";
 export default [legendPlugin.configs.strict];
 ```
 
+| Rule                          | Severity |
+| ----------------------------- | -------- |
+| `observable-naming`           | `error`  |
+| `no-observable-in-jsx`        | `error`  |
+| `hook-return-naming`          | `error`  |
+| `prefer-show-for-conditional` | `error`  |
+| `prefer-for-component`        | `error`  |
+| `prefer-use-observable`       | `error`  |
+| `prefer-use-observe`          | `error`  |
+| `no-get-in-non-reactive`      | `error`  |
+
 ---
 
 ## TypeScript Integration
 
-The plugin is written in TypeScript and ships with type definitions. No extra configuration is required. Parser is provided separately:
+The plugin is written in TypeScript and ships with type definitions. No extra
+configuration is required. Parser is provided separately:
 
 ```bash
 npm install -D @typescript-eslint/parser
@@ -381,6 +397,11 @@ export default [
 
 ## Tips
 
-- **Enable `observable-naming` first.** Several rules (`no-observable-in-jsx`, `prefer-show-for-conditional`, `prefer-for-component`) rely on the `$` suffix to detect observables. Without it, they may miss some cases.
-- **Use `allowPatterns` for UI-only state.** `prefer-use-observable` and `prefer-use-observe` can be noisy in existing codebases. Use `allowPatterns` / `allowList` to introduce them incrementally.
-- **Pair with the Babel/Vite plugin.** `@usels/vite-plugin` auto-wraps `.get()` calls in `<Memo>`, making `prefer-show-for-conditional` warnings less urgent for simple cases.
+- **Enable `observable-naming` first.** Several rules rely on the `$` suffix to
+  detect observables. Without it, they may miss some cases.
+- **Use `recommended` for existing codebases.** It keeps the higher-churn
+  conditional rule off while still warning on list rendering, hook replacements,
+  and non-reactive `.get()` snapshots.
+- **Use `strict` for new codebases.** It turns every current rule into an error.
+- **Pair with the Babel/Vite plugin.** `@usels/vite-plugin` can auto-wrap JSX
+  `.get()` reads in `<Memo>` boundaries.
