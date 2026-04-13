@@ -1,6 +1,6 @@
 {
   "name": "@usels/skills",
-  "version": "0.1.0",
+  "version": "0.10.0",
   "type": "module",
   "private": true,
   "description": "AI skill reference files for use-legend hooks (@usels/core, @usels/web)",
