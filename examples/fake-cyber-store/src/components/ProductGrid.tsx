@@ -20,7 +20,7 @@ export function ProductGrid() {
       }
     >
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <For each={filteredProducts$ as unknown as Observable<Product[]>} optimized>
+        <For each={filteredProducts$ as unknown as Observable<Product[]>}>
           {(product$) => <ProductCard product$={product$} />}
         </For>
       </section>

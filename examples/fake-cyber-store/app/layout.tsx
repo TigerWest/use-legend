@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Script from "next/script";
+import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "Fake Cyber Store",
@@ -13,6 +15,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <Script
+          src="//unpkg.com/react-scan/dist/auto.global.js"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
+      </Head>
       <body>{children}</body>
     </html>
   );
