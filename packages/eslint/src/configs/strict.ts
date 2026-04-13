@@ -14,5 +14,6 @@ export const strict: TSESLint.FlatConfig.Config = {
     "use-legend/prefer-use-observable": "error",
     "use-legend/prefer-use-observe": "error",
     "use-legend/no-get-in-non-reactive": "error",
+    "use-legend/no-hooks-in-scope": "error",
   },
 };

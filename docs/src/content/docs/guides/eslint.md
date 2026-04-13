@@ -62,6 +62,7 @@ export default [
       "use-legend/prefer-use-observable": "warn",
       "use-legend/prefer-use-observe": "warn",
       "use-legend/no-get-in-non-reactive": "warn",
+      "use-legend/no-hooks-in-scope": "warn",
     },
   },
 ];
@@ -80,6 +81,7 @@ export default [
 | [`prefer-use-observable`](#prefer-use-observable)             | `warn`      | `error` | Prefer `useObservable` over React `useState`                     |
 | [`prefer-use-observe`](#prefer-use-observe)                   | `warn`      | `error` | Prefer `useObserve` / `useObserveEffect` over React `useEffect`  |
 | [`no-get-in-non-reactive`](#no-get-in-non-reactive)           | `warn`      | `error` | Avoid one-time `.get()` snapshots in component or hook bodies    |
+| [`no-hooks-in-scope`](#no-hooks-in-scope)                     | `warn`      | `error` | Avoid React hook calls inside scoped bodies                      |
 | [`prefer-show-for-conditional`](#prefer-show-for-conditional) | `off`       | `error` | Use `<Show>` over `&&` / ternary with observable conditions      |
 
 ---
@@ -305,6 +307,37 @@ function useLogCount() {
 
 ---
 
+### `no-hooks-in-scope`
+
+React hooks cannot be called inside `useScope` factories. A `"use scope"`
+directive is transformed into `useScope`, so hooks in that scoped body are also
+flagged.
+
+```tsx
+// ❌ Warning
+useScope(() => {
+  const value = useMemo(() => 1, []);
+  return { value };
+});
+
+// ❌ Warning
+function Component() {
+  "use scope";
+  const value = useMemo(() => 1, []);
+  return value;
+}
+
+// ✅ Good
+function useCounter() {
+  const initial = useMemo(() => 0, []);
+  return useScope((p) => ({ count$: observable(p.initial) }), { initial });
+}
+```
+
+[Full docs →](https://github.com/TigerWest/use-legend/blob/main/packages/eslint/docs/rules/no-hooks-in-scope.md)
+
+---
+
 ### `prefer-show-for-conditional`
 
 `&&` / `||` / ternary with an observable condition causes the parent component to
@@ -347,6 +380,7 @@ export default [legendPlugin.configs.recommended];
 | `prefer-use-observable`       | `warn`   |
 | `prefer-use-observe`          | `warn`   |
 | `no-get-in-non-reactive`      | `warn`   |
+| `no-hooks-in-scope`           | `warn`   |
 
 ### `strict`
 
@@ -368,6 +402,7 @@ export default [legendPlugin.configs.strict];
 | `prefer-use-observable`       | `error`  |
 | `prefer-use-observe`          | `error`  |
 | `no-get-in-non-reactive`      | `error`  |
+| `no-hooks-in-scope`           | `error`  |
 
 ---
 
