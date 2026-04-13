@@ -83,6 +83,28 @@ pluginTester({
       `,
     },
 
+    'props.children in final return stays outside scope factory': {
+      code: `
+        function MyComponent(props) {
+          "use scope"
+          const ready$ = createObservable(true)
+          return <div>{props.children}</div>
+        }
+      `,
+      output: `
+        import { useScope } from "@usels/core";
+        function MyComponent(props) {
+          const { ready$ } = useScope(() => {
+            const ready$ = createObservable(true);
+            return {
+              ready$,
+            };
+          });
+          return <div>{props.children}</div>;
+        }
+      `,
+    },
+
     'no props: transforms normally': {
       code: `
         function MyComponent() {

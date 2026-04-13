@@ -1,0 +1,140 @@
+---
+title: useInfiniteScroll
+description: "Triggers a load callback whenever the scroll position reaches a boundary of a scrollable element, enabling infinite scroll for lists and feeds. Supports all four scroll directions, pre-load distance, manual control, async callbacks, and a `canLoadMore` gate function to control when loading stops."
+category: Sensors
+sidebar:
+  order: 4
+type-table:
+  import: "@usels/web"
+  name: "UseInfiniteScroll"
+  params:
+    children:
+      - UseInfiniteScrollOptions
+---
+
+## Demo
+
+## Usage
+
+### Basic
+
+Call `useInfiniteScroll` with a ref to the scrollable element and an async `onLoadMore` callback. The callback fires automatically when the user scrolls to the bottom (default direction).
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useRef$ } from "@usels/core";
+    import { useInfiniteScroll } from "@usels/web";
+
+    function Component() {
+      const el$ = useRef$<HTMLDivElement>();
+
+      const { isLoading$ } = useInfiniteScroll(el$, async () => {
+        const newItems = await fetchNextPage();
+        items.push(...newItems);
+      });
+
+      return (
+        <div ref={el$} style={{ height: 300, overflowY: "auto" }}>
+          {/* list items */}
+          {isLoading$.get() && <div>Loading…</div>}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createInfiniteScroll } from "@usels/web";
+
+    function Component() {
+      "use scope";
+      const el$ = createRef$<HTMLDivElement>();
+
+      const { isLoading$ } = createInfiniteScroll(el$, async () => {
+        const newItems = await fetchNextPage();
+        items.push(...newItems);
+      });
+
+      return (
+        <div ref={el$} style={{ height: 300, overflowY: "auto" }}>
+          {/* list items */}
+          {isLoading$.get() && <div>Loading…</div>}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Direction
+
+Use the `direction` option to trigger loading from any edge. Certain directions require specific CSS on the scrollable container so that new content prepends in the correct visual position.
+
+| Direction          | Required CSS                                     |
+| ------------------ | ------------------------------------------------ |
+| `bottom` (default) | No special settings required                     |
+| `top`              | `display: flex; flex-direction: column-reverse;` |
+| `left`             | `display: flex; flex-direction: row-reverse;`    |
+| `right`            | `display: flex;`                                 |
+
+```tsx
+useInfiniteScroll(
+  el$,
+  async () => {
+    /* load older messages */
+  },
+  { direction: "top" }
+);
+```
+
+### With distance
+
+Set `distance` (in px) to start loading before the user actually reaches the boundary — useful for pre-fetching the next page early.
+
+```typescript
+useInfiniteScroll(el$, onLoadMore, {
+  distance: 200, // trigger 200px before the bottom edge
+});
+```
+
+### canLoadMore
+
+Pass a `canLoadMore` function to control whether loading should trigger. When it returns `false`, the scroll listener is skipped entirely. Use this to stop loading once all pages have been fetched.
+
+```tsx
+useInfiniteScroll(
+  el$,
+  async () => {
+    const page = await fetchNextPage();
+    if (!page.hasMore) setHasMore(false);
+  },
+  {
+    canLoadMore: () => hasMore,
+  }
+);
+```
+
+### Minimum load interval
+
+Use the `interval` option to set a minimum number of milliseconds between consecutive load triggers.
+
+```typescript
+useInfiniteScroll(el$, onLoadMore, {
+  interval: 200, // minimum 200ms between consecutive loads (default: 100)
+});
+```
+
+### Manual load & reset
+
+`load` triggers a load imperatively; `reset` re-checks the current scroll position and triggers a load if the boundary condition is met.
+
+```tsx
+const { load, reset, isLoading$ } = useInfiniteScroll(el$, async () => {
+  await fetchNextPage();
+});
+```

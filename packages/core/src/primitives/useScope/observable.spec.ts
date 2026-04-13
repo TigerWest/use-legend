@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
-import { useState } from "react";
-import { observable } from "@legendapp/state";
+import { createElement, useState } from "react";
+import { isObservable, observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
 import { useScope, toObs, observe } from ".";
 
@@ -32,6 +32,58 @@ describe("useScope() — reactive props (toObs)", () => {
         )
       );
       expect(result.current.a$).toBe(result.current.b$);
+    });
+
+    it("toObs(p).children reads the latest React element after rerender", () => {
+      const firstChild = createElement("span", { key: "first" }, "first child");
+      const secondChild = createElement("span", { key: "second" }, "second child");
+
+      const { result, rerender } = renderHook(
+        ({ children }) =>
+          useScope(
+            (p) => {
+              const p$ = toObs(p);
+              return { readChildren: () => p$.children.peek() };
+            },
+            { children }
+          ),
+        { initialProps: { children: firstChild } }
+      );
+
+      expect(result.current.readChildren()).toBe(firstChild);
+
+      rerender({ children: secondChild });
+
+      expect(result.current.readChildren()).toBe(secondChild);
+    });
+
+    it("keeps React element children opaque so nested props are not observable paths", () => {
+      const data = { nested: 1 };
+      const child = createElement("span", { data }, "child");
+
+      const { result } = renderHook(() =>
+        useScope(
+          (p) => {
+            const p$ = toObs(p);
+            return { children$: p$.children };
+          },
+          { children: child }
+        )
+      );
+
+      const children$ = result.current.children$ as unknown as {
+        get: () => unknown;
+        props: {
+          data: typeof data;
+        };
+      };
+
+      expect(isObservable(children$)).toBe(true);
+      expect(children$.get()).toBe(child);
+      expect(isObservable(children$.props)).toBe(false);
+      expect(children$.props).toBe(child.props);
+      expect(children$.props.data).toBe(data);
+      expect("get" in children$.props.data).toBe(false);
     });
 
     it("Observable is stable across rerenders", () => {

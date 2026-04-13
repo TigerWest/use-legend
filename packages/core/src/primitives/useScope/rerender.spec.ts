@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
-import { renderHook, act } from "@testing-library/react";
+import { render, renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
+import { Memo } from "@legendapp/state/react";
+import { createElement, memo as reactMemo, type ReactNode } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { useScope, onMount, onBeforeMount, observe, toObs } from ".";
 
@@ -173,6 +175,93 @@ describe("useScope() — rerender stability with props", () => {
       result.current.read();
       expect(captured).toBe(42);
     });
+  });
+});
+
+describe("useScope() - component children rerender", () => {
+  it("renders latest props.children when the component rerenders", () => {
+    function ScopedChildren(props: { children: ReactNode }) {
+      const { marker } = useScope(() => ({ marker: "scope" }));
+
+      return createElement(
+        "div",
+        { "data-marker": marker, "data-testid": "content" },
+        props.children
+      );
+    }
+
+    const { getByTestId, rerender } = render(createElement(ScopedChildren, null, "first child"));
+
+    expect(getByTestId("content").textContent).toBe("first child");
+
+    rerender(createElement(ScopedChildren, null, "second child"));
+
+    expect(getByTestId("content").textContent).toBe("second child");
+    expect(getByTestId("content").getAttribute("data-marker")).toBe("scope");
+  });
+
+  it("updates a Memo-wrapped observable element prop without rerendering the child", () => {
+    const firstEl = createElement("span", null, "first element");
+    const secondEl = createElement("span", null, "second element");
+    const props$ = observable({ el: firstEl });
+    const parentRender = vi.fn();
+    const childRender = vi.fn();
+
+    const Child = reactMemo(function Child(props: { el: { get: () => ReactNode } }) {
+      childRender();
+      const { marker } = useScope(() => ({ marker: "child-scope" }));
+
+      return createElement(
+        "div",
+        { "data-marker": marker, "data-testid": "child" },
+        createElement(Memo, null, () => props.el.get())
+      );
+    });
+
+    function Parent() {
+      parentRender();
+      return createElement(Child, { el: props$.el });
+    }
+
+    const { getByTestId } = render(createElement(Parent));
+
+    expect(getByTestId("child").textContent).toBe("first element");
+    expect(getByTestId("child").getAttribute("data-marker")).toBe("child-scope");
+    expect(parentRender).toHaveBeenCalledTimes(1);
+    expect(childRender).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      props$.el.set(secondEl);
+    });
+
+    expect(getByTestId("child").textContent).toBe("second element");
+    expect(getByTestId("child").getAttribute("data-marker")).toBe("child-scope");
+    expect(parentRender).toHaveBeenCalledTimes(1);
+    expect(childRender).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes observable object fields through JSX spread as child props", () => {
+    const handleSubmit = vi.fn(() => "submitted");
+    const observableValue$ = observable({ some1: "one", some2: "two", handleSubmit });
+    let receivedProps: Record<string, any> | undefined;
+
+    function Child(props: Record<string, any>) {
+      receivedProps = props;
+      return null;
+    }
+
+    render(createElement(Child, { ...observableValue$ }));
+
+    expect(Object.keys(receivedProps ?? {}).sort()).toEqual(["handleSubmit", "some1", "some2"]);
+    expect(receivedProps?.some1).toBe(observableValue$.some1);
+    expect(receivedProps?.some2).toBe(observableValue$.some2);
+    expect(receivedProps?.handleSubmit).toBe(observableValue$.handleSubmit);
+    expect(receivedProps?.some1.get()).toBe("one");
+    expect(receivedProps?.some2.get()).toBe("two");
+    expect(receivedProps?.handleSubmit).not.toBe(handleSubmit);
+    handleSubmit.mockClear();
+    expect(receivedProps?.handleSubmit()).toBe("submitted");
+    expect(handleSubmit).toHaveBeenCalledTimes(1);
   });
 });
 
