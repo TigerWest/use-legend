@@ -1,6 +1,6 @@
 {
   "name": "@usels/tanstack-query",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Observable-native TanStack Query integration for Legend-State",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.mjs",
