@@ -1,19 +1,9 @@
 "use client";
-import { createContext, ReactNode } from "react";
+import { createProvider } from "@usels/core";
 import { QueryClient } from "@tanstack/query-core";
 
 /**
- * React Context for QueryClient
- */
-export const QueryClientContext = createContext<QueryClient | undefined>(undefined);
-
-export interface QueryClientProviderProps {
-  client: QueryClient;
-  children: ReactNode;
-}
-
-/**
- * Provider component that makes QueryClient available to hooks
+ * Provider component that makes QueryClient available to hooks.
  *
  * @example
  * ```tsx
@@ -31,8 +21,9 @@ export interface QueryClientProviderProps {
  * }
  * ```
  */
-export function QueryClientProvider({ client, children }: QueryClientProviderProps) {
-  return <QueryClientContext.Provider value={client}>{children}</QueryClientContext.Provider>;
-}
+export const [QueryClientProvider, useQueryClientCtx, getQueryClientCtx] = createProvider(
+  (props: { client: QueryClient }) => props.client,
+  { name: "QueryClient", strict: false }
+);
 
 export { QueryClient };

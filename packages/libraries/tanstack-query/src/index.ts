@@ -7,7 +7,7 @@ export {
   type DehydrateOptions,
   type HydrateOptions,
 } from "./HydrationBoundary";
-export { useQueryClient } from "./useQueryClient";
+export { useQueryClient, getQueryClient } from "./useQueryClient";
 export { useQuery } from "./useQuery";
 export { useMutation } from "./useMutation";
 export { useInfiniteQuery } from "./useInfiniteQuery";
