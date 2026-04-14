@@ -52,6 +52,7 @@ export * from "@utilities/peek";
 export * from "@utilities/useSupported";
 export * from "@utilities/usePermissionAware";
 export * from "@utilities/useWhenMounted";
+export * from "@utilities/useIsMounted";
 export * from "@utilities/useDebounceFn";
 export * from "@utilities/useThrottleFn";
 export * from "@utilities/usePausableFilter";
