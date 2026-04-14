@@ -1,7 +1,8 @@
 import type { Observable } from "@legendapp/state";
 import { For, Show } from "@legendapp/state/react";
 import type { ReactNode } from "react";
-import type { ReadonlyObservable, Memo } from "@usels/core";
+import type { ReadonlyObservable } from "@usels/core";
+import { Memo } from "@usels/core";
 import { cx, DemoPanel, toneClasses } from ".";
 
 type HistoryRecordLike = {
