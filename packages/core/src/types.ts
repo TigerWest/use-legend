@@ -143,16 +143,58 @@ export interface PermissionAware {
 }
 
 // ---------------------------------------------------------------------------
-// Module augmentation: allow ReadonlyObservable in Legend-State React components
+// Module augmentation: narrow Show/For prop types to only the Observable methods
+// they actually call at runtime.
+//
+// Show:
+//   - `if`/`ifReady` → passed to useSelector → computeSelector → calls .get()
+//   - `$value`       → calls $value.get() directly
+//   Both only need Pick<Observable<T>, 'get'>.
+//
+// For:
+//   - `each`         → calls each.get(trackingType) directly inside useSelector
+//   Only needs Pick<Observable<T[]|Record|Map>, 'get'>.
+//
+// Using Pick means any object that has .get() satisfies the constraint, so
+// ReadonlyObservable and other minimal observable-like types pass through.
 // ---------------------------------------------------------------------------
-// Legend-State's Selector<T> requires ObservableParam<T> (= ImmutableObservableSimple & MutableObservableSimple),
-// but ReadonlyObservable intentionally omits MutableObservableSimple.
-// This overload lets <Show if={readonlyObs$}> work without weakening ReadonlyObservable's type safety.
+export type ShowIfProp<T> = Pick<import("@legendapp/state").Observable<T>, "get"> | (() => T) | T;
+
 declare module "@legendapp/state/react" {
   function Show<T>(props: {
-    if: ReadonlyObservable<T>;
+    if: ShowIfProp<T>;
+    ifReady?: never;
     else?: import("react").ReactNode | (() => import("react").ReactNode);
-    wrap?: (children: import("react").ReactNode) => import("react").ReactNode;
+    $value?: Pick<import("@legendapp/state").Observable<T>, "get">;
+    wrap?: import("react").FC<{ children: import("react").ReactNode }>;
     children: import("react").ReactNode | ((value?: T) => import("react").ReactNode);
   }): import("react").ReactElement;
+
+  function Show<T>(props: {
+    if?: never;
+    ifReady: ShowIfProp<T>;
+    else?: import("react").ReactNode | (() => import("react").ReactNode);
+    $value?: Pick<import("@legendapp/state").Observable<T>, "get">;
+    wrap?: import("react").FC<{ children: import("react").ReactNode }>;
+    children: import("react").ReactNode | ((value?: T) => import("react").ReactNode);
+  }): import("react").ReactElement;
+
+  function For<T, TProps>(props: {
+    each?: Pick<
+      import("@legendapp/state").Observable<
+        T[] | Record<string | number, T> | Map<string | number, T>
+      >,
+      "get"
+    >;
+    optimized?: boolean;
+    item?: import("react").FC<
+      { item$: import("@legendapp/state").Observable<T>; id?: string } & TProps
+    >;
+    itemProps?: TProps;
+    sortValues?: (A: T, B: T, AKey: string, BKey: string) => number;
+    children?: (
+      value: import("@legendapp/state").Observable<T>,
+      id: string | undefined
+    ) => import("react").ReactElement;
+  }): import("react").ReactElement | null;
 }

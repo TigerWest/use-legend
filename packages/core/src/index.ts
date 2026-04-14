@@ -32,6 +32,7 @@ export {
   useObserve,
   useObserveEffect,
   useUnmount,
+  useSelector,
 } from "@legendapp/state/react";
 
 export {
