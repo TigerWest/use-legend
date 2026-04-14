@@ -1,0 +1,146 @@
+---
+title: Scope & Lifecycle
+description: Use "use scope" or useScope to create local observable state with automatic cleanup.
+---
+
+A scope is a lifecycle boundary for observable state, effects, and cleanup.
+Use it when state belongs to one component or one custom hook.
+
+## "use scope"
+
+With the Vite or Babel plugin enabled, the `"use scope"` directive is compiled
+to `useScope(...)`.
+
+```tsx
+import { observable, observe, onMount, onUnmount } from "@usels/core";
+
+function Counter() {
+  "use scope";
+
+  const count$ = observable(0);
+  const increment = () => count$.set((count) => count + 1);
+
+  observe(() => {
+    document.title = `Count ${count$.get()}`;
+  });
+
+  onMount(() => {
+    console.log("mounted");
+  });
+
+  onUnmount(() => {
+    console.log("unmounted");
+  });
+
+  return <button onClick={increment}>{count$.get()}</button>;
+}
+```
+
+The observable and functions are created once for the component mount. Scope
+effects are disposed when the component unmounts.
+
+## Props In Scoped Components
+
+When a scoped component needs reactive prop tracking, keep the component props as
+an identifier and pass that identifier to `toObs()`.
+
+```tsx
+import { observable, observe, toObs } from "@usels/core";
+
+type EditableTitleProps = {
+  value: string;
+  onCommit: (value: string) => void;
+};
+
+function EditableTitle(props: EditableTitleProps) {
+  "use scope";
+
+  const props$ = toObs(props, { onCommit: "function" });
+  const draft$ = observable(props.value);
+
+  observe(() => {
+    draft$.set(props$.value.get());
+  });
+
+  const commit = () => {
+    props$.onCommit.get()(draft$.peek());
+  };
+
+  return (
+    <input
+      value={draft$.get()}
+      onChange={(event) => draft$.set(event.currentTarget.value)}
+      onBlur={commit}
+    />
+  );
+}
+```
+
+Inside the scope body, `props.value` is a latest-value read that does not track.
+`props$.value.get()` is reactive and re-runs the `observe()` callback when the
+parent passes a new `value`.
+
+Use hints for non-plain props such as functions, opaque objects, and React
+elements. In the example, `{ onCommit: "function" }` keeps the callback as a
+function value inside the observable props object.
+
+## useScope
+
+Use `useScope` directly when you need explicit props handling or when a build
+pipeline cannot use the directive transform.
+
+```tsx
+import { observable, observe, toObs, useScope } from "@usels/core";
+
+function useThemeSync(props: { theme: string }) {
+  return useScope((p) => {
+    const props$ = toObs(p);
+
+    observe(() => {
+      document.documentElement.dataset.theme = props$.theme.get();
+    });
+
+    return {};
+  }, props);
+}
+```
+
+Plain `p.theme` reads always give the latest value without tracking. Use
+`toObs(p)` when the scope needs reactive prop tracking.
+
+## Scope-Aware APIs
+
+Inside a scope, use the scope-aware lifecycle and effect APIs from `@usels/core`:
+
+| Need | API |
+| --- | --- |
+| DOM measurement before paint | `onBeforeMount()` |
+| Work after mount | `onMount()` |
+| Cleanup on unmount | `onUnmount()` |
+| Reactive side effect | `observe()` |
+| Reactive props | `toObs()` |
+
+## Why create* Fits Scope
+
+Most utility APIs have a `use*` hook wrapper and a `create*` primitive. Inside a
+scope, `create*` reads naturally because the scope already owns lifecycle:
+
+```tsx
+import { createDebounced, observable, observe } from "@usels/core";
+
+function SearchBox({ onSearch }: { onSearch: (query: string) => void }) {
+  "use scope";
+
+  const draft$ = observable("");
+  const query$ = createDebounced(draft$, { ms: 150 });
+
+  observe(() => {
+    onSearch(query$.get());
+  });
+
+  return <input value={draft$.get()} onChange={(event) => draft$.set(event.currentTarget.value)} />;
+}
+```
+
+See [use* vs create*](/use-legend/guides/concepts/use-vs-create/) for the
+selection rule.

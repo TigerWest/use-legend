@@ -49,6 +49,9 @@ module.exports = {
 };
 ```
 
+See [Babel / Next.js](/use-legend/guides/tooling/babel-nextjs/) for non-Vite
+build pipelines.
+
 ## Start With Local Scope
 
 Use `"use scope"` when state belongs to one component or one custom hook.
@@ -100,8 +103,41 @@ function ProductSearch({ onSearch }: { onSearch: (query: string) => void }) {
 }
 ```
 
-Use `toObs()` when props need reactive tracking inside the scope factory. Plain
-prop reads stay available as latest-value reads.
+## Track Props Reactively
+
+Use `toObs()` when a scoped component needs to react to prop changes inside
+`observe()` or a derived observable. Keep props as an identifier so `toObs(props)`
+can be compiled into the scope factory.
+
+```tsx
+import { observable, observe, toObs } from "@usels/core";
+
+function SearchInput(props: { initialQuery: string; onSearch: (query: string) => void }) {
+  "use scope";
+
+  const props$ = toObs(props, { onSearch: "function" });
+  const draft$ = observable(props.initialQuery);
+
+  observe(() => {
+    draft$.set(props$.initialQuery.get());
+  });
+
+  observe(() => {
+    props$.onSearch.get()(draft$.get());
+  });
+
+  return (
+    <input
+      value={draft$.get()}
+      onChange={(event) => draft$.set(event.currentTarget.value)}
+      placeholder="Search products"
+    />
+  );
+}
+```
+
+Plain `props.initialQuery` reads stay available as latest-value reads. Use
+`props$.initialQuery.get()` when the scope should track prop changes reactively.
 
 ## Promote Shared State To A Store
 
@@ -190,9 +226,9 @@ receives debounced domain state.
 
 | Need                               | Use                                           |
 | ---------------------------------- | --------------------------------------------- |
-| Local component state and effects  | `"use scope"`, `useScope`, `observe`, `toObs` |
-| Shared app or domain state         | `createStore()`, `StoreProvider`              |
-| Derived values                     | `observable(() => ...)`                       |
-| Lists and conditionals             | `For`, `Show`, `Memo`                         |
-| Browser, element, and sensor state | `@usels/web` `create*` and `use*` APIs        |
-| Data fetching integration          | `@usels/tanstack-query`                       |
+| Local component state and effects  | [Scope & Lifecycle](/use-legend/guides/concepts/scope-and-lifecycle/) |
+| Shared app or domain state         | [Store & Provider Boundary](/use-legend/guides/concepts/store-and-provider-boundary/) |
+| Derived values and effects         | [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) |
+| Lists and conditionals             | [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/) |
+| Browser, element, and sensor state | [Reactive Refs & Web Targets](/use-legend/guides/concepts/reactive-refs-and-web-targets/) |
+| Data fetching integration          | [Data Fetching](/use-legend/guides/patterns/data-fetching/) |

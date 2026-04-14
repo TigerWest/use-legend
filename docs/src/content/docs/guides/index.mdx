@@ -8,6 +8,10 @@ import ObservableFirstDemoEmbed from "../../../components/guides/ObservableFirst
 
 Use Legend-State as the first state model in app code.
 
+`use-legend` is an observable-first React utility layer built on Legend-State:
+state lives in observables, React renders the tree, and fine-grained boundaries
+update only the UI reads that changed.
+
 ## Observable-First Rules
 
 - No `useState`
@@ -27,3 +31,12 @@ When the interval updates an observable, only the bound text node updates and th
 <ObservableFirstDemoEmbed />
 
 Use this pattern for high-frequency updates (timers, polling, streaming, sensors) to keep React work minimal while keeping logic composable with hooks.
+
+## Read Next
+
+- [Getting Started](/use-legend/guides/getting-started/) for installation and a
+  first local scope/store example.
+- [Observable-First Mental Model](/use-legend/guides/concepts/observable-first-mental-model/)
+  for the core reactivity model.
+- [Scope & Lifecycle](/use-legend/guides/concepts/scope-and-lifecycle/) for
+  local state and cleanup.

@@ -123,19 +123,51 @@ export default defineConfig({
             { label: "Introduction", slug: "guides" },
             { label: "Getting Started", slug: "guides/getting-started" },
             {
-              label: "Patterns & Best Practices",
+              label: "Concepts",
               items: [
-                { label: "Best Practices", slug: "guides/best-practices" },
-                { label: "Recommend Pattern", slug: "guides/recommend-pattern" },
+                {
+                  label: "Observable-First Mental Model",
+                  slug: "guides/concepts/observable-first-mental-model",
+                },
+                { label: "Scope & Lifecycle", slug: "guides/concepts/scope-and-lifecycle" },
+                {
+                  label: "Store & Provider Boundary",
+                  slug: "guides/concepts/store-and-provider-boundary",
+                },
+                {
+                  label: "Rendering Boundaries",
+                  slug: "guides/concepts/rendering-boundaries",
+                },
+                { label: "use* vs create*", slug: "guides/concepts/use-vs-create" },
+                {
+                  label: "Reactive Refs & Web Targets",
+                  slug: "guides/concepts/reactive-refs-and-web-targets",
+                },
+              ],
+            },
+            {
+              label: "Patterns",
+              collapsed: true,
+              items: [
+                {
+                  label: "Local Draft, Global Commit",
+                  slug: "guides/patterns/local-draft-global-commit",
+                },
+                {
+                  label: "Derived State & Effects",
+                  slug: "guides/patterns/derived-state-and-effects",
+                },
+                { label: "Persisted State", slug: "guides/patterns/persisted-state" },
+                { label: "Data Fetching", slug: "guides/patterns/data-fetching" },
               ],
             },
             {
               label: "Tooling",
               collapsed: true,
               items: [
-                { label: "ESLint Plugin", slug: "guides/eslint" },
-                { label: "Babel", slug: "guides/babel" },
-                { label: "Vite", slug: "guides/vite" },
+                { label: "Vite", slug: "guides/tooling/vite" },
+                { label: "Babel / Next.js", slug: "guides/tooling/babel-nextjs" },
+                { label: "ESLint", slug: "guides/tooling/eslint" },
               ],
             },
           ],
@@ -144,17 +176,22 @@ export default defineConfig({
           label: "Core",
           items: [
             { label: "Primitives", autogenerate: { directory: "core/primitives" } },
-            { label: "State", autogenerate: { directory: "core/state" } },
-            { label: "Reactivity", autogenerate: { directory: "core/reactivity" } },
-            { label: "Observe", autogenerate: { directory: "core/observe" } },
-            { label: "Sync", autogenerate: { directory: "core/sync" } },
-            { label: "Timer", autogenerate: { directory: "core/timer" } },
-            { label: "Utilities", autogenerate: { directory: "core/utilities" } },
+            { label: "State", collapsed: true, autogenerate: { directory: "core/state" } },
+            {
+              label: "Reactivity",
+
+              collapsed: true,
+              autogenerate: { directory: "core/reactivity" },
+            },
+            { label: "Observe", collapsed: true, autogenerate: { directory: "core/observe" } },
+            { label: "Sync", collapsed: true, autogenerate: { directory: "core/sync" } },
+            { label: "Timer", collapsed: true, autogenerate: { directory: "core/timer" } },
+            { label: "Utilities", collapsed: true, autogenerate: { directory: "core/utilities" } },
           ],
         },
         {
           label: "Web",
-          autogenerate: { directory: "web" },
+          autogenerate: { directory: "web", collapsed: true },
         },
         // {
         //   label: "Integrations",
@@ -162,6 +199,7 @@ export default defineConfig({
         // },
         {
           label: "TanStack Query",
+          collapsed: true,
           autogenerate: { directory: "tanstack-query" },
         },
         // {

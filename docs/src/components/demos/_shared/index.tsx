@@ -37,7 +37,6 @@ type ValueTokenProps = {
   readonly children: ReactNode;
 };
 
-
 export const toneClasses: Record<
   Tone,
   {
@@ -144,7 +143,10 @@ export function StatCard({ label, value, tone = "neutral" }: StatCardProps) {
       )}
     >
       <div className="text-[11px] font-bold uppercase tracking-[0.04em]">{label}</div>
-      <div className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-bold text-[var(--sl-color-text)]">
+      <div
+        className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-bold text-[var(--sl-color-text)]"
+        suppressHydrationWarning
+      >
         {value}
       </div>
     </div>
