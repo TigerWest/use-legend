@@ -1,10 +1,12 @@
 # no-observable-in-jsx
 
-Disallow using observables directly in JSX expressions without calling `.get()`.
+Disallow rendering observables as JSX text nodes.
 
 ## Rule Details
 
-Placing an observable directly inside a JSX expression (`{count$}`) renders `[object Object]` instead of the actual value. This is a silent bug — no runtime error is thrown, but the UI displays garbage. This rule catches these cases at lint time.
+Placing an observable directly as a JSX child (`<div>{count$}</div>`) renders `[object Object]` instead of the actual value. This is a silent bug — no runtime error is thrown, but the UI displays garbage. This rule catches these cases at lint time.
+
+The rule only checks JSX child positions. Prop values are intentionally not checked — TypeScript already verifies type compatibility, and some props accept observables by design (`Show#if`, `For#each`, `ref` from `useRef$`, `*$`-suffixed custom props, etc.).
 
 ### Incorrect
 
@@ -15,11 +17,9 @@ Placing an observable directly inside a JSX expression (`{count$}`) renders `[ob
 // ❌ Nested property — still an observable, not a value
 <span>{user$.name}</span>
 
-// ❌ Logical expression with raw observable
-{isLoading$ && <Spinner />}
-
-// ❌ Observable passed as a non-allowed prop
-<Button disabled={isDisabled$} />
+// ❌ Raw observable as child of a reactive component
+<Show>{obs$}</Show>
+<Computed>{obs$}</Computed>
 ```
 
 ### Correct
@@ -29,52 +29,20 @@ Placing an observable directly inside a JSX expression (`{count$}`) renders `[ob
 <div>{count$.get()}</div>
 <span>{user$.name.get()}</span>
 
-// ✅ Legend-State reactive components accept observables intentionally
+// ✅ Reactive components receive a render function, not the raw observable
+<Memo>{() => count$.get()}</Memo>
+<Computed>{() => obs$.get()}</Computed>
+
+// ✅ Props are not checked — type compatibility is handled by TypeScript
 <Show if={isLoading$}><Spinner /></Show>
 <For each={items$}>{(item$) => <li>{item$.name.get()}</li>}</For>
-<Switch value={tab$}><Match when="home"><Home /></Match></Switch>
-
-// ✅ ref prop accepts observable refs from useRef$
+<CustomComp value={counter$} />
 <div ref={el$} />
-
-// ✅ Memo child — observable passed into a reactive render function
-<Memo>{() => count$.get()}</Memo>
 ```
-
-## Allowed Components & Props
-
-By default these Legend-State components accept observables in specific props:
-
-| Component | Allowed Props |
-|-----------|--------------|
-| `Show` | `if`, `ifReady`, `else` |
-| `For` | `each` |
-| `Switch` | `value` |
-| `Memo`, `Computed` | (as children container) |
-
-Additionally, the `ref` prop is always allowed on any element (for `useRef$` observable refs).
 
 ## Options
 
-```ts
-{
-  "use-legend/no-observable-in-jsx": ["error", {
-    "allowedJsxComponents": ["Show", "For", "Switch", "Memo", "Computed"],
-    "allowedProps": {
-      "Show": ["if", "ifReady", "else"],
-      "For": ["each"],
-      "Switch": ["value"]
-    },
-    "allowedGlobalProps": ["ref"]
-  }]
-}
-```
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `allowedJsxComponents` | `string[]` | `["Show","For","Switch","Memo","Computed"]` | Components whose children may receive observables. |
-| `allowedProps` | `Record<string, string[]>` | See above | Per-component prop allowlist. |
-| `allowedGlobalProps` | `string[]` | `["ref"]` | Props allowed on any element. |
+This rule has no options.
 
 ## Detection Strategy
 

@@ -20,114 +20,81 @@ const ruleTester = new RuleTester({
 
 ruleTester.run('no-observable-in-jsx', noObservableInJsx, {
   valid: [
-    // 1. .get() call — not an observable expression itself
+    // .get() call as child
     {
       code: `const el = <div>{count$.get()}</div>;`,
     },
-    // 2. Nested member .get()
+    // Nested member .get()
     {
       code: `const el = <div>{user$.name.get()}</div>;`,
     },
-    // 3. Show's `if` prop is allowed
-    {
-      code: `const el = <Show if={isLoading$}><Spinner /></Show>;`,
-    },
-    // 4. For's `each` prop is allowed
-    {
-      code: `const el = <For each={items$}><Item /></For>;`,
-    },
-    // 5. Switch's `value` prop is allowed
-    {
-      code: `const el = <Switch value={tab$}><Match /></Switch>;`,
-    },
-    // 6. Memo children with arrow function — the function itself is not an observable
+    // Arrow function child — the function itself is not an observable
     {
       code: `const el = <Memo>{() => count$.get()}</Memo>;`,
     },
-    // 7. No $ suffix — not an observable
+    // No $ suffix — not an observable
     {
       code: `const el = <div>{count}</div>;`,
     },
-    // 8. Plain member expression without $ root
+    // Plain member expression without $ root
     {
       code: `const el = <div>{someObj.value}</div>;`,
     },
-    // 9. Show's `ifReady` prop is allowed
+    // Observable in any prop — allowed (type system handles compatibility)
     {
-      code: `const el = <Show ifReady={data$}><Content /></Show>;`,
+      code: `const el = <div className={style$}></div>;`,
     },
-    // 10. Show's `else` prop is allowed
     {
-      code: `const el = <Show if={visible$} else={<Fallback />}><Modal /></Show>;`,
+      code: `const el = <CustomComp value={counter$} />;`,
     },
-    // 11. Child of Computed — allowed
-    {
-      code: `const el = <Computed>{obs$}</Computed>;`,
-    },
-    // 12. Custom allowedJsxComponents option
-    {
-      code: `const el = <MyObserver>{obs$}</MyObserver>;`,
-      options: [{ allowedJsxComponents: ['MyObserver'] }],
-    },
-    // 13. Custom allowedProps option
-    {
-      code: `const el = <MyComp data={obs$} />;`,
-      options: [
-        {
-          allowedJsxComponents: [],
-          allowedProps: { MyComp: ['data'] },
-        },
-      ],
-    },
-    // 14. `ref` prop is always allowed (useRef$ pattern)
     {
       code: `const el = <div ref={el$}></div>;`,
     },
-    // 15. `ref` on a custom component
     {
-      code: `const el = <MyComp ref={containerRef$} />;`,
+      code: `const el = <Show if={isLoading$}><Spinner /></Show>;`,
+    },
+    {
+      code: `const el = <For each={items$} limit={count$}><Item /></For>;`,
+    },
+    // Fragment with non-observable child
+    {
+      code: `const el = <>{count$.get()}</>;`,
     },
   ],
 
   invalid: [
-    // 1. Direct observable as child
+    // Direct observable as child of JSXElement
     {
       code: `const el = <div>{count$}</div>;`,
       errors: [{ messageId: 'observableInJsx', data: { name: 'count$' } }],
     },
-    // 2. Member expression (user$.name) as child
+    // Member expression as child
     {
       code: `const el = <span>{user$.name}</span>;`,
       errors: [
         { messageId: 'observableInJsx', data: { name: 'user$.name' } },
       ],
     },
-    // 3. Observable in non-allowed prop
-    {
-      code: `const el = <div className={style$}></div>;`,
-      errors: [{ messageId: 'observableInJsx', data: { name: 'style$' } }],
-    },
-    // 4. Observable on non-allowedJsxComponents prop
-    {
-      code: `const el = <CustomComp value={obs$} />;`,
-      errors: [{ messageId: 'observableInJsx', data: { name: 'obs$' } }],
-    },
-    // 5. Show with a non-allowed prop (e.g., `className`)
-    {
-      code: `const el = <Show className={style$}><Content /></Show>;`,
-      errors: [{ messageId: 'observableInJsx', data: { name: 'style$' } }],
-    },
-    // 6. For with a non-allowed prop
-    {
-      code: `const el = <For limit={count$}><Item /></For>;`,
-      errors: [{ messageId: 'observableInJsx', data: { name: 'count$' } }],
-    },
-    // 7. Deeply nested member expression
+    // Deeply nested member expression
     {
       code: `const el = <p>{form$.fields.email}</p>;`,
       errors: [
         { messageId: 'observableInJsx', data: { name: 'form$.fields.email' } },
       ],
+    },
+    // Observable as child of previously-allowlisted components — no more exception
+    {
+      code: `const el = <Show>{obs$}</Show>;`,
+      errors: [{ messageId: 'observableInJsx', data: { name: 'obs$' } }],
+    },
+    {
+      code: `const el = <Computed>{obs$}</Computed>;`,
+      errors: [{ messageId: 'observableInJsx', data: { name: 'obs$' } }],
+    },
+    // Observable as child of JSXFragment
+    {
+      code: `const el = <>{count$}</>;`,
+      errors: [{ messageId: 'observableInJsx', data: { name: 'count$' } }],
     },
   ],
 });

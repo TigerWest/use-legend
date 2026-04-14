@@ -1,15 +1,6 @@
 import type { TSESTree } from "@typescript-eslint/utils";
-import { isObservableExpression, getJsxElementName } from "../utils/ast-helpers";
+import { isObservableExpression } from "../utils/ast-helpers";
 import { createRule } from "../utils/create-rule";
-
-type AllowedProps = Record<string, string[]>;
-
-interface Options {
-  allowedJsxComponents: string[];
-  allowedProps: AllowedProps;
-  /** Props that are always allowed on ANY element/component (e.g. React's `ref`). */
-  allowedGlobalProps: string[];
-}
 
 type MessageIds = "observableInJsx";
 
@@ -28,119 +19,33 @@ function getObservableName(node: TSESTree.Node): string {
   return "(observable)";
 }
 
-export const noObservableInJsx = createRule<[Partial<Options>], MessageIds>({
+export const noObservableInJsx = createRule<[], MessageIds>({
   name: "no-observable-in-jsx",
   meta: {
     type: "problem",
     docs: {
-      description: "Disallow using observables directly in JSX expressions without calling .get()",
+      description:
+        "Disallow rendering observables as JSX text nodes. Call '.get()' or wrap with a reactive component.",
     },
     messages: {
       observableInJsx:
-        "Observable '{{name}}' is used directly in JSX. Call '.get()' to read its value, e.g., '{{name}}.get()'.",
+        "Observable '{{name}}' is rendered as a text node. Call '.get()' to read its value, e.g., '{{name}}.get()'.",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          allowedJsxComponents: {
-            type: "array",
-            items: { type: "string" },
-          },
-          allowedProps: {
-            type: "object",
-            additionalProperties: {
-              type: "array",
-              items: { type: "string" },
-            },
-          },
-          allowedGlobalProps: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
   },
-  defaultOptions: [{}],
-  create(context, [userOptions]) {
-    const allowedJsxComponents: string[] = userOptions.allowedJsxComponents ?? [
-      "Show",
-      "For",
-      "Switch",
-      "Memo",
-      "Computed",
-    ];
-    const allowedProps: AllowedProps = userOptions.allowedProps ?? {
-      Show: ["if", "ifReady", "else"],
-      For: ["each"],
-      Switch: ["value"],
-    };
-    // `ref` is always valid: React accepts observable refs from useRef$
-    const allowedGlobalProps: string[] = userOptions.allowedGlobalProps ?? ["ref"];
-
+  defaultOptions: [],
+  create(context) {
     return {
       JSXExpressionContainer(node: TSESTree.JSXExpressionContainer) {
         const { expression } = node;
 
-        // Skip empty expressions ({}) and spread elements
-        if (expression.type === "JSXEmptyExpression") {
-          return;
-        }
-
-        // Only flag nodes that look like observables
-        if (!isObservableExpression(expression)) {
-          return;
-        }
+        if (expression.type === "JSXEmptyExpression") return;
+        if (!isObservableExpression(expression)) return;
 
         const parent = node.parent;
+        if (!parent) return;
+        if (parent.type !== "JSXElement" && parent.type !== "JSXFragment") return;
 
-        // Case 1: expression container is a JSX attribute value
-        // e.g. <Show if={isLoading$}>
-        if (parent && parent.type === "JSXAttribute") {
-          const attrNode = parent as TSESTree.JSXAttribute;
-          const attrName = attrNode.name.type === "JSXIdentifier" ? attrNode.name.name : null;
-
-          // The opening element is the parent of the attribute
-          const openingElement = attrNode.parent as TSESTree.JSXOpeningElement;
-          const componentName = getJsxElementName(openingElement);
-
-          // Props ending with `$` explicitly accept observables (e.g. history$={history$})
-          if (attrName && attrName.endsWith("$")) {
-            return;
-          }
-
-          // Globally allowed props (e.g. React's `ref` for observable refs)
-          if (attrName && allowedGlobalProps.includes(attrName)) {
-            return;
-          }
-
-          if (attrName && componentName && allowedProps[componentName]?.includes(attrName)) {
-            return; // allowed prop
-          }
-
-          // Not an allowed prop — report
-          context.report({
-            node,
-            messageId: "observableInJsx",
-            data: { name: getObservableName(expression) },
-          });
-          return;
-        }
-
-        // Case 2: expression container is a child of a JSXElement
-        // e.g. <Show>{obs$}</Show>
-        if (parent && parent.type === "JSXElement") {
-          const jsxElement = parent as TSESTree.JSXElement;
-          const componentName = getJsxElementName(jsxElement.openingElement);
-
-          if (componentName && allowedJsxComponents.includes(componentName)) {
-            return; // child of an allowed component
-          }
-        }
-
-        // All other cases: report
         context.report({
           node,
           messageId: "observableInJsx",
