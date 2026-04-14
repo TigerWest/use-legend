@@ -29,6 +29,10 @@ export class EffectScope {
   /** @internal */ _parent: EffectScope | null = null;
   /** @internal */ readonly _beforeMountCbs: Array<() => void> = [];
   /** @internal */ readonly _mountCbs: Array<() => (() => void) | void> = [];
+  /** @internal — React.Context refs collected by `inject()` during first-mount run */
+  readonly _recordedCtxs: unknown[] = [];
+  /** @internal — true only during the first-mount `scope.run()` in useScope */
+  _injectRecording = false;
 
   constructor() {
     this._parent = _currentScope;

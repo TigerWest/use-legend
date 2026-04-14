@@ -71,3 +71,34 @@ const [ThemeProvider, useTheme] = createProvider(
   { name: "Theme" }
 );
 ```
+
+### getHook — call from inside `useScope` / `"use scope"`
+
+The third tuple entry `getHook` is a non-hook accessor for the provided value.
+Use it inside a `useScope` factory (or a `"use scope"` directive body) where
+regular React hooks are disallowed.
+
+```tsx
+// @noErrors
+import { observable, computed } from "@legendapp/state";
+import { createProvider } from "@usels/core";
+
+const [ThemeProvider, useTheme, getTheme] = createProvider(({ color }: { color: string }) =>
+  observable({ color })
+);
+
+function useThemeClass() {
+  "use scope";
+  const theme$ = getTheme();
+  return { className$: computed(() => `theme-${theme$.color.get()}`) };
+}
+```
+
+Rules:
+
+- Must be called **synchronously** during the first run of the factory.
+- Must be called under the matching Provider; otherwise throws in strict mode
+  or returns `undefined` in non-strict mode.
+- Returns the raw provided value (same as `useHook`). For reactivity, provide
+  an Observable from the composable — its reference stays stable and `observe()`
+  inside the scope reacts to field changes.

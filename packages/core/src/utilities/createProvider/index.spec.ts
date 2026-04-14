@@ -3,15 +3,17 @@ import React, { useState } from "react";
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { createProvider } from ".";
+import { useScope } from "@primitives/useScope";
 
 describe("createProvider()", () => {
   describe("return type / structure", () => {
-    it("returns a readonly tuple of [Provider, useContext]", () => {
+    it("returns a readonly tuple of [Provider, useHook, getHook]", () => {
       const result = createProvider(() => 42);
       expect(Array.isArray(result)).toBe(true);
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
       expect(typeof result[0]).toBe("function");
       expect(typeof result[1]).toBe("function");
+      expect(typeof result[2]).toBe("function");
     });
   });
 
@@ -131,5 +133,46 @@ describe("createProvider()", () => {
       });
       expect(() => unmount()).not.toThrow();
     });
+  });
+});
+
+describe("createProvider() — getHook (3rd tuple entry)", () => {
+  it("getHook returns the provided value when used inside useScope under Provider", () => {
+    const [Provider, , getValue] = createProvider((props: { value: number }) => props.value);
+
+    function useCapture() {
+      return useScope(() => {
+        return { v: getValue() };
+      });
+    }
+
+    const { result } = renderHook(() => useCapture(), {
+      wrapper: ({ children }) => React.createElement(Provider, { value: 7 }, children),
+    });
+
+    expect(result.current.v).toBe(7);
+  });
+
+  it("getHook throws in strict mode when Provider is missing", () => {
+    const [, , getValue] = createProvider(() => 42, { name: "StrictCtx" });
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    function useCapture() {
+      return useScope(() => ({ v: getValue() }));
+    }
+
+    expect(() => renderHook(() => useCapture())).toThrow(/StrictCtx/);
+    spy.mockRestore();
+  });
+
+  it("getHook returns undefined in non-strict mode when Provider is missing", () => {
+    const [, , getValue] = createProvider(() => 42, { strict: false });
+
+    function useCapture() {
+      return useScope(() => ({ v: getValue() }));
+    }
+
+    const { result } = renderHook(() => useCapture());
+    expect(result.current.v).toBeUndefined();
   });
 });

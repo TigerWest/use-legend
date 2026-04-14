@@ -50,4 +50,16 @@ describe("createProvider() — types", () => {
       expectTypeOf(Provider).parameter(0).toMatchTypeOf<{ label: string; count: number }>();
     });
   });
+
+  describe("getHook (3rd tuple entry)", () => {
+    it("strict mode: getHook returns Value", () => {
+      const [, , getCtx] = createProvider((props: { x: number }) => props.x);
+      expectTypeOf(getCtx).returns.toBeNumber();
+    });
+
+    it("non-strict mode: getHook returns Value | undefined", () => {
+      const [, , getCtx] = createProvider((props: { x: number }) => props.x, { strict: false });
+      expectTypeOf(getCtx).returns.toEqualTypeOf<number | undefined>();
+    });
+  });
 });

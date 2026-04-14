@@ -14,6 +14,7 @@ export { onBeforeMount, onMount, onUnmount } from "./effectScope";
 export { observe } from "./observe";
 export { toObs } from "./reactiveProps";
 export type { ReactiveProps } from "./reactiveProps";
+export { inject } from "./inject";
 
 /**
  * Runs a factory function exactly once per mount inside an effect scope.
@@ -90,7 +91,9 @@ export function useScope(fn: any, ...rest: any[]): any {
     }
   }
 
-  if (stateRef.current === null) {
+  const justCreated = stateRef.current === null;
+
+  if (justCreated) {
     const scope = effectScope();
     const ctxList: ScopePropsCtx<Record<string, unknown>>[] = rest.map((p) => ({
       propsRef: { current: p },
@@ -99,18 +102,32 @@ export function useScope(fn: any, ...rest: any[]): any {
       rawPrev: null,
     }));
     const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
+
     const _prev = setActiveValue(_registry);
+    scope._injectRecording = true;
+
     let result: unknown;
     try {
       result = scope.run(() => fn(...proxies)); // factory runs exactly once, ever
     } finally {
+      scope._injectRecording = false;
       setActiveValue(_prev);
     }
     stateRef.current = { scope, result, ctxList };
   }
 
-  for (let i = 0; i < stateRef.current.ctxList.length; i++) {
-    syncProps(stateRef.current.ctxList[i], rest[i]);
+  // Replay useContext calls on every render EXCEPT the one that just created
+  // stateRef (on that render they already ran inside scope.run via inject()).
+  if (!justCreated) {
+    const recorded = stateRef.current!.scope._recordedCtxs;
+    for (let i = 0; i < recorded.length; i++) {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      React.useContext(recorded[i] as React.Context<unknown>);
+    }
+  }
+
+  for (let i = 0; i < stateRef.current!.ctxList.length; i++) {
+    syncProps(stateRef.current!.ctxList[i], rest[i]);
   }
 
   // onBeforeMount — fires on every useLayoutEffect mount (twice in Strict Mode,

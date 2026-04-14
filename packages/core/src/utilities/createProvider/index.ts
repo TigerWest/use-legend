@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { inject } from "@primitives/useScope";
 
 export interface CreateProviderOptions {
   name?: string;
@@ -9,12 +10,14 @@ export interface CreateProviderOptions {
 
 export type CreateProviderReturn<Props, Value> = readonly [
   Provider: React.FC<React.PropsWithChildren<Props>>,
-  useContext: () => Value,
+  useHook: () => Value,
+  getHook: () => Value,
 ];
 
 export type CreateProviderNullableReturn<Props, Value> = readonly [
   Provider: React.FC<React.PropsWithChildren<Props>>,
-  useContext: () => Value | undefined,
+  useHook: () => Value | undefined,
+  getHook: () => Value | undefined,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Props must accept arbitrary key-value pairs
@@ -52,5 +55,13 @@ export function createProvider<Props extends Record<string, any>, Value>(
     return ctx;
   };
 
-  return [Provider, useCtx] as const;
+  const getCtx = (): Value | undefined => {
+    const ctx = inject(Context);
+    if (strict && ctx === undefined) {
+      throw new Error(`${Context.displayName}: getHook must be used within a Provider.`);
+    }
+    return ctx;
+  };
+
+  return [Provider, useCtx, getCtx] as const;
 }

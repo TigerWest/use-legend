@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     // Test files to include (exclude browser-specific specs)
-    include: ["src/**/*.spec.ts"],
-    exclude: ["src/**/*.browser.spec.ts", "node_modules"],
+    include: ["src/**/*.spec.ts", "src/**/*.spec.tsx"],
+    exclude: ["src/**/*.browser.spec.ts", "src/**/*.browser.spec.tsx", "node_modules"],
 
     // Test environment
     environment: "node",
