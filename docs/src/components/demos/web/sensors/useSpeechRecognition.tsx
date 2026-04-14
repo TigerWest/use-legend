@@ -1,5 +1,5 @@
 import { useSpeechRecognition } from "@usels/web";
-import { Memo, Show } from "@legendapp/state/react";
+import { Show } from "@legendapp/state/react";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge } from "../../_shared";
 
 export default function Demo() {

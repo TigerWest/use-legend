@@ -281,8 +281,7 @@ Direct JSX children and multiple children:
 ### Basic principle: write `.get()` naturally, plugin handles wrapping
 
 ```tsx
-import { observable } from '@legendapp/state';
-import { Show, Memo, For } from '@legendapp/state/react';
+import { Show, Memo, For, observable } from '@usels/core';
 
 const count$ = observable(0);
 const isVisible$ = observable(true);
