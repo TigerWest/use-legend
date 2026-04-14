@@ -9,7 +9,9 @@ export default function UseNowDemo() {
   return (
     <DemoShell eyebrow="Timer">
       <DemoPanel title="Current Time" description="Updates every frame via requestAnimationFrame.">
-        <ValueToken>{nowLocale$.get()}</ValueToken>
+        <ValueToken>
+          <span suppressHydrationWarning>{nowLocale$.get()}</span>
+        </ValueToken>
       </DemoPanel>
     </DemoShell>
   );

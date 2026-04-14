@@ -77,6 +77,7 @@ export function HistoryList({
                       <time
                         className="text-[11px] text-[var(--sl-color-gray-3)] [font-variant-numeric:tabular-nums]"
                         dateTime={new Date(record$.timestamp.get()).toISOString()}
+                        suppressHydrationWarning
                       >
                         {timeFormatter.format(record$.timestamp.get())}
                       </time>

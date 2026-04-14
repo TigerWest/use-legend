@@ -23,8 +23,8 @@ to re-render by default.
 ## Installation
 
 ```bash
-pnpm add @usels/core @usels/web react
-pnpm add -D @usels/vite-plugin @usels/babel-plugin @babel/core
+pnpm add @usels/core @usels/web
+pnpm add -D @usels/vite-plugin
 ```
 
 Use `@usels/core` for local scopes, global stores, reactivity, timers, and sync
@@ -150,7 +150,6 @@ instances isolated across SSR requests, app shells, tests, or embedded roots.
 | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | [`@usels/core`](./packages/core)                               | Store, scope, reactivity, timers, sync primitives, and Legend-State exports |
 | [`@usels/web`](./packages/web)                                 | Browser, element, and sensor APIs                                           |
-| [`@usels/native`](./packages/native)                           | Currently re-exports core; native APIs can be added here                    |
 | [`@usels/tanstack-query`](./packages/libraries/tanstack-query) | Observable-native TanStack Query integration                                |
 | [`@usels/vite-plugin`](./packages/vite)                        | Vite transform for JSX `.get()` reads and `"use scope"`                     |
 | [`@usels/babel-plugin`](./packages/babel)                      | Underlying Babel transform used by the Vite plugin                          |

@@ -6,10 +6,7 @@ export default function UseTimestampDemo() {
 
   return (
     <DemoShell eyebrow="Timer">
-      <DemoPanel
-        title="Timestamp"
-        description="Updates every frame via requestAnimationFrame."
-      >
+      <DemoPanel title="Timestamp" description="Updates every frame via requestAnimationFrame.">
         <div className={demoClasses.statsGrid}>
           <StatCard label="Timestamp" value={timestamp$.get()} tone="accent" />
         </div>
