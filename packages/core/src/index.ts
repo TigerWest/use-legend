@@ -55,6 +55,7 @@ export * from "@utilities/useWhenMounted";
 export * from "@utilities/useDebounceFn";
 export * from "@utilities/useThrottleFn";
 export * from "@utilities/usePausableFilter";
+export * from "@utilities/createProvider";
 
 export * from "@reactivity/useMaybeObservable";
 export * from "@reactivity/useInitialPick";
@@ -70,7 +71,6 @@ export * from "@state/useManualHistory";
 export * from "@state/useDataHistory";
 export * from "@state/useThrottledHistory";
 export * from "@state/useDebouncedHistory";
-export * from "@state/createProvider";
 export * from "@state/useLastChanged";
 
 export * from "@shared/filters";
