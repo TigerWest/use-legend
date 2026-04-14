@@ -4,22 +4,46 @@ description: "Reactive online state. A thin wrapper around [`useNetwork`](/web/s
 category: Sensors
 sidebar:
   order: 8
+type-table:
+  import: "@usels/web"
+  name: "UseOnline"
+  params:
+    children:
+      - UseOnlineOptions
 ---
 
 ## Demo
 
 ## Usage
 
-```tsx twoslash
-// @noErrors
-import { useOnline } from "@usels/web";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useOnline } from "@usels/web";
 
-function Component() {
-  const isOnline$ = useOnline();
+    function Component() {
+      const isOnline$ = useOnline();
 
-  return <div>{isOnline$.get() ? "Online" : "Offline"}</div>;
-}
-```
+      return <div>{isOnline$.get() ? "Online" : "Offline"}</div>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createOnline } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const isOnline$ = createOnline();
+
+      return <div>{isOnline$.get() ? "Online" : "Offline"}</div>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### With `onChange` callback
 

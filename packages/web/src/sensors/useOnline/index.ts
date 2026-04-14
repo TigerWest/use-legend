@@ -1,9 +1,11 @@
 "use client";
-import type { ReadonlyObservable } from "@usels/core";
-import { useNetwork } from "../useNetwork";
+import { useScope } from "@usels/core";
+import { createOnline } from "./core";
 
-/*@__NO_SIDE_EFFECTS__*/
-export function useOnline(): ReadonlyObservable<boolean> {
-  const { isOnline$ } = useNetwork();
-  return isOnline$;
-}
+export { createOnline } from "./core";
+export type { UseOnlineOptions, UseOnlineReturn } from "./core";
+
+export type UseOnline = typeof createOnline;
+export const useOnline: UseOnline = (options = {}) => {
+  return useScope(() => createOnline(options));
+};

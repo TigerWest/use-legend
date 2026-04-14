@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useWindowScroll } from ".";
-import * as useScrollModule from "@sensors/useScroll";
 
 describe("useWindowScroll()", () => {
   beforeEach(() => {
@@ -44,17 +43,20 @@ describe("useWindowScroll()", () => {
     vi.restoreAllMocks();
   });
 
-  it("calls useScroll internally with window as target", () => {
-    const spy = vi.spyOn(useScrollModule, "useScroll");
+  it("registers a scroll listener on window", () => {
+    const spy = vi.spyOn(window, "addEventListener");
     renderHook(() => useWindowScroll());
-    expect(spy).toHaveBeenCalledWith(window, undefined);
+    const scrollCalls = spy.mock.calls.filter(([type]) => type === "scroll");
+    expect(scrollCalls.length).toBeGreaterThan(0);
   });
 
-  it("options are forwarded to useScroll as-is", () => {
-    const spy = vi.spyOn(useScrollModule, "useScroll");
-    const options = { idle: 500, throttle: 100 };
-    renderHook(() => useWindowScroll(options));
-    expect(spy).toHaveBeenCalledWith(window, options);
+  it("forwards onScroll option to the underlying scroll tracker", () => {
+    const onScroll = vi.fn();
+    renderHook(() => useWindowScroll({ onScroll }));
+    act(() => {
+      window.dispatchEvent(new Event("scroll"));
+    });
+    expect(onScroll).toHaveBeenCalled();
   });
 
   it("returns an object matching UseScrollReturn shape", () => {

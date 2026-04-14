@@ -2,6 +2,8 @@
 title: get
 description: Extract values from MaybeObservable types
 category: Utilities
+sidebar:
+  order: 0
 ---
 
 Extract raw values from `MaybeObservable` types (works with both raw values and Legend-State observables).

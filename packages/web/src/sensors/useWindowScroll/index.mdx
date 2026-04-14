@@ -4,6 +4,12 @@ description: "Tracks the window scroll position, direction, arrived state, and s
 category: Sensors
 sidebar:
   order: 4
+type-table:
+  import: "@usels/web"
+  name: "UseWindowScroll"
+  params:
+    children:
+      - UseWindowScrollOptions
 ---
 
 ## Demo
@@ -12,21 +18,44 @@ sidebar:
 
 ### Basic
 
-```tsx twoslash
-// @noErrors
-import { useWindowScroll } from "@usels/core";
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { useWindowScroll } from "@usels/web";
 
-function Component() {
-  const { x, y, arrivedState } = useWindowScroll();
+    function Component() {
+      const { x$, y$, arrivedState$ } = useWindowScroll();
 
-  return (
-    <p>
-      scrollX: {x.get()}, scrollY: {y.get()}
-      {arrivedState.bottom.get() && " — reached bottom"}
-    </p>
-  );
-}
-```
+      return (
+        <p>
+          scrollX: {x$.get()}, scrollY: {y$.get()}
+          {arrivedState$.bottom.get() && " — reached bottom"}
+        </p>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createWindowScroll } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { x$, y$, arrivedState$ } = createWindowScroll();
+
+      return (
+        <p>
+          scrollX: {x$.get()}, scrollY: {y$.get()}
+          {arrivedState$.bottom.get() && " — reached bottom"}
+        </p>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
 
 ### Back-to-top button
 

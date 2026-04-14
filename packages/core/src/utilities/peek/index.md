@@ -2,6 +2,8 @@
 title: peek
 description: Extract values from MaybeObservable types without registering a tracking dependency
 category: Utilities
+sidebar:
+  order: 0
 ---
 
 Extract raw values from `MaybeObservable` types **without registering a reactive dependency** (works with both raw values and Legend-State observables).

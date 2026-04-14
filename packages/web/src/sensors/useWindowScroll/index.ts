@@ -1,9 +1,25 @@
 "use client";
-import { type UseScrollOptions, type UseScrollReturn, useScroll } from "@sensors/useScroll";
-import { defaultWindow } from "@shared/configurable";
+import { useScope, toObs } from "@usels/core";
+import { createWindowScroll } from "./core";
 
-export type { UseScrollOptions, UseScrollReturn };
+export { createWindowScroll } from "./core";
+export type { UseWindowScrollOptions, UseWindowScrollReturn } from "./core";
+// Re-export UseScroll option/return type names (legacy alias) so existing
+// consumers that import them from `useWindowScroll` keep working.
+export type { UseScrollOptions, UseScrollReturn } from "../useScroll/core";
 
-export function useWindowScroll(options?: UseScrollOptions): UseScrollReturn {
-  return useScroll(options?.window ?? defaultWindow ?? null, options);
-}
+export type UseWindowScroll = typeof createWindowScroll;
+export const useWindowScroll: UseWindowScroll = (options = {}) => {
+  return useScope(
+    (opts) => {
+      const opts$ = toObs(opts, {
+        onScroll: "function",
+        onStop: "function",
+        onError: "function",
+        window: "opaque",
+      });
+      return createWindowScroll(opts$ as never);
+    },
+    options as Record<string, unknown>
+  );
+};
