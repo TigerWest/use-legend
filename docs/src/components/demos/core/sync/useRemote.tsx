@@ -1,5 +1,4 @@
-import { Show } from "@legendapp/state/react";
-import { useRemote } from "@usels/core";
+import { Show, useRemote } from "@usels/core";
 import {
   ActionButton,
   DemoPanel,

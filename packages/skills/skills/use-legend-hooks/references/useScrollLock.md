@@ -60,7 +60,7 @@ const { isLocked$, unlock } = useScrollLock(undefined, true);
 Pass an Observable as `initialState` to seed the lock state reactively.
 
 ```tsx
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useScrollLock } from "@usels/web";
 // ---cut---
 const locked$ = observable(false);

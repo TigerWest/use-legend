@@ -9,8 +9,7 @@ Debounce an Observable value. Creates a read-only Observable that updates only a
 ## Usage
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useDebounced } from "@usels/core";
+import { useDebounced, useObservable } from "@usels/core";
 
 const source$ = useObservable("hello");
 const debounced$ = useDebounced(source$, 300);
@@ -18,8 +17,7 @@ const debounced$ = useDebounced(source$, 300);
 ```
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useDebounced } from "@usels/core";
+import { useDebounced, useObservable } from "@usels/core";
 
 const source$ = useObservable(0);
 const debounced$ = useDebounced(source$, 300, { maxWait: 1000 });
@@ -27,8 +25,7 @@ const debounced$ = useDebounced(source$, 300, { maxWait: 1000 });
 ```
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useDebounced } from "@usels/core";
+import { useDebounced, useObservable } from "@usels/core";
 
 const source$ = useObservable("hello");
 const delay$ = useObservable(300);

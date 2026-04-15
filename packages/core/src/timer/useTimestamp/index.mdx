@@ -50,8 +50,7 @@ Returns a `ReadonlyObservable<number>` containing the current Unix timestamp in 
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useTimestamp } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, useTimestamp } from "@usels/core";
 
     function Component() {
       const offset$ = observable(5000);
@@ -63,8 +62,7 @@ Returns a `ReadonlyObservable<number>` containing the current Unix timestamp in 
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createTimestamp } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createTimestamp, observable } from "@usels/core";
 
     function Component() {
       "use scope"

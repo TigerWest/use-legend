@@ -15,8 +15,7 @@ type-table:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObservable } from "@legendapp/state/react";
-    import { useThrottled } from "@usels/core";
+    import { useObservable, useThrottled } from "@usels/core";
 
     function Component() {
       const source$ = useObservable("hello");
@@ -28,8 +27,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createThrottled } from "@usels/core";
+    import { createThrottled, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -46,8 +44,7 @@ type-table:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useThrottled } from "@usels/core";
+    import { useObservable, useThrottled } from "@usels/core";
 
     function Component() {
       const source$ = useObservable("hello");
@@ -59,8 +56,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createThrottled } from "@usels/core";
+    import { createThrottled, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -77,8 +73,7 @@ type-table:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useThrottled } from "@usels/core";
+    import { useObservable, useThrottled } from "@usels/core";
 
     function Component() {
       const source$ = useObservable("hello");
@@ -90,8 +85,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createThrottled } from "@usels/core";
+    import { createThrottled, observable } from "@usels/core";
 
     function Component() {
       "use scope"

@@ -1,6 +1,5 @@
-import { useManualReset } from "@usels/core";
+import { useManualReset, useObservable } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, ValueToken, demoClasses } from "@demos/_shared";
-import { useObservable } from "@legendapp/state/react";
 
 export default function UseManualResetDemo() {
   const obs = useObservable("hello");

@@ -1,6 +1,6 @@
 "use client";
 
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { observe } from "@usels/core";
 import { PRODUCT_CATEGORIES, SORT_OPTIONS } from "@/data/products";
 import { getCyberStore } from "@/store/cyberStore";

@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useLastChanged } from "@usels/core";
+import { useLastChanged, useObservable } from "@usels/core";
 import { DemoPanel, DemoShell, StatCard, ValueToken, demoClasses } from "@demos/_shared";
 
 function formatTimestamp(ts: number | null): string {

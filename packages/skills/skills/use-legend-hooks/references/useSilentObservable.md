@@ -42,7 +42,7 @@ Legend-State provides a `setSilently` utility function that works on any Observa
 If you only need a one-off silent update without a dedicated hook, you can use it directly.
 
 ```tsx
-import { observable, setSilently } from "@legendapp/state";
+import { observable, setSilently } from "@usels/core";
 
 const count$ = observable(0);
 

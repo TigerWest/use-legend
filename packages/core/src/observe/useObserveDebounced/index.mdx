@@ -15,8 +15,7 @@ type-declarations:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObserveDebounced } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveDebounced } from "@usels/core";
 
     function Component() {
       const query$ = useObservable("");
@@ -35,8 +34,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeDebounced } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeDebounced } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -63,8 +61,7 @@ Use `maxWait` to guarantee the effect fires at least once, even if the source ke
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserveDebounced } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveDebounced } from "@usels/core";
 
     function Component() {
       const input$ = useObservable("");
@@ -82,8 +79,7 @@ Use `maxWait` to guarantee the effect fires at least once, even if the source ke
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeDebounced } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeDebounced } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -109,8 +105,7 @@ Pass `immediate: true` to execute the effect immediately on setup, in addition t
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserveDebounced } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveDebounced } from "@usels/core";
 
     function Component() {
       const count$ = useObservable(0);
@@ -129,8 +124,7 @@ Pass `immediate: true` to execute the effect immediately on setup, in addition t
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeDebounced } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeDebounced } from "@usels/core";
 
     function Component() {
       "use scope"

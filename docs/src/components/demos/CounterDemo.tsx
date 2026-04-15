@@ -1,6 +1,4 @@
-import { observable } from "@legendapp/state";
-import { Show, useObservable } from "@legendapp/state/react";
-import { createInterval, createRef$, useInterval } from "@usels/core";
+import { createInterval, createRef$, Show, useInterval, useObservable } from "@usels/core";
 import { useEffect, useRef } from "react";
 import { cx } from "./_shared";
 

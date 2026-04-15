@@ -1,5 +1,4 @@
-import { Show } from "@legendapp/state/react";
-import { useCountdown } from "@usels/core";
+import { Show, useCountdown } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "@demos/_shared";
 
 export default function UseCountdownDemo() {

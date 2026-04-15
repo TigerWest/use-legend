@@ -330,7 +330,7 @@ const count = observable(0);
 When the whole component is reactive, wrap with `observer()`. Plugin skips content inside — no double-wrapping:
 
 ```tsx
-import { observer } from '@legendapp/state/react';
+import { observer } from '@usels/core';
 
 // ✅ Entire component is reactive — no individual Memo wrappers needed
 const Profile = observer(() => {
@@ -422,7 +422,7 @@ function TodoList() {
 ### Computed derived values
 
 ```tsx
-import { computed } from '@legendapp/state';
+import { computed } from '@usels/core';
 
 const price$ = observable(100);
 const qty$ = observable(2);

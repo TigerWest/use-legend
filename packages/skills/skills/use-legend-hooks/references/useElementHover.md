@@ -40,7 +40,7 @@ function DelayedHover() {
 ### Reactive options
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 
 const delayEnter$ = observable(200);
 const isHovered$ = useElementHover(el$, { delayEnter: delayEnter$ });

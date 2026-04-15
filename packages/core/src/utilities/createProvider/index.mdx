@@ -12,8 +12,7 @@ sidebar:
 
 ```tsx twoslash
 // @noErrors
-import { useObservable } from "@legendapp/state/react";
-import { createProvider } from "@usels/core";
+import { createProvider, useObservable } from "@usels/core";
 
 function useCounterSetup(props: { initial: number }) {
   const count$ = useObservable(props.initial);
@@ -60,8 +59,7 @@ function Child() {
 
 ```tsx
 // @noErrors
-import { useObservable } from "@legendapp/state/react";
-import { createProvider } from "@usels/core";
+import { createProvider, useObservable } from "@usels/core";
 
 const [ThemeProvider, useTheme] = createProvider(
   (props: { mode: "light" | "dark" }) => {
@@ -80,8 +78,7 @@ regular React hooks are disallowed.
 
 ```tsx
 // @noErrors
-import { observable, computed } from "@legendapp/state";
-import { createProvider } from "@usels/core";
+import { computed, createProvider, observable } from "@usels/core";
 
 const [ThemeProvider, useTheme, getTheme] = createProvider(({ color }: { color: string }) =>
   observable({ color })

@@ -50,8 +50,7 @@ function CustomVoice() {
 The `text` parameter accepts `MaybeObservable<string>`, and options accept `DeepMaybeObservable`. Changes take effect on the next `speak()` call.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { observable, useObservable } from "@usels/core";
 import { useSpeechSynthesis } from "@usels/web";
 
 function DynamicSpeech() {

@@ -1,4 +1,4 @@
-import { useRef$ } from "@usels/core";
+import { useObservable, useRef$ } from "@usels/core";
 import { useAnimate } from "@usels/web";
 import {
   ActionButton,
@@ -8,7 +8,6 @@ import {
   StatusBadge,
   demoClasses,
 } from "../../_shared";
-import { useObservable } from "@legendapp/state/react";
 
 export default function Demo() {
   const el$ = useRef$<HTMLDivElement>();

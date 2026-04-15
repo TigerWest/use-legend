@@ -1,6 +1,4 @@
-import type { Observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
-import { useDebouncedHistory } from "@usels/core";
+import { useDebouncedHistory, useObservable, type Observable } from "@usels/core";
 import {
   ActionButton,
   DemoPanel,

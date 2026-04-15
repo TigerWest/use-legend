@@ -98,16 +98,10 @@ console.log(isSupported$.get()); // Observable<boolean>
 ## Type Declarations
 
 ```typescript
-export interface UseIntersectionObserverOptions {
-    immediate?: boolean;
-    root?: MaybeEventTarget;
-    rootMargin?: string;
-    threshold?: number | number[];
-}
-export interface UseIntersectionObserverReturn extends Supportable, Pausable {
-    stop: () => void;
-}
-export declare function useIntersectionObserver(target: MaybeEventTarget | MaybeEventTarget[], callback: IntersectionObserverCallback, options?: DeepMaybeObservable<UseIntersectionObserverOptions>): UseIntersectionObserverReturn;
+export { createIntersectionObserver } from "./core";
+export type { UseIntersectionObserverOptions, UseIntersectionObserverReturn } from "./core";
+export type UseIntersectionObserver = typeof createIntersectionObserver;
+export declare const useIntersectionObserver: UseIntersectionObserver;
 ```
 
 ## Source

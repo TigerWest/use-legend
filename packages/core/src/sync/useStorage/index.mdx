@@ -18,7 +18,7 @@ Creates an `Observable<T>` that automatically persists to a storage backend. The
     ```tsx twoslash
     // @noErrors
     import { useStorage } from "@usels/core";
-    import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+    import { ObservablePersistLocalStorage } from "@usels/web";
 
     function Component() {
       const { data$: count$, isPersistLoaded$ } = useStorage("count", 0, {
@@ -40,9 +40,8 @@ Creates an `Observable<T>` that automatically persists to a storage backend. The
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createStorage } from "@usels/core";
-    import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+    import { createStorage, observable } from "@usels/core";
+    import { ObservablePersistLocalStorage } from "@usels/web";
 
     function Component() {
       "use scope"
@@ -71,7 +70,7 @@ Creates an `Observable<T>` that automatically persists to a storage backend. The
   <Fragment slot="hook">
     ```tsx
     import { useStorage } from "@usels/core";
-    import { ObservablePersistIndexedDB } from "@legendapp/state/persist-plugins/indexeddb";
+    import { ObservablePersistIndexedDB } from "@usels/web";
 
     function Component() {
       const { data$, isPersistLoaded$, error$ } = useStorage(
@@ -97,9 +96,8 @@ Creates an `Observable<T>` that automatically persists to a storage backend. The
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createStorage } from "@usels/core";
-    import { ObservablePersistIndexedDB } from "@legendapp/state/persist-plugins/indexeddb";
+    import { createStorage, observable } from "@usels/core";
+    import { ObservablePersistIndexedDB } from "@usels/web";
 
     function Component() {
       "use scope"

@@ -1,5 +1,5 @@
 import { useStorage } from "@usels/core";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+import { ObservablePersistLocalStorage } from "@usels/web";
 import { ActionButton, DemoPanel, DemoShell, demoClasses } from "@demos/_shared";
 
 export default function UseStorageDemo() {

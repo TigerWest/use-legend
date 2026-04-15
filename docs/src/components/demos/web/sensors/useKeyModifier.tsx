@@ -1,7 +1,7 @@
 "use client";
+import { useObserve } from "@usels/core";
 import { useKeyModifier } from "@usels/web";
 import { DemoPanel, DemoShell, StatusBadge } from "../../_shared";
-import { useObserve } from "@legendapp/state/react";
 
 export default function Demo() {
   const shift$ = useKeyModifier("Shift");

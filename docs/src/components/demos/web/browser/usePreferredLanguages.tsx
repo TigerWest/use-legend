@@ -1,6 +1,5 @@
 "use client";
-import { For } from "@legendapp/state/react";
-import { useObservable } from "@legendapp/state/react";
+import { For, useObservable } from "@usels/core";
 import { usePreferredLanguages } from "@usels/web";
 import { DemoShell, DemoPanel, ValueToken, demoClasses } from "../../_shared";
 

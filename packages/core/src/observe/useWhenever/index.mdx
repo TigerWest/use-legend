@@ -15,8 +15,7 @@ type-declarations:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useWhenever } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWhenever } from "@usels/core";
 
     function Component() {
       const isReady$ = useObservable(false);
@@ -31,8 +30,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { whenever } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, whenever } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -55,8 +53,7 @@ Pass `immediate: true` to also fire on setup if the value is already truthy.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useWhenever } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWhenever } from "@usels/core";
 
     function Component() {
       const isReady$ = useObservable(true);
@@ -74,8 +71,7 @@ Pass `immediate: true` to also fire on setup if the value is already truthy.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { whenever } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, whenever } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -101,8 +97,7 @@ Dispose the watcher automatically after the first truthy invocation.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useWhenever } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWhenever } from "@usels/core";
 
     function Component() {
       const token$ = useObservable<string | null>(null);
@@ -121,8 +116,7 @@ Dispose the watcher automatically after the first truthy invocation.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { whenever } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, whenever } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -149,8 +143,7 @@ Use a function to derive a truthy/falsy value from one or more observables.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useWhenever } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWhenever } from "@usels/core";
 
     function Component() {
       const user$ = useObservable<{ name: string } | null>(null);
@@ -167,8 +160,7 @@ Use a function to derive a truthy/falsy value from one or more observables.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { whenever } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, whenever } from "@usels/core";
 
     function Component() {
       "use scope"

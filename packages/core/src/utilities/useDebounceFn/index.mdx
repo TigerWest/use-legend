@@ -44,8 +44,7 @@ Debounce execution of a function. Returns a debounced version that fires after t
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useDebounceFn } from "@usels/core";
+    import { useObservable, useDebounceFn } from "@usels/core";
 
     function Component() {
       const delay$ = useObservable(300);
@@ -59,8 +58,7 @@ Debounce execution of a function. Returns a debounced version that fires after t
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createDebounceFn } from "@usels/core";
+    import { createDebounceFn, observable } from "@usels/core";
 
     function Component() {
       "use scope"

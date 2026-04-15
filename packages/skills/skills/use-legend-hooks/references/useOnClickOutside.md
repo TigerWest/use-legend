@@ -9,9 +9,8 @@ Listen for clicks outside of a target element. Useful for closing modals, dropdo
 ## Usage
 
 ```tsx
-import { useRef$ } from "@usels/core";
+import { useObservable, useRef$ } from "@usels/core";
 import { useOnClickOutside } from "@usels/web";
-import { useObservable } from "@legendapp/state/react";
 
 function Dropdown() {
   const el$ = useRef$<HTMLDivElement>();

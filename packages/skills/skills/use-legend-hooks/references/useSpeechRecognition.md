@@ -52,7 +52,7 @@ function KoreanSpeech() {
 Options accept `DeepMaybeObservable`. Each field can be a plain value or an `Observable`. Changes take effect on the next `start()` call.
 
 ```tsx
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useSpeechRecognition } from "@usels/web";
 
 function DynamicRecognition() {

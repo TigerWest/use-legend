@@ -9,8 +9,7 @@ Runs a reactive effect that skips the first effect execution by default (lazy mo
 ## Usage
 
 ```tsx
-import { useWatch } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWatch } from "@usels/core";
 
 const query$ = observable("");
 
@@ -25,8 +24,7 @@ useWatch(query$, (value) => {
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
 ```tsx
-import { useWatch } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWatch } from "@usels/core";
 
 const query$ = observable("");
 
@@ -45,8 +43,7 @@ useWatch(
 Watch multiple sources at once. The effect receives a tuple of current values.
 
 ```tsx
-import { useWatch } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWatch } from "@usels/core";
 
 const query$ = observable("");
 const page$ = observable(1);
@@ -61,8 +58,7 @@ useWatch([query$, page$], ([query, page]) => {
 Use a function to compute a derived value. The function runs on every dep change to maintain tracking; the effect receives the computed result.
 
 ```tsx
-import { useWatch } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWatch } from "@usels/core";
 
 const firstName$ = observable("John");
 const lastName$ = observable("Doe");

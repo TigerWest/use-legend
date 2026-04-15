@@ -78,7 +78,7 @@ Array, object, or Observable keyframes are all supported.
     ```tsx
     import { useRef$ } from "@usels/core";
     import { useAnimate } from "@usels/web";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable } from "@usels/core";
 
     function Component() {
       const el$ = useRef$<HTMLDivElement>();
@@ -101,7 +101,7 @@ Array, object, or Observable keyframes are all supported.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
     import { createRef$ } from "@usels/core";
     import { createAnimate } from "@usels/web";
 

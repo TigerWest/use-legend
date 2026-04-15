@@ -9,8 +9,7 @@ A hook that tracks Observable change history with debounce. A thin wrapper aroun
 ## Usage
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useDebouncedHistory } from "@usels/core";
+import { useDebouncedHistory, useObservable } from "@usels/core";
 
 const search$ = useObservable("");
 
@@ -23,8 +22,7 @@ const { undo, redo, canUndo$ } = useDebouncedHistory(search$, { debounce: 500 })
 Even if the user keeps typing, a snapshot is forced after `maxWait` ms.
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useDebouncedHistory } from "@usels/core";
+import { useDebouncedHistory, useObservable } from "@usels/core";
 
 const text$ = useObservable("");
 
@@ -38,8 +36,7 @@ const { undo, redo } = useDebouncedHistory(text$, {
 ### Combined with capacity
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useDebouncedHistory } from "@usels/core";
+import { useDebouncedHistory, useObservable } from "@usels/core";
 
 const note$ = useObservable("");
 

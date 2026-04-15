@@ -50,7 +50,7 @@ function ParallaxCard() {
 ### Reactive options
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 
 const tiltAdjust$ = observable((v: number) => v * 2);
 const { tilt$ } = useParallax(el$, { mouseTiltAdjust: tiltAdjust$ });

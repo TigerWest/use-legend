@@ -1,7 +1,5 @@
-import { observable } from "@legendapp/state";
-import { For, Show, useObservable } from "@legendapp/state/react";
-import { QueryClientProvider, QueryClient } from "@usels/tanstack-query";
-import { useQuery } from "@usels/tanstack-query";
+import { For, observable, Show, useObservable } from "@usels/core";
+import { QueryClient, QueryClientProvider, useQuery } from "@usels/tanstack-query";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "@demos/_shared";
 
 const MOCK_DATA: Record<string, { id: number; name: string }[]> = {

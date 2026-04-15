@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useTimeoutFn } from "@usels/core";
+import { useObservable, useTimeoutFn } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, ValueToken, demoClasses } from "@demos/_shared";
 
 const defaultText = "Please wait for 3 seconds";

@@ -1,6 +1,4 @@
-import type { Observable } from "@legendapp/state";
-import { For, useObservable } from "@legendapp/state/react";
-import { useComputedWithControl } from "@usels/core";
+import { For, useComputedWithControl, useObservable, type Observable } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "@demos/_shared";
 
 interface Product {

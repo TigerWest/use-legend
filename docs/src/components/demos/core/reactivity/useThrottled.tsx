@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useThrottled } from "@usels/core";
+import { useObservable, useThrottled } from "@usels/core";
 import { DemoPanel, DemoShell, StatCard, demoClasses } from "@demos/_shared";
 
 export default function UseThrottledDemo() {

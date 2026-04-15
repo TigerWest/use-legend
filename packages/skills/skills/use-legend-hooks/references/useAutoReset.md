@@ -18,8 +18,7 @@ message$.set("Saved!");
 ```
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useAutoReset } from "@usels/core";
+import { useAutoReset, useObservable } from "@usels/core";
 
 // Reactive delay — changing afterMs$ restarts the pending timer
 const afterMs$ = useObservable(1000);

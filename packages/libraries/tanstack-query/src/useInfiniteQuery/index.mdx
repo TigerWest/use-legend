@@ -20,7 +20,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { For, Show, useObservable } from "@legendapp/state/react";
+    import { For, Show, useObservable } from "@usels/core";
     import { useInfiniteQuery } from "@usels/tanstack-query";
 
     interface Page {
@@ -64,8 +64,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { For, Show } from "@legendapp/state/react";
-    import { observable } from "@legendapp/state";
+    import { For, observable, Show } from "@usels/core";
     import { createInfiniteQuery } from "@usels/tanstack-query";
 
     interface Page {
@@ -116,7 +115,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   <Fragment slot="hook">
     ```tsx
     import { useInfiniteQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const category$ = observable("all");
 
@@ -137,7 +136,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   <Fragment slot="scope">
     ```tsx
     import { createInfiniteQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const category$ = observable("all");
 
@@ -164,7 +163,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   <Fragment slot="hook">
     ```tsx
     import { useInfiniteQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const isReady$ = observable(false);
 
@@ -183,7 +182,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   <Fragment slot="scope">
     ```tsx
     import { createInfiniteQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const isReady$ = observable(false);
 

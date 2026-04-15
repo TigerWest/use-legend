@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useNow } from "@usels/core";
+import { useNow, useObservable } from "@usels/core";
 import { DemoPanel, DemoShell, ValueToken } from "@demos/_shared";
 
 export default function UseNowDemo() {

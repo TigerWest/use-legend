@@ -98,7 +98,7 @@ const { devices$ } = useDevicesList({ requestPermissions: true });
 Options can be passed as plain values, per-field `Observable`s, or a single `Observable<UseDevicesListOptions>`. Changes are picked up reactively.
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useDevicesList } from "@usels/web";
 
 const constraints$ = observable<MediaStreamConstraints>({ audio: true, video: true });

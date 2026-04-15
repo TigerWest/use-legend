@@ -1,6 +1,4 @@
-import { ObservableHint } from "@legendapp/state";
-import type { OpaqueObject } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { ObservableHint, useObservable, type OpaqueObject } from "@usels/core";
 import { useEventListener, useParentElement } from "@usels/web";
 import { DemoPanel, DemoShell } from "../../_shared";
 

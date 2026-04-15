@@ -1,6 +1,4 @@
-import type { Observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
-import { useThrottledHistory } from "@usels/core";
+import { useObservable, useThrottledHistory, type Observable } from "@usels/core";
 import {
   ActionButton,
   DemoPanel,

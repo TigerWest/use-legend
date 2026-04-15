@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useRafFn } from "@usels/core";
+import { useObservable, useRafFn } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatCard, StatusBadge, demoClasses } from "@demos/_shared";
 
 export default function UseRafFnDemo() {

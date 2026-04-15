@@ -1,6 +1,4 @@
-import { useObservePausable } from "@usels/core";
-import { observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { observable, useObservable, useObservePausable } from "@usels/core";
 import {
   ActionButton,
   DemoPanel,

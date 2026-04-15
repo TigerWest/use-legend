@@ -20,8 +20,7 @@ const { isActive, pause, resume } = useRafFn(({ delta, timestamp }) => {
 ### FPS limit
 
 ```tsx
-import { useRafFn } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useRafFn } from "@usels/core";
 
 const fps$ = observable(30);
 useRafFn(({ delta }) => {}, { fpsLimit: fps$ });

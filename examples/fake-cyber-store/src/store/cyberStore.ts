@@ -1,6 +1,6 @@
 "use client";
 
-import { batch, observable } from "@legendapp/state";
+import { batch, observable } from "@usels/core";
 import { createStore, onMount } from "@usels/core";
 import { createLocalStorage } from "@usels/web";
 import { PRODUCTS } from "@/data/products";

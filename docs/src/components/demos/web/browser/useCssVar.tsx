@@ -1,7 +1,6 @@
+import { useObservable, useRef$ } from "@usels/core";
 import { useCssVar } from "@usels/web";
-import { useRef$ } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatCard, ValueToken } from "../../_shared";
-import { useObservable } from "@legendapp/state/react";
 
 const COLORS = ["#7fa998", "#df8543", "#6366f1", "#e11d48", "#0ea5e9"];
 

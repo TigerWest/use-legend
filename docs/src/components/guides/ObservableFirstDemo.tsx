@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useIntervalFn } from "@usels/core";
+import { useIntervalFn, useObservable } from "@usels/core";
 import { useRef, useState } from "react";
 
 const CARD_BASE_CLASS =

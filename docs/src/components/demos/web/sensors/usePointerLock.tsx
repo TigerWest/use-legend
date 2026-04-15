@@ -1,5 +1,5 @@
-import { useObservable, useObserveEffect } from "@legendapp/state/react";
-import { usePointerLock, useMouse } from "@usels/web";
+import { useObservable, useObserveEffect } from "@usels/core";
+import { useMouse, usePointerLock } from "@usels/web";
 import { DemoPanel, DemoShell, StatusBadge } from "../../_shared";
 
 export default function Demo() {

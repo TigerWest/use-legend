@@ -9,8 +9,7 @@ Shorthand for watching a source and running an effect only when the value is tru
 ## Usage
 
 ```tsx
-import { useWhenever } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWhenever } from "@usels/core";
 
 const isReady$ = observable(false);
 
@@ -25,8 +24,7 @@ useWhenever(isReady$, (value) => {
 Pass `immediate: true` to also fire on setup if the value is already truthy.
 
 ```tsx
-import { useWhenever } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWhenever } from "@usels/core";
 
 const isReady$ = observable(true);
 
@@ -44,8 +42,7 @@ useWhenever(
 Dispose the watcher automatically after the first truthy invocation.
 
 ```tsx
-import { useWhenever } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWhenever } from "@usels/core";
 
 const token$ = observable<string | null>(null);
 
@@ -64,8 +61,7 @@ useWhenever(
 Use a function to derive a truthy/falsy value from one or more observables.
 
 ```tsx
-import { useWhenever } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useWhenever } from "@usels/core";
 
 const user$ = observable<{ name: string } | null>(null);
 

@@ -106,7 +106,7 @@ const { y$ } = useScroll(target);
 Options can be passed as plain values, per-field `Observable`s, or a single `Observable<UseScrollOptions>`. Changes are picked up reactively.
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 
 const idle$ = observable(200);
 const { isScrolling$ } = useScroll(el$, { idle: idle$ });

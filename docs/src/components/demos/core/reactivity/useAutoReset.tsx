@@ -1,4 +1,4 @@
-import { useAutoReset } from "@usels/core";
+import { useAutoReset, useObservable } from "@usels/core";
 import {
   ActionButton,
   DemoPanel,
@@ -7,7 +7,6 @@ import {
   ValueToken,
   demoClasses,
 } from "@demos/_shared";
-import { useObservable } from "@legendapp/state/react";
 
 export default function UseAutoResetDemo() {
   const source = useObservable("");

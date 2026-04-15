@@ -19,8 +19,7 @@ const debouncedFn = useDebounceFn((value: string) => {
 With reactive delay:
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useDebounceFn } from "@usels/core";
+import { useDebounceFn, useObservable } from "@usels/core";
 
 const delay$ = useObservable(300);
 const debouncedFn = useDebounceFn(() => {

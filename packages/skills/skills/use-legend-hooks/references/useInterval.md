@@ -55,8 +55,7 @@ resume(); // start manually
 ### Reactive interval
 
 ```tsx
-import { useInterval } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useInterval } from "@usels/core";
 
 const ms$ = observable(1000);
 const counter = useInterval(ms$);

@@ -20,7 +20,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { Show } from "@legendapp/state/react";
+    import { Show } from "@usels/core";
     import { useMutation } from "@usels/tanstack-query";
 
     function CreateUser() {
@@ -55,7 +55,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { Show } from "@legendapp/state/react";
+    import { Show } from "@usels/core";
     import { createMutation } from "@usels/tanstack-query";
 
     function CreateUser() {

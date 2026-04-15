@@ -21,7 +21,7 @@ Combines remote sync with local persistence and automatic retry. Data is availab
     ```tsx twoslash
     // @noErrors
     import { useOfflineFirst } from "@usels/core";
-    import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+    import { ObservablePersistLocalStorage } from "@usels/web";
 
     interface Settings {
       theme: string;
@@ -61,9 +61,8 @@ Combines remote sync with local persistence and automatic retry. Data is availab
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createOfflineFirst } from "@usels/core";
-    import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+    import { createOfflineFirst, observable } from "@usels/core";
+    import { ObservablePersistLocalStorage } from "@usels/web";
 
     interface Settings {
       theme: string;
@@ -110,7 +109,7 @@ Combines remote sync with local persistence and automatic retry. Data is availab
   <Fragment slot="hook">
     ```tsx
     import { useOfflineFirst } from "@usels/core";
-    import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+    import { ObservablePersistLocalStorage } from "@usels/web";
 
     function Component() {
       const { data$, clearPersist } = useOfflineFirst<string[]>({
@@ -130,9 +129,8 @@ Combines remote sync with local persistence and automatic retry. Data is availab
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createOfflineFirst } from "@usels/core";
-    import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+    import { createOfflineFirst, observable } from "@usels/core";
+    import { ObservablePersistLocalStorage } from "@usels/web";
 
     function Component() {
       "use scope"

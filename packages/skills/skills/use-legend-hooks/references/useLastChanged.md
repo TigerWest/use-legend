@@ -9,8 +9,7 @@ A hook that tracks when a source Observable last changed. Returns a read-only Ob
 ## Usage
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useLastChanged } from "@usels/core";
+import { useLastChanged, useObservable } from "@usels/core";
 
 const count$ = useObservable(0);
 const lastChanged$ = useLastChanged(count$);
@@ -24,8 +23,7 @@ lastChanged$.get(); // 1715000000000 (Date.now() at time of change)
 ### initialValue — custom initial timestamp
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useLastChanged } from "@usels/core";
+import { useLastChanged, useObservable } from "@usels/core";
 
 const count$ = useObservable(0);
 
@@ -36,8 +34,7 @@ const lastChanged$ = useLastChanged(count$, Date.now());
 ### Core function — framework-agnostic usage
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createLastChanged } from "@usels/core";
+import { createLastChanged, observable } from "@usels/core";
 
 const source$ = observable("hello");
 const { timestamp$, dispose } = createLastChanged(source$);

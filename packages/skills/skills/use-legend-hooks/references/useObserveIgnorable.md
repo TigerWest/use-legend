@@ -9,8 +9,7 @@ Runs a reactive effect with an `ignoreUpdates` escape hatch. Changes made inside
 ## Usage
 
 ```tsx
-import { useObserveIgnorable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveIgnorable } from "@usels/core";
 
 const source$ = observable(0);
 
@@ -35,8 +34,7 @@ ignoreUpdates(() => {
 The primary use case is preventing a reactive feedback loop when syncing two observables.
 
 ```tsx
-import { useObserveIgnorable, useWatch } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveIgnorable, useWatch } from "@usels/core";
 
 const local$ = observable("");
 const remote$ = observable("");
@@ -65,9 +63,7 @@ useWatch(
 `isIgnoring$` is an Observable that reflects whether an `ignoreUpdates` call is currently active.
 
 ```tsx
-import { useObserveIgnorable } from "@usels/core";
-import { observable } from "@legendapp/state";
-import { Show } from "@legendapp/state/react";
+import { observable, Show, useObserveIgnorable } from "@usels/core";
 
 const count$ = observable(0);
 
@@ -92,8 +88,7 @@ function MyComponent() {
 Pass `immediate: true` to execute the effect immediately on setup.
 
 ```tsx
-import { useObserveIgnorable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveIgnorable } from "@usels/core";
 
 const count$ = observable(0);
 

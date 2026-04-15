@@ -1,7 +1,5 @@
 "use client";
-import { useObservable } from "@legendapp/state/react";
-import { For, Show } from "@legendapp/state/react";
-import { useRef$ } from "@usels/core";
+import { For, Show, useObservable, useRef$ } from "@usels/core";
 import { useInfiniteScroll } from "@usels/web";
 import {
   ActionButton,

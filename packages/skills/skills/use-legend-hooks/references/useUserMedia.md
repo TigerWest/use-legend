@@ -67,7 +67,7 @@ function Microphone() {
 Options can be passed as plain values, per-field `Observable`s, or a single `Observable<UseUserMediaOptions>`. `constraints` are read at each `start()` / `restart()` call.
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useUserMedia } from "@usels/web";
 
 const constraints$ = observable<MediaStreamConstraints>({ audio: false, video: true });

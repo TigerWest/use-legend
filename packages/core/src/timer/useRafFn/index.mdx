@@ -53,8 +53,7 @@ The callback receives `delta` (ms since last frame) and `timestamp` (ms since pa
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useRafFn } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, useRafFn } from "@usels/core";
 
     function Component() {
       const fps$ = observable(30);
@@ -66,8 +65,7 @@ The callback receives `delta` (ms since last frame) and `timestamp` (ms since pa
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createRafFn } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createRafFn, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -145,8 +143,7 @@ Pass an `Observable` when you need to change the fps cap at runtime. A plain `nu
 
 ```tsx
 // @noErrors
-import { useRafFn } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useRafFn } from "@usels/core";
 
 // ✅ Reactive — changes apply on the next frame
 const fps$ = observable(30);

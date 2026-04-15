@@ -11,8 +11,7 @@ Runs a factory function exactly once per mount inside an effect scope. The facto
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useScope, onMount, onUnmount, observe } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observe, onMount, onUnmount, useScope } from "@usels/core";
 
     function useCounter() {
       return useScope(() => {
@@ -34,8 +33,7 @@ Runs a factory function exactly once per mount inside an effect scope. The facto
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { onMount, onUnmount } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, onMount, onUnmount } from "@usels/core";
 
     function useCounter() {
       "use scope"
@@ -253,8 +251,7 @@ When a component is rendered inside a `StoreProvider`, `getStore()` works inside
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { createStore, useScope, observe } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createStore, observable, observe, useScope } from "@usels/core";
 
     const [, getSettingsStore] = createStore("settings", () => {
       const theme$ = observable<"light" | "dark">("light");
@@ -277,8 +274,7 @@ When a component is rendered inside a `StoreProvider`, `getStore()` works inside
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createStore, observe } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createStore, observable, observe } from "@usels/core";
 
     const [, getSettingsStore] = createStore("settings", () => {
       const theme$ = observable<"light" | "dark">("light");

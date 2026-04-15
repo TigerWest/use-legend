@@ -1,6 +1,4 @@
-import { useObserveIgnorable } from "@usels/core";
-import { observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { observable, useObservable, useObserveIgnorable } from "@usels/core";
 import {
   ActionButton,
   DemoPanel,

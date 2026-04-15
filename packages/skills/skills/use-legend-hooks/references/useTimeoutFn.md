@@ -34,8 +34,7 @@ start();
 ### Reactive interval (`MaybeObservable`)
 
 ```tsx
-import { useTimeoutFn } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useTimeoutFn } from "@usels/core";
 
 const delay$ = observable(1000);
 const { start } = useTimeoutFn(() => {}, delay$);

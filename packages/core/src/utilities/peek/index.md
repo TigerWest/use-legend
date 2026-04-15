@@ -13,8 +13,7 @@ Use `peek` when you need to read a value once (e.g. at mount time) and do **not*
 ## Usage
 
 ```typescript
-import { peek } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, peek } from "@usels/core";
 
 // With raw values — returned as-is
 const rawValue = { name: "John", age: 30 };

@@ -9,8 +9,7 @@ Runs a reactive effect gated by an EventFilter. The selector always tracks depen
 ## Usage
 
 ```tsx
-import { useObserveWithFilter, createPausableFilter } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { createPausableFilter, observable, useObserveWithFilter } from "@usels/core";
 
 const count$ = observable(0);
 const { pause, resume, eventFilter } = createPausableFilter();
@@ -30,8 +29,7 @@ useObserveWithFilter(
 Control when the effect fires by pausing and resuming the filter. The selector continues tracking changes in the background.
 
 ```tsx
-import { useObserveWithFilter, createPausableFilter } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { createPausableFilter, observable, useObserveWithFilter } from "@usels/core";
 
 const count$ = observable(0);
 const { pause, resume, eventFilter } = createPausableFilter();
@@ -56,8 +54,7 @@ resume();
 Use a debounce filter to only execute the effect after the source stops changing for a specified duration.
 
 ```tsx
-import { useObserveWithFilter, createDebounceFilter } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { createDebounceFilter, observable, useObserveWithFilter } from "@usels/core";
 
 const query$ = observable("");
 
@@ -75,8 +72,7 @@ useObserveWithFilter(
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
 ```tsx
-import { useObserveWithFilter, createPausableFilter } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { createPausableFilter, observable, useObserveWithFilter } from "@usels/core";
 
 const count$ = observable(0);
 const { eventFilter } = createPausableFilter();

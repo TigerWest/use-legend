@@ -44,8 +44,7 @@ Unlike `useWhenMounted` (which wraps a callback), this hook exposes the raw moun
 Use `.get()` inside `observe()` so the effect re-runs when the mounted flag flips — the initial pre-mount run short-circuits, then the post-mount re-run proceeds.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { observe, createIsMounted } from "@usels/core";
+import { createIsMounted, observable, observe } from "@usels/core";
 
 function Component({ deps$ }: { deps$: Observable<unknown> }) {
   "use scope";

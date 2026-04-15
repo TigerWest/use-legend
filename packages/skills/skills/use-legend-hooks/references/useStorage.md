@@ -10,7 +10,7 @@ Reactive storage binding powered by Legend-State's [persist & sync](https://lege
 
 ```tsx
 import { useStorage } from "@usels/core";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+import { ObservablePersistLocalStorage } from "@usels/web";
 
 function Component() {
   const { data$: count$, isPersistLoaded$ } = useStorage("count", 0, {
@@ -33,7 +33,7 @@ function Component() {
 
 ```tsx
 import { useStorage } from "@usels/core";
-import { ObservablePersistIndexedDB } from "@legendapp/state/persist-plugins/indexeddb";
+import { ObservablePersistIndexedDB } from "@usels/web";
 
 function Component() {
   const { data$, isPersistLoaded$, error$ } = useStorage(

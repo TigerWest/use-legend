@@ -1,6 +1,4 @@
-import { useObserveTriggerable } from "@usels/core";
-import { observable } from "@legendapp/state";
-import { useObservable } from "@legendapp/state/react";
+import { observable, useObservable, useObserveTriggerable } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, ValueToken, demoClasses } from "../../_shared";
 
 const source$ = observable(0);

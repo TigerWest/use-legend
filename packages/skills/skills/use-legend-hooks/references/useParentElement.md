@@ -24,8 +24,7 @@ function Component() {
 Use inside an `observer` component to reactively render based on the parent:
 
 ```tsx
-import { useRef$, useParentElement } from "@usels/core";
-import { observer } from "@legendapp/state/react";
+import { observer, useParentElement, useRef$ } from "@usels/core";
 
 const Component = observer(() => {
   const el$ = useRef$<HTMLDivElement>();
@@ -38,8 +37,7 @@ const Component = observer(() => {
 ### With an Observable target
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { useParentElement } from "@usels/core";
+import { observable, useParentElement } from "@usels/core";
 
 function Component() {
   const target$ = observable<HTMLElement | null>(null);

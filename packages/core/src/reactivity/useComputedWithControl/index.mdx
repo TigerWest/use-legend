@@ -15,8 +15,7 @@ type-declarations:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObservable } from "@legendapp/state/react";
-    import { useComputedWithControl } from "@usels/core";
+    import { useComputedWithControl, useObservable } from "@usels/core";
 
     function Component() {
       const counter$ = useObservable(1);
@@ -29,8 +28,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createComputedWithControl } from "@usels/core";
+    import { createComputedWithControl, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -47,8 +45,7 @@ type-declarations:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useComputedWithControl } from "@usels/core";
+    import { useComputedWithControl, useObservable } from "@usels/core";
 
     function Component() {
       const source$ = useObservable(1);
@@ -64,8 +61,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createComputedWithControl } from "@usels/core";
+    import { createComputedWithControl, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -86,8 +82,7 @@ type-declarations:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useComputedWithControl } from "@usels/core";
+    import { useComputedWithControl, useObservable } from "@usels/core";
 
     function Component() {
       const event$ = useObservable(0);
@@ -99,8 +94,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createComputedWithControl } from "@usels/core";
+    import { createComputedWithControl, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -117,8 +111,7 @@ type-declarations:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useComputedWithControl } from "@usels/core";
+    import { useComputedWithControl, useObservable } from "@usels/core";
 
     function Component() {
       const width$ = useObservable(100);
@@ -132,8 +125,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createComputedWithControl } from "@usels/core";
+    import { createComputedWithControl, observable } from "@usels/core";
 
     function Component() {
       "use scope"

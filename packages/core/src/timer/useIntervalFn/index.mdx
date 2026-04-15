@@ -36,8 +36,7 @@ Returns a `Pausable` — `isActive` is a `ReadonlyObservable<boolean>`.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createIntervalFn } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createIntervalFn, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -69,8 +68,7 @@ Returns a `Pausable` — `isActive` is a `ReadonlyObservable<boolean>`.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createIntervalFn } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createIntervalFn, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -87,8 +85,7 @@ Returns a `Pausable` — `isActive` is a `ReadonlyObservable<boolean>`.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useIntervalFn } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, useIntervalFn } from "@usels/core";
 
     function Component() {
       const ms$ = observable(1000);
@@ -100,8 +97,7 @@ Returns a `Pausable` — `isActive` is a `ReadonlyObservable<boolean>`.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createIntervalFn } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createIntervalFn, observable } from "@usels/core";
 
     function Component() {
       "use scope"

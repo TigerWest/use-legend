@@ -44,8 +44,7 @@ Check whether a browser API or feature is supported, returning a reactive `Obser
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { Show } from "@legendapp/state/react";
-    import { useSupported } from "@usels/core";
+    import { Show, useSupported } from "@usels/core";
 
     function Component() {
       const isIntersectionObserverSupported$ = useSupported(
@@ -66,8 +65,7 @@ Check whether a browser API or feature is supported, returning a reactive `Obser
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { Show } from "@legendapp/state/react";
-    import { createSupported } from "@usels/core";
+    import { createSupported, Show } from "@usels/core";
 
     function Component() {
       "use scope"

@@ -1,6 +1,5 @@
-import { useRef$ } from "@usels/core";
+import { Show, useObservable, useRef$ } from "@usels/core";
 import { useIntersectionObserver } from "@usels/web";
-import { Show, useObservable } from "@legendapp/state/react";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "../../_shared";
 
 const DEFAULT_ROOT_MARGIN = 0;

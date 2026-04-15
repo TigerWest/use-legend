@@ -74,7 +74,7 @@ const { text$ } = useTextSelection({ debounce: 200 }); // fires 200ms after sele
 Both `throttle` and `debounce` accept a plain number or a reactive `Observable<number>` for dynamic control.
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 
 const delay$ = observable(100);
 const { text$ } = useTextSelection({ throttle: delay$ });

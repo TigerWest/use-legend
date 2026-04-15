@@ -10,7 +10,7 @@ Reactive offline-first data binding powered by Legend-State's [sync engine](http
 
 ```tsx
 import { useOfflineFirst } from "@usels/core";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+import { ObservablePersistLocalStorage } from "@usels/web";
 
 interface Settings {
   theme: string;
@@ -51,7 +51,7 @@ function Component() {
 
 ```tsx
 import { useOfflineFirst } from "@usels/core";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+import { ObservablePersistLocalStorage } from "@usels/web";
 
 function Component() {
   const { data$, clearPersist } = useOfflineFirst<string[]>({

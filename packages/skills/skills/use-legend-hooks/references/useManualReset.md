@@ -22,8 +22,7 @@ reset();
 ### Observable default value
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useManualReset } from "@usels/core";
+import { useManualReset, useObservable } from "@usels/core";
 
 // When defaultValue is an Observable, reset() reads its current value
 const default$ = useObservable("initial");

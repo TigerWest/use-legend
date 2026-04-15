@@ -46,9 +46,7 @@ function MyComponent() {
 Array, object, or Observable keyframes are all supported.
 
 ```tsx
-import { useRef$ } from "@usels/core";
-import { useAnimate } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useAnimate, useRef$ } from "@usels/core";
 
 function MyComponent() {
   const el$ = useRef$<HTMLDivElement>();

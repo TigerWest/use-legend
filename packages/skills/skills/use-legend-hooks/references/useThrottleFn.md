@@ -19,8 +19,7 @@ const throttledFn = useThrottleFn((value: string) => {
 With reactive delay:
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useThrottleFn } from "@usels/core";
+import { useObservable, useThrottleFn } from "@usels/core";
 
 const delay$ = useObservable(300);
 const throttledFn = useThrottleFn(() => {

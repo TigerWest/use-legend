@@ -154,8 +154,7 @@ A thin wrapper around `useIntervalFn` that exposes a `ReadonlyObservable<number>
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useInterval } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, useInterval } from "@usels/core";
 
     function Component() {
       const ms$ = observable(1000);
@@ -168,8 +167,7 @@ A thin wrapper around `useIntervalFn` that exposes a `ReadonlyObservable<number>
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createInterval } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createInterval, observable } from "@usels/core";
 
     function Component() {
       "use scope"

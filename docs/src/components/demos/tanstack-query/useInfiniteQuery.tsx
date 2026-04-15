@@ -1,6 +1,5 @@
-import { For, Show, useObservable } from "@legendapp/state/react";
-import { QueryClientProvider, QueryClient } from "@usels/tanstack-query";
-import { useInfiniteQuery } from "@usels/tanstack-query";
+import { For, Show, useObservable } from "@usels/core";
+import { QueryClient, QueryClientProvider, useInfiniteQuery } from "@usels/tanstack-query";
 import {
   ActionButton,
   DemoPanel,

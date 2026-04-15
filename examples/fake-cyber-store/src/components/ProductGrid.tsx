@@ -1,7 +1,7 @@
 "use client";
 
-import type { Observable } from "@legendapp/state";
-import { For, Show } from "@legendapp/state/react";
+import type { Observable } from "@usels/core";
+import { For, Show } from "@usels/core";
 import { ProductCard } from "@/components/ProductCard";
 import { getCyberStore } from "@/store/cyberStore";
 import type { Product } from "@/types";

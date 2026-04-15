@@ -15,8 +15,7 @@ type-table:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualReset } from "@usels/core";
+    import { useManualReset, useObservable } from "@usels/core";
 
     function Component() {
       const default$ = useObservable("hello");
@@ -33,8 +32,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualReset } from "@usels/core";
+    import { createManualReset, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -55,8 +53,7 @@ type-table:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualReset } from "@usels/core";
+    import { useManualReset, useObservable } from "@usels/core";
 
     function Component() {
       const default$ = useObservable("initial");
@@ -72,8 +69,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualReset } from "@usels/core";
+    import { createManualReset, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -95,8 +91,7 @@ type-table:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualReset } from "@usels/core";
+    import { useManualReset, useObservable } from "@usels/core";
 
     function Component() {
       const emptyStr$ = useObservable("");
@@ -114,8 +109,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualReset } from "@usels/core";
+    import { createManualReset, observable } from "@usels/core";
 
     function Component() {
       "use scope"

@@ -1,5 +1,4 @@
-import { Show, useObservable } from "@legendapp/state/react";
-import { useIntervalFn } from "@usels/core";
+import { Show, useIntervalFn, useObservable } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, ValueToken } from "@demos/_shared";
 
 const greetings = ["Hello", "Hi", "Yo!", "Hey", "Hola", "Bonjour", "Salut!", "Ciao"];

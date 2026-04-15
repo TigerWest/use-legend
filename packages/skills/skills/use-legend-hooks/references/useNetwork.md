@@ -69,7 +69,7 @@ function Component() {
 Use `onChange` on `isOnline$` to react whenever the network status changes.
 
 ```tsx
-import { useMount } from "@legendapp/state/react";
+import { useMount } from "@usels/core";
 import { useNetwork } from "@usels/web";
 
 function Component() {

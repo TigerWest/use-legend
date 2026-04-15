@@ -108,7 +108,7 @@ Scale or invert the raw sensor output via the four `*Adjust` callbacks.
 Pass an `Observable` callback to change the adjustment function at runtime.
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 
 const tiltAdjust$ = observable((v: number) => v * 2);
 const { tilt$ } = useParallax(el$, { mouseTiltAdjust: tiltAdjust$ });

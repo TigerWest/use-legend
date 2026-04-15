@@ -20,7 +20,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { For, Show, useObservable } from "@legendapp/state/react";
+    import { For, Show, useObservable } from "@usels/core";
     import { useQuery } from "@usels/tanstack-query";
 
     function ProductList() {
@@ -47,8 +47,7 @@ Both variants require a `QueryClientProvider` ancestor — the client is injecte
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { For, Show } from "@legendapp/state/react";
-    import { observable } from "@legendapp/state";
+    import { For, observable, Show } from "@usels/core";
     import { createQuery } from "@usels/tanstack-query";
 
     function ProductList() {
@@ -84,7 +83,7 @@ When an element inside `queryKey` is an `Observable`, the query automatically re
   <Fragment slot="hook">
     ```tsx
     import { useQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const id$ = observable("1");
 
@@ -100,7 +99,7 @@ When an element inside `queryKey` is an `Observable`, the query automatically re
   <Fragment slot="scope">
     ```tsx
     import { createQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const id$ = observable("1");
 
@@ -126,7 +125,7 @@ Observable values nested inside plain objects within `queryKey` are also resolve
   <Fragment slot="hook">
     ```tsx
     import { useQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const filter$ = observable({ category: "electronics" });
 
@@ -142,7 +141,7 @@ Observable values nested inside plain objects within `queryKey` are also resolve
   <Fragment slot="scope">
     ```tsx
     import { createQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const filter$ = observable({ category: "electronics" });
 
@@ -166,7 +165,7 @@ Individual options like `enabled`, `staleTime`, etc. also accept `Observable` va
   <Fragment slot="hook">
     ```tsx
     import { useQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const enabled$ = observable(false);
 
@@ -183,7 +182,7 @@ Individual options like `enabled`, `staleTime`, etc. also accept `Observable` va
   <Fragment slot="scope">
     ```tsx
     import { createQuery } from "@usels/tanstack-query";
-    import { observable } from "@legendapp/state";
+    import { observable } from "@usels/core";
 
     const enabled$ = observable(false);
 

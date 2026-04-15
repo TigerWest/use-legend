@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useRef$ } from "@usels/core";
+import { useObservable, useRef$ } from "@usels/core";
 import { useDraggable } from "@usels/web";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "../../_shared";
 

@@ -1,6 +1,4 @@
-import { batch, beginBatch, endBatch } from "@legendapp/state";
-import { Show, useObservable } from "@legendapp/state/react";
-import { useRef$ } from "@usels/core";
+import { batch, beginBatch, endBatch, Show, useObservable, useRef$ } from "@usels/core";
 import { useMutationObserver } from "@usels/web";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "../../_shared";
 

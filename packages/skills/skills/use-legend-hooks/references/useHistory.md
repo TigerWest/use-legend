@@ -9,8 +9,7 @@ A hook that automatically tracks changes to an Observable and manages undo/redo 
 ## Usage
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useHistory, useObservable } from "@usels/core";
 
 const text$ = useObservable("hello");
 const { undo, redo, canUndo$, canRedo$ } = useHistory(text$);
@@ -23,8 +22,7 @@ redo(); // text$ → "world"
 ### pause / resume — stop and restart auto-tracking
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useHistory, useObservable } from "@usels/core";
 
 const text$ = useObservable("hello");
 const { pause, resume, isTracking$ } = useHistory(text$);
@@ -45,8 +43,7 @@ Multiple changes inside `transaction()` are recorded as a single undo step.
 Call the provided `cancel()` to abort the commit entirely.
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useHistory, useObservable } from "@usels/core";
 
 const value$ = useObservable(0);
 const { transaction, undo } = useHistory(value$);
@@ -66,8 +63,7 @@ undo(); // value$ → 0 (single step back)
 Return `false` from `shouldCommit` to skip recording specific values.
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useHistory, useObservable } from "@usels/core";
 
 const count$ = useObservable(0);
 
@@ -80,8 +76,7 @@ const { undo } = useHistory(count$, {
 ### capacity — limit undo depth
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useHistory, useObservable } from "@usels/core";
 
 const text$ = useObservable("");
 
@@ -92,8 +87,7 @@ const { undo, redo } = useHistory(text$, { capacity: 50 });
 ### dispose — permanently stop tracking
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useHistory } from "@usels/core";
+import { useHistory, useObservable } from "@usels/core";
 
 const value$ = useObservable(0);
 const { dispose } = useHistory(value$);

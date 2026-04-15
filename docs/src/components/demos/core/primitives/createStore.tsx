@@ -1,7 +1,4 @@
-import { batch, observable } from "@legendapp/state";
-import type { Observable } from "@legendapp/state";
-import { For, Show, useObservable } from "@legendapp/state/react";
-import { createStore, StoreProvider, Memo } from "@usels/core";
+import { batch, createStore, For, Memo, observable, Show, StoreProvider, useObservable, type Observable } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "@demos/_shared";
 
 // --- Types ---

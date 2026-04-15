@@ -1,5 +1,4 @@
-import { Show } from "@legendapp/state/react";
-import { useRef$ } from "@usels/core";
+import { Show, useRef$ } from "@usels/core";
 import { useDropZone } from "@usels/web";
 import { DemoPanel, DemoShell } from "../../_shared";
 

@@ -54,8 +54,7 @@ Also exports `formatTimeAgo` as a standalone pure function for one-off formattin
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useTimeAgo } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, useTimeAgo } from "@usels/core";
 
     function Component() {
       const time$ = observable(new Date());
@@ -68,8 +67,7 @@ Also exports `formatTimeAgo` as a standalone pure function for one-off formattin
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createTimeAgo } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { createTimeAgo, observable } from "@usels/core";
 
     function Component() {
       "use scope"

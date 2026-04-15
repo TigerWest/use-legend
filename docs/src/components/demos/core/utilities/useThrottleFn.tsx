@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useThrottleFn } from "@usels/core";
+import { useObservable, useThrottleFn } from "@usels/core";
 import { ActionButton, DemoPanel, DemoShell, StatCard, StatusBadge, demoClasses } from "../../_shared";
 
 export default function UseThrottleFnDemo() {

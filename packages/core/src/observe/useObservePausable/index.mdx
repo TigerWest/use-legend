@@ -15,8 +15,7 @@ type-declarations:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObservePausable } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObservePausable } from "@usels/core";
 
     function Component() {
       const count$ = useObservable(0);
@@ -39,8 +38,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observePausable } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observePausable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -71,8 +69,7 @@ Use `initialState: 'paused'` to start with the effect suppressed. Call `resume()
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservePausable } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObservePausable } from "@usels/core";
 
     function Component() {
       const data$ = useObservable(0);
@@ -93,8 +90,7 @@ Use `initialState: 'paused'` to start with the effect suppressed. Call `resume()
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observePausable } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observePausable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -123,9 +119,7 @@ Use `initialState: 'paused'` to start with the effect suppressed. Call `resume()
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservePausable } from "@usels/core";
-    import { observable } from "@legendapp/state";
-    import { Show } from "@legendapp/state/react";
+    import { observable, Show, useObservePausable } from "@usels/core";
 
     const count$ = useObservable(0);
 
@@ -148,9 +142,7 @@ Use `initialState: 'paused'` to start with the effect suppressed. Call `resume()
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observePausable } from "@usels/core";
-    import { observable } from "@legendapp/state";
-    import { Show } from "@legendapp/state/react";
+    import { observable, observePausable, Show } from "@usels/core";
 
     const count$ = observable(0);
 
@@ -181,8 +173,7 @@ Pass `immediate: true` to execute the effect immediately on setup.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservePausable } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObservePausable } from "@usels/core";
 
     function Component() {
       const count$ = useObservable(0);
@@ -200,8 +191,7 @@ Pass `immediate: true` to execute the effect immediately on setup.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observePausable } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observePausable } from "@usels/core";
 
     function Component() {
       "use scope"

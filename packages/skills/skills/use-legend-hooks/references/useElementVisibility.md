@@ -68,8 +68,7 @@ const isVisible$ = useElementVisibility(el$, {
 All options accept `Observable<T>` for reactive control:
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { useRef$, Ref$, useElementVisibility } from "@usels/core";
+import { observable, useElementVisibility, useRef$, Ref$ } from "@usels/core";
 declare const el$: Ref$<HTMLDivElement>;
 // ---cut---
 const threshold$ = observable<number | number[]>(0.5);

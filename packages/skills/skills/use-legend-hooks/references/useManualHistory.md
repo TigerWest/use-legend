@@ -9,8 +9,7 @@ A hook for manually managing Observable change history. It only records a snapsh
 ## Usage
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useManualHistory } from "@usels/core";
+import { useManualHistory, useObservable } from "@usels/core";
 
 const counter$ = useObservable(0);
 const { commit, undo, redo, canUndo$, canRedo$ } = useManualHistory(counter$);
@@ -28,8 +27,7 @@ redo(); // counter$ → 2
 ### capacity — limit history size
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useManualHistory } from "@usels/core";
+import { useManualHistory, useObservable } from "@usels/core";
 
 const value$ = useObservable(0);
 
@@ -42,8 +40,7 @@ const { commit, undo } = useManualHistory(value$, { capacity: 10 });
 Use `dump` and `parse` to store a compact or transformed representation instead of raw value clones.
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useManualHistory } from "@usels/core";
+import { useManualHistory, useObservable } from "@usels/core";
 
 const items$ = useObservable<string[]>([]);
 
@@ -64,8 +61,7 @@ undo(); // restored to ["a", "b", "c"]
 `reset()` restores the source to the last committed value without touching the undo/redo stacks.
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useManualHistory } from "@usels/core";
+import { useManualHistory, useObservable } from "@usels/core";
 
 const text$ = useObservable("saved");
 const { commit, reset } = useManualHistory(text$);
@@ -78,8 +74,7 @@ reset(); // text$ → "saved" (stacks unchanged)
 ### clear — wipe all history
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useManualHistory } from "@usels/core";
+import { useManualHistory, useObservable } from "@usels/core";
 
 const value$ = useObservable(0);
 const { commit, clear, history$ } = useManualHistory(value$);

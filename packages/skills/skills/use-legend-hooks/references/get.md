@@ -9,8 +9,7 @@ Extract values from MaybeObservable types
 ## Usage
 
 ```typescript
-import { get } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { get, observable } from "@usels/core";
 
 // With raw values
 const rawValue = { name: "John", age: 30 };
@@ -29,6 +28,8 @@ console.log(get(obs$, "name")); // 'John'
 export declare function get<T>(v: {
     get(): T;
 }): T;
+export declare function get<T extends object>(v: DeepMaybeObservable<T>): T;
+export declare function get<T extends object>(v: DeepMaybeObservable<T> | undefined): T | undefined;
 export declare function get<T>(maybeObservable: MaybeObservable<T>): T;
 export declare function get<T>(maybeObservable: MaybeObservable<T> | undefined): T | undefined;
 export declare function get<T, K extends keyof T>(maybeObservable: MaybeObservable<T>, key: K): T[K] | undefined;

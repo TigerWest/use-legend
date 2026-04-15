@@ -44,8 +44,7 @@ Calling `el$.get()` inside `observe` automatically re-runs the observer when the
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserve } from "@legendapp/state/react";
-    import { useRef$ } from "@usels/core";
+    import { useObserve, useRef$ } from "@usels/core";
 
     function Component() {
       const el$ = useRef$<HTMLDivElement>();

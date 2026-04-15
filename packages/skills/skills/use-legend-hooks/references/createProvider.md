@@ -11,8 +11,7 @@ Collapses React Context + Provider component + useContext hook into a single cal
 ### Basic — wrap a hook
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { createProvider } from "@usels/core";
+import { createProvider, useObservable } from "@usels/core";
 
 function useCounterSetup(props: { initial: number }) {
   const count$ = useObservable(props.initial);
@@ -57,8 +56,7 @@ function Child() {
 ### Custom displayName
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { createProvider } from "@usels/core";
+import { createProvider, useObservable } from "@usels/core";
 
 const [ThemeProvider, useTheme] = createProvider(
   (props: { mode: "light" | "dark" }) => {

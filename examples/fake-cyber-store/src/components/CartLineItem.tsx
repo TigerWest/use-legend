@@ -1,6 +1,6 @@
 "use client";
 
-import type { Observable } from "@legendapp/state";
+import type { Observable } from "@usels/core";
 import { formatCurrency } from "@/components/format";
 import { getCyberStore } from "@/store/cyberStore";
 import type { CartLine } from "@/types";

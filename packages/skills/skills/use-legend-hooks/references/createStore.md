@@ -1,6 +1,6 @@
 # createStore
 
-> Part of `@usels/core` | Category: State
+> Part of `@usels/core` | Category: Primitives
 
 ## Overview
 
@@ -11,8 +11,7 @@ Lazily-initialized store with `StoreProvider`, effectScope lifecycle, inter-stor
 ### Basic store
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore, StoreProvider } from "@usels/core";
+import { createStore, observable, StoreProvider } from "@usels/core";
 
 const [useCountStore] = createStore("count", () => {
   const count$ = observable(0);
@@ -59,8 +58,7 @@ const [useAuthStore, getAuthStore] = createStore("auth", () => {
 Use `getStore` (tuple[1]) inside another store's `setup()` to declare inter-store dependencies.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, observable } from "@usels/core";
 
 const [, getAuthStore] = createStore("auth", () => {
   const user$ = observable<string | null>(null);
@@ -122,8 +120,7 @@ Call `onMount` and `onUnmount` inside a store's `setup()` to register lifecycle 
 The `StoreProvider` runs `onMount` when it mounts and disposes scopes (running `onUnmount`) when it unmounts.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, observable } from "@usels/core";
 import { onMount, onUnmount } from "@usels/core/state/useScope/effectScope";
 
 const [useWebSocketStore] = createStore("ws", () => {
@@ -153,8 +150,7 @@ onUnmount(() => {
 Use `observe` from the scope-aware import so subscriptions are automatically cleaned up when the `StoreProvider` unmounts.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, observable } from "@usels/core";
 import { observe } from "@usels/core/state/useScope/observe";
 
 const [useDocStore] = createStore("doc", () => {
@@ -198,13 +194,13 @@ function App() {
 ### Redux DevTools integration
 
 Stores auto-connect to Redux DevTools Extension in development mode.
+Pass `dangerouslyUseInProduction` to `StoreProvider` only when you explicitly want the same DevTools integration in production.
 
 - **Action entries** (`storeName/actionName`) — logged when an action function is called.
 - **State entries** (`storeName/__state`) — logged when observables change outside an action. Multiple synchronous changes are batched into one entry.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, observable, StoreProvider } from "@usels/core";
 
 const [useAppStore] = createStore("app", () => {
   const theme$ = observable<"light" | "dark">("light");
@@ -215,19 +211,14 @@ const [useAppStore] = createStore("app", () => {
 // DevTools timeline:
 // @@INIT          → { theme$: "light" }
 // app/toggleTheme → { theme$: "dark" }
-```
 
-### `createStore` (deprecated)
-
-`createStore` is preserved as a deprecated backward-compatible wrapper that returns a single hook function instead of a tuple.
-
-```tsx
-import { createStore } from "@usels/core";
-
-const useCountStore = createStore("count", () => {
-  const count$ = observable(0);
-  return { count$ };
-});
+function App() {
+  return (
+    <StoreProvider dangerouslyUseInProduction>
+      <MainContent />
+    </StoreProvider>
+  );
+}
 ```
 
 ## Type Declarations
@@ -238,13 +229,10 @@ export type { StoreProviderProps, StoreState, StoreActions } from "./core";
 export type { StoreRegistryValue, ActionTracker } from "./storeContext";
 export { StoreRegistryContext } from "./storeContext";
 export declare function useStoreRegistry(): StoreRegistryValue | null;
-export declare const StoreProvider: React.FC<{
-    children: React.ReactNode;
-    _devtools?: boolean;
-}>;
+export declare const StoreProvider: React.FC<StoreProviderProps>;
 ```
 
 ## Source
 
-- Implementation: `packages/core/src/state/createStore/index.ts`
-- Documentation: `packages/core/src/state/createStore/index.md`
+- Implementation: `packages/core/src/primitives/createStore/index.ts`
+- Documentation: `packages/core/src/primitives/createStore/index.md`

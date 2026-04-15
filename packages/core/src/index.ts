@@ -27,6 +27,7 @@ export {
   Computed,
   Switch,
   Reactive,
+  observer,
   useMount,
   useObservable,
   useObserve,

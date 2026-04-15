@@ -15,8 +15,7 @@ type-declarations:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObserveThrottled } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveThrottled } from "@usels/core";
 
     function Component() {
       const position$ = useObservable({ x: 0, y: 0 });
@@ -35,8 +34,7 @@ type-declarations:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeThrottled } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeThrottled } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -63,8 +61,7 @@ Control whether the effect fires at the leading edge (immediately on first chang
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserveThrottled } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveThrottled } from "@usels/core";
 
     function Component() {
       const mouseMove$ = useObservable({ x: 0, y: 0 });
@@ -92,8 +89,7 @@ Control whether the effect fires at the leading edge (immediately on first chang
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeThrottled } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeThrottled } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -129,8 +125,7 @@ Pass `immediate: true` to execute the effect immediately on setup, in addition t
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserveThrottled } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveThrottled } from "@usels/core";
 
     function Component() {
       const count$ = useObservable(0);
@@ -149,8 +144,7 @@ Pass `immediate: true` to execute the effect immediately on setup, in addition t
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeThrottled } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeThrottled } from "@usels/core";
 
     function Component() {
       "use scope"

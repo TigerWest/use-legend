@@ -18,8 +18,7 @@ const timeAgo = useTimeAgo(new Date("2024-01-01"));
 ### Reactive `time`
 
 ```tsx
-import { useTimeAgo } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useTimeAgo } from "@usels/core";
 
 const time$ = observable(new Date());
 const timeAgo = useTimeAgo(time$);

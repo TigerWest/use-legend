@@ -9,8 +9,7 @@ A hook that tracks Observable change history with throttle. A thin wrapper aroun
 ## Usage
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useThrottledHistory } from "@usels/core";
+import { useObservable, useThrottledHistory } from "@usels/core";
 
 const slider$ = useObservable(50);
 
@@ -23,8 +22,7 @@ const { undo, redo, canUndo$ } = useThrottledHistory(slider$, { throttle: 300 })
 By default both leading and trailing edges fire. Disable either to customize behavior.
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useThrottledHistory } from "@usels/core";
+import { useObservable, useThrottledHistory } from "@usels/core";
 
 const value$ = useObservable(0);
 
@@ -39,8 +37,7 @@ const { undo } = useThrottledHistory(value$, {
 ### Combined with capacity
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useThrottledHistory } from "@usels/core";
+import { useObservable, useThrottledHistory } from "@usels/core";
 
 const position$ = useObservable({ x: 0, y: 0 });
 

@@ -44,8 +44,7 @@ Throttle execution of a function. Especially useful for rate limiting execution 
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useThrottleFn } from "@usels/core";
+    import { useObservable, useThrottleFn } from "@usels/core";
 
     function Component() {
       const delay$ = useObservable(300);
@@ -59,8 +58,7 @@ Throttle execution of a function. Especially useful for rate limiting execution 
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createThrottleFn } from "@usels/core";
+    import { createThrottleFn, observable } from "@usels/core";
 
     function Component() {
       "use scope"

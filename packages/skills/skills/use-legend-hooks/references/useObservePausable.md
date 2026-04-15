@@ -9,8 +9,7 @@ Runs a reactive effect with built-in pause/resume controls. Built on `useObserve
 ## Usage
 
 ```tsx
-import { useObservePausable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObservePausable } from "@usels/core";
 
 const count$ = observable(0);
 
@@ -33,8 +32,7 @@ resume();
 Use `initialState: 'paused'` to start with the effect suppressed. Call `resume()` whenever you're ready to begin reacting.
 
 ```tsx
-import { useObservePausable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObservePausable } from "@usels/core";
 
 const data$ = observable(0);
 
@@ -55,9 +53,7 @@ resume();
 `isActive$` is an Observable — use it directly in JSX for reactive UI.
 
 ```tsx
-import { useObservePausable } from "@usels/core";
-import { observable } from "@legendapp/state";
-import { Show } from "@legendapp/state/react";
+import { observable, Show, useObservePausable } from "@usels/core";
 
 const count$ = observable(0);
 
@@ -82,8 +78,7 @@ function MyComponent() {
 Pass `immediate: true` to execute the effect immediately on setup.
 
 ```tsx
-import { useObservePausable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObservePausable } from "@usels/core";
 
 const count$ = observable(0);
 

@@ -20,8 +20,7 @@ type-table:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualHistory } from "@usels/core";
+    import { useManualHistory, useObservable } from "@usels/core";
 
     function Component() {
       const counter$ = useObservable(0);
@@ -40,8 +39,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualHistory } from "@usels/core";
+    import { createManualHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -66,8 +64,7 @@ type-table:
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualHistory } from "@usels/core";
+    import { useManualHistory, useObservable } from "@usels/core";
 
     function Component() {
       const value$ = useObservable(0);
@@ -79,8 +76,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualHistory } from "@usels/core";
+    import { createManualHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -99,8 +95,7 @@ Use `dump` and `parse` to store a compact or transformed representation instead 
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualHistory } from "@usels/core";
+    import { useManualHistory, useObservable } from "@usels/core";
 
     function Component() {
       const items$ = useObservable<string[]>([]);
@@ -115,8 +110,7 @@ Use `dump` and `parse` to store a compact or transformed representation instead 
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualHistory } from "@usels/core";
+    import { createManualHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -138,8 +132,7 @@ Use `dump` and `parse` to store a compact or transformed representation instead 
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualHistory } from "@usels/core";
+    import { useManualHistory, useObservable } from "@usels/core";
 
     function Component() {
       const text$ = useObservable("saved");
@@ -150,8 +143,7 @@ Use `dump` and `parse` to store a compact or transformed representation instead 
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualHistory } from "@usels/core";
+    import { createManualHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -168,8 +160,7 @@ Use `dump` and `parse` to store a compact or transformed representation instead 
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useManualHistory } from "@usels/core";
+    import { useManualHistory, useObservable } from "@usels/core";
 
     function Component() {
       const value$ = useObservable(0);
@@ -180,8 +171,7 @@ Use `dump` and `parse` to store a compact or transformed representation instead 
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createManualHistory } from "@usels/core";
+    import { createManualHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"

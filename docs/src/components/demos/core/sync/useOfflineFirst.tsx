@@ -1,5 +1,5 @@
 import { useOfflineFirst } from "@usels/core";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+import { ObservablePersistLocalStorage } from "@usels/web";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "@demos/_shared";
 
 // Simulates a slow API with local state

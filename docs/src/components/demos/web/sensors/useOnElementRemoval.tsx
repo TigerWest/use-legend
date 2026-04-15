@@ -1,6 +1,5 @@
-import { useRef$ } from "@usels/core";
+import { useObservable, useRef$ } from "@usels/core";
 import { useOnElementRemoval } from "@usels/web";
-import { useObservable } from "@legendapp/state/react";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge } from "../../_shared";
 
 export default function Demo() {

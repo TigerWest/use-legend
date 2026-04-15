@@ -9,8 +9,7 @@ Runs a reactive effect throttled — fires at most once per `ms` milliseconds. B
 ## Usage
 
 ```tsx
-import { useObserveThrottled } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveThrottled } from "@usels/core";
 
 const position$ = observable({ x: 0, y: 0 });
 
@@ -29,8 +28,7 @@ useObserveThrottled(
 Control whether the effect fires at the leading edge (immediately on first change) or trailing edge (after the throttle window expires). By default, only the trailing edge fires.
 
 ```tsx
-import { useObserveThrottled } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveThrottled } from "@usels/core";
 
 const mouseMove$ = observable({ x: 0, y: 0 });
 
@@ -58,8 +56,7 @@ useObserveThrottled(
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
 ```tsx
-import { useObserveThrottled } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveThrottled } from "@usels/core";
 
 const count$ = observable(0);
 

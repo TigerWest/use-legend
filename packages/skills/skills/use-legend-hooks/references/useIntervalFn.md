@@ -31,8 +31,7 @@ useIntervalFn(() => fetchData(), 5000, { immediateCallback: true });
 ### Reactive interval
 
 ```tsx
-import { useIntervalFn } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useIntervalFn } from "@usels/core";
 
 const ms$ = observable(1000);
 useIntervalFn(() => {}, ms$);

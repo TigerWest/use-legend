@@ -20,8 +20,7 @@ type-table:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObservable } from "@legendapp/state/react";
-    import { useThrottledHistory } from "@usels/core";
+    import { useObservable, useThrottledHistory } from "@usels/core";
 
     function Component() {
       const slider$ = useObservable(50);
@@ -35,8 +34,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createThrottledHistory } from "@usels/core";
+    import { createThrottledHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -57,8 +55,7 @@ By default both leading and trailing edges fire. Disable either to customize beh
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useThrottledHistory } from "@usels/core";
+    import { useObservable, useThrottledHistory } from "@usels/core";
 
     function Component() {
       const value$ = useObservable(0);
@@ -74,8 +71,7 @@ By default both leading and trailing edges fire. Disable either to customize beh
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createThrottledHistory } from "@usels/core";
+    import { createThrottledHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -96,8 +92,7 @@ By default both leading and trailing edges fire. Disable either to customize beh
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useThrottledHistory } from "@usels/core";
+    import { useObservable, useThrottledHistory } from "@usels/core";
 
     function Component() {
       const position$ = useObservable({ x: 0, y: 0 });
@@ -111,8 +106,7 @@ By default both leading and trailing edges fire. Disable either to customize beh
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createThrottledHistory } from "@usels/core";
+    import { createThrottledHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"

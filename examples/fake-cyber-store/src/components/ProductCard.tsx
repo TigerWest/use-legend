@@ -1,6 +1,6 @@
 "use client";
 
-import { observable, type Observable } from "@legendapp/state";
+import { observable, type Observable } from "@usels/core";
 import { getCyberStore } from "@/store/cyberStore";
 import type { Product } from "@/types";
 import { formatCurrency, labelize } from "@/components/format";

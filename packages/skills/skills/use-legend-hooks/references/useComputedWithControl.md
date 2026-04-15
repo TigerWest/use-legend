@@ -9,8 +9,7 @@ Computed Observable with explicit source control and manual trigger. Only recomp
 ## Usage
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useComputedWithControl } from "@usels/core";
+import { useComputedWithControl, useObservable } from "@usels/core";
 
 const counter$ = useObservable(1);
 const { value$, trigger } = useComputedWithControl(counter$, (count) => count * 2);
@@ -21,8 +20,7 @@ const { value$, trigger } = useComputedWithControl(counter$, (count) => count * 
 ### Manual trigger
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useComputedWithControl } from "@usels/core";
+import { useComputedWithControl, useObservable } from "@usels/core";
 
 const source$ = useObservable(1);
 const { value$, trigger } = useComputedWithControl(source$, (val) => {
@@ -36,8 +34,7 @@ trigger();
 ### Previous value (incremental computation)
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useComputedWithControl } from "@usels/core";
+import { useComputedWithControl, useObservable } from "@usels/core";
 
 const event$ = useObservable(0);
 const { value$ } = useComputedWithControl(event$, (eventValue, prev) => (prev ?? 0) + eventValue);
@@ -47,8 +44,7 @@ const { value$ } = useComputedWithControl(event$, (eventValue, prev) => (prev ??
 ### Array source
 
 ```tsx
-import { useObservable } from "@legendapp/state/react";
-import { useComputedWithControl } from "@usels/core";
+import { useComputedWithControl, useObservable } from "@usels/core";
 
 const width$ = useObservable(100);
 const height$ = useObservable(50);

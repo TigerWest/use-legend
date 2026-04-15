@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
-import { useObservable } from "@legendapp/state/react";
-import { useRef$ } from "@usels/core";
+import { useObservable, useRef$ } from "@usels/core";
 import { useOnLongPress } from "@usels/web";
 import {
   ActionButton,

@@ -1,6 +1,5 @@
-import { Show, useObservable } from "@legendapp/state/react";
-import { QueryClientProvider, QueryClient } from "@usels/tanstack-query";
-import { useMutation } from "@usels/tanstack-query";
+import { Show, useObservable } from "@usels/core";
+import { QueryClient, QueryClientProvider, useMutation } from "@usels/tanstack-query";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, demoClasses } from "@demos/_shared";
 
 interface Todo {

@@ -17,8 +17,7 @@ Built on `useObserveIgnorable` — lazy by default (`immediate: false`). `trigge
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObserveTriggerable } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveTriggerable } from "@usels/core";
 
     function Component() {
       const source$ = useObservable(0);
@@ -46,8 +45,7 @@ Built on `useObserveIgnorable` — lazy by default (`immediate: false`). `trigge
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeTriggerable } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeTriggerable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -83,8 +81,7 @@ Built on `useObserveIgnorable` — lazy by default (`immediate: false`). `trigge
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserveTriggerable } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveTriggerable } from "@usels/core";
 
     const remote$ = useObservable("");
     const local$ = useObservable("");
@@ -107,8 +104,7 @@ Built on `useObserveIgnorable` — lazy by default (`immediate: false`). `trigge
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeTriggerable } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeTriggerable } from "@usels/core";
 
     const remote$ = observable("");
     const local$ = observable("");
@@ -139,8 +135,7 @@ The same `ignoreUpdates` pattern as `useObserveIgnorable` — prevents circular 
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserveTriggerable, useWatch } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveTriggerable, useWatch } from "@usels/core";
 
     function Component() {
       const local$ = useObservable("");
@@ -169,8 +164,7 @@ The same `ignoreUpdates` pattern as `useObserveIgnorable` — prevents circular 
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeTriggerable, watch } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeTriggerable, watch } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -207,8 +201,7 @@ Pass `immediate: true` to execute the effect on setup.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObserveTriggerable } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useObserveTriggerable } from "@usels/core";
 
     function Component() {
       const count$ = useObservable(0);
@@ -226,8 +219,7 @@ Pass `immediate: true` to execute the effect on setup.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observeTriggerable } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, observeTriggerable } from "@usels/core";
 
     function Component() {
       "use scope"

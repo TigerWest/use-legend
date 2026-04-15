@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useTimeAgo } from "@usels/core";
+import { useObservable, useTimeAgo } from "@usels/core";
 import { DemoPanel, DemoShell, ValueToken, demoClasses } from "@demos/_shared";
 
 const INITIAL_TIME = Date.now();

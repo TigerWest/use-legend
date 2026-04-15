@@ -33,7 +33,7 @@ function SwipeDemo() {
 ### Reactive options
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 
 const threshold$ = observable(50);
 const { direction$ } = usePointerSwipe(el$, { threshold: threshold$ });

@@ -21,8 +21,7 @@ Selector supports three forms:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useWatch } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWatch } from "@usels/core";
 
     function Component() {
       const query$ = useObservable("");
@@ -37,8 +36,7 @@ Selector supports three forms:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { watch } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, watch } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -61,8 +59,7 @@ Pass `immediate: true` to execute the effect immediately on setup, in addition t
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useWatch } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWatch } from "@usels/core";
 
     function Component() {
       const query$ = useObservable("");
@@ -81,8 +78,7 @@ Pass `immediate: true` to execute the effect immediately on setup, in addition t
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { watch } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, watch } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -109,8 +105,7 @@ Watch multiple sources at once. The effect receives a tuple of current values.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useWatch } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWatch } from "@usels/core";
 
     function Component() {
       const query$ = useObservable("");
@@ -125,8 +120,7 @@ Watch multiple sources at once. The effect receives a tuple of current values.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { watch } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, watch } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -149,8 +143,7 @@ Use a function to compute a derived value. The function runs on every dep change
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useWatch } from "@usels/core";
-    import { useObservable } from "@legendapp/state/react";
+    import { useObservable, useWatch } from "@usels/core";
 
     function Component() {
       const firstName$ = useObservable("John");
@@ -168,8 +161,7 @@ Use a function to compute a derived value. The function runs on every dep change
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { watch } from "@usels/core";
-    import { observable } from "@legendapp/state";
+    import { observable, watch } from "@usels/core";
 
     function Component() {
       "use scope"

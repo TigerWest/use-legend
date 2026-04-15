@@ -1,6 +1,6 @@
 import { useRef } from "react";
+import { useObservable, useObserveEffect } from "@usels/core";
 import { useDocumentVisibility } from "@usels/web";
-import { useObservable, useObserveEffect } from "@legendapp/state/react";
 import { DemoPanel, DemoShell, StatusBadge, demoClasses } from "../../_shared";
 
 export default function UseDocumentVisibilityDemo() {

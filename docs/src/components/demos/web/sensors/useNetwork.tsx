@@ -1,5 +1,5 @@
 "use client";
-import { Show } from "@legendapp/state/react";
+import { Show } from "@usels/core";
 import { useNetwork } from "@usels/web";
 import { DemoShell, DemoPanel, StatCard, StatusBadge, demoClasses } from "../../_shared";
 

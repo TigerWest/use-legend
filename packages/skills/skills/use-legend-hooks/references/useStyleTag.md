@@ -48,7 +48,7 @@ function Component() {
 If you already have an Observable holding your CSS string, pass it directly.
 
 ```tsx
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useStyleTag } from "@usels/web";
 
 const theme$ = observable("body { background: white; }");

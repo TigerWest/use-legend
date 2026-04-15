@@ -11,8 +11,7 @@ Extract raw values from `MaybeObservable` types (works with both raw values and 
 ## Usage
 
 ```typescript
-import { get } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { get, observable } from "@usels/core";
 
 // With raw values
 const rawValue = { name: "John", age: 30 };

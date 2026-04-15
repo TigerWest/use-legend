@@ -20,8 +20,7 @@ type-table:
   <Fragment slot="hook">
     ```tsx twoslash
     // @noErrors
-    import { useObservable } from "@legendapp/state/react";
-    import { useDebouncedHistory } from "@usels/core";
+    import { useDebouncedHistory, useObservable } from "@usels/core";
 
     function Component() {
       const search$ = useObservable("");
@@ -35,8 +34,7 @@ type-table:
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createDebouncedHistory } from "@usels/core";
+    import { createDebouncedHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -57,8 +55,7 @@ Even if the user keeps typing, a snapshot is forced after `maxWait` ms.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useDebouncedHistory } from "@usels/core";
+    import { useDebouncedHistory, useObservable } from "@usels/core";
 
     function Component() {
       const text$ = useObservable("");
@@ -73,8 +70,7 @@ Even if the user keeps typing, a snapshot is forced after `maxWait` ms.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createDebouncedHistory } from "@usels/core";
+    import { createDebouncedHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"
@@ -94,8 +90,7 @@ Even if the user keeps typing, a snapshot is forced after `maxWait` ms.
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useObservable } from "@legendapp/state/react";
-    import { useDebouncedHistory } from "@usels/core";
+    import { useDebouncedHistory, useObservable } from "@usels/core";
 
     function Component() {
       const note$ = useObservable("");
@@ -109,8 +104,7 @@ Even if the user keeps typing, a snapshot is forced after `maxWait` ms.
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observable } from "@legendapp/state";
-    import { createDebouncedHistory } from "@usels/core";
+    import { createDebouncedHistory, observable } from "@usels/core";
 
     function Component() {
       "use scope"

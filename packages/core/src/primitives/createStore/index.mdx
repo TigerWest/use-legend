@@ -15,8 +15,7 @@ type-table:
 
 ```tsx twoslash
 // @noErrors
-import { observable } from "@legendapp/state";
-import { createStore, StoreProvider } from "@usels/core";
+import { createStore, observable, StoreProvider } from "@usels/core";
 
 const [useCountStore] = createStore("count", () => {
   const count$ = observable(0);
@@ -63,8 +62,7 @@ const [useAuthStore, getAuthStore] = createStore("auth", () => {
 Use `getStore` (tuple[1]) inside another store's `setup()` to declare inter-store dependencies.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, observable } from "@usels/core";
 
 const [, getAuthStore] = createStore("auth", () => {
   const user$ = observable<string | null>(null);
@@ -126,8 +124,7 @@ Call `onMount` and `onUnmount` inside a store's `setup()` to register lifecycle 
 The `StoreProvider` runs `onMount` when it mounts and disposes scopes (running `onUnmount`) when it unmounts.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, observable } from "@usels/core";
 import { onMount, onUnmount } from "@usels/core/state/useScope/effectScope";
 
 const [useWebSocketStore] = createStore("ws", () => {
@@ -157,8 +154,7 @@ onUnmount(() => {
 Use `observe` from the scope-aware import so subscriptions are automatically cleaned up when the `StoreProvider` unmounts.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore } from "@usels/core";
+import { createStore, observable } from "@usels/core";
 import { observe } from "@usels/core/state/useScope/observe";
 
 const [useDocStore] = createStore("doc", () => {
@@ -208,8 +204,7 @@ Pass `dangerouslyUseInProduction` to `StoreProvider` only when you explicitly wa
 - **State entries** (`storeName/__state`) — logged when observables change outside an action. Multiple synchronous changes are batched into one entry.
 
 ```tsx
-import { observable } from "@legendapp/state";
-import { createStore, StoreProvider } from "@usels/core";
+import { createStore, observable, StoreProvider } from "@usels/core";
 
 const [useAppStore] = createStore("app", () => {
   const theme$ = observable<"light" | "dark">("light");

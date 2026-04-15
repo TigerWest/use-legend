@@ -18,8 +18,7 @@ const ts = useTimestamp();
 ### With offset
 
 ```tsx
-import { useTimestamp } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useTimestamp } from "@usels/core";
 
 const offset$ = observable(5000);
 const ts = useTimestamp({ offset: offset$ });

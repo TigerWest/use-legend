@@ -1,5 +1,4 @@
-import { useObservable } from "@legendapp/state/react";
-import { useDebounced } from "@usels/core";
+import { useDebounced, useObservable } from "@usels/core";
 import { DemoPanel, DemoShell, StatCard, demoClasses } from "@demos/_shared";
 
 export default function UseDebouncedDemo() {

@@ -50,7 +50,7 @@ function ScreenShareWithAudio() {
 Options can be passed as plain values, per-field `Observable`s, or a single `Observable<UseDisplayMediaOptions>`. `video` and `audio` are read at each `start()` call, so changes take effect on the next share.
 
 ```typescript
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useDisplayMedia } from "@usels/web";
 
 const audio$ = observable(false);

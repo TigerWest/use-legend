@@ -1,6 +1,6 @@
 "use client";
+import { useObservable } from "@usels/core";
 import { useOnKeyStroke } from "@usels/web";
-import { useObservable } from "@legendapp/state/react";
 import { DemoPanel, DemoShell, StatCard, demoClasses } from "../../_shared";
 
 export default function Demo() {

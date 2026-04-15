@@ -25,8 +25,7 @@ function Component() {
 Calling `el$.get()` inside `useObserve` automatically re-runs the observer when the element is mounted or unmounted.
 
 ```tsx
-import { useObserve } from "@legendapp/state/react";
-import { useRef$ } from "@usels/core";
+import { useObserve, useRef$ } from "@usels/core";
 
 function Component() {
   const el$ = useRef$<HTMLDivElement>();

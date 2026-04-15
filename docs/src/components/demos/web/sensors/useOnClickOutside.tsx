@@ -1,6 +1,5 @@
-import { useRef$ } from "@usels/core";
+import { useObservable, useRef$ } from "@usels/core";
 import { useOnClickOutside } from "@usels/web";
-import { useObservable } from "@legendapp/state/react";
 import { ActionButton, DemoPanel, DemoShell, StatusBadge, StatCard, demoClasses } from "../../_shared";
 
 export default function UseOnClickOutsideDemo() {

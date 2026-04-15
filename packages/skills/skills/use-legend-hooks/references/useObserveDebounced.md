@@ -9,8 +9,7 @@ Runs a reactive effect debounced — fires only after `ms` milliseconds of inact
 ## Usage
 
 ```tsx
-import { useObserveDebounced } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveDebounced } from "@usels/core";
 
 const query$ = observable("");
 
@@ -29,8 +28,7 @@ useObserveDebounced(
 Use `maxWait` to guarantee the effect fires at least once, even if the source keeps changing continuously. The effect will fire after `maxWait` milliseconds regardless of activity.
 
 ```tsx
-import { useObserveDebounced } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveDebounced } from "@usels/core";
 
 const input$ = observable("");
 
@@ -48,8 +46,7 @@ useObserveDebounced(
 Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
 
 ```tsx
-import { useObserveDebounced } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveDebounced } from "@usels/core";
 
 const count$ = observable(0);
 

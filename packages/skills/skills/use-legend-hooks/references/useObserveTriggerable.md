@@ -9,8 +9,7 @@ Runs a reactive effect with a manual `trigger()` method and an `ignoreUpdates` e
 ## Usage
 
 ```tsx
-import { useObserveTriggerable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveTriggerable } from "@usels/core";
 
 const source$ = observable(0);
 
@@ -38,8 +37,7 @@ ignoreUpdates(() => {
 `trigger()` executes the effect immediately with the current selector value. Useful for initializing side effects on demand or re-running a sync after an ignored update.
 
 ```tsx
-import { useObserveTriggerable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveTriggerable } from "@usels/core";
 
 const remote$ = observable("");
 const local$ = observable("");
@@ -64,8 +62,7 @@ function MyComponent() {
 The same `ignoreUpdates` pattern as `useObserveIgnorable` — prevents circular reactive updates when syncing two observables.
 
 ```tsx
-import { useObserveTriggerable, useWatch } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveTriggerable, useWatch } from "@usels/core";
 
 const local$ = observable("");
 const remote$ = observable("");
@@ -94,8 +91,7 @@ useWatch(
 Pass `immediate: true` to execute the effect on setup.
 
 ```tsx
-import { useObserveTriggerable } from "@usels/core";
-import { observable } from "@legendapp/state";
+import { observable, useObserveTriggerable } from "@usels/core";
 
 const count$ = observable(0);
 
