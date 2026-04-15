@@ -1,0 +1,203 @@
+---
+title: useInfiniteQuery
+category: Hooks
+type-declarations:
+  file: ./index.ts
+  comments: true
+---
+
+Bridges TanStack Query infinite queries with Legend-State. Returns query state as an `Observable`, and accepts `Observable` values in options and `queryKey` — just like `useQuery`. Refer to [TanStack Query docs](https://tanstack.com/query/latest/docs/framework/react/reference/useInfiniteQuery) for full option details. Options like `enabled`, `staleTime`, `gcTime`, etc. accept `MaybeObservable<T>` for reactive control.
+
+Both variants require a `QueryClientProvider` ancestor — the client is injected from context.
+
+## Demo
+
+## Usage
+
+### Basic infinite query
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { For, Show, useObservable } from "@legendapp/state/react";
+    import { useInfiniteQuery } from "@usels/tanstack-query";
+
+    interface Page {
+      items: { id: number; name: string }[];
+      nextCursor: number | null;
+    }
+
+    function InfiniteList() {
+      const query = useInfiniteQuery({
+        queryKey: ["items"],
+        queryFn: ({ pageParam }) =>
+          fetch(`/api/items?cursor=${pageParam}`).then((r) => r.json() as Promise<Page>),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      });
+
+      const allItems$ = useObservable(() =>
+        (query.data.get()?.pages ?? []).flatMap((page) => page.items)
+      );
+
+      return (
+        <div>
+          <Show if={query.isLoading}>
+            <p>Loading...</p>
+          </Show>
+          <For each={allItems$}>{(item$) => <div>{item$.name.get()}</div>}</For>
+          <Show if={query.hasNextPage}>
+            <button
+              onClick={() => query.fetchNextPage()}
+              disabled={query.isFetchingNextPage.get()}
+            >
+              <Show if={query.isFetchingNextPage} else="Load More">
+                Loading more...
+              </Show>
+            </button>
+          </Show>
+        </div>
+      );
+    }
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { For, Show } from "@legendapp/state/react";
+    import { observable } from "@legendapp/state";
+    import { createInfiniteQuery } from "@usels/tanstack-query";
+
+    interface Page {
+      items: { id: number; name: string }[];
+      nextCursor: number | null;
+    }
+
+    function InfiniteList() {
+      "use scope";
+      const state$ = createInfiniteQuery<Page, ["items"], number>({
+        queryKey: ["items"],
+        queryFn: ({ pageParam }) =>
+          fetch(`/api/items?cursor=${pageParam}`).then((r) => r.json()),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      });
+
+      const allItems$ = observable(() =>
+        (state$.data.get()?.pages ?? []).flatMap((page) => page.items)
+      );
+
+      return (
+        <div>
+          <Show if={state$.isLoading}>
+            <p>Loading...</p>
+          </Show>
+          <For each={allItems$}>{(item$) => <div>{item$.name.get()}</div>}</For>
+          <Show if={state$.hasNextPage}>
+            <button
+              onClick={() => state$.fetchNextPage.get()()}
+              disabled={state$.isFetchingNextPage.get()}
+            >
+              <Show if={state$.isFetchingNextPage} else="Load More">
+                Loading more...
+              </Show>
+            </button>
+          </Show>
+        </div>
+      );
+    }
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Observable queryKey
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useInfiniteQuery } from "@usels/tanstack-query";
+    import { observable } from "@legendapp/state";
+
+    const category$ = observable("all");
+
+    function FilteredList() {
+      const query = useInfiniteQuery({
+        queryKey: ["items", category$],
+        queryFn: ({ pageParam }) =>
+          fetch(`/api/items?category=${category$.peek()}&cursor=${pageParam}`).then((r) =>
+            r.json()
+          ),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      });
+      return <div>{query.data.get()?.pages.length} pages</div>;
+    }
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createInfiniteQuery } from "@usels/tanstack-query";
+    import { observable } from "@legendapp/state";
+
+    const category$ = observable("all");
+
+    function FilteredList() {
+      "use scope";
+      const state$ = createInfiniteQuery({
+        queryKey: ["items", category$],
+        queryFn: ({ pageParam }) =>
+          fetch(`/api/items?category=${category$.peek()}&cursor=${pageParam}`).then((r) =>
+            r.json()
+          ),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      });
+      return <div>{state$.data.get()?.pages.length} pages</div>;
+    }
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Conditional fetching with Observable enabled
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useInfiniteQuery } from "@usels/tanstack-query";
+    import { observable } from "@legendapp/state";
+
+    const isReady$ = observable(false);
+
+    function Feed() {
+      const query = useInfiniteQuery({
+        queryKey: ["feed"],
+        queryFn: ({ pageParam }) => fetchFeed(pageParam),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) => lastPage.next,
+        enabled: isReady$,
+      });
+      return <div>{query.status.get()}</div>;
+    }
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createInfiniteQuery } from "@usels/tanstack-query";
+    import { observable } from "@legendapp/state";
+
+    const isReady$ = observable(false);
+
+    function Feed() {
+      "use scope";
+      const state$ = createInfiniteQuery({
+        queryKey: ["feed"],
+        queryFn: ({ pageParam }) => fetchFeed(pageParam),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) => lastPage.next,
+        enabled: isReady$,
+      });
+      return <div>{state$.status.get()}</div>;
+    }
+    ```
+  </Fragment>
+</CodeTabs>

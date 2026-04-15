@@ -1,6 +1,17 @@
-import { observable, observe, type Observable } from "@legendapp/state";
-import { QueryClient, QueryObserver } from "@tanstack/query-core";
-import { get, peek, type MaybeObservable, type Disposable } from "@usels/core";
+
+import { QueryObserver } from "@tanstack/query-core";
+import {
+  get,
+  peek,
+  observe,
+  onUnmount,
+  createIsMounted,
+  observable,
+  type Observable,
+  type MaybeObservable,
+  type DeepMaybeObservable,
+} from "@usels/core";
+import { getQueryClient } from "../useQueryClient";
 import { resolveQueryKey } from "../keyResolvers";
 
 export interface CreateQueryOptions<TData = unknown> {
@@ -56,24 +67,22 @@ export interface QueryState<TData = unknown> {
 
 /**
  * Core observable function for bridging TanStack Query with Legend-State.
- * Framework-agnostic — no React imports.
  *
- * Creates a QueryObserver and subscribes immediately. Reacts to option
- * changes (including Observable elements in queryKey) via `observe()`.
+ * Must be called inside a scope (e.g. `useScope` factory or standalone `createScope`)
+ * wrapped by a `QueryClientProvider` — `getQueryClient()` injects the client from
+ * context. Reactive teardown is registered via `onUnmount`; option changes
+ * (including Observable elements inside `queryKey`) are tracked via `observe`.
  *
- * @param queryClient - The TanStack QueryClient instance.
- * @param options$ - Observable containing query options. Reactive fields
- *   inside (enabled, staleTime, etc.) are resolved via `get()`.
- * @returns Disposable with `state$` Observable reflecting query state.
+ * @param options - Plain object, per-field Observable, or outer Observable of options.
+ * @returns Observable reflecting query state (including `refetch`).
  */
 export function createQuery<TData = unknown>(
-  queryClient: QueryClient,
-  options$: Observable<CreateQueryOptions<TData>>
-): Disposable & { state$: Observable<QueryState<TData>>; observer: QueryObserver<TData, Error> } {
-  const subscriptions: (() => void)[] = [];
+  options?: DeepMaybeObservable<CreateQueryOptions<TData>>
+): Observable<QueryState<TData>> {
+  const queryClient = getQueryClient();
+  const opts$ = observable(options);
 
-  // Non-reactive snapshot for initial observer creation
-  const initialOpts = options$.peek();
+  const initialOpts = opts$.peek();
   const initialQueryKey = resolveQueryKey(initialOpts?.queryKey ?? []);
 
   const observer = new QueryObserver<TData, Error>(queryClient, {
@@ -121,31 +130,30 @@ export function createQuery<TData = unknown>(
   });
 
   // React to option changes (including Observable elements inside queryKey).
-  // observe() registers deps on all .get() calls within the callback.
-  subscriptions.push(
-    observe(() => {
-      const opts = options$.get();
-      if (!opts) return;
+  // Gate on isMounted$ — initial constructor call already set options; this
+  // effect handles subsequent changes after mount.
+  const isMounted$ = createIsMounted();
+  observe(() => {
+    const opts = opts$.get();
+    if (!opts || !isMounted$.get()) return;
 
-      const resolvedKey = resolveQueryKey(opts.queryKey ?? []);
+    const resolvedKey = resolveQueryKey(opts.queryKey ?? []);
 
-      observer.setOptions({
-        queryKey: resolvedKey,
-        queryFn: opts.queryFn,
-        enabled: get(opts.enabled) ?? true,
-        staleTime: get(opts.staleTime),
-        gcTime: get(opts.gcTime),
-        retry: get(opts.retry as MaybeObservable<number | boolean>),
-        refetchOnWindowFocus: get(opts.refetchOnWindowFocus),
-        refetchOnMount: get(opts.refetchOnMount),
-        refetchOnReconnect: get(opts.refetchOnReconnect),
-        throwOnError: opts.throwOnError as never,
-        suspense: get(opts.suspense) ?? false,
-      });
-    })
-  );
+    observer.setOptions({
+      queryKey: resolvedKey,
+      queryFn: opts.queryFn,
+      enabled: get(opts.enabled) ?? true,
+      staleTime: get(opts.staleTime),
+      gcTime: get(opts.gcTime),
+      retry: get(opts.retry as MaybeObservable<number | boolean>),
+      refetchOnWindowFocus: get(opts.refetchOnWindowFocus),
+      refetchOnMount: get(opts.refetchOnMount),
+      refetchOnReconnect: get(opts.refetchOnReconnect),
+      throwOnError: opts.throwOnError as never,
+      suspense: get(opts.suspense) ?? false,
+    });
+  });
 
-  // Subscribe immediately (not deferred to mount) — updates state$ on every result change.
   const assignResult = (result: ReturnType<typeof observer.getCurrentResult>) => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     state$.assign({
@@ -178,11 +186,9 @@ export function createQuery<TData = unknown>(
   };
 
   assignResult(observer.getCurrentResult());
-  subscriptions.push(observer.subscribe(assignResult));
+  const unsubscribe = observer.subscribe(assignResult);
 
-  return {
-    state$,
-    observer,
-    dispose: () => subscriptions.forEach((unsub) => unsub()),
-  };
+  onUnmount(unsubscribe);
+
+  return state$;
 }

@@ -1,7 +1,13 @@
-import { observable, observe, type Observable } from "@legendapp/state";
 import { MutationKey, MutationObserver } from "@tanstack/query-core";
-import { QueryClient } from "@tanstack/query-core";
-import { type Disposable } from "@usels/core";
+import {
+  observe,
+  onUnmount,
+  createIsMounted,
+  type DeepMaybeObservable,
+  Observable,
+  observable,
+} from "@usels/core";
+import { getQueryClient } from "../useQueryClient";
 import { resolveMutationKey } from "../keyResolvers";
 
 export interface CreateMutationOptions<TData = unknown, TVariables = void, TContext = unknown> {
@@ -48,23 +54,23 @@ export interface MutationState<TData = unknown, TVariables = void, TContext = un
 
 /**
  * Core observable function for bridging TanStack Query mutations with Legend-State.
- * Framework-agnostic — no React imports.
  *
- * Creates a MutationObserver and subscribes immediately. Reacts to option
- * changes via `observe()`.
+ * Must be called inside a scope wrapped by a `QueryClientProvider` —
+ * `getQueryClient()` injects the client from context. Teardown is registered
+ * via `onUnmount`; option changes propagate via `observe`.
  *
- * @param queryClient - The TanStack QueryClient instance.
- * @param options$ - Observable containing mutation options (callbacks stored as plain functions).
- * @returns Disposable with `state$` Observable reflecting mutation state.
+ * @param options - Plain object, per-field Observable, or outer Observable of options.
+ * @returns Observable reflecting mutation state (including `mutate`/`mutateAsync`/`reset`).
  */
 export function createMutation<TData = unknown, TVariables = void, TContext = unknown>(
-  queryClient: QueryClient,
-  options$: Observable<CreateMutationOptions<TData, TVariables, TContext>>
-): Disposable & { state$: Observable<MutationState<TData, TVariables, TContext>> } {
-  const subscriptions: (() => void)[] = [];
+  options?: DeepMaybeObservable<CreateMutationOptions<TData, TVariables, TContext>>
+): Observable<MutationState<TData, TVariables, TContext>> {
+  const queryClient = getQueryClient();
+  const opts$ = observable(options) as Observable<
+    CreateMutationOptions<TData, TVariables, TContext>
+  >;
 
-  // Non-reactive snapshot for initial observer creation
-  const initialOpts = options$.peek();
+  const initialOpts = opts$.peek();
 
   const observer = new MutationObserver<TData, Error, TVariables, TContext>(queryClient, {
     mutationKey: resolveMutationKey(initialOpts?.mutationKey),
@@ -96,7 +102,6 @@ export function createMutation<TData = unknown, TVariables = void, TContext = un
     },
     mutateAsync(variables: TVariables): Promise<TData> {
       return new Promise((resolve, reject) => {
-        // Suppress TanStack Query's internal execute() Promise rejection.
         (
           observer.mutate(variables, {
             onSuccess: (data) => resolve(data),
@@ -110,48 +115,42 @@ export function createMutation<TData = unknown, TVariables = void, TContext = un
     },
   });
 
-  // React to option changes via observe()
-  subscriptions.push(
-    observe(() => {
-      const opts = options$.get();
-      if (!opts) return;
+  const isMounted$ = createIsMounted();
+  observe(() => {
+    const opts = opts$.get();
+    if (!opts || !isMounted$.get()) return;
 
-      observer.setOptions({
-        mutationKey: resolveMutationKey(opts.mutationKey),
-        mutationFn: opts.mutationFn,
-        onMutate: opts.onMutate,
-        onSuccess: opts.onSuccess,
-        onError: opts.onError,
-        onSettled: opts.onSettled,
-      });
-    })
-  );
+    observer.setOptions({
+      mutationKey: resolveMutationKey(opts.mutationKey),
+      mutationFn: opts.mutationFn,
+      onMutate: opts.onMutate,
+      onSuccess: opts.onSuccess,
+      onError: opts.onError,
+      onSettled: opts.onSettled,
+    });
+  });
 
-  // Subscribe immediately — updates state$ on every mutation result change.
-  subscriptions.push(
-    observer.subscribe((result) => {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      state$.assign({
-        data: result.data,
-        error: result.error ?? null,
-        status: result.status,
-        isIdle: result.isIdle,
-        isPending: result.isPending,
-        isPaused: result.isPaused,
-        isSuccess: result.isSuccess,
-        isError: result.isError,
-        failureCount: result.failureCount,
-        failureReason: result.failureReason ?? null,
-        submittedAt: result.submittedAt,
-        variables: result.variables,
-        context: result.context,
-      } as any);
-      /* eslint-enable @typescript-eslint/no-explicit-any */
-    })
-  );
+  const unsubscribe = observer.subscribe((result) => {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    state$.assign({
+      data: result.data,
+      error: result.error ?? null,
+      status: result.status,
+      isIdle: result.isIdle,
+      isPending: result.isPending,
+      isPaused: result.isPaused,
+      isSuccess: result.isSuccess,
+      isError: result.isError,
+      failureCount: result.failureCount,
+      failureReason: result.failureReason ?? null,
+      submittedAt: result.submittedAt,
+      variables: result.variables,
+      context: result.context,
+    } as any);
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  });
 
-  return {
-    state$,
-    dispose: () => subscriptions.forEach((unsub) => unsub()),
-  };
+  onUnmount(unsubscribe);
+
+  return state$;
 }

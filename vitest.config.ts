@@ -17,6 +17,7 @@ export default defineConfig({
       'packages/eslint/vitest.config.ts',
       'packages/integrations/vitest.config.ts',
       'packages/web/vitest.config.ts',
+      'packages/libraries/tanstack-query/vitest.config.ts',
     ],
 
     // Coverage configuration

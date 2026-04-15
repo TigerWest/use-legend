@@ -1,9 +1,7 @@
 "use client";
-import { useUnmount } from "@legendapp/state/react";
-import type { Observable } from "@legendapp/state";
-import { get, type DeepMaybeObservable, useMaybeObservable } from "@usels/core";
-import { useConstant } from "@usels/core/shared/useConstant";
+import { useScope, toObs, get, peek, type DeepMaybeObservable, Observable } from "@usels/core";
 import { useQueryClient } from "../useQueryClient";
+import { resolveQueryKey } from "../keyResolvers";
 import { createQuery, type CreateQueryOptions, type QueryState } from "./core";
 
 export type { CreateQueryOptions, QueryState } from "./core";
@@ -11,7 +9,6 @@ export { createQuery } from "./core";
 
 /**
  * UseQueryOptions is an alias for CreateQueryOptions for backward compatibility.
- * The hook accepts the same options as the core function.
  */
 export type UseQueryOptions<TData = unknown> = CreateQueryOptions<TData>;
 
@@ -25,78 +22,40 @@ export type UseQueryOptions<TData = unknown> = CreateQueryOptions<TData>;
  *
  * @example
  * ```tsx
- * // Plain values
  * const products$ = useQuery({
  *   queryKey: ['products'],
  *   queryFn: () => fetch('/api/products').then(r => r.json())
  * })
- *
- * // Observable element in queryKey array
- * const id$ = observable('1')
- * const user$ = useQuery({
- *   queryKey: ['users', id$],
- *   queryFn: () => fetchUser(id$.peek()),
- * })
- * // Automatically re-fetches when id$ changes.
- * // Cache is accessible via queryClient.getQueryData(['users', '1'])
- *
- * // Observable inside a nested object in queryKey
- * const filter$ = observable({ category: 'electronics' })
- * const list$ = useQuery({
- *   queryKey: ['products', { filter: filter$.category }],
- *   queryFn: () => fetchProducts(filter$.category.peek()),
- * })
- *
- * // Per-field Observable options
- * const enabled$ = observable(false)
- * const data$ = useQuery({
- *   queryKey: ['test'],
- *   queryFn: fetchData,
- *   enabled: enabled$,
- * })
  * ```
  */
-export function useQuery<TData = unknown>(
-  options: DeepMaybeObservable<CreateQueryOptions<TData>>
-): Observable<QueryState<TData>> {
+export type UseQuery = typeof createQuery;
+
+export const useQuery: UseQuery = <TData = unknown>(
+  options?: DeepMaybeObservable<CreateQueryOptions<TData>>
+): Observable<QueryState<TData>> => {
   const queryClient = useQueryClient();
 
-  // Normalize DeepMaybeObservable<CreateQueryOptions> into a stable computed Observable.
-  // - 'function' for queryFn: prevents Legend-State from treating it as a child observable
-  // - 'default' (omitted) for other fields: Observables are kept as-is in the result,
-  //   so that get(opts.enabled) inside observe() explicitly registers the dep
-  // - queryKey is NOT listed here: resolveQueryKey handles Observable elements directly
-  const opts$ = useMaybeObservable<CreateQueryOptions<TData>>(
-    options as DeepMaybeObservable<CreateQueryOptions<TData>>,
-    {
-      queryFn: "function",
-    }
-  );
-
-  const { state$, observer, dispose } = useConstant(() =>
-    createQuery<TData>(
-      queryClient,
-
-      opts$ as unknown as Observable<CreateQueryOptions<TData>>
-    )
-  );
-
-  useUnmount(dispose);
+  const state$ = useScope(
+    (opts) => {
+      // queryKey stays untagged so resolveQueryKey handles Observable elements directly.
+      const opts$ = toObs(opts, { queryFn: "function" }) as unknown as Observable<
+        CreateQueryOptions<TData>
+      >;
+      return createQuery<TData>(opts$);
+    },
+    (options ?? {}) as Record<string, unknown>
+  ) as Observable<QueryState<TData>>;
 
   // Suspense handling (React-specific) stays in the hook.
-  // Reads current result at render time without registering reactive deps.
-  const renderOpts = opts$.peek();
-  const result = observer.getCurrentResult();
-  const suspense = get(renderOpts?.suspense) ?? false;
+  const rawOpts = peek(options) as CreateQueryOptions<TData> | undefined;
+  const suspense = get(rawOpts?.suspense) ?? false;
 
-  if (suspense && result.isPending) {
-    throw (
-      observer
-        .fetchOptimistic(observer.options)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .then((optimisticResult: any) => optimisticResult.data)
-    );
+  if (suspense && (state$ as unknown as Observable<QueryState>).isPending.peek()) {
+    throw queryClient.fetchQuery({
+      queryKey: resolveQueryKey(rawOpts?.queryKey ?? []),
+      queryFn: rawOpts?.queryFn,
+    });
   }
 
   return state$;
-}
+};

@@ -6,7 +6,7 @@
  */
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useQuery } from "../useQuery";
 import { createWrapper } from "./test-utils";
 

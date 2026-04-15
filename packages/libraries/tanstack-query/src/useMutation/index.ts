@@ -1,9 +1,5 @@
 "use client";
-import { useUnmount } from "@legendapp/state/react";
-import type { Observable } from "@legendapp/state";
-import { type DeepMaybeObservable, useMaybeObservable } from "@usels/core";
-import { useConstant } from "@usels/core/shared/useConstant";
-import { useQueryClient } from "../useQueryClient";
+import { useScope, toObs, type DeepMaybeObservable, Observable } from "@usels/core";
 import { createMutation, type CreateMutationOptions, type MutationState } from "./core";
 
 export type { CreateMutationOptions, MutationState } from "./core";
@@ -21,67 +17,23 @@ export type UseMutationOptions<
 /**
  * Connects TanStack Query Mutation with Legend-State observables.
  * Uses MutationObserver to manage mutation state as observables.
- *
- * @example
- * ```tsx
- * import { QueryClient } from '@tanstack/react-query'
- * import { QueryClientProvider, useMutation } from '@usels/tanstack-query'
- *
- * // Create a QueryClient and provide it via Provider
- * const queryClient = new QueryClient()
- *
- * function App() {
- *   return (
- *     <QueryClientProvider client={queryClient}>
- *       <YourApp />
- *     </QueryClientProvider>
- *   )
- * }
- *
- * // Usage in a component
- * function YourComponent() {
- *   const createProduct$ = useMutation({
- *     mutationFn: (product: NewProduct) =>
- *       fetch('/api/products', {
- *         method: 'POST',
- *         body: JSON.stringify(product)
- *       }).then(r => r.json()),
- *     onSuccess: () => {
- *       alert('Product created!')
- *     }
- *   })
- *
- *   const handleSubmit = (product: NewProduct) => {
- *     createProduct$.mutate(product)
- *   }
- * }
- * ```
  */
-export function useMutation<TData = unknown, TVariables = void, TContext = unknown>(
-  options: DeepMaybeObservable<CreateMutationOptions<TData, TVariables, TContext>>
-): Observable<MutationState<TData, TVariables, TContext>> {
-  const queryClient = useQueryClient();
+export type UseMutation = typeof createMutation;
 
-  const opts$ = useMaybeObservable<CreateMutationOptions<TData, TVariables, TContext>>(
-    options as DeepMaybeObservable<CreateMutationOptions<TData, TVariables, TContext>>,
-    {
-      mutationFn: "function",
-      onMutate: "function",
-      onSuccess: "function",
-      onError: "function",
-      onSettled: "function",
-    }
-  );
-
-  const { state$, dispose } = useConstant(() =>
-    createMutation<TData, TVariables, TContext>(
-      queryClient,
-
-      opts$ as unknown as Observable<CreateMutationOptions<TData, TVariables, TContext>>
-    )
-  );
-
-  useUnmount(dispose);
-
-  return state$;
-}
+export const useMutation: UseMutation = <TData = unknown, TVariables = void, TContext = unknown>(
+  options?: DeepMaybeObservable<CreateMutationOptions<TData, TVariables, TContext>>
+): Observable<MutationState<TData, TVariables, TContext>> => {
+  return useScope(
+    (opts) => {
+      const opts$ = toObs(opts, {
+        mutationFn: "function",
+        onMutate: "function",
+        onSuccess: "function",
+        onError: "function",
+        onSettled: "function",
+      }) as unknown as Observable<CreateMutationOptions<TData, TVariables, TContext>>;
+      return createMutation<TData, TVariables, TContext>(opts$);
+    },
+    (options ?? {}) as Record<string, unknown>
+  ) as Observable<MutationState<TData, TVariables, TContext>>;
+};

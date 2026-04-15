@@ -1,0 +1,184 @@
+---
+title: useMutation
+category: Hooks
+type-declarations:
+  file: ./index.ts
+  comments: true
+---
+
+Bridges TanStack Query mutations with Legend-State. Returns mutation state as an `Observable`, so every status field (`isPending`, `isSuccess`, `isError`, etc.) is reactive. Options follow TanStack Query's standard `UseMutationOptions` — refer to [TanStack Query docs](https://tanstack.com/query/latest/docs/framework/react/reference/useMutation) for full option details.
+
+Both variants require a `QueryClientProvider` ancestor — the client is injected from context.
+
+## Demo
+
+## Usage
+
+### Basic mutation
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import { Show } from "@legendapp/state/react";
+    import { useMutation } from "@usels/tanstack-query";
+
+    function CreateUser() {
+      const mutation = useMutation({
+        mutationFn: (user: { name: string; email: string }) =>
+          fetch("/api/users", {
+            method: "POST",
+            body: JSON.stringify(user),
+          }).then((r) => r.json()),
+      });
+
+      return (
+        <div>
+          <button
+            onClick={() => mutation.mutate.get()({ name: "John", email: "john@test.com" })}
+            disabled={mutation.isPending.get()}
+          >
+            <Show if={mutation.isPending} else="Create User">
+              Creating...
+            </Show>
+          </button>
+          <Show if={mutation.isError}>
+            <p>Error: {mutation.error.get()?.message}</p>
+          </Show>
+          <Show if={mutation.isSuccess}>
+            <p>User created!</p>
+          </Show>
+        </div>
+      );
+    }
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { Show } from "@legendapp/state/react";
+    import { createMutation } from "@usels/tanstack-query";
+
+    function CreateUser() {
+      "use scope";
+      const state$ = createMutation({
+        mutationFn: (user: { name: string; email: string }) =>
+          fetch("/api/users", {
+            method: "POST",
+            body: JSON.stringify(user),
+          }).then((r) => r.json()),
+      });
+
+      return (
+        <div>
+          <button
+            onClick={() => state$.mutate.get()({ name: "John", email: "john@test.com" })}
+            disabled={state$.isPending.get()}
+          >
+            <Show if={state$.isPending} else="Create User">
+              Creating...
+            </Show>
+          </button>
+          <Show if={state$.isError}>
+            <p>Error: {state$.error.get()?.message}</p>
+          </Show>
+          <Show if={state$.isSuccess}>
+            <p>User created!</p>
+          </Show>
+        </div>
+      );
+    }
+    ```
+  </Fragment>
+</CodeTabs>
+
+### With callbacks
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useMutation, useQueryClient } from "@usels/tanstack-query";
+
+    function AddTodo() {
+      const queryClient = useQueryClient();
+      const mutation = useMutation({
+        mutationFn: (text: string) =>
+          fetch("/api/todos", {
+            method: "POST",
+            body: JSON.stringify({ text }),
+          }).then((r) => r.json()),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+      });
+      return <button onClick={() => mutation.mutate.get()("New todo")}>Add Todo</button>;
+    }
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createMutation, getQueryClient } from "@usels/tanstack-query";
+
+    function AddTodo() {
+      "use scope";
+      const queryClient = getQueryClient();
+      const state$ = createMutation({
+        mutationFn: (text: string) =>
+          fetch("/api/todos", {
+            method: "POST",
+            body: JSON.stringify({ text }),
+          }).then((r) => r.json()),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+      });
+      return <button onClick={() => state$.mutate.get()("New todo")}>Add Todo</button>;
+    }
+    ```
+  </Fragment>
+</CodeTabs>
+
+### Async mutation
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useMutation } from "@usels/tanstack-query";
+
+    function SubmitForm() {
+      const mutation = useMutation({
+        mutationFn: (data: FormData) =>
+          fetch("/api/submit", { method: "POST", body: data }).then((r) => r.json()),
+      });
+
+      const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const result = await mutation.mutateAsync.get()(new FormData(e.currentTarget));
+        console.log("Submitted:", result);
+      };
+
+      return <form onSubmit={handleSubmit}>...</form>;
+    }
+    ```
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createMutation } from "@usels/tanstack-query";
+
+    function SubmitForm() {
+      "use scope";
+      const state$ = createMutation({
+        mutationFn: (data: FormData) =>
+          fetch("/api/submit", { method: "POST", body: data }).then((r) => r.json()),
+      });
+
+      const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const result = await state$.mutateAsync.get()(new FormData(e.currentTarget));
+        console.log("Submitted:", result);
+      };
+
+      return <form onSubmit={handleSubmit}>...</form>;
+    }
+    ```
+  </Fragment>
+</CodeTabs>

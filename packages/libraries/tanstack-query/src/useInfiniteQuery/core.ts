@@ -1,12 +1,21 @@
-import { observable, observe, type Observable } from "@legendapp/state";
 import {
-  QueryClient,
   QueryKey,
   InfiniteQueryObserver,
   InfiniteData,
   QueryFunctionContext,
 } from "@tanstack/query-core";
-import { get, peek, type MaybeObservable, type Disposable } from "@usels/core";
+import {
+  get,
+  peek,
+  observe,
+  onUnmount,
+  createIsMounted,
+  observable,
+  type Observable,
+  type MaybeObservable,
+  type DeepMaybeObservable,
+} from "@usels/core";
+import { getQueryClient } from "../useQueryClient";
 import { resolveQueryKey } from "../keyResolvers";
 
 export interface CreateInfiniteQueryOptions<
@@ -88,38 +97,25 @@ export interface InfiniteQueryState<TData = unknown> {
 
 /**
  * Core observable function for bridging TanStack Query infinite queries with Legend-State.
- * Framework-agnostic — no React imports.
  *
- * Creates an InfiniteQueryObserver and subscribes immediately. Reacts to option
- * changes (including Observable elements in queryKey) via `observe()`.
+ * Must be called inside a scope wrapped by a `QueryClientProvider` —
+ * `getQueryClient()` injects the client from context.
  *
- * @param queryClient - The TanStack QueryClient instance.
- * @param options$ - Observable containing infinite query options.
- * @returns Disposable with `state$` Observable reflecting infinite query state,
- *   including fetchNextPage and fetchPreviousPage controls.
+ * @param options - Plain object, per-field Observable, or outer Observable of options.
+ * @returns Observable reflecting query state (incl. fetchNextPage/fetchPreviousPage/refetch).
  */
 export function createInfiniteQuery<
   TQueryFnData = unknown,
   TQueryKey extends QueryKey = QueryKey,
   TPageParam = unknown,
 >(
-  queryClient: QueryClient,
-  options$: Observable<CreateInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>>
-): Disposable & {
-  state$: Observable<InfiniteQueryState<InfiniteData<TQueryFnData>>>;
-  observer: InfiniteQueryObserver<
-    TQueryFnData,
-    Error,
-    InfiniteData<TQueryFnData>,
-    TQueryKey,
-    TPageParam
-  >;
-} {
+  options?: DeepMaybeObservable<CreateInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>>
+): Observable<InfiniteQueryState<InfiniteData<TQueryFnData>>> {
   type InfiniteOpts = CreateInfiniteQueryOptions<TQueryFnData, TQueryKey, TPageParam>;
-  const subscriptions: (() => void)[] = [];
+  const queryClient = getQueryClient();
+  const opts$ = observable(options) as Observable<InfiniteOpts>;
 
-  // Non-reactive snapshot for initial observer creation
-  const initialOpts = options$.peek() as InfiniteOpts | undefined;
+  const initialOpts = opts$.peek() as InfiniteOpts | undefined;
   const initialQueryKey = resolveQueryKey(initialOpts?.queryKey ?? []);
 
   const observer = new InfiniteQueryObserver<
@@ -189,35 +185,32 @@ export function createInfiniteQuery<
     },
   });
 
-  // React to option changes (including Observable elements inside queryKey).
-  subscriptions.push(
-    observe(() => {
-      const opts = options$.get() as InfiniteOpts | undefined;
-      if (!opts) return;
+  const isMounted$ = createIsMounted();
+  observe(() => {
+    const opts = opts$.get() as InfiniteOpts | undefined;
+    if (!opts || !isMounted$.get()) return;
 
-      const resolvedKey = resolveQueryKey(opts.queryKey ?? []);
+    const resolvedKey = resolveQueryKey(opts.queryKey ?? []);
 
-      observer.setOptions({
-        queryKey: resolvedKey as TQueryKey,
-        queryFn: opts.queryFn,
-        enabled: get(opts.enabled) ?? true,
-        staleTime: get(opts.staleTime),
-        gcTime: get(opts.gcTime),
-        retry: get(opts.retry as MaybeObservable<number | boolean>),
-        refetchOnWindowFocus: get(opts.refetchOnWindowFocus),
-        refetchOnMount: get(opts.refetchOnMount),
-        refetchOnReconnect: get(opts.refetchOnReconnect),
-        throwOnError: opts.throwOnError as never,
-        suspense: get(opts.suspense) ?? false,
-        initialPageParam: opts.initialPageParam,
-        getNextPageParam: opts.getNextPageParam,
-        getPreviousPageParam: opts.getPreviousPageParam,
-        maxPages: opts.maxPages,
-      });
-    })
-  );
+    observer.setOptions({
+      queryKey: resolvedKey as TQueryKey,
+      queryFn: opts.queryFn,
+      enabled: get(opts.enabled) ?? true,
+      staleTime: get(opts.staleTime),
+      gcTime: get(opts.gcTime),
+      retry: get(opts.retry as MaybeObservable<number | boolean>),
+      refetchOnWindowFocus: get(opts.refetchOnWindowFocus),
+      refetchOnMount: get(opts.refetchOnMount),
+      refetchOnReconnect: get(opts.refetchOnReconnect),
+      throwOnError: opts.throwOnError as never,
+      suspense: get(opts.suspense) ?? false,
+      initialPageParam: opts.initialPageParam,
+      getNextPageParam: opts.getNextPageParam,
+      getPreviousPageParam: opts.getPreviousPageParam,
+      maxPages: opts.maxPages,
+    });
+  });
 
-  // Subscribe immediately — updates state$ on every result change.
   const assignResult = (result: ReturnType<typeof observer.getCurrentResult>) => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     state$.assign({
@@ -256,11 +249,9 @@ export function createInfiniteQuery<
   };
 
   assignResult(observer.getCurrentResult());
-  subscriptions.push(observer.subscribe(assignResult));
+  const unsubscribe = observer.subscribe(assignResult);
 
-  return {
-    state$,
-    observer,
-    dispose: () => subscriptions.forEach((unsub) => unsub()),
-  };
+  onUnmount(unsubscribe);
+
+  return state$;
 }

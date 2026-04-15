@@ -163,7 +163,7 @@ importers:
         version: file:packages/core(react@19.2.5)
       '@usels/web':
         specifier: file:../../packages/web
-        version: file:packages/web(@usels/core@0.9.0)(react@19.2.5)
+        version: file:packages/web(@usels/core@0.10.0)(react@19.2.5)
       next:
         specifier: ^16.2.3
         version: 16.2.3(@babel/core@7.29.0)(react-dom@19.2.5)(react@19.2.5)
@@ -362,9 +362,6 @@ importers:
 
   packages/libraries/tanstack-query:
     dependencies:
-      '@legendapp/state':
-        specifier: 3.0.0-beta.44
-        version: 3.0.0-beta.44(react@19.2.5)
       '@tanstack/query-core':
         specifier: ^5.90.20
         version: 5.90.20
@@ -10376,7 +10373,7 @@ packages:
       - expo-sqlite
     dev: false
 
-  file:packages/web(@usels/core@0.9.0)(react@19.2.5):
+  file:packages/web(@usels/core@0.10.0)(react@19.2.5):
     resolution: {directory: packages/web, type: directory}
     id: file:packages/web
     name: '@usels/web'

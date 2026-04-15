@@ -36,30 +36,30 @@ function fetchItems(cursor: number): Promise<Page> {
 const queryClient = new QueryClient();
 
 function InfiniteQueryDemo() {
-  const query = useInfiniteQuery<Page, readonly unknown[], number>({
+  const query$ = useInfiniteQuery<Page, readonly unknown[], number>({
     queryKey: ["demo-items"],
     queryFn: ({ pageParam }: { pageParam: number }) => fetchItems(pageParam),
     initialPageParam: 0,
     getNextPageParam: (lastPage: Page) => lastPage.nextCursor,
   });
 
-  const pageCount$ = useObservable(() => query.data.get()?.pages.length ?? 0);
+  const pageCount$ = useObservable(() => query$.data.get()?.pages.length ?? 0);
   const totalItems$ = useObservable(() =>
-    (query.data.get()?.pages ?? []).reduce((sum, page) => sum + page.items.length, 0)
+    (query$.data.get()?.pages ?? []).reduce((sum, page) => sum + page.items.length, 0)
   );
   const allItems$ = useObservable(() =>
-    (query.data.get()?.pages ?? []).flatMap((page) => page.items)
+    (query$.data.get()?.pages ?? []).flatMap((page) => page.items)
   );
 
   const statusTone$ = useObservable(() =>
-    query.isSuccess.get()
+    query$.isSuccess.get()
       ? ("green" as const)
-      : query.isError.get()
+      : query$.isError.get()
         ? ("orange" as const)
         : ("accent" as const)
   );
   const statusLabel$ = useObservable(() =>
-    query.isLoading.get() ? "Loading" : query.isSuccess.get() ? "Success" : "Error"
+    query$.isLoading.get() ? "Loading" : query$.isSuccess.get() ? "Success" : "Error"
   );
 
   return (
@@ -73,14 +73,14 @@ function InfiniteQueryDemo() {
         <StatCard label="Items" value={totalItems$.get()} />
         <StatCard
           label="Has More"
-          value={query.hasNextPage.get() ? "Yes" : "No"}
-          tone={query.hasNextPage.get() ? "accent" : "neutral"}
+          value={query$.hasNextPage.get() ? "Yes" : "No"}
+          tone={query$.hasNextPage.get() ? "accent" : "neutral"}
         />
       </div>
 
-      <div className={demoClasses.valueRow}>
+      <div className={demoClasses.valueRow} style={{ justifyContent: "left" }}>
         <Show
-          if={query.isLoading}
+          if={query$.isLoading}
           else={<For each={allItems$}>{(item$) => <span>{item$.name.get()}</span>}</For>}
         >
           <span>Loading first page...</span>
@@ -89,15 +89,15 @@ function InfiniteQueryDemo() {
 
       <div className={demoClasses.actionRow}>
         <ActionButton
-          onClick={() => query.fetchNextPage()}
+          onClick={() => query$.fetchNextPage()}
           tone="accent"
           grow
-          disabled={!query.hasNextPage.get() || query.isFetchingNextPage.get()}
+          disabled={!query$.hasNextPage.get() || query$.isFetchingNextPage.get()}
         >
           <Show
-            if={query.isFetchingNextPage}
+            if={query$.isFetchingNextPage}
             else={
-              <Show if={query.hasNextPage} else="All loaded">
+              <Show if={query$.hasNextPage} else="All loaded">
                 Load More
               </Show>
             }

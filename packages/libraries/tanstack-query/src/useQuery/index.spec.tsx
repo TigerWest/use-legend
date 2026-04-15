@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { observable } from "@legendapp/state";
-import { useObserve } from "@legendapp/state/react";
+import { observable, useObserve } from "@usels/core";
 import { Suspense, type ReactNode } from "react";
 import { useQuery } from ".";
 import { createWrapper } from "../__tests__/test-utils";

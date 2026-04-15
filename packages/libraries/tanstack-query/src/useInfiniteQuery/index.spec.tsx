@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { observable } from "@legendapp/state";
+import { observable } from "@usels/core";
 import { useInfiniteQuery } from ".";
 import { createWrapper } from "../__tests__/test-utils";
 

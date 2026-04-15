@@ -30,7 +30,6 @@
     "reactive"
   ],
   "dependencies": {
-    "@legendapp/state": "3.0.0-beta.44",
     "@tanstack/query-core": "^5.90.20"
   },
   "peerDependencies": {

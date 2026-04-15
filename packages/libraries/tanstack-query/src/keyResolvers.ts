@@ -1,4 +1,4 @@
-import { isObservable, type Observable } from "@legendapp/state";
+import { isObservable, type Observable } from "@usels/core";
 import type { MutationKey, QueryKey } from "@tanstack/query-core";
 
 /**
