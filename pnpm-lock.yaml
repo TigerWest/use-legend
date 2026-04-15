@@ -160,10 +160,10 @@ importers:
         version: 3.0.0-beta.44(react@19.2.5)
       '@usels/core':
         specifier: file:../../packages/core
-        version: file:packages/core(react@19.2.5)
+        version: file:packages/core(@legendapp/state@3.0.0-beta.44)(react@19.2.5)
       '@usels/web':
         specifier: file:../../packages/web
-        version: file:packages/web(@usels/core@0.10.0)(react@19.2.5)
+        version: file:packages/web(@legendapp/state@3.0.0-beta.44)(@usels/core@0.10.0)(react@19.2.5)
       next:
         specifier: ^16.2.3
         version: 16.2.3(@babel/core@7.29.0)(react-dom@19.2.5)(react@19.2.5)
@@ -237,9 +237,6 @@ importers:
 
   packages/core:
     dependencies:
-      '@legendapp/state':
-        specifier: 3.0.0-beta.44
-        version: 3.0.0-beta.44(react@19.2.5)
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -250,6 +247,9 @@ importers:
         specifier: 19.2.5
         version: 19.2.5
     devDependencies:
+      '@legendapp/state':
+        specifier: 3.0.0-beta.44
+        version: 3.0.0-beta.44(react@19.2.5)
       '@testing-library/react':
         specifier: ^16.1.0
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3)(@types/react@19.2.14)(react-dom@19.2.5)(react@19.2.5)
@@ -487,9 +487,6 @@ importers:
 
   packages/web:
     dependencies:
-      '@legendapp/state':
-        specifier: 3.0.0-beta.44
-        version: 3.0.0-beta.44(react@19.2.5)
       es-toolkit:
         specifier: ^1.0.0
         version: 1.44.0
@@ -497,6 +494,9 @@ importers:
         specifier: 19.2.5
         version: 19.2.5
     devDependencies:
+      '@legendapp/state':
+        specifier: 3.0.0-beta.44
+        version: 3.0.0-beta.44(react@19.2.5)
       '@testing-library/react':
         specifier: ^16.1.0
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3)(@types/react@19.2.14)(react-dom@19.2.5)(react@19.2.5)
@@ -2210,7 +2210,6 @@ packages:
       use-sync-external-store: 1.6.0(react@19.2.5)
     transitivePeerDependencies:
       - react
-    dev: false
 
   /@mdx-js/mdx@3.1.1:
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
@@ -9688,7 +9687,6 @@ packages:
       react: 19.2.5
     dependencies:
       react: 19.2.5
-    dev: false
 
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -10355,11 +10353,12 @@ packages:
       '@babel/core': 7.29.0
     dev: true
 
-  file:packages/core(react@19.2.5):
+  file:packages/core(@legendapp/state@3.0.0-beta.44)(react@19.2.5):
     resolution: {directory: packages/core, type: directory}
     id: file:packages/core
     name: '@usels/core'
     peerDependencies:
+      '@legendapp/state': 3.0.0-beta.44
       react: 19.2.5
     peerDependenciesMeta:
       react:
@@ -10369,15 +10368,14 @@ packages:
       date-fns: 4.1.0
       es-toolkit: 1.44.0
       react: 19.2.5
-    transitivePeerDependencies:
-      - expo-sqlite
     dev: false
 
-  file:packages/web(@usels/core@0.10.0)(react@19.2.5):
+  file:packages/web(@legendapp/state@3.0.0-beta.44)(@usels/core@0.10.0)(react@19.2.5):
     resolution: {directory: packages/web, type: directory}
     id: file:packages/web
     name: '@usels/web'
     peerDependencies:
+      '@legendapp/state': 3.0.0-beta.44
       '@usels/core': ^0.9.0
       react: 19.2.5
     peerDependenciesMeta:
@@ -10385,9 +10383,7 @@ packages:
         optional: true
     dependencies:
       '@legendapp/state': 3.0.0-beta.44(react@19.2.5)
-      '@usels/core': file:packages/core(react@19.2.5)
+      '@usels/core': file:packages/core(@legendapp/state@3.0.0-beta.44)(react@19.2.5)
       es-toolkit: 1.44.0
       react: 19.2.5
-    transitivePeerDependencies:
-      - expo-sqlite
     dev: false
