@@ -208,5 +208,97 @@ ruleTester.run("no-hooks-in-scope", noHooksInScope, {
       options: [{ useScopeSources: ["custom-scope"] }],
       errors: [{ messageId: "hookInUseScope", data: { name: "useThing" } }],
     },
+    {
+      code: `
+        function ScopeComponent() {
+          "use scope";
+          const value = useMemo(() => 1, []);
+          return value;
+        }
+
+        function NormalComponent() {
+          const value = useMemo(() => 1, []);
+          return value;
+        }
+      `,
+      errors: [
+        {
+          messageId: "hookInScopeDirective",
+          data: { name: "useMemo" },
+          line: 4,
+          column: 25,
+        },
+      ],
+    },
+    {
+      code: `
+        import { useScope } from "@usels/core";
+
+        function NormalHook() {
+          const [count, setCount] = useState(0);
+          useEffect(() => {}, []);
+          return count;
+        }
+
+        function useScopedHook() {
+          return useScope(() => {
+            const [count] = useState(0);
+            useEffect(() => {}, []);
+            return { count };
+          });
+        }
+      `,
+      errors: [
+        {
+          messageId: "hookInUseScope",
+          data: { name: "useState" },
+          line: 12,
+          column: 29,
+        },
+        {
+          messageId: "hookInUseScope",
+          data: { name: "useEffect" },
+          line: 13,
+          column: 13,
+        },
+      ],
+    },
+    {
+      code: `
+        import { useScope } from "@usels/core";
+
+        function useScopedHook() {
+          return useScope(() => {
+            useThing();
+            return {};
+          });
+        }
+
+        function ScopeComponent() {
+          "use scope";
+          useOther();
+          return null;
+        }
+
+        function NormalComponent() {
+          useMemo(() => 1, []);
+          return null;
+        }
+      `,
+      errors: [
+        {
+          messageId: "hookInUseScope",
+          data: { name: "useThing" },
+          line: 6,
+          column: 13,
+        },
+        {
+          messageId: "hookInScopeDirective",
+          data: { name: "useOther" },
+          line: 13,
+          column: 11,
+        },
+      ],
+    },
   ],
 });

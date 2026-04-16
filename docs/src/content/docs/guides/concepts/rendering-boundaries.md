@@ -1,6 +1,6 @@
 ---
 title: Rendering Boundaries
-description: Use Memo, For, and the transform to keep observable reads fine-grained.
+description: Use Memo, Show, Computed, and For to keep observable reads fine-grained.
 ---
 
 Observable state only helps rendering if reads happen inside a reactive boundary.
@@ -28,11 +28,10 @@ With the Vite or Babel plugin, simple JSX reads are wrapped for you:
 The transform emits a `Memo` boundary for that read so the parent component does
 not become the default update unit.
 
-## Coarsen A Boundary Manually
+### Coarsen a Boundary Manually
 
-AutoWrap creates small boundaries for ordinary leaf reads. If a dense group of
-`.get()` reads would create too many tiny boundaries, wrap the group in a manual
-`Memo`:
+If a dense group of `.get()` reads would create too many tiny auto-wrapped
+boundaries, wrap the group in a manual `Memo`:
 
 ```tsx
 import { Memo } from "@usels/core";
@@ -45,17 +44,61 @@ import { Memo } from "@usels/core";
 ```
 
 A user-authored `Memo` is treated as an explicit render boundary. The transform
-does not insert additional auto-generated `Memo` boundaries inside it. With
-`wrapReactiveChildren` enabled, the transform may still normalize
-`<Memo>{value$.get()}</Memo>` to `<Memo>{() => value$.get()}</Memo>`, but the
-boundary remains the one you wrote.
+does not insert additional auto-generated `Memo` boundaries inside it.
 
 Use this only when the reads really belong to one UI update. For independent
 rows or fields, prefer `For` or ordinary leaf reads.
 
+## Show
+
+`Show` is a conditional rendering boundary. It only re-renders its children when
+the condition observable changes — the parent component stays untouched:
+
+```tsx
+import { Show } from "@usels/core";
+
+<Show if={isLoggedIn$}>
+  <Dashboard />
+</Show>;
+```
+
+Use `else` for the falsy branch:
+
+```tsx
+<Show if={isLoading$} else={<Content data$={data$} />}>
+  <p>Loading…</p>
+</Show>;
+```
+
+Prefer `Show` over inline conditionals like `{obs$.get() && <JSX>}` — the inline
+form re-renders the parent component on every change.
+
+## Computed
+
+`Computed` creates a reactive boundary around arbitrary JSX. It re-renders only
+itself when any observable read inside changes — the parent component is not
+affected:
+
+```tsx
+import { Computed } from "@usels/core";
+
+<Computed>
+  {() => (
+    <span>
+      {firstName$.get()} {lastName$.get()}
+    </span>
+  )}
+</Computed>;
+```
+
+`Computed` tracks any observable state change, not just derived values. With the
+transform enabled, most leaf reads are auto-wrapped — use `Computed` when you
+need an explicit reactive boundary around a block of JSX.
+
 ## For
 
-Use `For` for observable arrays:
+Use `For` for observable arrays. Each item gets its own boundary so individual
+rows update independently:
 
 ```tsx
 import { For } from "@usels/core";
@@ -63,25 +106,17 @@ import { For } from "@usels/core";
 <For each={items$}>{(item$) => <li>{item$.name.get()}</li>}</For>;
 ```
 
-Avoid mapping over a broad array snapshot when individual rows should update
-independently.
+Avoid `.get().map()` — it re-renders the entire list when any item changes.
 
-## What The Transform Handles
+## Choosing the Right Boundary
 
-Use the transform for ordinary leaf reads:
-
-```tsx
-<p>{profile$.name.get()}</p>
-<Button disabled={isSaving$.get()} />
-```
-
-Use `For` when the UI structure itself depends on an observable array:
-
-```tsx
-<For each={items$}>{(item$) => <Row item$={item$} />}</For>
-```
-
-The transform reduces boilerplate. `For` still documents intent and gives a better boundary for lists than an ad-hoc map.
+| Scenario | Boundary |
+|----------|----------|
+| Ordinary leaf reads in JSX | Auto-wrapped by the transform |
+| Group of related reads that update together | `Memo` (manual) |
+| Conditional rendering | `Show` |
+| Explicit reactive block of JSX | `Computed` |
+| Observable array iteration | `For` |
 
 ## Related
 

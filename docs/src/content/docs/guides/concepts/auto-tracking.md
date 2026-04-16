@@ -82,7 +82,7 @@ function Counter() {
 
 Use `count$.get()` inline in the JSX instead.
 
-**`.get().map()` re-renders the entire list.** Use `<For each={obs$}>` for observable arrays — each item gets its own leaf and independent reactivity.
+**`.get().map()` re-renders the entire list.** Use `<For each={obs$}>` for observable arrays — see [Rendering Boundaries → For](/use-legend/guides/concepts/rendering-boundaries/#for).
 
 **`.get()` outside JSX or outside a reactive context is a plain read.** If you need to react to changes as a side-effect, use `useObserve`. If you need a derived observable, use `useObservable(() => ...)`.
 
