@@ -70,15 +70,17 @@ if (!isLoaded$.get()) return <p>Loading...</p>;
 return <div>{data$.name.get()}</div>;
 ```
 
-Instead, keep everything inside a single return and use ternary expressions. The Babel plugin tracks each `.get()` call inline in JSX:
+Instead, keep everything inside a single return and wrap the ternary in a JSX fragment (`<>...</>`). The Babel plugin only tracks `.get()` calls that appear **inside JSX** — a bare return ternary is not JSX, so wrapping it in a fragment puts it inside the plugin's detection scope:
 
 ```tsx
-// ✅ Ternary — each .get() is a fine-grained leaf
-return error$.get()
-  ? <p>Error: {error$.get()?.message}</p>
-  : !isLoaded$.get()
-    ? <p>Loading...</p>
-    : <div>{data$.name.get()}</div>;
+// ✅ Ternary inside JSX — each .get() is a fine-grained leaf
+return <>
+  {error$.get()
+    ? <p>Error: {error$.get()?.message}</p>
+    : !isLoaded$.get()
+      ? <p>Loading...</p>
+      : <div>{data$.name.get()}</div>}
+</>;
 ```
 
 Or derive a view-state observable that captures the branching logic:
@@ -90,11 +92,13 @@ const view$ = useObservable(() => {
   return "ready" as const;
 });
 
-return view$.get() === "error"
-  ? <p>Error</p>
-  : view$.get() === "loading"
-    ? <p>Loading...</p>
-    : <div>{data$.name.get()}</div>;
+return <>
+  {view$.get() === "error"
+    ? <p>Error</p>
+    : view$.get() === "loading"
+      ? <p>Loading...</p>
+      : <div>{data$.name.get()}</div>}
+</>;
 ```
 
 ## Related

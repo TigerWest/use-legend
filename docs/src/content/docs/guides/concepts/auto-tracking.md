@@ -31,10 +31,12 @@ You keep the straightforward syntax; the plugin does the wrapping.
 
 ## What Gets Tracked
 
-- `.get()` inside a JSX expression — tracked.
+- `.get()` inside a JSX expression (`{count$.get()}`) — tracked.
+- `.get()` inside a ternary wrapped in JSX (`<>{flag$.get() ? <A /> : <B />}</>`) — tracked.
 - `.get()` passed as a prop value to a child component — tracked. The child's prop updates without re-rendering the parent.
 - `.get()` inside a `useObservable(() => ...)` computed — tracked (this is Legend-State's own tracking, not the plugin).
 - `.get()` passed as a function-call argument inside JSX — tracked at the call site.
+- `.get()` in a bare return ternary (`return flag$.get() ? ... : ...`) — **not tracked**. Wrap in a fragment.
 
 ## No Nested Memo Wrapping (Source Subset Rule)
 
@@ -69,6 +71,20 @@ If a child reads a **different** source that the parent does not track, the chil
 The rule is: **child sources ⊆ parent sources → child Memo is pruned**. This prevents redundant reactive boundaries without losing independent granularity when sources differ.
 
 ## Common Pitfalls
+
+**Bare return ternaries are not tracked.**
+
+The plugin only detects `.get()` calls that appear inside JSX. A ternary at the return statement level is plain JavaScript, not JSX — the plugin cannot wrap it:
+
+```tsx
+// ❌ Bare return — not inside JSX, plugin does not track
+return error$.get() ? <ErrorView /> : <MainView />;
+
+// ✅ Fragment wrapper — puts the ternary inside JSX
+return <>{error$.get() ? <ErrorView /> : <MainView />}</>;
+```
+
+Always wrap conditional returns in a fragment (`<>...</>`) so the `.get()` call lands inside the plugin's detection scope.
 
 **Storing `.get()` in a variable defeats tracking.**
 
