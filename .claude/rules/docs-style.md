@@ -324,7 +324,7 @@ The filename must match the hook name (e.g. `useQuery.tsx` for `useQuery`). When
 
 ### Demo Code Rules
 
-- Since the babel plugin (`@usels/vite-plugin-legend-memo`) is applied, do not use wrappers like `Computed` or `useSelector`.
+- Since the babel plugin (`@usels/vite-plugin`) is applied, do not use wrappers like `Computed` or `useSelector`.
 - When reading Observable values in JSX, call `variable$.get()` directly.
 
 ```tsx

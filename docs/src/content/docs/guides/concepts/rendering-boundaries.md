@@ -1,11 +1,13 @@
 ---
 title: Rendering Boundaries
-description: Use Memo, Show, For, and the transform to keep observable reads fine-grained.
+description: Use Memo, For, and the transform to keep observable reads fine-grained.
 ---
 
 Observable state only helps rendering if reads happen inside a reactive boundary.
 `use-legend` gives you explicit boundaries and a transform that can create common
 boundaries automatically.
+
+See [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/) for how JSX-positioned `.get()` reads become reactive leaves.
 
 ## Memo
 
@@ -49,21 +51,7 @@ does not insert additional auto-generated `Memo` boundaries inside it. With
 boundary remains the one you wrote.
 
 Use this only when the reads really belong to one UI update. For independent
-rows, branches, or fields, prefer `For`, `Show`, or ordinary leaf reads.
-
-## Show
-
-Use `Show` for observable conditionals:
-
-```tsx
-import { Show } from "@usels/core";
-
-<Show if={isLoading$} else={<Content />}>
-  <Spinner />
-</Show>;
-```
-
-This keeps the conditional branch as the update boundary.
+rows or fields, prefer `For` or ordinary leaf reads.
 
 ## For
 
@@ -87,15 +75,16 @@ Use the transform for ordinary leaf reads:
 <Button disabled={isSaving$.get()} />
 ```
 
-Use explicit components when the UI structure itself depends on an observable:
+Use `For` when the UI structure itself depends on an observable array:
 
 ```tsx
-<Show if={isOpen$}>
-  <Panel />
-</Show>
-
 <For each={items$}>{(item$) => <Row item$={item$} />}</For>
 ```
 
-The transform reduces boilerplate. `Show` and `For` still document intent and
-give better boundaries for conditions and lists.
+The transform reduces boilerplate. `For` still documents intent and gives a better boundary for lists than an ad-hoc map.
+
+## Related
+
+- [Observable-First Mental Model](/use-legend/guides/observable-first-mental-model/) — why leaf-bound reads avoid component-wide re-renders.
+- [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/) — how the transform wraps JSX reads.
+- [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) — applied patterns that feed reactive reads into rendering boundaries.

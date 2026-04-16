@@ -1158,7 +1158,7 @@ const resume = () => {
 
 ## Rule 8 — Computed Values in Components: Don't Store `.get()` in Plain Variables
 
-The project uses `@usels/vite-plugin-legend-memo` (babel plugin). This plugin **automatically wraps JSX expressions in reactive tracking**, so calling `.get()` inline in JSX is safe and reactive — no manual `<Memo>` wrapper needed.
+The project uses `@usels/vite-plugin` (babel plugin). This plugin **automatically wraps JSX expressions in reactive tracking**, so calling `.get()` inline in JSX is safe and reactive — no manual `<Memo>` wrapper needed.
 
 The real anti-pattern is storing `.get()` in a plain `const` and reusing that variable. The snapshot loses reactivity; changes to the Observable won't trigger re-renders.
 

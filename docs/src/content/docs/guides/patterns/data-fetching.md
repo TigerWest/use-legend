@@ -51,9 +51,15 @@ When `category$` changes, the query key changes and the query can refetch.
 | State | Place |
 | --- | --- |
 | Remote cache, loading, errors | `@usels/tanstack-query` |
-| Local input draft | Scope |
-| Shared app/domain state | Store |
+| Local input draft | `useObservable` |
+| Shared app/domain state | `createStore` |
 | Persisted client snapshot | Storage helpers |
 
 See the [TanStack Query API reference](/use-legend/tanstack-query/) for
 `useQuery`, `useMutation`, `useInfiniteQuery`, and `useQueryClient`.
+
+## Related
+
+- [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) — compose derived reads over query results.
+- [Persisted State](/use-legend/guides/patterns/persisted-state/) — keep a client-side snapshot alongside server state.
+- [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) — effect primitives for reacting to query-state changes.

@@ -1,6 +1,6 @@
 # @usels/vite-plugin-legend-memo
 
-A Vite plugin that applies [`@usels/babel-plugin-legend-memo`](../babel) during the transform phase. Automatically wraps Legend-State observable `.get()` calls in JSX with reactive `<Memo>` boundaries for fine-grained reactivity — without any boilerplate.
+A Vite plugin that applies [`@usels/babel-plugin`](../babel) during the transform phase. Automatically wraps Legend-State observable `.get()` calls in JSX with reactive `<Memo>` boundaries for fine-grained reactivity — without any boilerplate.
 
 ```tsx
 // You write this naturally
@@ -31,11 +31,11 @@ import { Memo } from "@usels/core";
 ## Installation
 
 ```bash
-npm install -D @usels/vite-plugin-legend-memo @usels/babel-plugin-legend-memo @babel/core
+npm install -D @usels/vite-plugin @usels/babel-plugin @babel/core
 # or
-pnpm add -D @usels/vite-plugin-legend-memo @usels/babel-plugin-legend-memo @babel/core
+pnpm add -D @usels/vite-plugin @usels/babel-plugin @babel/core
 # or
-yarn add -D @usels/vite-plugin-legend-memo @usels/babel-plugin-legend-memo @babel/core
+yarn add -D @usels/vite-plugin @usels/babel-plugin @babel/core
 ```
 
 ---
@@ -48,7 +48,7 @@ yarn add -D @usels/vite-plugin-legend-memo @usels/babel-plugin-legend-memo @babe
 // vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { autoWrap } from '@usels/vite-plugin-legend-memo';
+import { autoWrap } from '@usels/vite-plugin';
 
 export default defineConfig({
   plugins: [
@@ -64,7 +64,7 @@ export default defineConfig({
 // vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { autoWrap } from '@usels/vite-plugin-legend-memo';
+import { autoWrap } from '@usels/vite-plugin';
 
 export default defineConfig({
   plugins: [
@@ -91,7 +91,7 @@ export default defineConfig({
 ```typescript
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { autoWrap } from '@usels/vite-plugin-legend-memo';
+import { autoWrap } from '@usels/vite-plugin';
 
 export default defineConfig({
   plugins: [
@@ -132,7 +132,7 @@ If `react()` runs before `autoWrap()`, the JSX is already converted to function 
 
 ## Configuration
 
-All options from `@usels/babel-plugin-legend-memo` are supported:
+All options from `@usels/babel-plugin` are supported:
 
 ```typescript
 interface PluginOptions {
@@ -451,7 +451,7 @@ function OrderSummary() {
 
 ### `autoWrap(options?: PluginOptions): Plugin`
 
-Returns a Vite plugin that transforms `.jsx` and `.tsx` files using `@usels/babel-plugin-legend-memo`.
+Returns a Vite plugin that transforms `.jsx` and `.tsx` files using `@usels/babel-plugin`.
 
 **Parameters:**
 - `options` (optional) — Configuration object. See [Configuration](#configuration).
@@ -461,7 +461,7 @@ Returns a Vite plugin that transforms `.jsx` and `.tsx` files using `@usels/babe
 **Example:**
 
 ```typescript
-import { autoWrap } from '@usels/vite-plugin-legend-memo';
+import { autoWrap } from '@usels/vite-plugin';
 
 const plugin = autoWrap({
   componentName: 'Memo',
@@ -473,7 +473,7 @@ const plugin = autoWrap({
 ### Type exports
 
 ```typescript
-import type { PluginOptions } from '@usels/vite-plugin-legend-memo';
+import type { PluginOptions } from '@usels/vite-plugin';
 
 const options: PluginOptions = {
   allGet: false,
@@ -549,12 +549,12 @@ const Component = observer(() => {
 |---------|-----------------|
 | `vite` | `>=4.0.0` |
 | `@babel/core` | `>=7.0.0` |
-| `@usels/babel-plugin-legend-memo` | `workspace:*` |
+| `@usels/babel-plugin` | `workspace:*` |
 
 ---
 
 ## See Also
 
-- [@usels/babel-plugin-legend-memo](../babel) — The underlying Babel plugin and its full documentation
+- [@usels/babel-plugin](../babel) — The underlying Babel plugin and its full documentation
 - [Legend-State Documentation](https://legendapp.com/dev/state/v3/)
 - [Vite Plugin API](https://vitejs.dev/guide/api-plugin.html)

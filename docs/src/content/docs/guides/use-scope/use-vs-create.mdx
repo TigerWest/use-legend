@@ -3,6 +3,12 @@ title: use* vs create*
 description: Choose React hook wrappers for component bodies and create* primitives for scopes, stores, and reusable observable factories.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note" title="Preview feature">
+This page documents `"use scope"`, an experimental API. Feedback welcome — the API may still evolve. Hook-based APIs are the stable recommendation for production code.
+</Aside>
+
 Most utilities come in two forms:
 
 | Form | Where to use it |
@@ -67,6 +73,29 @@ function ResizablePanel() {
 
 In a regular hook body, use `useRef$` and `useElementSize` instead.
 
+## Why `create*` Fits Scope
+
+Inside a scope, `create*` reads naturally because the scope already owns lifecycle. The primitive does not need hook rules — setup happens once per scope, cleanup happens when the scope tears down:
+
+```tsx
+import { createDebounced, observable, observe } from "@usels/core";
+
+function SearchBox({ onSearch }: { onSearch: (query: string) => void }) {
+  "use scope";
+
+  const draft$ = observable("");
+  const query$ = createDebounced(draft$, { ms: 150 });
+
+  observe(() => {
+    onSearch(query$.get());
+  });
+
+  return <input value={draft$.get()} onChange={(event) => draft$.set(event.currentTarget.value)} />;
+}
+```
+
+Same component written with `use*` would need to be inside a component body with hook-rule constraints. Inside scope, `create*` keeps the factory side-effect-free from React's perspective.
+
 ## Rule Of Thumb
 
 If React is the lifecycle boundary, use `use*`.
@@ -74,3 +103,9 @@ If a use-legend scope or store is the lifecycle boundary, use `create*`.
 
 `createStore()` is a store definition API, so it is the exception you define at
 module scope.
+
+## Related
+
+- [Scope & Lifecycle](/use-legend/guides/use-scope/scope-and-lifecycle/) — the lifecycle model that makes `create*` safe without hook rules.
+- [Effects API](/use-legend/guides/use-scope/effects-api/) — the scope-level effect primitives paired with `create*`.
+- [TypeScript](/use-legend/guides/patterns/typescript/) — how `create*` and `use*` types relate in team-scale code.

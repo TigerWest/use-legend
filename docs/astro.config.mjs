@@ -120,25 +120,23 @@ export default defineConfig({
         {
           label: "Guides",
           items: [
-            { label: "Introduction", slug: "guides" },
-            { label: "Getting Started", slug: "guides/getting-started" },
             {
-              label: "Concepts",
+              label: "Learn",
               items: [
+                { label: "Introduction", slug: "guides" },
+                { label: "Getting Started", slug: "guides/getting-started" },
                 {
                   label: "Observable-First Mental Model",
-                  slug: "guides/concepts/observable-first-mental-model",
+                  slug: "guides/observable-first-mental-model",
                 },
-                { label: "Scope & Lifecycle", slug: "guides/concepts/scope-and-lifecycle" },
-                {
-                  label: "Store & Provider Boundary",
-                  slug: "guides/concepts/store-and-provider-boundary",
-                },
-                {
-                  label: "Rendering Boundaries",
-                  slug: "guides/concepts/rendering-boundaries",
-                },
-                { label: "use* vs create*", slug: "guides/concepts/use-vs-create" },
+              ],
+            },
+            {
+              label: "Concepts",
+              collapsed: true,
+              items: [
+                { label: "Rendering Boundaries", slug: "guides/concepts/rendering-boundaries" },
+                { label: "Auto-Tracking & .get()", slug: "guides/concepts/auto-tracking" },
                 {
                   label: "Reactive Refs & Web Targets",
                   slug: "guides/concepts/reactive-refs-and-web-targets",
@@ -159,6 +157,8 @@ export default defineConfig({
                 },
                 { label: "Persisted State", slug: "guides/patterns/persisted-state" },
                 { label: "Data Fetching", slug: "guides/patterns/data-fetching" },
+                { label: "Utility Hooks", slug: "guides/patterns/utility-hooks" },
+                { label: "TypeScript", slug: "guides/patterns/typescript" },
               ],
             },
             {
@@ -168,6 +168,21 @@ export default defineConfig({
                 { label: "Vite", slug: "guides/tooling/vite" },
                 { label: "Babel / Next.js", slug: "guides/tooling/babel-nextjs" },
                 { label: "ESLint", slug: "guides/tooling/eslint" },
+              ],
+            },
+            {
+              label: "Use Scope",
+              badge: { text: "Experimental", variant: "caution" },
+              collapsed: true,
+              items: [
+                { label: "Introduction", slug: "guides/use-scope" },
+                { label: "Scope & Lifecycle", slug: "guides/use-scope/scope-and-lifecycle" },
+                {
+                  label: "Store & Provider Boundary",
+                  slug: "guides/use-scope/store-and-provider-boundary",
+                },
+                { label: "Effects API", slug: "guides/use-scope/effects-api" },
+                { label: "use* vs create*", slug: "guides/use-scope/use-vs-create" },
               ],
             },
           ],

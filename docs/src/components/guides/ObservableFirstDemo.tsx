@@ -17,7 +17,7 @@ function StateDrivenCard() {
 
   useIntervalFn(() => {
     setCount((v) => v + 1);
-  }, 24);
+  }, 500);
 
   return (
     <div className={`${CARD_BASE_CLASS} border-orange-300`}>
@@ -36,7 +36,7 @@ function ObservableDrivenCard() {
 
   useIntervalFn(() => {
     count$.set((v) => v + 1);
-  }, 24);
+  }, 500);
 
   return (
     <div className={`${CARD_BASE_CLASS} border-green-300`}>

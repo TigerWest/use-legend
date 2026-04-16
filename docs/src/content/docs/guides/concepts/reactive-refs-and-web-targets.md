@@ -1,6 +1,6 @@
 ---
 title: Reactive Refs & Web Targets
-description: Use useRef$ and createRef$ when DOM targets can mount, unmount, or be replaced.
+description: Use useRef$ when DOM targets can mount, unmount, or be replaced.
 ---
 
 Web utilities often need a DOM target. A plain `useRef()` gives you a mutable
@@ -31,28 +31,6 @@ function Panel() {
 If `el$` changes, `useElementSize` and `useEventListener` can react to the new
 target.
 
-## createRef$
-
-Inside a scope, use `createRef$`:
-
-```tsx
-import { createRef$ } from "@usels/core";
-import { createElementSize, createEventListener } from "@usels/web";
-
-function Panel() {
-  "use scope";
-
-  const el$ = createRef$<HTMLDivElement>();
-  const { width$, height$ } = createElementSize(el$);
-
-  createEventListener(el$, "click", () => {
-    console.log("clicked");
-  });
-
-  return <div ref={el$}>{width$.get()} x {height$.get()}</div>;
-}
-```
-
 ## When Plain Refs Are Not Enough
 
 Avoid passing a plain element reference when the target can change:
@@ -66,10 +44,8 @@ useElementSize(ref.current);
 The hook receives the current value once. It cannot subscribe to future element
 changes. Use `Ref$` for element-based hooks and primitives.
 
-## Next
+## Related
 
-Use the Web API reference when you know the target type:
-
-- [useElementSize](/use-legend/web/useElementSize/)
-- [useEventListener](/use-legend/web/useEventListener/)
-- [useMouse](/use-legend/web/useMouse/)
+- [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/) — how reactive reads surface in JSX.
+- [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/) — the Babel plugin behavior referenced above.
+- [Tooling: Vite](/use-legend/guides/tooling/vite/) — enable the babel/vite plugin.

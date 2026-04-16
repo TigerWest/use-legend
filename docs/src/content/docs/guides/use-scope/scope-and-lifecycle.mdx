@@ -3,6 +3,12 @@ title: Scope & Lifecycle
 description: Use "use scope" or useScope to create local observable state with automatic cleanup.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note" title="Preview feature">
+This page documents `"use scope"`, an experimental API. Feedback welcome — the API may still evolve. Hook-based APIs are the stable recommendation for production code.
+</Aside>
+
 A scope is a lifecycle boundary for observable state, effects, and cleanup.
 Use it when state belongs to one component or one custom hook.
 
@@ -110,37 +116,17 @@ Plain `p.theme` reads always give the latest value without tracking. Use
 
 ## Scope-Aware APIs
 
-Inside a scope, use the scope-aware lifecycle and effect APIs from `@usels/core`:
+Inside a scope, use the scope-aware lifecycle APIs from `@usels/core`:
 
 | Need | API |
 | --- | --- |
 | DOM measurement before paint | `onBeforeMount()` |
 | Work after mount | `onMount()` |
 | Cleanup on unmount | `onUnmount()` |
-| Reactive side effect | `observe()` |
 | Reactive props | `toObs()` |
 
-## Why create* Fits Scope
+For reactive side effects inside a scope, see [Effects API](/use-legend/guides/use-scope/effects-api/) — the canonical reference for `observe()`, `watch()`, and `whenever()`.
 
-Most utility APIs have a `use*` hook wrapper and a `create*` primitive. Inside a
-scope, `create*` reads naturally because the scope already owns lifecycle:
+## Picking `use*` vs `create*` Inside Scope
 
-```tsx
-import { createDebounced, observable, observe } from "@usels/core";
-
-function SearchBox({ onSearch }: { onSearch: (query: string) => void }) {
-  "use scope";
-
-  const draft$ = observable("");
-  const query$ = createDebounced(draft$, { ms: 150 });
-
-  observe(() => {
-    onSearch(query$.get());
-  });
-
-  return <input value={draft$.get()} onChange={(event) => draft$.set(event.currentTarget.value)} />;
-}
-```
-
-See [use* vs create*](/use-legend/guides/concepts/use-vs-create/) for the
-selection rule.
+Inside a scope, prefer `create*` primitives over `use*` hook wrappers — the scope already owns lifecycle, so the hook rules do not apply. See [use* vs create*](/use-legend/guides/use-scope/use-vs-create/) for the full selection rule and examples.

@@ -6,37 +6,56 @@ sidebar:
 
 import ObservableFirstDemoEmbed from "../../../components/guides/ObservableFirstDemoEmbed.astro"
 
-Use Legend-State as the first state model in app code.
+`use-legend` is an observable-first React utility layer built on Legend-State. State lives in observables, React renders the tree, and fine-grained boundaries update only the UI reads that changed.
 
-`use-legend` is an observable-first React utility layer built on Legend-State:
-state lives in observables, React renders the tree, and fine-grained boundaries
-update only the UI reads that changed.
+## At a Glance
 
-## Observable-First Rules
+```tsx
+import { useRef } from "react";
+import { useObservable } from "@legendapp/state/react";
 
-- No `useState`
-- No `useReducer`
-- No component-wide re-rendering as the default update path
+function Counter() {
+  const count$ = useObservable(0);
+  const renders = useRef(0);
+  renders.current += 1;
 
-Instead, keep mutable values in observables and update only the UI nodes that depend on those values.
-Hooks are still useful, but mainly for composing side effects, timers, sensors, and reusable logic around observables.
+  return (
+    <div>
+      <button onClick={() => count$.set((c) => c + 1)}>
+        Clicked {count$.get()} times
+      </button>
+      <p>renderCount: {renders.current}</p>
+    </div>
+  );
+}
+```
 
-## Why hooks + observables work well together
+Clicking the button increments `count$` and updates the text inside the button. But `renderCount` stays at `1` forever — the component function does not re-run. Only the JSX leaves that read `count$.get()` are updated. That is fine-grained reactivity in practice.
 
-When an interval updates a regular React state value, the whole component re-renders.
-When the interval updates an observable, only the bound text node updates and the parent component render count stays stable.
+## Three Rules
 
-## Demo
+- **No `useState`** — keep mutable values in observables.
+- **No `useReducer`** — use observable setters or scoped functions.
+- **No component-wide re-rendering as the default update path** — bind reads at the leaf.
+
+Hooks are still useful — for composing side effects, timers, sensors, and reusable logic around observables.
+
+## See It Live
 
 <ObservableFirstDemoEmbed />
 
 Use this pattern for high-frequency updates (timers, polling, streaming, sensors) to keep React work minimal while keeping logic composable with hooks.
 
-## Read Next
+## What You'll Build
 
-- [Getting Started](/use-legend/guides/getting-started/) for installation and a
-  first local scope/store example.
-- [Observable-First Mental Model](/use-legend/guides/concepts/observable-first-mental-model/)
-  for the core reactivity model.
-- [Scope & Lifecycle](/use-legend/guides/concepts/scope-and-lifecycle/) for
-  local state and cleanup.
+After the Learn path you can:
+
+- Build local interactive UI without `useState`.
+- Share state across components with zero wasted re-renders.
+- Co-locate effects, timers, and cleanup with scope lifecycle.
+
+## Start Here
+
+- **[Getting Started →](/use-legend/guides/getting-started/)** — install and first examples.
+- [Observable-First Mental Model](/use-legend/guides/observable-first-mental-model/) — the reactivity model.
+- [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/) — how `.get()` in JSX becomes a fine-grained reactive leaf.

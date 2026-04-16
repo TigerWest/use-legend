@@ -1,0 +1,114 @@
+---
+title: Introduction
+description: The "use scope" directive — an experimental API for lifecycle-owned reactive code.
+sidebar:
+  order: 0
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note" title="Preview feature">
+Feedback welcome — the API may still evolve. Hook-based APIs are the stable recommendation for production code.
+</Aside>
+
+## The Problem
+
+In observable/signal-based frameworks like SolidJS, Svelte, and Vue (setup), the component function body runs **only once** at mount time. When state changes, the framework does not re-execute the entire function — its reactive system propagates only the changes.
+
+React works differently. Every state change **re-executes the entire function body**. This creates a fundamental friction when writing observable-based code:
+
+```tsx
+function Counter() {
+  // ❌ Every re-render creates a brand-new observable instance
+  // → All subscriptions to the previous instance are lost
+  const count$ = observable(0);
+
+  // ❌ A new observe() is set up every render — previous ones are never cleaned up
+  observe(() => {
+    document.title = `Count: ${count$.get()}`;
+  });
+
+  return <button onClick={() => count$.set(c => c + 1)}>{count$.get()}</button>;
+}
+```
+
+Because the `observable()` reference itself is recreated on every re-render, subscriptions are silently destroyed — the intent is to propagate internal value changes, but the reference keeps being replaced. To work around this, React requires hook wrappers like `useObservable()` that preserve the same observable reference across re-renders.
+
+This gap also causes a **code split between store and local state**:
+
+```tsx
+// global store — use observable() directly
+const store = createStore(() => {
+  const count$ = observable(0);        // ✅ runs once
+  return { count$ };
+});
+
+// local component — must wrap with useObservable()
+function Counter() {
+  const count$ = useObservable(0);     // hook wrapper required
+  return <button>{count$.get()}</button>;
+}
+```
+
+Store setup runs once, so `observable()` works directly. But inside a component, you must use `useObservable()`. Same library, same state model — different APIs depending on context.
+
+## What `"use scope"` Solves
+
+`"use scope"` turns a component function body into a **scope factory that runs only once** — just like the setup phase in SolidJS or Svelte. Inside the scope, you can call `observable()`, `observe()`, `onMount()`, and other primitives directly, without hook wrappers.
+
+```tsx
+import { observable, observe, onMount, onUnmount } from "@usels/core";
+
+function Counter() {
+  "use scope";
+
+  // ✅ Runs once — the same reference is preserved across re-renders
+  const count$ = observable(0);
+
+  observe(() => {
+    document.title = `Count: ${count$.get()}`;
+  });
+
+  onMount(() => console.log("mounted"));
+  onUnmount(() => console.log("unmounted"));
+
+  return <button onClick={() => count$.set(c => c + 1)}>{count$.get()}</button>;
+}
+```
+
+Store and local component can now use **the same code**:
+
+```tsx
+// global store — observable() directly
+const store = createStore(() => {
+  const count$ = observable(0);
+  return { count$ };
+});
+
+// local component — same observable() with "use scope"
+function Counter() {
+  "use scope";
+  const count$ = observable(0);        // identical to the store code
+  return <button>{count$.get()}</button>;
+}
+```
+
+## When Scope Shines
+
+- Writing observable/signal-based code in a **run-once environment** inside React.
+- Using the **same API** in both store setup and local components.
+- Complex lifecycle coordination inside a single component or store setup.
+- Code paths that would otherwise be fragile under hook-ordering rules (conditional setup, loop-driven subscriptions).
+
+## Tradeoffs
+
+- Experimental — the API is subject to change.
+- Team-level convention required. Scope code should not interleave with React hooks inside the same function.
+- Learning curve for debugging scope disposal.
+
+## What's Here
+
+- [Scope & Lifecycle](/use-legend/guides/use-scope/scope-and-lifecycle/)
+- [Store & Provider Boundary](/use-legend/guides/use-scope/store-and-provider-boundary/)
+- [Effects API](/use-legend/guides/use-scope/effects-api/)
+- [use* vs create*](/use-legend/guides/use-scope/use-vs-create/)

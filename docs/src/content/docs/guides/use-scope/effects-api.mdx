@@ -1,0 +1,147 @@
+---
+title: Effects API
+description: Canonical reference for observe, watch, and whenever — the three scope-level effect primitives.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note" title="Preview feature">
+This page documents `"use scope"`, an experimental API. Feedback welcome — the API may still evolve. Hook-based APIs are the stable recommendation for production code.
+</Aside>
+
+Effects in a scope subscribe to observable reads and run work when those reads change. Three primitives cover the common cases.
+
+All three register against the current scope and are automatically disposed when the scope tears down. Use them inside `"use scope"` blocks, `useScope` factories, or store setup functions.
+
+## `observe()`
+
+Run a callback whenever any observable read inside it changes. Tracks reads on every run.
+
+**Signature:**
+
+```ts
+function observe(callback: () => void): () => void;
+```
+
+Returns a dispose function. Inside a scope the dispose is auto-registered — you do not need to capture the return value.
+
+**Example:**
+
+```tsx
+import { observable, observe } from "@usels/core";
+
+function Counter() {
+  "use scope";
+
+  const count$ = observable(0);
+
+  observe(() => {
+    document.title = `Count: ${count$.get()}`;
+  });
+
+  return <button onClick={() => count$.set((c) => c + 1)}>{count$.get()}</button>;
+}
+```
+
+The callback runs immediately, then re-runs whenever `count$` (or any other observable read inside it) changes.
+
+## `watch()`
+
+Subscribe to a selector and react to its changes. By default, does **not** fire on the initial value — only on subsequent changes (`immediate: false`).
+
+**Signature:**
+
+```ts
+function watch<T extends WatchSource>(
+  selector: T,
+  effect: Effector<T>,
+  options?: WatchOptions,
+): Disposable;
+
+interface WatchOptions {
+  /** Fire effect on mount when `true`. @default false */
+  immediate?: boolean;
+  /** `'sync'` fires synchronously inside a batch; `'deferred'` waits until the batch ends. */
+  schedule?: "sync" | "deferred";
+}
+```
+
+`WatchSource` accepts an `Observable<T>`, a `() => T` selector function, or a tuple of either (for multi-source watching).
+
+**Example:**
+
+```tsx
+import { observable, watch } from "@usels/core";
+
+function SearchSync() {
+  "use scope";
+
+  const query$ = observable("");
+
+  watch(query$, (query) => {
+    console.log("query changed:", query);
+  });
+
+  return <input value={query$.get()} onChange={(event) => query$.set(event.currentTarget.value)} />;
+}
+```
+
+Use when you care about a specific source (or composition of sources) and want to skip the initial value by default.
+
+## `whenever()`
+
+Subscribe to a selector and run the effect every time the value transitions to truthy. With `{ once: true }` it disposes after the first truthy fire.
+
+**Signature:**
+
+```ts
+function whenever<T>(
+  selector: Selector<T>,
+  effect: (value: Truthy<T>) => void,
+  options?: WheneverOptions,
+): Disposable;
+
+interface WheneverOptions extends WatchOptions {
+  /** Dispose after the first truthy invocation. @default false */
+  once?: boolean;
+}
+```
+
+`Selector<T>` is an `Observable<T>` or a `() => T` function. `Truthy<T>` strips `false | 0 | "" | null | undefined` from `T`.
+
+**Example:**
+
+```tsx
+import { observable, whenever } from "@usels/core";
+
+function ReadyBanner() {
+  "use scope";
+
+  const ready$ = observable(false);
+
+  whenever(ready$, () => {
+    console.log("ready!");
+  });
+
+  return <button onClick={() => ready$.set(true)}>Ready</button>;
+}
+```
+
+Each transition from falsy → truthy fires the effect. Pass `{ once: true }` if you want the subscription to self-dispose after the first fire.
+
+## Choosing Between Them
+
+| Need | API |
+| --- | --- |
+| React to any observable read inside the effect body (fires on mount) | `observe()` |
+| React to a specific source (or tuple), skip the first value by default | `watch()` |
+| Fire only when a value becomes truthy (optionally one-shot via `once`) | `whenever()` |
+
+## Hook Wrappers
+
+Outside a scope (in a regular component body), use the hook wrappers: `useObserve()`, `useWatch()`, `useWhenever()`. They follow the same signatures but integrate with React's hook lifecycle. See [use* vs create*](/use-legend/guides/use-scope/use-vs-create/) for when to pick which.
+
+## Related
+
+- [Scope & Lifecycle](/use-legend/guides/use-scope/scope-and-lifecycle/) — how scopes own effect disposal.
+- [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) — applied patterns using these primitives (debounced effects, conditional runs, external sync).

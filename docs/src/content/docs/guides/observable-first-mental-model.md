@@ -18,12 +18,16 @@ component that owns it.
 With an observable, the changing value lives outside the render cycle:
 
 ```tsx
-import { observable } from "@usels/core";
+import { useObservable } from "@legendapp/state/react";
 
-const count$ = observable(0);
+function Counter() {
+  const count$ = useObservable(0);
 
-count$.get(); // read
-count$.set((count) => count + 1); // write
+  count$.get(); // read
+  count$.set((count) => count + 1); // write
+
+  return <span>{count$.get()}</span>;
+}
 ```
 
 Use `$` for observable variables. The suffix makes reactive values visible in
@@ -31,11 +35,15 @@ regular TypeScript code and lets the ESLint plugin catch common mistakes.
 
 ## Derived Observables
 
-Derived values are observables too:
+Derived values are observables too. Pass a compute function to `useObservable`:
 
 ```tsx
-const count$ = observable(0);
-const double$ = observable(() => count$.get() * 2);
+function Doubler() {
+  const count$ = useObservable(0);
+  const double$ = useObservable(() => count$.get() * 2);
+
+  return <span>{double$.get()}</span>;
+}
 ```
 
 `double$` tracks the `count$` read inside the function. When `count$` changes,
@@ -62,9 +70,9 @@ outside a reactive boundary.
 
 ## Next
 
-- Use [Scope & Lifecycle](/use-legend/guides/concepts/scope-and-lifecycle/) for
-  component-local observable state.
-- Use [Store & Provider Boundary](/use-legend/guides/concepts/store-and-provider-boundary/)
-  when state becomes shared app or domain state.
-- Use [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/)
-  to understand `Memo`, `Show`, `For`, and the transform.
+- Read [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/)
+  to understand how the Babel plugin turns `.get()` into a fine-grained leaf.
+- Read [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/)
+  to understand `Memo`, `For`, and the transform.
+- See [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) for the
+  observable-first hook catalog.

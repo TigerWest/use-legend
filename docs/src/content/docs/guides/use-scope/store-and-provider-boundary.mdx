@@ -3,6 +3,12 @@ title: Store & Provider Boundary
 description: Use createStore and StoreProvider when observable state belongs to an app, route, feature, or domain.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note" title="Preview feature">
+This page documents `"use scope"`, an experimental API. Feedback welcome — the API may still evolve. Hook-based APIs are the stable recommendation for production code.
+</Aside>
+
 Use a scope for local state. Use a store when state should be shared through a
 React subtree or owned by a domain.
 
@@ -45,23 +51,6 @@ function CartButton() {
   return <button onClick={() => addItem("keyboard")}>Cart {count$.get()}</button>;
 }
 ```
-
-## When To Promote Local State
-
-Keep state local while it is a component concern:
-
-- input draft text
-- drag position
-- transient hover or focus state
-- sensor values used by one widget
-
-Promote it to a store when it becomes shared or domain-owned:
-
-- cart contents
-- current account
-- route or feature filters
-- application settings
-- state used by multiple components without prop drilling
 
 ## Provider Boundary
 

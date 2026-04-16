@@ -1,6 +1,6 @@
 ---
 title: Local Draft, Global Commit
-description: Keep fast-changing draft state in a scope and commit stable domain state to a store.
+description: Keep fast-changing draft state local and commit stable domain state to a store.
 ---
 
 Fast UI state should usually stay local. Shared domain state should usually live
@@ -12,16 +12,15 @@ debounced value to a shared store.
 ## Pattern
 
 ```tsx
-import { createDebounced, observable, observe } from "@usels/core";
+import { useDebounced } from "@usels/core";
+import { useObservable, useObserve } from "@legendapp/state/react";
 
 function ProductSearch() {
-  "use scope";
+  const { setQuery } = useProductStore();
+  const draft$ = useObservable("");
+  const query$ = useDebounced(draft$, { ms: 150 });
 
-  const { setQuery } = getProductStore();
-  const draft$ = observable("");
-  const query$ = createDebounced(draft$, { ms: 150 });
-
-  observe(() => {
+  useObserve(() => {
     setQuery(query$.get());
   });
 
@@ -51,6 +50,8 @@ function ProductSearch() {
 - data shared across siblings
 - values used outside the component that produced them
 
-Use [Store & Provider Boundary](/use-legend/guides/concepts/store-and-provider-boundary/)
-for the store model and [Scope & Lifecycle](/use-legend/guides/concepts/scope-and-lifecycle/)
-for scope cleanup.
+## Related
+
+- [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) — when to derive vs. when to commit with an effect.
+- [Persisted State](/use-legend/guides/patterns/persisted-state/) — persist committed drafts across reloads.
+- [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) — rate-limit hooks used in this pattern.

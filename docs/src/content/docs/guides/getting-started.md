@@ -1,29 +1,16 @@
 ---
 title: Getting Started
-description: Install use-legend and build with local scopes, global stores, and fine-grained observable reads.
+description: Install use-legend and build with hook-based observables, fine-grained reads, and shared stores.
 ---
-
-`use-legend` starts from local state, then lets you promote state to a shared
-store when it becomes app or domain state.
-
-- Use `"use scope"` for component-local observables and scoped effects.
-- Use `createStore()` for provider-scoped global state.
-- Use `create*` and `use*` APIs for timers, browser APIs, sensors, sync, and
-  integrations without changing the state model.
-
-These examples assume the Vite plugin is configured. The plugin transforms
-`"use scope"` into `useScope(...)` and wraps JSX `.get()` reads with `Memo`
-boundaries, so only the read expression updates.
 
 ## Install
 
 ```bash
-pnpm add @usels/core @usels/web react
-pnpm add -D @usels/vite-plugin @usels/babel-plugin @babel/core
+pnpm add @usels/core @legendapp/state@beta @usels/web
+pnpm add -D @usels/vite-plugin
 ```
 
-Use `@usels/core` for local scopes, global stores, reactivity, timers, and sync
-primitives. Add `@usels/web` when you need browser, element, or sensor APIs.
+Use `@usels/core` for local state, reactivity, timers, stores, and sync primitives. Add `@usels/web` when you need browser, element, or sensor APIs.
 
 ## Configure Vite
 
@@ -40,7 +27,11 @@ export default defineConfig({
 
 Place `useLegend()` before `react()`. It runs before JSX is compiled.
 
-If you are not using Vite, configure the underlying Babel plugin instead:
+If you are not using Vite, install the Babel plugin and configure it instead:
+
+```bash
+pnpm add -D @usels/babel-plugin
+```
 
 ```js
 // babel.config.js
@@ -49,47 +40,44 @@ module.exports = {
 };
 ```
 
-See [Babel / Next.js](/use-legend/guides/tooling/babel-nextjs/) for non-Vite
-build pipelines.
+See [Babel / Next.js](/use-legend/guides/tooling/babel-nextjs/) for non-Vite build pipelines.
 
-## Start With Local Scope
+## Your First Observable
 
-Use `"use scope"` when state belongs to one component or one custom hook.
+`useObservable()` replaces `useState` for values that should update without re-rendering the whole component.
 
 ```tsx
-import { observable } from "@usels/core";
+import { useObservable } from "@legendapp/state/react";
 
 function Counter() {
-  "use scope";
-
-  const count$ = observable(0);
+  const count$ = useObservable(0);
   const increment = () => count$.set((value) => value + 1);
 
   return <button onClick={increment}>Clicked {count$.get()} times</button>;
 }
 ```
 
-`count$` and `increment` are created once for that component mount. When
-`count$` changes, the text that reads `count$.get()` updates through a
-fine-grained boundary instead of making the whole component the default update
-unit.
+`count$` is created once on mount. When it changes, only the text that reads `count$.get()` updates — the component function itself does not re-run.
 
-## Add Scoped Effects
+## Why `.get()` in JSX?
 
-Use scope-aware `observe()`, `onMount()`, `onUnmount()`, and `onBeforeMount()`
-inside a scope. They are registered to the current scope and cleaned up when the
-component unmounts.
+Calling `count$.get()` inside JSX looks like a plain read, but the Babel plugin rewrites each such call into a fine-grained memoized leaf. The component function renders once; only the leaf holding `.get()` updates when the observable changes.
+
+This is why you rarely need `<Computed>`, `useSelector`, or `observer(...)` wrappers — the plugin handles the tracking. For the setup and edge cases, see [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/).
+
+## Add Reactive Effects
+
+Use `useObserve()` to run a callback whenever any observable read inside it changes. Combine it with utility hooks like `useDebounced()` to build real-world behavior without extra plumbing.
 
 ```tsx
-import { createDebounced, observable, observe } from "@usels/core";
+import { useObservable, useObserve } from "@legendapp/state/react";
+import { useDebounced } from "@usels/core";
 
 function ProductSearch({ onSearch }: { onSearch: (query: string) => void }) {
-  "use scope";
+  const draft$ = useObservable("");
+  const debounced$ = useDebounced(draft$, { ms: 150 });
 
-  const draft$ = observable("");
-  const debounced$ = createDebounced(draft$, { ms: 150 });
-
-  observe(() => {
+  useObserve(() => {
     onSearch(debounced$.get());
   });
 
@@ -103,27 +91,26 @@ function ProductSearch({ onSearch }: { onSearch: (query: string) => void }) {
 }
 ```
 
+`useObserve()` tracks any observable reads inside its callback and re-runs when they change. `useDebounced()` returns a new observable that reflects the source after a quiet period — plug it into effects that talk to external systems.
+
 ## Track Props Reactively
 
-Use `toObs()` when a scoped component needs to react to prop changes inside
-`observe()` or a derived observable. Keep props as an identifier so `toObs(props)`
-can be compiled into the scope factory.
+Wrap props with `useMaybeObservable` when a component needs reactive reads of prop values inside `useObserve` or a derived observable. The return is a `DeepMaybeObservable<T>` — you can keep using `.get()` chains.
 
 ```tsx
-import { observable, observe, toObs } from "@usels/core";
+import { useMaybeObservable } from "@usels/core";
+import { useObservable, useObserve } from "@legendapp/state/react";
 
 function SearchInput(props: { initialQuery: string; onSearch: (query: string) => void }) {
-  "use scope";
+  const props$ = useMaybeObservable(props);
+  const draft$ = useObservable(props.initialQuery);
 
-  const props$ = toObs(props, { onSearch: "function" });
-  const draft$ = observable(props.initialQuery);
-
-  observe(() => {
+  useObserve(() => {
     draft$.set(props$.initialQuery.get());
   });
 
-  observe(() => {
-    props$.onSearch.get()(draft$.get());
+  useObserve(() => {
+    props$.onSearch.get()?.(draft$.get());
   });
 
   return (
@@ -136,18 +123,16 @@ function SearchInput(props: { initialQuery: string; onSearch: (query: string) =>
 }
 ```
 
-Plain `props.initialQuery` reads stay available as latest-value reads. Use
-`props$.initialQuery.get()` when the scope should track prop changes reactively.
+Plain `props.initialQuery` reads stay available as latest-value reads. Use `props$.initialQuery.get()` when the effect should track prop changes reactively.
 
 ## Promote Shared State To A Store
 
-Use `createStore()` when state needs a provider boundary and shared access across
-multiple components.
+Use `createStore()` when state needs a provider boundary and shared access across multiple components.
 
 ```tsx
 import { createStore, observable, StoreProvider } from "@usels/core";
 
-const [useProductStore, getProductStore] = createStore("products", () => {
+const [useProductStore] = createStore("products", () => {
   const query$ = observable("");
   const cart$ = observable<Record<string, number>>({});
 
@@ -182,30 +167,22 @@ function CartButton() {
 }
 ```
 
-`createStore(name, setup)` returns `[useStore, getStore]`.
+`useProductStore()` reads the store from the nearest `StoreProvider`. Use `StoreProvider` to isolate store instances for SSR, tests, embedded roots, and app boundaries.
 
-- Use `useStore()` in React components.
-- Use `getStore()` inside another store setup function or inside a `"use scope"`
-  factory rendered under `StoreProvider`.
-- Use `StoreProvider` to isolate store instances for SSR, tests, embedded roots,
-  and app boundaries.
+## Combine Store And Local State
 
-## Combine Store And Scope
-
-A common pattern is to keep fast-changing draft state local, then sync the stable
-result into a global store.
+A common pattern is to keep fast-changing draft state local and sync the stable result into a global store.
 
 ```tsx
-import { createDebounced, observable, observe } from "@usels/core";
+import { useDebounced } from "@usels/core";
+import { useObservable, useObserve } from "@legendapp/state/react";
 
 function StoreBackedSearch() {
-  "use scope";
+  const { setQuery } = useProductStore();
+  const draft$ = useObservable("");
+  const query$ = useDebounced(draft$, { ms: 150 });
 
-  const { setQuery } = getProductStore();
-  const draft$ = observable("");
-  const query$ = createDebounced(draft$, { ms: 150 });
-
-  observe(() => {
+  useObserve(() => {
     setQuery(query$.get());
   });
 
@@ -219,16 +196,16 @@ function StoreBackedSearch() {
 }
 ```
 
-This keeps keystroke-level UI state local to the component while the shared store
-receives debounced domain state.
+This keeps keystroke-level UI state local to the component while the shared store receives debounced domain state.
 
 ## What To Use Next
 
 | Need                               | Use                                           |
 | ---------------------------------- | --------------------------------------------- |
-| Local component state and effects  | [Scope & Lifecycle](/use-legend/guides/concepts/scope-and-lifecycle/) |
-| Shared app or domain state         | [Store & Provider Boundary](/use-legend/guides/concepts/store-and-provider-boundary/) |
+| Observable-first rendering model   | [Observable-First Mental Model](/use-legend/guides/observable-first-mental-model/) |
+| How `.get()` tracking works        | [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/) |
+| Fine-grained rendering             | [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/) |
 | Derived values and effects         | [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) |
-| Lists and conditionals             | [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/) |
 | Browser, element, and sensor state | [Reactive Refs & Web Targets](/use-legend/guides/concepts/reactive-refs-and-web-targets/) |
 | Data fetching integration          | [Data Fetching](/use-legend/guides/patterns/data-fetching/) |
+| Utility hook catalog               | [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) |
