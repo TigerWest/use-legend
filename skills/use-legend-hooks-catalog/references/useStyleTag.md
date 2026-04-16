@@ -1,0 +1,171 @@
+# useStyleTag
+
+> Part of `@usels/web` | Category: Browser
+
+## Overview
+
+Dynamically inject and remove a `<style>` tag in `document.head`. The tag is appended on mount and removed on unmount. Supports reactive CSS updates via `css$` and optional manual lifecycle management.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useStyleTag } from "@usels/web";
+
+    function Component() {
+      const { isLoaded$ } = useStyleTag("body { background: #f0f0f0; }");
+
+      return <div>{isLoaded$.get() ? "Styles injected" : "Loading..."}</div>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createStyleTag } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { isLoaded$ } = createStyleTag("body { background: #f0f0f0; }");
+
+      return <div>{isLoaded$.get() ? "Styles injected" : "Loading..."}</div>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Reactive CSS updates
+
+Update `css$` at any time to change the injected styles without re-mounting.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useStyleTag } from "@usels/web";
+
+    function Component() {
+      const { css$, isLoaded$ } = useStyleTag(".box { color: red; }");
+
+      return (
+        <div>
+          <button onClick={() => css$.set(".box { color: blue; }")}>Change color</button>
+          <div className="box">Styled box</div>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createStyleTag } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { css$, isLoaded$ } = createStyleTag(".box { color: red; }");
+
+      return (
+        <div>
+          <button onClick={() => css$.set(".box { color: blue; }")}>Change color</button>
+          <div className="box">Styled box</div>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Pass an Observable as CSS
+
+If you already have an Observable holding your CSS string, pass it directly.
+
+```tsx
+import { observable } from "@usels/core";
+import { useStyleTag } from "@usels/web";
+
+const theme$ = observable("body { background: white; }");
+
+function Component() {
+  useStyleTag(theme$);
+  // Updating theme$ automatically updates the injected style tag
+}
+```
+
+### Manual control
+
+Set `manual: true` to take full control of when the style tag is injected and removed.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useStyleTag } from "@usels/web";
+
+    function Component() {
+      const { load, unload, isLoaded$ } = useStyleTag(".box { color: red; }", {
+        manual: true,
+      });
+
+      return (
+        <div>
+          <button onClick={load}>Inject</button>
+          <button onClick={unload}>Remove</button>
+          <p>{isLoaded$.get() ? "Injected" : "Not injected"}</p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createStyleTag } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const { load, unload, isLoaded$ } = createStyleTag(".box { color: red; }", {
+        manual: true,
+      });
+
+      return (
+        <div>
+          <button onClick={load}>Inject</button>
+          <button onClick={unload}>Remove</button>
+          <p>{isLoaded$.get() ? "Injected" : "Not injected"}</p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With options
+
+```typescript
+import { useStyleTag } from "@usels/web";
+
+useStyleTag(".box { color: red; }", {
+  id: "my-style", // custom id for the style element
+  media: "print", // CSS media query
+  nonce: "abc123", // Content Security Policy nonce
+  immediate: true, // default: true — inject on mount
+  manual: false, // default: false — auto lifecycle management
+});
+```
+
+## Type Declarations
+
+```typescript
+export { createStyleTag } from "./core";
+export type { UseStyleTagOptions, UseStyleTagReturn } from "./core";
+export type UseStyleTag = typeof createStyleTag;
+export declare const useStyleTag: UseStyleTag;
+```
+
+## Source
+
+- Implementation: `packages/web/src/browser/useStyleTag/index.ts`
+- Documentation: `packages/web/src/browser/useStyleTag/index.mdx`

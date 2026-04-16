@@ -1,0 +1,254 @@
+---
+title: Getting Started
+description: Install use-legend and build with hook-based observables, fine-grained reads, and shared stores.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Install
+
+<Tabs syncKey="pkg">
+  <TabItem label="npm">
+    ```bash
+    npm add @usels/core @legendapp/state@beta @usels/web
+    npm add -D @usels/vite-plugin
+    ```
+  </TabItem>
+  <TabItem label="yarn">
+    ```bash
+    yarn add @usels/core @legendapp/state@beta @usels/web
+    yarn add -D @usels/vite-plugin
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add @usels/core @legendapp/state@beta @usels/web
+    pnpm add -D @usels/vite-plugin
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```bash
+    bun add @usels/core @legendapp/state@beta @usels/web
+    bun add -D @usels/vite-plugin
+    ```
+  </TabItem>
+</Tabs>
+
+Use `@usels/core` for local state, reactivity, timers, stores, and sync primitives. Add `@usels/web` when you need browser, element, or sensor APIs.
+
+## Configure Vite
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import useLegend from "@usels/vite-plugin";
+
+export default defineConfig({
+  plugins: [useLegend(), react()],
+});
+```
+
+Place `useLegend()` before `react()`. It runs before JSX is compiled.
+
+If you are not using Vite, install the Babel plugin and configure it instead:
+
+<Tabs syncKey="pkg">
+  <TabItem label="npm">
+    ```bash
+    npm add -D @usels/babel-plugin
+    ```
+  </TabItem>
+  <TabItem label="yarn">
+    ```bash
+    yarn add -D @usels/babel-plugin
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add -D @usels/babel-plugin
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```bash
+    bun add -D @usels/babel-plugin
+    ```
+  </TabItem>
+</Tabs>
+
+```js
+// babel.config.js
+module.exports = {
+  plugins: ["@usels/babel-plugin"],
+};
+```
+
+See [Babel / Next.js](/use-legend/guides/tooling/babel-nextjs/) for non-Vite build pipelines.
+
+## Your First Observable
+
+`useObservable()` replaces `useState` for values that should update without re-rendering the whole component.
+
+```tsx
+import { useObservable } from "@legendapp/state/react";
+
+function Counter() {
+  const count$ = useObservable(0);
+  const increment = () => count$.set((value) => value + 1);
+
+  return <button onClick={increment}>Clicked {count$.get()} times</button>;
+}
+```
+
+`count$` is created once on mount. When it changes, only the text that reads `count$.get()` updates — the component function itself does not re-run.
+
+## Why `.get()` in JSX?
+
+Calling `count$.get()` inside JSX looks like a plain read, but the Babel plugin rewrites each such call into a fine-grained memoized leaf. The component function renders once; only the leaf holding `.get()` updates when the observable changes.
+
+This is why you rarely need `<Computed>`, `useSelector`, or `observer(...)` wrappers — the plugin handles the tracking. For the setup and edge cases, see [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/).
+
+## Add Reactive Effects
+
+Use `useObserve()` to run a callback whenever any observable read inside it changes. Combine it with utility hooks like `useDebounced()` to build real-world behavior without extra plumbing.
+
+```tsx
+import { useObservable, useObserve } from "@legendapp/state/react";
+import { useDebounced } from "@usels/core";
+
+function ProductSearch({ onSearch }: { onSearch: (query: string) => void }) {
+  const draft$ = useObservable("");
+  const debounced$ = useDebounced(draft$, { ms: 150 });
+
+  useObserve(() => {
+    onSearch(debounced$.get());
+  });
+
+  return (
+    <input
+      value={draft$.get()}
+      onChange={(event) => draft$.set(event.currentTarget.value)}
+      placeholder="Search products"
+    />
+  );
+}
+```
+
+`useObserve()` tracks any observable reads inside its callback and re-runs when they change. `useDebounced()` returns a new observable that reflects the source after a quiet period — plug it into effects that talk to external systems.
+
+## Track Props Reactively
+
+Wrap props with `useMaybeObservable` when a component needs reactive reads of prop values inside `useObserve` or a derived observable. The return is a `DeepMaybeObservable<T>` — you can keep using `.get()` chains.
+
+```tsx
+import { useMaybeObservable } from "@usels/core";
+import { useObservable, useObserve } from "@legendapp/state/react";
+
+function SearchInput(props: { initialQuery: string; onSearch: (query: string) => void }) {
+  const props$ = useMaybeObservable(props);
+  const draft$ = useObservable(props.initialQuery);
+
+  useObserve(() => {
+    draft$.set(props$.initialQuery.get());
+  });
+
+  useObserve(() => {
+    props$.onSearch.get()?.(draft$.get());
+  });
+
+  return (
+    <input
+      value={draft$.get()}
+      onChange={(event) => draft$.set(event.currentTarget.value)}
+      placeholder="Search products"
+    />
+  );
+}
+```
+
+Plain `props.initialQuery` reads stay available as latest-value reads. Use `props$.initialQuery.get()` when the effect should track prop changes reactively.
+
+## Promote Shared State To A Store
+
+Use `createStore()` when state needs a provider boundary and shared access across multiple components.
+
+```tsx
+import { createStore, observable, StoreProvider } from "@usels/core";
+
+const [useProductStore] = createStore("products", () => {
+  const query$ = observable("");
+  const cart$ = observable<Record<string, number>>({});
+
+  const cartCount$ = observable(() =>
+    Object.values(cart$.get()).reduce((sum, quantity) => sum + quantity, 0)
+  );
+
+  const setQuery = (query: string) => query$.set(query);
+
+  const addToCart = (id: string, quantity = 1) => {
+    cart$.set((cart) => ({
+      ...cart,
+      [id]: (cart[id] ?? 0) + quantity,
+    }));
+  };
+
+  return { query$, cart$, cartCount$, setQuery, addToCart };
+});
+
+function App() {
+  return (
+    <StoreProvider>
+      <CartButton />
+    </StoreProvider>
+  );
+}
+
+function CartButton() {
+  const { cartCount$, addToCart } = useProductStore();
+
+  return <button onClick={() => addToCart("keyboard")}>Cart {cartCount$.get()}</button>;
+}
+```
+
+`useProductStore()` reads the store from the nearest `StoreProvider`. Use `StoreProvider` to isolate store instances for SSR, tests, embedded roots, and app boundaries.
+
+## Combine Store And Local State
+
+A common pattern is to keep fast-changing draft state local and sync the stable result into a global store.
+
+```tsx
+import { useDebounced } from "@usels/core";
+import { useObservable, useObserve } from "@legendapp/state/react";
+
+function StoreBackedSearch() {
+  const { setQuery } = useProductStore();
+  const draft$ = useObservable("");
+  const query$ = useDebounced(draft$, { ms: 150 });
+
+  useObserve(() => {
+    setQuery(query$.get());
+  });
+
+  return (
+    <input
+      value={draft$.get()}
+      onChange={(event) => draft$.set(event.currentTarget.value)}
+      placeholder="Search products"
+    />
+  );
+}
+```
+
+This keeps keystroke-level UI state local to the component while the shared store receives debounced domain state.
+
+## What To Use Next
+
+| Need                               | Use                                           |
+| ---------------------------------- | --------------------------------------------- |
+| Observable-first rendering model   | [Observable-First Mental Model](/use-legend/guides/observable-first-mental-model/) |
+| How `.get()` tracking works        | [Auto-Tracking & `.get()`](/use-legend/guides/concepts/auto-tracking/) |
+| Fine-grained rendering             | [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/) |
+| Derived values and effects         | [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) |
+| Browser, element, and sensor state | [Reactive Refs & Web Targets](/use-legend/guides/concepts/reactive-refs-and-web-targets/) |
+| Data fetching integration          | [Data Fetching](/use-legend/guides/patterns/data-fetching/) |
+| Utility hook catalog               | [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) |

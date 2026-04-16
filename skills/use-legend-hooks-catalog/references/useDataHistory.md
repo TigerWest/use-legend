@@ -1,0 +1,187 @@
+# useDataHistory
+
+> Part of `@usels/core` | Category: Reactivity
+
+## Overview
+
+A hook that automatically tracks changes to an Observable and manages undo/redo history. Records a snapshot automatically whenever the source Observable changes. Built on top of `useManualHistory`, with additional support for auto-commit, pause/resume, and transaction.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useDataHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const text$ = useObservable("hello");
+      const { undo, redo, canUndo$, canRedo$ } = useDataHistory(text$);
+
+      return (
+        <div>
+          <input value={text$.get()} onChange={(e) => text$.set(e.target.value)} />
+          <button onClick={undo} disabled={!canUndo$.get()}>Undo</button>
+          <button onClick={redo} disabled={!canRedo$.get()}>Redo</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDataHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const text$ = observable("hello");
+      const { undo, redo, canUndo$, canRedo$ } = createDataHistory(text$);
+
+      return (
+        <div>
+          <input value={text$.get()} onChange={(e) => text$.set(e.target.value)} />
+          <button onClick={undo} disabled={!canUndo$.get()}>Undo</button>
+          <button onClick={redo} disabled={!canRedo$.get()}>Redo</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### pause / resume — stop and restart auto-tracking
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useDataHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const text$ = useObservable("hello");
+      const { pause, resume, isTracking$ } = useDataHistory(text$);
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDataHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const text$ = observable("hello");
+      const { pause, resume, isTracking$ } = createDataHistory(text$);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### transaction — group mutations into one record
+
+Multiple changes inside `transaction()` are recorded as a single undo step.
+Call the provided `cancel()` to abort the commit entirely.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useDataHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const value$ = useObservable(0);
+      const { transaction, undo } = useDataHistory(value$);
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDataHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const value$ = observable(0);
+      const { transaction, undo } = createDataHistory(value$);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### shouldCommit — conditional auto-commit
+
+Return `false` from `shouldCommit` to skip recording specific values.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useDataHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const count$ = useObservable(0);
+      // Only record even numbers
+      const { undo } = useDataHistory(count$, {
+        shouldCommit: (value) => value % 2 === 0,
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDataHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const count$ = observable(0);
+      const { undo } = createDataHistory(count$, {
+        shouldCommit: (value) => value % 2 === 0,
+      });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### capacity — limit undo depth
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useDataHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const text$ = useObservable("");
+      // Keep at most 50 undo steps
+      const { undo, redo } = useDataHistory(text$, { capacity: 50 });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDataHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const text$ = observable("");
+      const { undo, redo } = createDataHistory(text$, { capacity: 50 });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Type Declarations
+
+```typescript
+export { createDataHistory, type DataHistoryOptions, type DataHistoryReturn } from "./core";
+export type UseDataHistory = typeof createDataHistory;
+export declare const useDataHistory: UseDataHistory;
+```
+
+## Source
+
+- Implementation: `packages/core/src/state/useDataHistory/index.ts`
+- Documentation: `packages/core/src/state/useDataHistory/index.mdx`

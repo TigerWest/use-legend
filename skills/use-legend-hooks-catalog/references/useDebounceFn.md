@@ -1,0 +1,117 @@
+# useDebounceFn
+
+> Part of `@usels/core` | Category: Utilities
+
+## Overview
+
+Debounce execution of a function.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useDebounceFn } from "@usels/core";
+
+    function Component() {
+      const debouncedFn = useDebounceFn((value: string) => {
+        console.log(value);
+      }, 250);
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDebounceFn } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { debouncedFn } = createDebounceFn((value: string) => {
+        console.log(value);
+      }, 250);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Reactive delay
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable, useDebounceFn } from "@usels/core";
+
+    function Component() {
+      const delay$ = useObservable(300);
+      const debouncedFn = useDebounceFn(() => {
+        // ...
+      }, delay$);
+      // Changing delay$ applies the new delay from the next call
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDebounceFn, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const delay$ = observable(300);
+      const { debouncedFn } = createDebounceFn(() => {
+        // ...
+      }, delay$);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### maxWait — cap maximum delay
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useDebounceFn } from "@usels/core";
+
+    function Component() {
+      // Forces execution every 1000ms even with continuous calls
+      const debouncedFn = useDebounceFn(
+        () => { /* ... */ },
+        300,
+        { maxWait: 1000 }
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createDebounceFn } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const { debouncedFn } = createDebounceFn(
+        () => { /* ... */ },
+        300,
+        { maxWait: 1000 }
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Type Declarations
+
+```typescript
+export { createDebounceFn } from "./core";
+export declare function useDebounceFn<T extends AnyFn>(fn: T, ms?: MaybeObservable<number>, options?: DebounceFilterOptions): PromisifyFn<T>;
+```
+
+## Source
+
+- Implementation: `packages/core/src/utilities/useDebounceFn/index.ts`
+- Documentation: `packages/core/src/utilities/useDebounceFn/index.mdx`

@@ -1,0 +1,117 @@
+# useParentElement
+
+> Part of `@usels/web` | Category: Elements
+
+## Overview
+
+Returns the `parentElement` of a target DOM node as a reactive `Observable`. Re-evaluates whenever the target `Ref$` or `Observable` changes. Targets can be `Ref$`, `MaybeElement`, or a plain `Element`.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useRef$ } from "@usels/core";
+    import { useParentElement } from "@usels/web";
+
+    function Component() {
+      const el$ = useRef$<HTMLDivElement>();
+      const parent$ = useParentElement(el$);
+
+      return <div ref={el$}>{parent$.get()?.tagName}</div>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createRef$ } from "@usels/core";
+    import { createParentElement } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+      const parent$ = createParentElement(el$);
+
+      return <div ref={el$}>{parent$.get()?.tagName}</div>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With an Observable target
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { observable } from "@usels/core";
+    import { useParentElement } from "@usels/web";
+
+    function Component() {
+      const target$ = observable<HTMLElement | null>(null);
+      const parent$ = useParentElement(target$);
+      // ...
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@usels/core";
+    import { createParentElement } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const target$ = observable<HTMLElement | null>(null);
+      const parent$ = createParentElement(target$);
+      // ...
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With a plain element
+
+A plain (non-Observable) element is read once at construction time; later DOM moves
+are not detected. Use `Ref$` or `Observable<Element>` for dynamic parent tracking.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useParentElement } from "@usels/web";
+
+    function Component({ el }: { el: HTMLElement }) {
+      const parent$ = useParentElement(el);
+      // ...
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createParentElement } from "@usels/web";
+
+    function Component({ el }: { el: HTMLElement }) {
+      "use scope"
+      const parent$ = createParentElement(el);
+      // ...
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Type Declarations
+
+```typescript
+export { createParentElement } from "./core";
+export type UseParentElement = typeof createParentElement;
+export declare const useParentElement: UseParentElement;
+```
+
+## Source
+
+- Implementation: `packages/web/src/elements/useParentElement/index.ts`
+- Documentation: `packages/web/src/elements/useParentElement/index.mdx`

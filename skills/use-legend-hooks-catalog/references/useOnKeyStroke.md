@@ -1,0 +1,110 @@
+# useOnKeyStroke
+
+> Part of `@usels/web` | Category: Sensors
+
+## Overview
+
+
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useOnKeyStroke, useOnKeyDown, useOnKeyUp } from "@usels/web";
+
+    function KeyStrokeDemo() {
+      // Single key
+      useOnKeyStroke("Enter", (e) => {
+        console.log("Enter pressed!");
+      });
+
+      // Multiple keys
+      useOnKeyStroke(["ArrowUp", "ArrowDown"], (e) => {
+        console.log(`Arrow ${e.key} pressed!`);
+      });
+
+      // Predicate function
+      useOnKeyStroke((e) => e.key === "a" && e.ctrlKey, (e) => {
+        console.log("Ctrl+A pressed!");
+      });
+
+      // All keys (handler-only overload)
+      useOnKeyStroke((e) => {
+        console.log(`Key: ${e.key}`);
+      });
+
+      // Convenience hooks for specific event types
+      useOnKeyDown("Escape", (e) => console.log("Escape down"));
+      useOnKeyUp("Escape", (e) => console.log("Escape up"));
+
+      return <div>Press any key</div>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createOnKeyStroke, createOnKeyDown, createOnKeyUp } from "@usels/web";
+
+    function KeyStrokeDemo() {
+      "use scope";
+
+      // Single key
+      createOnKeyStroke("Enter", (e) => {
+        console.log("Enter pressed!");
+      });
+
+      // Multiple keys
+      createOnKeyStroke(["ArrowUp", "ArrowDown"], (e) => {
+        console.log(`Arrow ${e.key} pressed!`);
+      });
+
+      // Predicate function
+      createOnKeyStroke((e) => e.key === "a" && e.ctrlKey, (e) => {
+        console.log("Ctrl+A pressed!");
+      });
+
+      // All keys (handler-only overload)
+      createOnKeyStroke((e) => {
+        console.log(`Key: ${e.key}`);
+      });
+
+      // Convenience functions for specific event types
+      createOnKeyDown("Escape", (e) => console.log("Escape down"));
+      createOnKeyUp("Escape", (e) => console.log("Escape up"));
+
+      return <div>Press any key</div>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Options
+
+```typescript
+useOnKeyStroke("Enter", handler, {
+  eventName: "keyup", // "keydown" | "keypress" | "keyup" — default: "keydown"
+  dedupe: true, // ignore repeat events when key is held down
+  passive: true, // use passive event listener
+  target: myElement, // custom event target — default: window
+});
+```
+
+## Type Declarations
+
+```typescript
+export { createOnKeyStroke, createOnKeyDown, createOnKeyPressed, createOnKeyUp } from "./core";
+export type { KeyPredicate, KeyFilter, KeyStrokeEventName, UseOnKeyStrokeOptions, UseOnKeyStrokeReturn, } from "./core";
+export type UseOnKeyStroke = typeof createOnKeyStroke;
+export declare const useOnKeyStroke: UseOnKeyStroke;
+export declare function useOnKeyDown(key: KeyFilter, handler: (event: KeyboardEvent) => void, options?: Omit<UseOnKeyStrokeOptions, "eventName">): Fn;
+export declare function useOnKeyPressed(key: KeyFilter, handler: (event: KeyboardEvent) => void, options?: Omit<UseOnKeyStrokeOptions, "eventName">): Fn;
+export declare function useOnKeyUp(key: KeyFilter, handler: (event: KeyboardEvent) => void, options?: Omit<UseOnKeyStrokeOptions, "eventName">): Fn;
+```
+
+## Source
+
+- Implementation: `packages/web/src/sensors/useOnKeyStroke/index.ts`
+- Documentation: `packages/web/src/sensors/useOnKeyStroke/index.mdx`

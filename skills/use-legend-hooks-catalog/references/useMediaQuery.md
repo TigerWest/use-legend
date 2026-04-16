@@ -1,0 +1,135 @@
+# useMediaQuery
+
+> Part of `@usels/web` | Category: Browser
+
+## Overview
+
+Tracks a CSS media query string as a reactive `Observable<boolean>`. Subscribes to `MediaQueryList` change events and updates automatically. SSR-safe: accepts an optional `ssrWidth` to statically evaluate `min-width` / `max-width` queries on the server.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useMediaQuery } from "@usels/web";
+
+    function Component() {
+      const isLarge$ = useMediaQuery("(min-width: 1024px)");
+
+      return <p>{isLarge$.get() ? "Large screen" : "Small screen"}</p>;
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createMediaQuery } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const isLarge$ = createMediaQuery("(min-width: 1024px)");
+
+      return <p>{isLarge$.get() ? "Large screen" : "Small screen"}</p>;
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Multiple queries
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useMediaQuery } from "@usels/web";
+
+    function Component() {
+      const isLarge$ = useMediaQuery("(min-width: 1024px)");
+      const prefersDark$ = useMediaQuery("(prefers-color-scheme: dark)");
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createMediaQuery } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const isLarge$ = createMediaQuery("(min-width: 1024px)");
+      const prefersDark$ = createMediaQuery("(prefers-color-scheme: dark)");
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Reactive query
+
+The query itself may be an `Observable<string>` — the underlying `MediaQueryList`
+is rebuilt whenever the observable changes, so the `matches` value always
+reflects the current query.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable } from "@usels/core";
+    import { useMediaQuery } from "@usels/web";
+
+    function Component() {
+      const query$ = useObservable("(min-width: 1024px)");
+      const matches$ = useMediaQuery(query$);
+
+      return (
+        <button onClick={() => query$.set("(max-width: 480px)")}>
+          {matches$.get() ? "matches" : "no match"}
+        </button>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable } from "@usels/core";
+    import { createMediaQuery } from "@usels/web";
+
+    function Component() {
+      "use scope"
+      const query$ = observable("(min-width: 1024px)");
+      const matches$ = createMediaQuery(query$);
+
+      return (
+        <button onClick={() => query$.set("(max-width: 480px)")}>
+          {matches$.get() ? "matches" : "no match"}
+        </button>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### SSR with `ssrWidth`
+
+Pass `ssrWidth` to statically evaluate `min-width` / `max-width` queries when
+`window.matchMedia` is unavailable. This prevents layout shift between the
+server-rendered markup and the first client render.
+
+```typescript
+useMediaQuery("(min-width: 1024px)", { ssrWidth: 1280 });
+```
+
+## Type Declarations
+
+```typescript
+export { createMediaQuery, evaluateSSRQuery } from "./core";
+export type { UseMediaQueryOptions, UseMediaQueryReturn } from "./core";
+export type UseMediaQuery = typeof createMediaQuery;
+export declare const useMediaQuery: UseMediaQuery;
+```
+
+## Source
+
+- Implementation: `packages/web/src/browser/useMediaQuery/index.ts`
+- Documentation: `packages/web/src/browser/useMediaQuery/index.mdx`

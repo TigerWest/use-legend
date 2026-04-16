@@ -1,0 +1,70 @@
+# useOnElementRemoval
+
+> Part of `@usels/web` | Category: Sensors
+
+## Overview
+
+Fires a callback when the target element or any ancestor containing it is removed from the DOM. Uses [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) internally.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useRef$ } from "@usels/core";
+    import { useObservable } from "@usels/core";
+    import { useOnElementRemoval } from "@usels/web";
+
+    function RemovalDetector() {
+      const el$ = useRef$<HTMLDivElement>();
+      const removed$ = useObservable(false);
+
+      useOnElementRemoval(el$, () => removed$.set(true));
+
+      return (
+        <div>
+          {!removed$.get() && <div ref={el$}>Watch me!</div>}
+          {removed$.get() && <p>Element was removed!</p>}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable, createRef$ } from "@usels/core";
+    import { createOnElementRemoval } from "@usels/web";
+
+    function RemovalDetector() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+      const removed$ = observable(false);
+
+      createOnElementRemoval(el$, () => removed$.set(true));
+
+      return (
+        <div>
+          {!removed$.get() && <div ref={el$}>Watch me!</div>}
+          {removed$.get() && <p>Element was removed!</p>}
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Type Declarations
+
+```typescript
+export { createOnElementRemoval } from "./core";
+export type { UseOnElementRemovalOptions } from "./core";
+export type UseOnElementRemoval = typeof createOnElementRemoval;
+export declare const useOnElementRemoval: UseOnElementRemoval;
+```
+
+## Source
+
+- Implementation: `packages/web/src/sensors/useOnElementRemoval/index.ts`
+- Documentation: `packages/web/src/sensors/useOnElementRemoval/index.mdx`

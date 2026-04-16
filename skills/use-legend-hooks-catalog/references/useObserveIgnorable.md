@@ -1,0 +1,240 @@
+# useObserveIgnorable
+
+> Part of `@usels/core` | Category: Observe
+
+## Overview
+
+Runs a reactive effect with an `ignoreUpdates` escape hatch. Changes made inside `ignoreUpdates(updater)` do not trigger the effect. Useful for breaking circular update cycles in two-way bindings.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useObserveIgnorable, useObservable } from "@usels/core";
+
+    function Component() {
+      const source$ = useObservable(0);
+
+      const { ignoreUpdates, isIgnoring$ } = useObserveIgnorable(
+        () => source$.get(),
+        (value) => {
+          console.log("source changed:", value);
+        }
+      );
+
+      // Normal change — effect fires
+      source$.set(1);
+
+      // Ignored change — effect is suppressed
+      ignoreUpdates(() => {
+        source$.set(2);
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observeIgnorable, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const source$ = observable(0);
+
+      const { ignoreUpdates, isIgnoring$ } = observeIgnorable(
+        () => source$.get(),
+        (value) => {
+          console.log("source changed:", value);
+        }
+      );
+
+      // Normal change — effect fires
+      source$.set(1);
+
+      // Ignored change — effect is suppressed
+      ignoreUpdates(() => {
+        source$.set(2);
+      });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Breaking two-way binding cycles
+
+The primary use case is preventing a reactive feedback loop when syncing two observables.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObserveIgnorable, useObservable, useWatch } from "@usels/core";
+
+    function Component() {
+      const local$ = useObservable("");
+      const remote$ = useObservable("");
+
+      // Sync remote → local without triggering local → remote
+      const { ignoreUpdates } = useObserveIgnorable(
+        () => remote$.get(),
+        (remoteValue) => {
+          ignoreUpdates(() => {
+            local$.set(remoteValue);
+          });
+        }
+      );
+
+      // Sync local → remote
+      useWatch(
+        () => local$.get(),
+        (localValue) => {
+          remote$.set(localValue);
+        }
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observeIgnorable, observable, watch } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const local$ = observable("");
+      const remote$ = observable("");
+
+      // Sync remote → local without triggering local → remote
+      const { ignoreUpdates } = observeIgnorable(
+        () => remote$.get(),
+        (remoteValue) => {
+          ignoreUpdates(() => {
+            local$.set(remoteValue);
+          });
+        }
+      );
+
+      // Sync local → remote
+      watch(
+        () => local$.get(),
+        (localValue) => {
+          remote$.set(localValue);
+        }
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Reactive `isIgnoring$`
+
+`isIgnoring$` is an Observable that reflects whether an `ignoreUpdates` call is currently active.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { observable, Show, useObserveIgnorable } from "@usels/core";
+
+    const count$ = useObservable(0);
+
+    function MyComponent() {
+      const { ignoreUpdates, isIgnoring$ } = useObserveIgnorable(
+        () => count$.get(),
+        (value) => {
+          console.log("count:", value);
+        }
+      );
+
+      return (
+        <Show if={isIgnoring$}>
+          <span>Ignoring updates...</span>
+        </Show>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable, observeIgnorable, Show } from "@usels/core";
+
+    const count$ = observable(0);
+
+    function MyComponent() {
+      "use scope"
+      const { ignoreUpdates, isIgnoring$ } = observeIgnorable(
+        () => count$.get(),
+        (value) => {
+          console.log("count:", value);
+        }
+      );
+
+      return (
+        <Show if={isIgnoring$}>
+          <span>Ignoring updates...</span>
+        </Show>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Eager mode (`immediate: true`)
+
+Pass `immediate: true` to execute the effect immediately on setup.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObserveIgnorable, useObservable } from "@usels/core";
+
+    function Component() {
+      const count$ = useObservable(0);
+
+      const { ignoreUpdates } = useObserveIgnorable(
+        () => count$.get(),
+        (value) => {
+          console.log("value:", value);
+        },
+        { immediate: true }
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observeIgnorable, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const count$ = observable(0);
+
+      const { ignoreUpdates } = observeIgnorable(
+        () => count$.get(),
+        (value) => {
+          console.log("value:", value);
+        },
+        { immediate: true }
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Type Declarations
+
+```typescript
+export { observeIgnorable, type ObserveIgnorableReturn } from "./core";
+export type UseObserveIgnorable = typeof observeIgnorable;
+export declare const useObserveIgnorable: UseObserveIgnorable;
+```
+
+## Source
+
+- Implementation: `packages/core/src/observe/useObserveIgnorable/index.ts`
+- Documentation: `packages/core/src/observe/useObserveIgnorable/index.mdx`

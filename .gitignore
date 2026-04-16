@@ -57,9 +57,12 @@ example
 
 docs/src/content/docs/**/*.mdx
 docs/src/content/docs/**/*.md
-!docs/src/content/docs/guides/*.md
-!docs/src/content/docs/guides/*.mdx
+!docs/src/content/docs/guides/**/*.md
+!docs/src/content/docs/guides/**/*.mdx
 !docs/src/content/docs/index.mdx
 !docs/src/content/docs/core/index.mdx
 !docs/src/content/docs/web/index.mdx
 !docs/src/content/docs/integrations/index.mdx
+
+
+

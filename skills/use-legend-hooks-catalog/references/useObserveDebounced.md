@@ -1,0 +1,166 @@
+# useObserveDebounced
+
+> Part of `@usels/core` | Category: Observe
+
+## Overview
+
+Runs a reactive effect debounced — fires only after `ms` milliseconds of inactivity. Built on `useObserveWithFilter`. The selector always tracks dependencies; only the effect is debounced.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useObservable, useObserveDebounced } from "@usels/core";
+
+    function Component() {
+      const query$ = useObservable("");
+
+      // ✅ Effect fires only after query$ stops changing for 300ms
+      useObserveDebounced(
+        () => query$.get(),
+        (value) => {
+          console.log("search:", value);
+        },
+        { ms: 300 }
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable, observeDebounced } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const query$ = observable("");
+
+      // ✅ Effect fires only after query$ stops changing for 300ms
+      observeDebounced(
+        () => query$.get(),
+        (value) => {
+          console.log("search:", value);
+        },
+        { ms: 300 }
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### With maxWait
+
+Use `maxWait` to guarantee the effect fires at least once, even if the source keeps changing continuously. The effect will fire after `maxWait` milliseconds regardless of activity.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable, useObserveDebounced } from "@usels/core";
+
+    function Component() {
+      const input$ = useObservable("");
+
+      useObserveDebounced(
+        () => input$.get(),
+        (value) => {
+          console.log("submit:", value);
+        },
+        { ms: 300, maxWait: 1000 }
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable, observeDebounced } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const input$ = observable("");
+
+      observeDebounced(
+        () => input$.get(),
+        (value) => {
+          console.log("submit:", value);
+        },
+        { ms: 300, maxWait: 1000 }
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Eager mode (`immediate: true`)
+
+Pass `immediate: true` to execute the effect immediately on setup, in addition to triggering on source changes.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useObservable, useObserveDebounced } from "@usels/core";
+
+    function Component() {
+      const count$ = useObservable(0);
+
+      // ✅ Also executes the effect immediately with the initial value
+      useObserveDebounced(
+        () => count$.get(),
+        (value) => {
+          console.log("value:", value);
+        },
+        { ms: 300, immediate: true }
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { observable, observeDebounced } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const count$ = observable(0);
+
+      // ✅ Also executes the effect immediately with the initial value
+      observeDebounced(
+        () => count$.get(),
+        (value) => {
+          console.log("value:", value);
+        },
+        { ms: 300, immediate: true }
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Batch scheduling (`schedule`)
+
+The `schedule` option controls when the effect runs relative to Legend-State's batch cycle.
+
+- `schedule: 'sync'` — runs synchronously inside the batch (equivalent to Legend-State `immediate: true`)
+- `schedule: 'deferred'` — runs after the batch ends (equivalent to Legend-State `immediate: false`)
+- omitted — uses Legend-State's default batching
+
+```typescript
+useObserveDebounced(count$, (v) => console.log(v), { ms: 300, schedule: "sync" });
+```
+
+## Type Declarations
+
+```typescript
+export { observeDebounced, type ObserveDebouncedOptions } from "./core";
+export type UseObserveDebounced = typeof observeDebounced;
+export declare const useObserveDebounced: UseObserveDebounced;
+```
+
+## Source
+
+- Implementation: `packages/core/src/observe/useObserveDebounced/index.ts`
+- Documentation: `packages/core/src/observe/useObserveDebounced/index.mdx`

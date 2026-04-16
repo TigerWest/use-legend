@@ -1,0 +1,188 @@
+# useManualHistory
+
+> Part of `@usels/core` | Category: Reactivity
+
+## Overview
+
+A hook for manually managing Observable change history. It only records a snapshot when `commit()` is called, and allows navigating previous states via `undo`/`redo`. Useful when auto-tracking is not needed, or when you want to record history only on explicit "save" actions.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useManualHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const counter$ = useObservable(0);
+      const { commit, undo, redo, canUndo$, canRedo$ } = useManualHistory(counter$);
+
+      return (
+        <div>
+          <button onClick={() => { counter$.set((v) => v + 1); commit(); }}>Save</button>
+          <button onClick={undo} disabled={!canUndo$.get()}>Undo</button>
+          <button onClick={redo} disabled={!canRedo$.get()}>Redo</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const counter$ = observable(0);
+      const { commit, undo, redo, canUndo$, canRedo$ } = createManualHistory(counter$);
+
+      return (
+        <div>
+          <button onClick={() => { counter$.set((v) => v + 1); commit(); }}>Save</button>
+          <button onClick={undo} disabled={!canUndo$.get()}>Undo</button>
+          <button onClick={redo} disabled={!canRedo$.get()}>Redo</button>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### capacity — limit history size
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useManualHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const value$ = useObservable(0);
+      // Keep at most 10 undo steps; older records are discarded automatically
+      const { commit, undo } = useManualHistory(value$, { capacity: 10 });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const value$ = observable(0);
+      const { commit, undo } = createManualHistory(value$, { capacity: 10 });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### dump / parse — custom serialization
+
+Use `dump` and `parse` to store a compact or transformed representation instead of raw value clones.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useManualHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const items$ = useObservable<string[]>([]);
+      const { commit, undo, history$ } = useManualHistory(items$, {
+        // Store as comma-separated string to save memory
+        dump: (arr) => arr.join(","),
+        parse: (str) => (str ? str.split(",") : []),
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const items$ = observable<string[]>([]);
+      const { commit, undo } = createManualHistory(items$, {
+        dump: (arr) => arr.join(","),
+        parse: (str) => (str ? str.split(",") : []),
+      });
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### reset — revert uncommitted changes
+
+`reset()` restores the source to the last committed value without touching the undo/redo stacks.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useManualHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const text$ = useObservable("saved");
+      const { commit, reset } = useManualHistory(text$);
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const text$ = observable("saved");
+      const { commit, reset } = createManualHistory(text$);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### clear — wipe all history
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useManualHistory, useObservable } from "@usels/core";
+
+    function Component() {
+      const value$ = useObservable(0);
+      const { commit, clear, history$ } = useManualHistory(value$);
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualHistory, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const value$ = observable(0);
+      const { commit, clear, history$ } = createManualHistory(value$);
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Type Declarations
+
+```typescript
+export { createManualHistory, type ManualHistoryOptions, type ManualHistoryReturn } from "./core";
+export type UseManualHistory = typeof createManualHistory;
+export declare const useManualHistory: UseManualHistory;
+```
+
+## Source
+
+- Implementation: `packages/core/src/state/useManualHistory/index.ts`
+- Documentation: `packages/core/src/state/useManualHistory/index.mdx`

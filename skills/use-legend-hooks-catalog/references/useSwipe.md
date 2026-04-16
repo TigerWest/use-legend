@@ -1,0 +1,89 @@
+# useSwipe
+
+> Part of `@usels/web` | Category: Sensors
+
+## Overview
+
+Reactive swipe detection based on TouchEvents. Detects swipe direction and length.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useSwipe } from "@usels/web";
+    import { useRef$ } from "@usels/core";
+
+    function SwipeDemo() {
+      const el$ = useRef$<HTMLDivElement>();
+      const { isSwiping$, direction$, lengthX$, lengthY$ } = useSwipe(el$, {
+        threshold: 50,
+        onSwipeEnd: (e, dir) => console.log(`Swiped ${dir}`),
+      });
+
+      return (
+        <div ref={el$} style={{ width: 300, height: 300, background: "#eee" }}>
+          <p>Swiping: {isSwiping$.get() ? "yes" : "no"}</p>
+          <p>Direction: {direction$.get()}</p>
+          <p>
+            Length: {lengthX$.get()}, {lengthY$.get()}
+          </p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createSwipe } from "@usels/web";
+    import { createRef$ } from "@usels/core";
+
+    function SwipeDemo() {
+      "use scope"
+      const el$ = createRef$<HTMLDivElement>();
+      const { isSwiping$, direction$, lengthX$, lengthY$ } = createSwipe(el$, {
+        threshold: 50,
+        onSwipeEnd: (e, dir) => console.log(`Swiped ${dir}`),
+      });
+
+      return (
+        <div ref={el$} style={{ width: 300, height: 300, background: "#eee" }}>
+          <p>Swiping: {isSwiping$.get() ? "yes" : "no"}</p>
+          <p>Direction: {direction$.get()}</p>
+          <p>
+            Length: {lengthX$.get()}, {lengthY$.get()}
+          </p>
+        </div>
+      );
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Reactive options
+
+```typescript
+import { observable } from "@usels/core";
+
+const threshold$ = observable(50);
+const { direction$ } = useSwipe(el$, { threshold: threshold$ });
+
+// Later: adjust threshold reactively
+threshold$.set(100);
+```
+
+## Type Declarations
+
+```typescript
+export { createSwipe } from "./core";
+export type { UseSwipeOptions, UseSwipeReturn, UseSwipeDirection } from "./core";
+export type UseSwipe = typeof createSwipe;
+export declare const useSwipe: UseSwipe;
+```
+
+## Source
+
+- Implementation: `packages/web/src/sensors/useSwipe/index.ts`
+- Documentation: `packages/web/src/sensors/useSwipe/index.mdx`

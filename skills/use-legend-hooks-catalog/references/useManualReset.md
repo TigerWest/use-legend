@@ -1,0 +1,137 @@
+# useManualReset
+
+> Part of `@usels/core` | Category: Reactivity
+
+## Overview
+
+Observable with a manual `reset()` function that restores the value to its default. Unlike `useAutoReset`, the value is only reset when you explicitly call `reset()`.
+
+## Usage
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+        import { useManualReset, useObservable } from "@usels/core";
+
+    function Component() {
+      const default$ = useObservable("hello");
+      const { value$, reset } = useManualReset(default$);
+
+      value$.set("changed");
+      // value$.get() returns "changed"
+
+      reset();
+      // value$.get() returns "hello" — restored to default
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualReset, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const default$ = observable("hello");
+      const { value$, reset } = createManualReset(default$);
+
+      value$.set("changed");
+      reset();
+      // value$.get() returns "hello"
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Dynamic default value
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useManualReset, useObservable } from "@usels/core";
+
+    function Component() {
+      const default$ = useObservable("initial");
+      const { value$, reset } = useManualReset(default$);
+
+      value$.set("changed");
+      default$.set("updated-default");
+      reset();
+      // value$.get() returns "updated-default" — reads current source value
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualReset, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const default$ = observable("initial");
+      const { value$, reset } = createManualReset(default$);
+
+      value$.set("changed");
+      default$.set("updated-default");
+      reset();
+      // value$.get() returns "updated-default"
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Form reset pattern
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import { useManualReset, useObservable } from "@usels/core";
+
+    function Component() {
+      const emptyStr$ = useObservable("");
+      const { value$: name$, reset: resetName } = useManualReset(emptyStr$);
+      const { value$: email$, reset: resetEmail } = useManualReset(emptyStr$);
+
+      const handleSubmit = () => {
+        // submit form...
+        resetName();
+        resetEmail();
+      };
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import { createManualReset, observable } from "@usels/core";
+
+    function Component() {
+      "use scope"
+      const emptyStr$ = observable("");
+      const { value$: name$, reset: resetName } = createManualReset(emptyStr$);
+      const { value$: email$, reset: resetEmail } = createManualReset(emptyStr$);
+
+      const handleSubmit = () => {
+        resetName();
+        resetEmail();
+      };
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Type Declarations
+
+```typescript
+export { createManualReset } from "./core";
+export type UseManualReset = typeof createManualReset;
+export declare const useManualReset: UseManualReset;
+```
+
+## Source
+
+- Implementation: `packages/core/src/reactivity/useManualReset/index.ts`
+- Documentation: `packages/core/src/reactivity/useManualReset/index.mdx`
