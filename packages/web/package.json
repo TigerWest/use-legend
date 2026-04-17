@@ -21,7 +21,7 @@
     "es-toolkit": "^1.0.0"
   },
   "scripts": {
-    "build": "rimraf dist && tsup && tsc-alias -p tsconfig.json --dir dist/esm && tsc-alias -p tsconfig.json --dir dist/cjs",
+    "build": "rimraf dist && tsup",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
@@ -48,6 +48,7 @@
     "@vitest/browser": "^4.0.18",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-istanbul": "^4.0.18",
+    "esbuild-fix-imports-plugin": "^1.0.23",
     "jsdom": "^25.0.0",
     "playwright": "^1.58.2",
     "rimraf": "^5.0.0",

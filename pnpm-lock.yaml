@@ -277,6 +277,9 @@ importers:
       '@vitest/coverage-istanbul':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18)
+      esbuild-fix-imports-plugin:
+        specifier: ^1.0.23
+        version: 1.0.23
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1
@@ -347,6 +350,9 @@ importers:
       '@usels/core':
         specifier: workspace:*
         version: link:../core
+      esbuild-fix-imports-plugin:
+        specifier: ^1.0.23
+        version: 1.0.23
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1
@@ -405,6 +411,9 @@ importers:
       '@vitest/coverage-istanbul':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18)
+      esbuild-fix-imports-plugin:
+        specifier: ^1.0.23
+        version: 1.0.23
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1
@@ -442,6 +451,9 @@ importers:
       '@usels/core':
         specifier: workspace:*
         version: link:../core
+      esbuild-fix-imports-plugin:
+        specifier: ^1.0.23
+        version: 1.0.23
       rimraf:
         specifier: ^5.0.0
         version: 5.0.10
@@ -509,6 +521,9 @@ importers:
       '@vitest/coverage-istanbul':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18)
+      esbuild-fix-imports-plugin:
+        specifier: ^1.0.23
+        version: 1.0.23
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1
@@ -3524,7 +3539,7 @@ packages:
       vitest: 4.0.18
     dependencies:
       '@vitest/browser': 4.0.18(vitest@4.0.18)
-      '@vitest/mocker': 4.0.18(vite@6.4.1)
+      '@vitest/mocker': 4.0.18(vite@5.4.21)
       playwright: 1.58.2
       tinyrainbow: 3.0.3
       vitest: 4.0.18(@types/node@25.3.3)(@vitest/browser-playwright@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
@@ -3561,7 +3576,7 @@ packages:
     peerDependencies:
       vitest: 4.0.18
     dependencies:
-      '@vitest/mocker': 4.0.18(vite@6.4.1)
+      '@vitest/mocker': 4.0.18(vite@5.4.21)
       '@vitest/utils': 4.0.18
       magic-string: 0.30.21
       pixelmatch: 7.1.0
@@ -4867,6 +4882,10 @@ packages:
       esast-util-from-estree: 2.0.0
       vfile-message: 4.0.3
     dev: false
+
+  /esbuild-fix-imports-plugin@1.0.23:
+    resolution: {integrity: sha512-zDn2Mq3OnW9qNm9FrHDeE0FePgIRIaH9EWpHOGsJZFPfyPSNqzvCK/x9EZJ5eHEEyXe8ZGdb5CjDpzqkyAqcCg==}
+    dev: true
 
   /esbuild@0.21.5:
     resolution: {integrity: sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==}

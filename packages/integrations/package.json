@@ -48,6 +48,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@usels/core": "workspace:*",
+    "esbuild-fix-imports-plugin": "^1.0.23",
     "jsdom": "^25.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

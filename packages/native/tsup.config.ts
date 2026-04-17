@@ -1,9 +1,12 @@
 import { defineConfig } from 'tsup';
+import { fixImportsPlugin } from 'esbuild-fix-imports-plugin';
 
 const shared = {
-  entry: ['src/index.ts'],
+  entry: ['src/**/*.{ts,tsx}', '!src/**/*.spec.*'],
   sourcemap: true,
   clean: false,
+  bundle: false,
+  esbuildPlugins: [fixImportsPlugin()],
 };
 
 export default defineConfig([
