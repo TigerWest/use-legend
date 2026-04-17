@@ -74,5 +74,3 @@ outside a reactive boundary.
   to understand how the Babel plugin turns `.get()` into a fine-grained leaf.
 - Read [Rendering Boundaries](/use-legend/guides/concepts/rendering-boundaries/)
   to understand `Memo`, `For`, and the transform.
-- See [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) for the
-  observable-first hook catalog.

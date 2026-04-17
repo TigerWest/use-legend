@@ -104,5 +104,4 @@ return <>
 ## Related
 
 - [Observable-First Mental Model](/use-legend/guides/observable-first-mental-model/) — why derived observables beat mirrored state.
-- [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) — the full effect hook catalog.
 - [Data Fetching](/use-legend/guides/patterns/data-fetching/) — effects that sync with remote sources.

@@ -1,37 +1,67 @@
 ---
 title: Data Fetching
-description: Use @usels/tanstack-query when server state should participate in the observable model.
+description: Choose between Legend-State sync and TanStack Query for your data fetching strategy.
 ---
 
-`@usels/tanstack-query` bridges TanStack Query and Legend-State. Use it for
-server state: cached remote data, loading state, errors, mutations, and
-invalidation.
+use-legend offers two paths for fetching and syncing remote data.
+Pick the one that fits your data ownership model.
 
-It keeps the TanStack Query option model, but returns query state as observables
-and accepts observables in options such as `queryKey` and `enabled`.
+## Two Approaches
 
-## Setup
+- **Legend-State Sync** (`useRemote`, `useOfflineFirst`) — the observable is the data, sync is a trait. You own the data model end-to-end.
+- **TanStack Query** (`@usels/tanstack-query`) — query cache owns data, observable wraps query state. For API consumption with caching, deduplication, and pagination.
+
+## Legend-State Sync
+
+Use `useRemote` when the observable itself is the source of truth and the server
+is just a backing store.
 
 ```tsx
-import { QueryClient, QueryClientProvider } from "@usels/tanstack-query";
+import { useRemote } from "@usels/core";
 
-const queryClient = new QueryClient();
+function Profile() {
+  const { data$, isLoaded$ } = useRemote({
+    get: () => fetch("/api/profile").then((res) => res.json()),
+    set: ({ value }) => fetch("/api/profile", { method: "PUT", body: JSON.stringify(value) }),
+    initial: { name: "" },
+  });
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ProductList />
-    </QueryClientProvider>
-  );
+  return isLoaded$.get()
+    ? <input value={data$.name.get()} onChange={(e) => data$.name.set(e.target.value)} />
+    : <p>Loading…</p>;
 }
 ```
 
-## Observable Query Key
+For offline-first scenarios, `useOfflineFirst` adds local persistence and retry:
 
 ```tsx
-import { observable } from "@usels/core";
-import { useQuery } from "@usels/tanstack-query";
+import { useOfflineFirst } from "@usels/core";
+import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
 
+function Profile() {
+  const { data$, isLoaded$ } = useOfflineFirst({
+    get: () => fetch("/api/profile").then((res) => res.json()),
+    set: ({ value }) => fetch("/api/profile", { method: "PUT", body: JSON.stringify(value) }),
+    initial: { name: "" },
+    persistKey: "profile",
+    persistPlugin: ObservablePersistLocalStorage,
+  });
+
+  // data loads from local storage first, then syncs with remote
+}
+```
+
+## TanStack Query
+
+Use `@usels/tanstack-query` when you need query caching, background refetching,
+pagination, or optimistic updates from TanStack Query — with observable results.
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@usels/tanstack-query";
+import { useQuery } from "@usels/tanstack-query";
+import { observable } from "@usels/core";
+
+const queryClient = new QueryClient();
 const category$ = observable("all");
 
 function ProductList() {
@@ -44,22 +74,9 @@ function ProductList() {
 }
 ```
 
-When `category$` changes, the query key changes and the query can refetch.
-
-## What Belongs Where
-
-| State | Place |
-| --- | --- |
-| Remote cache, loading, errors | `@usels/tanstack-query` |
-| Local input draft | `useObservable` |
-| Shared app/domain state | `createStore` |
-| Persisted client snapshot | Storage helpers |
-
 See the [TanStack Query API reference](/use-legend/tanstack-query/) for
 `useQuery`, `useMutation`, `useInfiniteQuery`, and `useQueryClient`.
 
 ## Related
 
-- [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) — compose derived reads over query results.
-- [Persisted State](/use-legend/guides/patterns/persisted-state/) — keep a client-side snapshot alongside server state.
-- [Utility Hooks](/use-legend/guides/patterns/utility-hooks/) — effect primitives for reacting to query-state changes.
+- [Derived State & Effects](/use-legend/guides/patterns/derived-state-and-effects/) — compose derived reads over fetched data.
