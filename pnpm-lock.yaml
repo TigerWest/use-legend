@@ -172,7 +172,7 @@ importers:
         version: file:packages/core(@legendapp/state@3.0.0-beta.44)(react@19.2.5)
       '@usels/web':
         specifier: file:../../packages/web
-        version: file:packages/web(@legendapp/state@3.0.0-beta.44)(@usels/core@0.10.0)(react@19.2.5)
+        version: file:packages/web(@legendapp/state@3.0.0-beta.44)(@usels/core@0.11.0)(react@19.2.5)
       next:
         specifier: ^16.2.3
         version: 16.2.3(@babel/core@7.29.0)(react-dom@19.2.5)(react@19.2.5)
@@ -3539,7 +3539,7 @@ packages:
       vitest: 4.0.18
     dependencies:
       '@vitest/browser': 4.0.18(vitest@4.0.18)
-      '@vitest/mocker': 4.0.18(vite@5.4.21)
+      '@vitest/mocker': 4.0.18(vite@6.4.1)
       playwright: 1.58.2
       tinyrainbow: 3.0.3
       vitest: 4.0.18(@types/node@25.3.3)(@vitest/browser-playwright@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
@@ -3576,7 +3576,7 @@ packages:
     peerDependencies:
       vitest: 4.0.18
     dependencies:
-      '@vitest/mocker': 4.0.18(vite@5.4.21)
+      '@vitest/mocker': 4.0.18(vite@6.4.1)
       '@vitest/utils': 4.0.18
       magic-string: 0.30.21
       pixelmatch: 7.1.0
@@ -10318,7 +10318,7 @@ packages:
       react: 19.2.5
     dev: false
 
-  file:packages/web(@legendapp/state@3.0.0-beta.44)(@usels/core@0.10.0)(react@19.2.5):
+  file:packages/web(@legendapp/state@3.0.0-beta.44)(@usels/core@0.11.0)(react@19.2.5):
     resolution: {directory: packages/web, type: directory}
     id: file:packages/web
     name: '@usels/web'
