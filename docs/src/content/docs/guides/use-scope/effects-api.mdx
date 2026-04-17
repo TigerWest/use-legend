@@ -3,12 +3,6 @@ title: Effects API
 description: Canonical reference for observe, watch, and whenever — the three scope-level effect primitives.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-
-<Aside type="note" title="Preview feature">
-This page documents `"use scope"`, an experimental API. Feedback welcome — the API may still evolve. Hook-based APIs are the stable recommendation for production code.
-</Aside>
-
 Effects in a scope subscribe to observable reads and run work when those reads change. Three primitives cover the common cases.
 
 All three register against the current scope and are automatically disposed when the scope tears down. Use them inside `"use scope"` blocks, `useScope` factories, or store setup functions.

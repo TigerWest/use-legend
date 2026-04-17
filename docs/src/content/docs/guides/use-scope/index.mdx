@@ -1,15 +1,9 @@
 ---
 title: Introduction
-description: The "use scope" directive — an experimental API for lifecycle-owned reactive code.
+description: The "use scope" directive — a lifecycle-owned reactive code API.
 sidebar:
   order: 0
 ---
-
-import { Aside } from '@astrojs/starlight/components';
-
-<Aside type="note" title="Preview feature">
-Feedback welcome — the API may still evolve. Hook-based APIs are the stable recommendation for production code.
-</Aside>
 
 ## The Problem
 
@@ -102,7 +96,6 @@ function Counter() {
 
 ## Tradeoffs
 
-- Experimental — the API is subject to change.
 - Team-level convention required. Scope code should not interleave with React hooks inside the same function.
 - Learning curve for debugging scope disposal.
 

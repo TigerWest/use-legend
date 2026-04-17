@@ -166,7 +166,6 @@ export default defineConfig({
             },
             {
               label: "Use Scope",
-              badge: { text: "Experimental", variant: "caution" },
               collapsed: true,
               items: [
                 { label: "Introduction", slug: "guides/use-scope" },
