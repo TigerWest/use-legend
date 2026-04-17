@@ -42,9 +42,25 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
     dangerouslyUseInProduction,
     actionTrackers: new Map<string, ActionTracker>(),
   }));
-
   React.useEffect(() => {
     value.mounted = true;
+
+    // Resume observers that were paused during a Strict Mode cleanup cycle.
+    // On the very first mount this is a no-op (no paused records yet).
+    for (const scope of value.scopes.values()) {
+      scope._resumeAll();
+    }
+
+    // Re-connect DevTools after Strict Mode remount (no-op on first mount
+    // because connectDevTools is already called during resolveStore).
+    if (process.env.NODE_ENV !== "production" || value.dangerouslyUseInProduction) {
+      void import("./devtools").then(({ connectDevTools }) => {
+        for (const [name, store] of value.registry) {
+          connectDevTools(name, store as Record<string, unknown>, value);
+        }
+      });
+    }
+
     const cleanups: (() => void)[] = [];
 
     // Execute onMount callbacks for all stores registered during initial render
@@ -71,26 +87,24 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
         }
       }
 
-      // Dispose all scopes (auto-unsubs observe() + runs onUnmount callbacks)
+      // Pause all observers — preserves records so _resumeAll() can restore them
+      // on the next mount (Strict Mode remount or actual remount).
+      // This mirrors useScope's _pauseAll/_resumeAll pattern.
       for (const scope of value.scopes.values()) {
         try {
-          scope.dispose();
+          scope._pauseAll();
         } catch (e) {
           console.error(e);
         }
       }
-      value.scopes.clear();
 
-      // Clean up registry — always clear synchronously to prevent stale hits
-      // (scopes.clear() is already synchronous above; registry must match)
+      // Clean up DevTools connection (dispose onChange listeners, disconnect).
+      // On Strict Mode remount, connectDevTools will re-establish the connection.
       if (process.env.NODE_ENV !== "production" || value.dangerouslyUseInProduction) {
         const registrySnapshot = new Map(value.registry);
-        value.registry.clear();
         void import("./devtools").then(({ cleanupDevTools }) => {
           cleanupDevTools(registrySnapshot);
         });
-      } else {
-        value.registry.clear();
       }
     };
   }, [value]);
