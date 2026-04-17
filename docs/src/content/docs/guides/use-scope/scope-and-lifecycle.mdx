@@ -90,6 +90,22 @@ Use hints for non-plain props such as functions, opaque objects, and React
 elements. In the example, `{ onCommit: "function" }` keeps the callback as a
 function value inside the observable props object.
 
+### Why `toObs()` Instead of `get()`
+
+The `get()` utility from `@usels/core` normalizes `DeepMaybeObservable` values, but it is a **plain function call**. The Babel plugin only detects `.get()` **method calls** (MemberExpression) to create reactive Memo boundaries. Using `get(props).field` in JSX will **not** trigger autoWrap — no fine-grained reactivity.
+
+`toObs()` converts props into an `Observable` object, so you can use `.get()` method calls that the plugin detects:
+
+```tsx
+// ❌ get() function — plugin cannot detect, no Memo boundary
+<h1>{get(props).title}</h1>
+
+// ✅ toObs() + .get() method — plugin auto-wraps
+"use scope"
+const props$ = toObs(props);
+<h1>{props$.title.get()}</h1>
+```
+
 ## useScope
 
 Use `useScope` directly when you need explicit props handling or when a build

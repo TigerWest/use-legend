@@ -1,0 +1,29 @@
+{
+  "name": "use-legend-skills",
+  "owner": {
+    "name": "use-legend",
+    "url": "https://github.com/TigerWest/use-legend"
+  },
+  "plugins": [
+    {
+      "name": "use-legend-functions",
+      "source": "./",
+      "description": "Skills for consuming @usels/core and @usels/web — Observable-native React utilities built on Legend-State. Covers 100+ hook references, custom hook authoring, scope components, best practices, and testing.",
+      "keywords": [
+        "use-legend",
+        "legend-state",
+        "react",
+        "observable",
+        "hooks",
+        "fine-grained-reactivity"
+      ],
+      "skills": [
+        "./skills/use-legend-hooks-catalog",
+        "./skills/use-legend-create-custom-hook",
+        "./skills/use-legend-scope-components",
+        "./skills/use-legend-best-practices",
+        "./skills/use-legend-testing-best-practices"
+      ]
+    }
+  ]
+}

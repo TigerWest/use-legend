@@ -4,16 +4,27 @@
 
 - Define the raw prop interface with plain types -- no `$` suffixes on fields.
 - Apply `DeepMaybeObservable<T>` at the **parameter** level, not per-field.
+- Inside `"use scope"`, convert props to Observable via `toObs()` -- then use `.get()` method for reactive reads.
+- **Never use `get()` function in JSX** -- `get()` is a plain function call, not a `.get()` MemberExpression. The Babel plugin only auto-tracks `.get()` method calls. `get(props).field` in JSX will NOT create a reactive Memo boundary.
 - Intermediate components receive and **pass through** observable fields as-is -- never eagerly unwrap.
-- Use `get(props).field` for a **reactive** read (registers tracking dependency).
-- Use `peek(props).field` for a **non-reactive** read (no tracking, always latest).
-- `children` is always a normal React prop, never observable. Access via `get({ children }).children as ReactNode` or destructure directly.
-- Callbacks: access via `peek(props).onCallback` -- non-reactive, always the latest reference.
+- `children` is always a normal React prop, never observable. Destructure it directly.
+- Callbacks: access via `peek(props).onCallback` or `props$.peek().onCallback` -- non-reactive, always the latest reference.
+
+## `get()` / `peek()` Function: Where They Belong
+
+The `get()` and `peek()` utility functions from `@usels/core` normalize `DeepMaybeObservable<T>` values. They are **not** autoWrap-compatible -- the Babel plugin does not detect them.
+
+| Context | Use `get()`/`peek()` function? | Use `.get()` method? |
+|---|---|---|
+| Inside `observe()` / computed `observable(() => ...)` | Yes -- reactive context, tracking works | Yes |
+| JSX expressions (`{...}`) | **No** -- plugin cannot detect, no Memo boundary | **Yes** -- plugin auto-wraps |
+| Event handlers | Use `peek()` / `.peek()` | Use `.peek()` |
 
 ## Typing Pattern
 
 ```tsx
-import { get, peek, type DeepMaybeObservable } from "@usels/core";
+import { toObs } from "@usels/core";
+import type { DeepMaybeObservable } from "@usels/core";
 import type { ReactNode } from "react";
 
 // 1. Define raw interface -- plain types, no $ suffixes
@@ -26,12 +37,15 @@ interface CardProps {
 
 // 2. DeepMaybeObservable wraps the raw type at the parameter level.
 //    Callers can pass plain values, per-field observables, or an outer Observable<CardProps>.
-function Card({ title, subtitle, onPress, children }: DeepMaybeObservable<CardProps>) {
+function Card({ children, ...rest }: DeepMaybeObservable<CardProps>) {
+  "use scope";
+  const props$ = toObs(rest);
+
   return (
-    <div onClick={() => peek({ onPress }).onPress?.()}>
-      <CardTitle title={title} />        {/* pass through -- no .get() */}
-      <CardSubtitle subtitle={subtitle} />
-      {get({ children }).children as ReactNode}
+    <div onClick={() => props$.onPress.peek()?.()}>
+      <CardTitle title={props$.title} />   {/* pass Observable field -- no .get() */}
+      <CardSubtitle subtitle={props$.subtitle} />
+      {children}
     </div>
   );
 }
@@ -42,48 +56,64 @@ function Card({ title, subtitle, onPress, children }: DeepMaybeObservable<CardPr
 ```
 Root ("use scope")          --> creates observable state
   +-- Intermediate          --> receives DeepMaybeObservable<Props>, passes through
-       +-- Leaf             --> calls get() / .get() inline in JSX for rendering
+       +-- Leaf             --> converts via toObs(), calls .get() inline in JSX
 ```
 
-- **Root**: creates observables via `useScope` or `observable()`.
+- **Root**: creates observables via `"use scope"` or `observable()`.
 - **Intermediate**: receives `DeepMaybeObservable<Props>`, forwards fields to children untouched.
-- **Leaf**: reads values reactively with `get(props).field` or `.get()` inline in JSX. The babel plugin auto-tracks these calls.
+- **Leaf**: converts props via `toObs()`, reads values with `.get()` inline in JSX. The babel plugin auto-tracks `.get()` method calls.
+
+## Anti-pattern: `get()` Function in JSX
+
+```tsx
+// ❌ BAD -- get() is a function call, Babel plugin cannot detect it
+// No Memo boundary created, no fine-grained reactivity
+function Card(props: DeepMaybeObservable<CardProps>) {
+  return <h1>{get(props).title}</h1>;
+}
+
+// ✅ GOOD -- toObs() + .get() method, Babel plugin auto-tracks
+function Card(props: DeepMaybeObservable<CardProps>) {
+  "use scope";
+  const props$ = toObs(props);
+  return <h1>{props$.title.get()}</h1>;
+}
+```
 
 ## Anti-pattern: Eager Unwrap in Intermediate Components
 
 ```tsx
-// BAD -- intermediate component kills reactivity; title becomes a snapshot
+// ❌ BAD -- intermediate component kills reactivity; title becomes a snapshot
 function CardContainer(props: DeepMaybeObservable<CardProps>) {
-  const title = get(props).title;  // snapshot at intermediate level
-  return <Card title={title} />;   // child never re-renders on title change
+  "use scope";
+  const props$ = toObs(props);
+  const title = props$.title.get();     // snapshot at intermediate level
+  return <Card title={title} />;        // child never re-renders on title change
 }
 
-// GOOD -- pass through; let the leaf read
+// ✅ GOOD -- pass through; let the leaf read
 function CardContainer(props: DeepMaybeObservable<CardProps>) {
   return <Card title={props.title} />;
 }
 ```
 
-Why: `get(props).title` resolves the value **now** and returns a plain string. Passing that string to `<Card>` means the child component receives a static snapshot. When the original observable changes, the child will not re-render.
+Why: `.get()` resolves the value **now** and returns a plain string. Passing that string to `<Card>` means the child component receives a static snapshot. When the original observable changes, the child will not re-render.
 
-Passing `props.title` preserves the `MaybeObservable<string>` wrapper. The leaf component calls `get()` inline, which registers a reactive tracking dependency at the right level.
+Passing `props.title` preserves the `MaybeObservable<string>` wrapper. The leaf component converts via `toObs()` and calls `.get()` inline, which registers a reactive tracking dependency at the right level.
 
 ## `children` Handling
 
-`children` is always a normal React prop. Never attempt to make it observable.
+`children` is always a normal React prop. Never attempt to make it observable. Destructure it before passing the rest to `toObs()`.
 
 ```tsx
-// GOOD -- destructure directly
+// ✅ GOOD -- destructure children, toObs the rest
 function Wrapper({ children, ...rest }: DeepMaybeObservable<WrapperProps>) {
-  return <div>{children}</div>;
-}
-
-// GOOD -- extract via get() wrapper
-function Wrapper({ title, children }: DeepMaybeObservable<WrapperProps>) {
+  "use scope";
+  const props$ = toObs(rest);
   return (
     <div>
-      <h1>{get({ title }).title}</h1>
-      {get({ children }).children as ReactNode}
+      <h1>{props$.title.get()}</h1>
+      {children}
     </div>
   );
 }
@@ -91,22 +121,26 @@ function Wrapper({ title, children }: DeepMaybeObservable<WrapperProps>) {
 
 ## Callback Handling
 
-Callbacks should be accessed via `peek()` -- non-reactive, always the latest reference. Never use `get()` for callbacks; there is no reason to track them reactively.
+Callbacks should be accessed via `.peek()` -- non-reactive, always the latest reference. Never use `.get()` for callbacks; there is no reason to track them reactively.
 
 ```tsx
-// GOOD -- peek for callbacks in event handlers
+// ✅ GOOD -- .peek() for callbacks in event handlers
 function Toggle(props: DeepMaybeObservable<ToggleProps>) {
+  "use scope";
+  const props$ = toObs(props);
   return (
-    <button onClick={() => peek(props).onToggle?.()}>
-      {get(props).label}
+    <button onClick={() => props$.onToggle.peek()?.()}>
+      {props$.label.get()}
     </button>
   );
 }
 
-// GOOD -- destructure with peek() when multiple callbacks are needed
+// ✅ GOOD -- peek() when multiple callbacks are needed
 function Form(props: DeepMaybeObservable<FormProps>) {
+  "use scope";
+  const props$ = toObs(props);
   const handleSubmit = () => {
-    const { onSubmit, onValidate } = peek(props);
+    const { onSubmit, onValidate } = props$.peek();
     if (onValidate?.()) {
       onSubmit?.();
     }
@@ -119,8 +153,9 @@ function Form(props: DeepMaybeObservable<FormProps>) {
 
 | What you need | How to access | Reactive? |
 |---|---|---|
-| Render a prop value in JSX | `get(props).field` or inline `.get()` | Yes |
+| Render a prop value in JSX | `props$.field.get()` (after `toObs()`) | Yes (autoWrap) |
 | Pass prop to a child component | `props.field` (pass through) | Preserved |
-| Fire a callback | `peek(props).onCallback?.()` | No |
-| Access `children` | destructure or `get({ children }).children as ReactNode` | No |
-| One-time mount read | `peek(props).field` | No |
+| Fire a callback | `props$.onCallback.peek()?.()` | No |
+| Access `children` | destructure directly | No |
+| One-time mount read | `props$.peek().field` | No |
+| Read in `observe()` / computed | `props$.get().field` or `props$.field.get()` | Yes (reactive context) |

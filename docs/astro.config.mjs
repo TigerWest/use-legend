@@ -148,16 +148,10 @@ export default defineConfig({
               collapsed: true,
               items: [
                 {
-                  label: "Local Draft, Global Commit",
-                  slug: "guides/patterns/local-draft-global-commit",
-                },
-                {
                   label: "Derived State & Effects",
                   slug: "guides/patterns/derived-state-and-effects",
                 },
-                { label: "Persisted State", slug: "guides/patterns/persisted-state" },
                 { label: "Data Fetching", slug: "guides/patterns/data-fetching" },
-                { label: "Utility Hooks", slug: "guides/patterns/utility-hooks" },
                 { label: "TypeScript", slug: "guides/patterns/typescript" },
               ],
             },

@@ -100,6 +100,22 @@ Use `count$.get()` inline in the JSX instead.
 
 **`.get().map()` re-renders the entire list.** Use `<For each={obs$}>` for observable arrays — see [Rendering Boundaries → For](/use-legend/guides/concepts/rendering-boundaries/#for).
 
+**`get()` function calls are not tracked.** The `get()` utility from `@usels/core` is a plain function call (`CallExpression`), not a `.get()` method call (`MemberExpression`). The plugin cannot detect it — no Memo boundary is created. When working with `DeepMaybeObservable` props, convert them via `toObs()` inside a scope and use `.get()` method instead:
+
+```tsx
+// ❌ get() function — plugin cannot detect, no Memo boundary
+function Card(props: DeepMaybeObservable<CardProps>) {
+  return <h1>{get(props).title}</h1>;
+}
+
+// ✅ toObs() + .get() method — plugin auto-tracks
+function Card(props: DeepMaybeObservable<CardProps>) {
+  "use scope";
+  const props$ = toObs(props);
+  return <h1>{props$.title.get()}</h1>;
+}
+```
+
 **`.get()` outside JSX or outside a reactive context is a plain read.** If you need to react to changes as a side-effect, use `useObserve`. If you need a derived observable, use `useObservable(() => ...)`.
 
 ## Setup

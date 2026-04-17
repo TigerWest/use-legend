@@ -186,6 +186,29 @@ pnpm lint
 - Node >= 18.0.0
 - pnpm >= 8.0.0
 
+## Claude Code Skills Plugin
+
+This repository also ships a [Claude Code](https://docs.anthropic.com/en/docs/claude-code) marketplace with one plugin:
+
+```
+/plugin marketplace add TigerWest/use-legend
+/plugin install use-legend-functions@use-legend-skills
+```
+
+Includes 5 skills:
+
+- `use-legend-hooks-catalog` — reference for 100+ hooks in `@usels/core` and `@usels/web`
+- `use-legend-create-custom-hook` — authoring custom reactive utilities
+- `use-legend-scope-components` — components with the `"use scope"` directive
+- `use-legend-best-practices` — naming, refs, reactive anti-patterns
+- `use-legend-testing-best-practices` — rerender, lifecycle, reactive options
+
+Regenerate the hook catalog after source changes:
+
+```sh
+pnpm skills:build
+```
+
 ## License
 
 MIT
