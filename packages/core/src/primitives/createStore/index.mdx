@@ -169,32 +169,6 @@ const [useDocStore] = createStore("doc", () => {
 });
 ```
 
-### Lazy init limitation
-
-`onMount` is only called for stores that are **first accessed during the initial render** (before `StoreProvider`'s `useEffect` runs). Stores accessed for the first time after the provider has mounted will not have their `onMount` callbacks executed.
-
-```tsx
-// ✅ Store accessed in initial render — onMount fires
-function App() {
-  return (
-    <StoreProvider>
-      <ComponentThatUsesStore />
-    </StoreProvider>
-  );
-}
-
-// ⚠️ Store accessed after mount — onMount does NOT fire
-function App() {
-  const [show, setShow] = useState(false);
-  return (
-    <StoreProvider>
-      <button onClick={() => setShow(true)}>Show</button>
-      {show && <ComponentThatUsesStore />}
-    </StoreProvider>
-  );
-}
-```
-
 ### Redux DevTools integration
 
 Stores auto-connect to Redux DevTools Extension in development mode.

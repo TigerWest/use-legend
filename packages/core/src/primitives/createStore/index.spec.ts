@@ -488,15 +488,14 @@ describe("effectScope integration", () => {
     });
   });
 
-  describe("lazy init limitation", () => {
-    it("onMount is NOT called for stores first accessed after StoreProvider mount", async () => {
+  describe("late-mount lifecycle", () => {
+    it("onMount fires for stores first accessed after StoreProvider mount", async () => {
       const mounted = vi.fn();
       const [useLate] = createStore("es-late-init", () => {
         onMount(mounted);
         return {};
       });
 
-      // Render without accessing useLate — StoreProvider mounts first
       const TestWrapper = ({ children }: { children: React.ReactNode }) =>
         React.createElement(StoreProvider, { children });
 
@@ -510,16 +509,16 @@ describe("effectScope integration", () => {
         }
       );
 
-      // StoreProvider already mounted, now access store for the first time
+      expect(mounted).not.toHaveBeenCalled();
+
       act(() => {
         rerender({ access: true });
       });
 
-      // onMount was NOT called because StoreProvider already ran its useEffect
-      expect(mounted).not.toHaveBeenCalled();
+      expect(mounted).toHaveBeenCalledTimes(1);
     });
 
-    it("onUnmount is NOT called for stores first accessed after StoreProvider mount", async () => {
+    it("onUnmount fires for stores first accessed after StoreProvider mount", async () => {
       const unmountCb = vi.fn();
       const [useLate] = createStore("es-late-unmount", () => {
         onUnmount(unmountCb);
@@ -539,15 +538,425 @@ describe("effectScope integration", () => {
         }
       );
 
-      // Access store after mount
       act(() => {
         rerender({ access: true });
       });
 
-      // Unmount — onUnmount was NOT called because the store was never part of the initial mount lifecycle
-      unmount();
       expect(unmountCb).not.toHaveBeenCalled();
+      unmount();
+      expect(unmountCb).toHaveBeenCalledTimes(1);
     });
+
+    it("onMount cleanup returned by late-mounted store runs on Provider unmount", () => {
+      const cleanup = vi.fn();
+      const [useLate] = createStore("es-late-cleanup", () => {
+        onMount(() => cleanup);
+        return {};
+      });
+
+      const { rerender, unmount } = renderHook(
+        ({ access }: { access: boolean }) => {
+          if (access) useLate();
+        },
+        {
+          wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+          initialProps: { access: false },
+        }
+      );
+
+      act(() => {
+        rerender({ access: true });
+      });
+
+      expect(cleanup).not.toHaveBeenCalled();
+      unmount();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+
+    it("late-mounted store mixed with initial-mounted store: both onMount fire", () => {
+      const earlyMount = vi.fn();
+      const lateMount = vi.fn();
+      const [useEarly] = createStore("es-mix-early", () => {
+        onMount(earlyMount);
+        return {};
+      });
+      const [useLate] = createStore("es-mix-late", () => {
+        onMount(lateMount);
+        return {};
+      });
+
+      const { rerender } = renderHook(
+        ({ access }: { access: boolean }) => {
+          useEarly();
+          if (access) useLate();
+        },
+        {
+          wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+          initialProps: { access: false },
+        }
+      );
+
+      expect(earlyMount).toHaveBeenCalledTimes(1);
+      expect(lateMount).not.toHaveBeenCalled();
+
+      act(() => {
+        rerender({ access: true });
+      });
+
+      expect(earlyMount).toHaveBeenCalledTimes(1);
+      expect(lateMount).toHaveBeenCalledTimes(1);
+    });
+
+    it("multiple late-mounted stores: each onMount fires exactly once", () => {
+      const mountA = vi.fn();
+      const mountB = vi.fn();
+      const [useA] = createStore("es-late-multi-a", () => {
+        onMount(mountA);
+        return {};
+      });
+      const [useB] = createStore("es-late-multi-b", () => {
+        onMount(mountB);
+        return {};
+      });
+
+      const { rerender } = renderHook(
+        ({ step }: { step: number }) => {
+          if (step >= 1) useA();
+          if (step >= 2) useB();
+        },
+        {
+          wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+          initialProps: { step: 0 },
+        }
+      );
+
+      expect(mountA).not.toHaveBeenCalled();
+      expect(mountB).not.toHaveBeenCalled();
+
+      act(() => {
+        rerender({ step: 1 });
+      });
+      expect(mountA).toHaveBeenCalledTimes(1);
+      expect(mountB).not.toHaveBeenCalled();
+
+      act(() => {
+        rerender({ step: 2 });
+      });
+      expect(mountA).toHaveBeenCalledTimes(1);
+      expect(mountB).toHaveBeenCalledTimes(1);
+    });
+
+    it("late-mounted store accessed twice only fires onMount once", () => {
+      const mounted = vi.fn();
+      const [useLate] = createStore("es-late-once", () => {
+        onMount(mounted);
+        return { v: 1 };
+      });
+
+      const { rerender } = renderHook(
+        ({ access }: { access: boolean }) => {
+          if (access) {
+            useLate();
+            useLate();
+          }
+        },
+        {
+          wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+          initialProps: { access: false },
+        }
+      );
+
+      act(() => {
+        rerender({ access: true });
+      });
+
+      expect(mounted).toHaveBeenCalledTimes(1);
+    });
+
+    it("throwing onMount in a late-mounted store does not prevent the store from resolving", () => {
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      const [useLate] = createStore("es-late-throw", () => {
+        onMount(() => {
+          throw new Error("late mount boom");
+        });
+        return { v: 99 };
+      });
+
+      const { rerender, result } = renderHook(
+        ({ access }: { access: boolean }) => {
+          if (access) return useLate();
+          return null;
+        },
+        {
+          wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+          initialProps: { access: false },
+        }
+      );
+
+      act(() => {
+        rerender({ access: true });
+      });
+
+      expect(result.current?.v).toBe(99);
+      expect(consoleError).toHaveBeenCalled();
+      consoleError.mockRestore();
+    });
+
+    it("late-mounted store's cleanups run in reverse order together with initial cleanups (LIFO)", () => {
+      const order: string[] = [];
+      const [useEarly] = createStore("es-late-order-early", () => {
+        onMount(() => () => order.push("early"));
+        return {};
+      });
+      const [useLate] = createStore("es-late-order-late", () => {
+        onMount(() => () => order.push("late"));
+        return {};
+      });
+
+      const { rerender, unmount } = renderHook(
+        ({ access }: { access: boolean }) => {
+          useEarly();
+          if (access) useLate();
+        },
+        {
+          wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+          initialProps: { access: false },
+        }
+      );
+
+      act(() => {
+        rerender({ access: true });
+      });
+
+      unmount();
+      // late-mounted cleanup was registered later → runs first (LIFO)
+      expect(order).toEqual(["late", "early"]);
+    });
+
+    it("observe() inside a late-mounted store is active after resolution", () => {
+      const seen: number[] = [];
+      const src$ = observable(0);
+      const [useLate] = createStore("es-late-observe", () => {
+        // observe imported via useScope factory elsewhere; here we rely on setup running inside scope.run
+        // Use onMount to subscribe to simulate reactive wiring that depends on mount lifecycle.
+        onMount(() => {
+          const unsub = src$.onChange(({ value }) => seen.push(value));
+          return () => unsub();
+        });
+        return {};
+      });
+
+      const { rerender, unmount } = renderHook(
+        ({ access }: { access: boolean }) => {
+          if (access) useLate();
+        },
+        {
+          wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+          initialProps: { access: false },
+        }
+      );
+
+      act(() => {
+        rerender({ access: true });
+      });
+
+      act(() => {
+        src$.set(1);
+        src$.set(2);
+      });
+      expect(seen).toEqual([1, 2]);
+
+      unmount();
+      act(() => {
+        src$.set(3);
+      });
+      // cleanup ran → no more updates
+      expect(seen).toEqual([1, 2]);
+    });
+  });
+});
+
+describe("late-mount render-phase safety exploration", () => {
+  it("StrictMode: late-mounted store's onMount fires exactly once (not doubled)", () => {
+    const mounted = vi.fn();
+    const [useLate] = createStore("rp-strict-once", () => {
+      onMount(mounted);
+      return {};
+    });
+
+    const Wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.StrictMode, null, React.createElement(StoreProvider, { children }));
+
+    const { rerender } = renderHook(
+      ({ access }: { access: boolean }) => {
+        if (access) useLate();
+      },
+      {
+        wrapper: Wrapper,
+        initialProps: { access: false },
+      }
+    );
+
+    expect(mounted).not.toHaveBeenCalled();
+
+    act(() => {
+      rerender({ access: true });
+    });
+
+    // In StrictMode, render runs twice. registry.has guard prevents re-resolve
+    // so _mountCbs should fire exactly once.
+    expect(mounted).toHaveBeenCalledTimes(1);
+  });
+
+  it("StrictMode: late-mount cleanup is symmetric with onMount (no leak)", () => {
+    const mounted = vi.fn();
+    const cleanup = vi.fn();
+    const [useLate] = createStore("rp-strict-cleanup", () => {
+      onMount(() => {
+        mounted();
+        return cleanup;
+      });
+      return {};
+    });
+
+    const Wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.StrictMode, null, React.createElement(StoreProvider, { children }));
+
+    const { rerender, unmount } = renderHook(
+      ({ access }: { access: boolean }) => {
+        if (access) useLate();
+      },
+      {
+        wrapper: Wrapper,
+        initialProps: { access: false },
+      }
+    );
+
+    act(() => {
+      rerender({ access: true });
+    });
+
+    unmount();
+    // Each onMount call should have a matching cleanup call.
+    expect(cleanup).toHaveBeenCalledTimes(mounted.mock.calls.length);
+  });
+
+  it("late-mounted store whose onMount mutates another store's observable does not warn", () => {
+    const warn = vi.spyOn(console, "error").mockImplementation(() => {});
+    const [useTarget] = createStore("rp-target", () => {
+      const value$ = observable(0);
+      return { value$ };
+    });
+    const [useMutator] = createStore("rp-mutator", () => {
+      onMount(() => {
+        // cross-store mutation during late mount — runs in render phase
+        useTarget().value$.set(42);
+      });
+      return {};
+    });
+
+    const { rerender } = renderHook(
+      ({ access }: { access: boolean }) => {
+        useTarget(); // resolved at initial render so target scope exists
+        if (access) useMutator();
+      },
+      {
+        wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+        initialProps: { access: false },
+      }
+    );
+
+    act(() => {
+      rerender({ access: true });
+    });
+
+    // Snapshot React warnings triggered by render-phase mutation.
+    const renderPhaseWarnings = warn.mock.calls.filter((call) =>
+      String(call[0] ?? "").includes("Cannot update a component")
+    );
+    // Documented expectation: legend-state mutations during render don't trip React's
+    // "Cannot update a component" warning because they flow through legend-state, not setState.
+    expect(renderPhaseWarnings).toHaveLength(0);
+    warn.mockRestore();
+  });
+
+  it("late-mount path: onMount runs synchronously between setup and useStore() return", () => {
+    const order: string[] = [];
+    const [useLate] = createStore("rp-sync-visible", () => {
+      order.push("setup");
+      onMount(() => {
+        order.push("onMount");
+      });
+      return {};
+    });
+
+    // Initial render: Provider mounts without accessing useLate — useEffect runs, value.mounted = true
+    // Second render (after access=true): useLate is accessed for the first time → late-mount path
+    const { rerender } = renderHook(
+      ({ access }: { access: boolean }) => {
+        if (!access) return;
+        order.push("before useLate");
+        useLate();
+        order.push("after useLate");
+      },
+      {
+        wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+        initialProps: { access: false },
+      }
+    );
+
+    // Baseline: provider-only mount — no setup/onMount yet
+    expect(order).toEqual([]);
+
+    act(() => {
+      rerender({ access: true });
+    });
+
+    // Late-mount path: setup and onMount both run synchronously *before* useLate() returns.
+    // This is the render-phase side effect we wanted to characterize.
+    expect(order).toEqual(["before useLate", "setup", "onMount", "after useLate"]);
+  });
+
+  it("store setup that throws synchronously during late mount leaves registry clean (no partial state)", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    let attempt = 0;
+    const [useFlaky] = createStore("rp-flaky", () => {
+      attempt++;
+      if (attempt === 1) throw new Error("setup boom");
+      return { v: "ok" };
+    });
+
+    const { rerender, result } = renderHook(
+      ({ access }: { access: boolean }) => {
+        if (!access) return null;
+        try {
+          return useFlaky();
+        } catch {
+          return null;
+        }
+      },
+      {
+        wrapper: ({ children }) => React.createElement(StoreProvider, { children }),
+        initialProps: { access: false },
+      }
+    );
+
+    // First access throws in setup
+    act(() => {
+      rerender({ access: true });
+    });
+    expect(result.current).toBeNull();
+
+    // Second access — setup should be allowed to retry (registry should not hold a broken entry)
+    act(() => {
+      rerender({ access: false });
+    });
+    act(() => {
+      rerender({ access: true });
+    });
+    // Document actual behavior: registry.has check gates on throw; the store should resolve on retry.
+    expect(result.current?.v).toBe("ok");
+    consoleError.mockRestore();
   });
 });
 

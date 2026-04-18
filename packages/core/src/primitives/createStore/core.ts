@@ -104,6 +104,20 @@ function resolveStore<T>(name: string, setup: () => T, value: StoreRegistryValue
         scope._beforeMountCbs.length = 0;
       }
 
+      // Late-mount path: if the StoreProvider already ran its useEffect,
+      // execute onMount callbacks now and push returned cleanups into the
+      // provider's shared cleanups list so they drain on provider unmount.
+      if (value.mounted) {
+        for (const cb of scope._mountCbs) {
+          try {
+            const r = cb();
+            if (typeof r === "function") value.cleanups.push(r);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+
       if (process.env.NODE_ENV !== "production" || value.dangerouslyUseInProduction) {
         const store = instance as Record<string, unknown>;
         wrapStoreActions(name, store, value.actionTrackers);

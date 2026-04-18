@@ -16,6 +16,7 @@ function createTestValue(): StoreRegistryValue {
     mounted: false,
     dangerouslyUseInProduction: false,
     actionTrackers: new Map(),
+    cleanups: [],
   };
 }
 

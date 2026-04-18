@@ -15,6 +15,13 @@ export interface StoreRegistryValue {
   mounted: boolean;
   dangerouslyUseInProduction: boolean;
   actionTrackers: Map<string, ActionTracker>;
+  /**
+   * Cleanup functions returned by store `onMount` callbacks.
+   * Populated both by `StoreProvider`'s useEffect (for stores registered during initial render)
+   * and by `resolveStore` (for stores first accessed after the provider mounted).
+   * Drained in LIFO order when the provider unmounts.
+   */
+  cleanups: Array<() => void>;
 }
 
 export const StoreRegistryContext = React.createContext<StoreRegistryValue | null>(null);

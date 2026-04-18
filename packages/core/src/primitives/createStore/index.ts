@@ -25,11 +25,14 @@ export function useStoreRegistry(): StoreRegistryValue | null {
  * Each StoreProvider creates its own isolated registry (SSR safe).
  *
  * Stores are lazily initialized on first access via `useStore()`.
- * StoreProvider is responsible for executing onMount/onUnmount lifecycle callbacks.
+ * StoreProvider is responsible for draining onMount cleanup callbacks on unmount.
  *
- * Lazy init limitation: onMount is only called for stores first accessed during
- * the initial render (before StoreProvider's useEffect runs). Stores accessed
- * after mount will NOT have their onMount callbacks executed.
+ * Lifecycle timing:
+ * - Stores first accessed during the initial render have their `onMount` callbacks
+ *   executed inside `StoreProvider`'s `useEffect`.
+ * - Stores first accessed after the provider has mounted (e.g. behind conditional
+ *   rendering) have their `onMount` callbacks executed immediately inside
+ *   `resolveStore`. Cleanup functions are still drained on provider unmount.
  */
 export const StoreProvider: React.FC<StoreProviderProps> = ({
   children,
@@ -41,6 +44,7 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
     mounted: false,
     dangerouslyUseInProduction,
     actionTrackers: new Map<string, ActionTracker>(),
+    cleanups: [],
   }));
   React.useEffect(() => {
     value.mounted = true;
@@ -61,14 +65,14 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
       });
     }
 
-    const cleanups: (() => void)[] = [];
-
-    // Execute onMount callbacks for all stores registered during initial render
+    // Execute onMount callbacks for all stores registered during initial render.
+    // Cleanups are appended to value.cleanups so that resolveStore (late-mount path)
+    // can push its own cleanups into the same LIFO list.
     for (const scope of value.scopes.values()) {
       for (const cb of scope._mountCbs) {
         try {
           const r = cb();
-          if (typeof r === "function") cleanups.push(r);
+          if (typeof r === "function") value.cleanups.push(r);
         } catch (e) {
           console.error(e);
         }
@@ -78,14 +82,15 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
     return () => {
       value.mounted = false;
 
-      // Run onMount cleanup functions in reverse order (LIFO)
-      for (let i = cleanups.length - 1; i >= 0; i--) {
+      // Run all onMount cleanups (initial + late-mounted) in reverse order (LIFO)
+      for (let i = value.cleanups.length - 1; i >= 0; i--) {
         try {
-          cleanups[i]();
+          value.cleanups[i]();
         } catch (e) {
           console.error(e);
         }
       }
+      value.cleanups.length = 0;
 
       // Pause all observers — preserves records so _resumeAll() can restore them
       // on the next mount (Strict Mode remount or actual remount).
