@@ -246,7 +246,7 @@ useScope(() => {
 
 When a function accepts a DOM element, use `MaybeElement` as the parameter type.
 This allows callers to pass a `Ref$` ref, a raw element, or an Observable element.
-`MaybeElement` works in **both** core functions and hooks — `getElement()` / `peekElement()` are pure functions with no React dependency.
+`MaybeElement` works in **both** core functions and hooks — resolve it via the `get()` / `peek()` utilities from `@utilities/get` and `@utilities/peek` (method form `.get()` / `.peek()` is not available on `MaybeObservable` types).
 
 ```ts
 // ❌ Bad — raw HTMLElement only
@@ -260,19 +260,25 @@ function useMyHook(element: MaybeElement) { ... }
 
 ### Resolving MaybeElement Internally
 
-Use `getElement` / `peekElement` / `isRef$` from `useRef$`.
-These are **pure functions** — usable in both core functions and hooks.
+Resolve `MaybeElement` with the `get()` utility (reactive) / `peek()` utility (non-reactive).
+Use `isRef$` from `useRef$` only when you need to distinguish `Ref$` from other shapes.
+
+> `MaybeElement` is a `MaybeObservable` union, so the method form `.get()` / `.peek()`
+> is not callable on the parameter directly. Import the utility functions from
+> `@utilities/get` and `@utilities/peek` instead — they handle plain values,
+> Observables, and `Ref$` uniformly.
 
 #### In a Core Function (uses `observe`)
 
 ```ts
-import { getElement, peekElement } from "../useRef$";
+import { get } from "@utilities/get";
+import { peek } from "@utilities/peek";
 
 function createElementSize(target: MaybeElement): { size$: Observable<Size> } {
   const size$ = observable({ width: 0, height: 0 });
 
   observe(() => {
-    const el = getElement(target); // reactive tracking registered
+    const el = get(target); // reactive tracking registered
     if (!el || !(el instanceof HTMLElement)) return;
     // ResizeObserver setup...
   });
@@ -288,18 +294,20 @@ function createElementSize(target: MaybeElement): { size$: Observable<Size> } {
 #### In a Hook (uses `useScope`)
 
 ```ts
-import { getElement, peekElement, isRef$ } from "../useRef$";
+import { get } from "@utilities/get";
+import { peek } from "@utilities/peek";
+import { isRef$ } from "../useRef$";
 
 function useMyHook(element: MaybeElement) {
   return useScope(() => {
     observe(() => {
       // Reactive read — registers tracking dependency on Ref$ or Observable element
-      const el = getElement(element);
+      const el = get(element);
       if (el) setup(el);
     });
 
     // Non-reactive read
-    const el = peekElement(element);
+    const el = peek(element);
   });
 }
 ```
@@ -613,47 +621,23 @@ useScope(
 
 Pass an optional `FieldTransformMap<T>` as the second argument to control how each field is resolved.
 
-| Hint                      | Behavior                                                                 | Use when                                    |
-| ------------------------- | ------------------------------------------------------------------------ | ------------------------------------------- |
-| _(omitted)_ / `'default'` | no-op — Legend-State auto-derefs + registers dep at call site            | reactive plain fields (default)             |
-| `'element'`               | `getElement(fieldValue)` (reactive) + `ObservableHint.opaque()`          | `MaybeElement` fields                       |
-| `'opaque'`                | `get(fieldValue)` + `ObservableHint.opaque()`                            | non-element objects needing opaque wrapping |
-| `'plain'`                 | `get(fieldValue)` + `ObservableHint.plain()`                             | prevent nested auto-deref                   |
-| `'function'`              | `get(fieldValue)` + `ObservableHint.function()` **⚠️ see warning below** | **avoid** — see callback-prop section       |
-| `(value) => R`            | custom transform function                                                | escape hatch for complex cases              |
+| Hint                      | Behavior                                                      | Use when                                    |
+| ------------------------- | ------------------------------------------------------------- | ------------------------------------------- | --- |
+| _(omitted)_ / `'default'` | no-op — Legend-State auto-derefs + registers dep at call site | reactive plain fields (default)             |
+| `'opaque'`                | `get(fieldValue)` + `ObservableHint.opaque()`                 | non-element objects needing opaque wrapping |
+| `'plain'`                 | `get(fieldValue)` + `ObservableHint.plain()`                  | prevent nested auto-deref                   |     |
+| `(value) => R`            | custom transform function                                     | escape hatch for complex cases              |
 
 > **Note:** Object-form hints are skipped when `options` is an outer `Observable<T>`.
 > In that case, `opts$` proxies `options$` directly (preserving reference-equality tracking).
 > Use per-field Observables or plain objects when per-field hints are needed.
 
-### Standard Pattern (with HTMLElement field)
-
-Use `'element'` hint for `MaybeElement` fields.
-`getElement()` in a reactive context registers dep on Ref$ mount/unmount and handles opaque wrapping automatically.
-
-```ts
-interface UseMyHookOptions {
-  scrollTarget?: MaybeElement;
-  rootMargin?: string;
-}
-
-function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
-  return useScope((p) => {
-    const p$ = toObs(p, {
-      scrollTarget: "element", // resolves Ref$/Observable<Element> reactively, wraps in opaque
-    });
-
-    observe(() => {
-      const root = p$.get().scrollTarget; // OpaqueObject<HTMLElement> | null
-      const rootMargin = p$.get().rootMargin;
-      setup({ root, rootMargin });
-    });
-  }, options ?? {});
-}
-```
-
-> `'element'` internally calls `getElement(fieldValue)` → registers dep on Ref$'s internal Observable.
-> When Ref$ mounts, `p$` recomputes → `p$.scrollTarget` updates → `observe` re-runs.
+> **`MaybeElement` fields — no hint at the `toObs` layer.**
+> Pass the field through `toObs(p)` without a hint and resolve it inside
+> `observe(() => get(p$.scrollTarget))` (import `get` from `@utilities/get`).
+> A single `get()` call handles both the `toObs` proxy field and the inner
+> Ref$/Observable/raw element — reactive dependency is registered and the
+> element is returned directly. There is no per-field `toObs` hint for elements.
 
 ### Standard Pattern (with callback fields)
 
