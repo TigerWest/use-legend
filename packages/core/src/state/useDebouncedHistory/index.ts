@@ -25,7 +25,7 @@ export type UseDebouncedHistory = typeof createDebouncedHistory;
 export const useDebouncedHistory: UseDebouncedHistory = (source$, options) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { dump: "function", parse: "function", shouldCommit: "function" });
+      const p$ = toObs(p);
       return createDebouncedHistory(source$, p$);
     },
     (options ?? {}) as Record<string, unknown>

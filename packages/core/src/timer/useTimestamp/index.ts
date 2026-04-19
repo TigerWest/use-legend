@@ -10,7 +10,7 @@ export type UseTimestamp = typeof createTimestamp;
 export const useTimestamp: UseTimestamp = (options = {}) => {
   return useScope(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- createTimestamp has discriminated overloads on controls: true/false
-    (opts): any => createTimestamp(toObs(opts, { callback: "function" }) as any),
+    (opts): any => createTimestamp(toObs(opts) as any),
     options
   );
 };

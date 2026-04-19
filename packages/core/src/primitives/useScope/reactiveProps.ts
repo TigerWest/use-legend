@@ -209,7 +209,7 @@ export function syncProps<P extends object>(ctx: ScopePropsCtx<P>, next: P): voi
  * `observable(observable)` returning itself. Hints are skipped in this case.
  *
  * @param p - The ReactiveProps proxy from `useScope`
- * @param hints - Optional hint spec: scalar `'opaque'`|`'plain'`|`'function'` or per-field/nested map
+ * @param hints - Optional hint spec: scalar `'opaque'`|`'plain'` or per-field/nested map
  *
  * @example
  * ```ts
@@ -219,10 +219,27 @@ export function syncProps<P extends object>(ctx: ScopePropsCtx<P>, next: P): voi
  *   observe(() => console.log(obs$.count.get()))
  *
  *   // non-plain fields — specify hints
- *   const obs2$ = toObs(p, { onClick: 'function', data: 'opaque' })
+ *   const obs2$ = toObs(p, { data: 'opaque' })
  *
  *   return {}
  * }, props)
+ * ```
+ *
+ * ### Callback props — use raw prop access, not a hint
+ *
+ * Dispatch callbacks through the raw proxy (`p.onX?.(...)`) or via
+ * `p$.peek().onX?.(...)`. Both paths resolve to the latest closure on each
+ * render. See `packages/core/src/shared/hints.spec.ts` for the pinned
+ * behavior contract of Legend-State's `ObservableHint.function` primitive.
+ *
+ * ```ts
+ * useScope((p) => {
+ *   const p$ = toObs(p); // no hint for onSubmit
+ *   observe(() => {
+ *     // when the event fires:
+ *     p.onSubmit?.(data); // raw-prop path — always latest closure
+ *   });
+ * }, { onSubmit });
  * ```
  */
 export function toObs<P extends object, H extends NestedHintSpec<P> = never>(

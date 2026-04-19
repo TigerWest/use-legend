@@ -25,13 +25,9 @@ export const useMutation: UseMutation = <TData = unknown, TVariables = void, TCo
 ): Observable<MutationState<TData, TVariables, TContext>> => {
   return useScope(
     (opts) => {
-      const opts$ = toObs(opts, {
-        mutationFn: "function",
-        onMutate: "function",
-        onSuccess: "function",
-        onError: "function",
-        onSettled: "function",
-      }) as unknown as Observable<CreateMutationOptions<TData, TVariables, TContext>>;
+      const opts$ = toObs(opts) as unknown as Observable<
+        CreateMutationOptions<TData, TVariables, TContext>
+      >;
       return createMutation<TData, TVariables, TContext>(opts$);
     },
     (options ?? {}) as Record<string, unknown>

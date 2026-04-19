@@ -13,9 +13,6 @@ export const useWindowScroll: UseWindowScroll = (options = {}) => {
   return useScope(
     (opts) => {
       const opts$ = toObs(opts, {
-        onScroll: "function",
-        onStop: "function",
-        onError: "function",
         window: "opaque",
       });
       return createWindowScroll(opts$ as never);

@@ -9,8 +9,8 @@ export type UseOnLongPress = typeof createOnLongPress;
 export const useOnLongPress: UseOnLongPress = (target, handler, options = {}) => {
   return useScope(
     (cbs, options) => {
-      const cbs$ = toObs(cbs, { handler: "function" });
-      const options$ = toObs(options, { onMouseUp: "function" });
+      const cbs$ = toObs(cbs);
+      const options$ = toObs(options);
       return createOnLongPress(target, cbs$.handler, options$);
     },
     { handler },

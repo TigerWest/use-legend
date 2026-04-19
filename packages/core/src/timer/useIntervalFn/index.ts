@@ -17,7 +17,7 @@ export type UseIntervalFn = (
 export const useIntervalFn: UseIntervalFn = (cb, interval = 1000, options) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { cb: "function" });
+      const p$ = toObs(p);
       return createIntervalFn(
         (...args: unknown[]) => (p.cb as AnyFn)(...args),
         p$.interval as Observable<number>,

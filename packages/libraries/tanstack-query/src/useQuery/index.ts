@@ -38,9 +38,7 @@ export const useQuery: UseQuery = <TData = unknown>(
   const state$ = useScope(
     (opts) => {
       // queryKey stays untagged so resolveQueryKey handles Observable elements directly.
-      const opts$ = toObs(opts, { queryFn: "function" }) as unknown as Observable<
-        CreateQueryOptions<TData>
-      >;
+      const opts$ = toObs(opts) as unknown as Observable<CreateQueryOptions<TData>>;
       return createQuery<TData>(opts$);
     },
     (options ?? {}) as Record<string, unknown>

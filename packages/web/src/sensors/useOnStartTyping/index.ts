@@ -8,7 +8,7 @@ export type { OnStartTypingCallback } from "./core";
 export function useOnStartTyping(callback: (event: KeyboardEvent) => void): void {
   useScope(
     (p) => {
-      const p$ = toObs(p, { callback: "function" });
+      const p$ = toObs(p);
       createOnStartTyping(p$.callback);
       return {};
     },

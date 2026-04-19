@@ -29,7 +29,7 @@ export type UseManualHistory = typeof createManualHistory;
 export const useManualHistory: UseManualHistory = (source$, options) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { dump: "function", parse: "function" });
+      const p$ = toObs(p);
       return createManualHistory(source$, p$);
     },
     (options ?? {}) as Record<string, unknown>

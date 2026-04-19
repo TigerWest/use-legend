@@ -32,14 +32,7 @@ export function useDropZone(
 
   return useScope(
     (opts) => {
-      const opts$ = toObs(opts, {
-        onDrop: "function",
-        onEnter: "function",
-        onLeave: "function",
-        onOver: "function",
-        checkValidity: "function",
-        dataTypes: "plain",
-      });
+      const opts$ = toObs(opts, { dataTypes: "plain" });
       return createDropZone(target, opts$);
     },
     normalized as Record<string, unknown>

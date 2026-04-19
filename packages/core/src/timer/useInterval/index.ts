@@ -12,7 +12,7 @@ export const useInterval: UseInterval = (intervalValue = 1000, options = {}) => 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- createInterval has discriminated overloads on controls: true/false
     (scalars, opts): any => {
       const { interval: interval$ } = toObs(scalars);
-      const opts$ = toObs(opts, { callback: "function" });
+      const opts$ = toObs(opts);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- discriminated overload
       return createInterval(interval$, opts$ as any);
     },

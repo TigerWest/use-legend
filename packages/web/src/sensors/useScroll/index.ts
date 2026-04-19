@@ -10,9 +10,6 @@ export const useScroll: UseScroll = (element, options = {}) => {
   return useScope(
     (opts) => {
       const opts$ = toObs(opts, {
-        onScroll: "function",
-        onStop: "function",
-        onError: "function",
         window: "opaque",
       });
       return createScroll(element, opts$ as never);

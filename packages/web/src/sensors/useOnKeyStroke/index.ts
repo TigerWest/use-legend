@@ -38,7 +38,7 @@ export const useOnKeyStroke: UseOnKeyStroke = ((
 
   return useScope(
     (cbs, opts) => {
-      const cbs$ = toObs(cbs, { handler: "function" });
+      const cbs$ = toObs(cbs);
       const opts$ = toObs(opts) as DeepMaybeObservable<UseOnKeyStrokeOptions>;
       return createOnKeyStroke(key, cbs$.handler as (e: KeyboardEvent) => void, opts$);
     },

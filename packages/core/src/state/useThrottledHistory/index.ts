@@ -24,7 +24,7 @@ export type UseThrottledHistory = typeof createThrottledHistory;
 export const useThrottledHistory: UseThrottledHistory = (source$, options) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { dump: "function", parse: "function", shouldCommit: "function" });
+      const p$ = toObs(p);
       return createThrottledHistory(source$, p$);
     },
     (options ?? {}) as Record<string, unknown>

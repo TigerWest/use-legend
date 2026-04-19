@@ -14,11 +14,7 @@ export type UsePointerSwipe = typeof createPointerSwipe;
 export const usePointerSwipe: UsePointerSwipe = (target, options = {}) => {
   return useScope(
     (opts) => {
-      const opts$ = toObs(opts, {
-        onSwipeStart: "function",
-        onSwipe: "function",
-        onSwipeEnd: "function",
-      });
+      const opts$ = toObs(opts);
       return createPointerSwipe(target, opts$);
     },
     options as Record<string, unknown>

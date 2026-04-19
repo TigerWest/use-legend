@@ -26,8 +26,6 @@ export const useAnimate: UseAnimate = (target, keyframes, options) => {
 
   return useScope((opts) => {
     const opts$ = toObs(opts, {
-      onReady: "function",
-      onError: "function",
       window: "opaque",
     });
     return createAnimate(

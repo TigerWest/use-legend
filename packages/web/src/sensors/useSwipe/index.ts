@@ -9,11 +9,7 @@ export type UseSwipe = typeof createSwipe;
 export const useSwipe: UseSwipe = (target, options = {}) => {
   return useScope(
     (opts) => {
-      const opts$ = toObs(opts, {
-        onSwipeStart: "function",
-        onSwipe: "function",
-        onSwipeEnd: "function",
-      });
+      const opts$ = toObs(opts);
       return createSwipe(target, opts$);
     },
     options as Record<string, unknown>

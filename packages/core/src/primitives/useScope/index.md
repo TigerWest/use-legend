@@ -192,7 +192,9 @@ Use `observe` from `@usels/core` (not `@legendapp/state`) so subscriptions are a
 
 ### `toObs` hints for non-plain fields
 
-Pass a hints map as the second argument to `toObs` for fields that are functions, opaque objects, or React elements.
+Pass a hints map as the second argument to `toObs` for fields that are opaque objects (DOM elements, class instances, Dates, etc.). Supported hints: `'opaque'` and `'plain'`.
+
+Callback props do not need a hint — dispatch them via raw prop access (`p.onClick?.(...)`) so every call resolves to the latest closure.
 
 <CodeTabs>
   <Fragment slot="hook">
@@ -202,13 +204,12 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
     function useEventHandler(props: { onClick: (e: MouseEvent) => void; data: SomeObject }) {
       return useScope((p) => {
         const obs$ = toObs(p, {
-          onClick: "function", // stored opaque — access via obs$.peek()?.onClick
-          data: "opaque",      // prevents deep-proxying
+          data: "opaque", // prevents deep-proxying
         });
 
         observe(() => {
-          const handler = obs$.peek()?.onClick;
-          element.addEventListener("click", handler);
+          // raw-prop dispatch — always latest closure
+          element.addEventListener("click", (e) => p.onClick?.(e));
         });
 
         return {};
@@ -224,13 +225,11 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
     function useEventHandler(props: { onClick: (e: MouseEvent) => void; data: SomeObject }) {
       "use scope"
       const obs$ = toObs(props, {
-        onClick: "function", // stored opaque — access via obs$.peek()?.onClick
-        data: "opaque",      // prevents deep-proxying
+        data: "opaque", // prevents deep-proxying
       });
 
       observe(() => {
-        const handler = obs$.peek()?.onClick;
-        element.addEventListener("click", handler);
+        element.addEventListener("click", (e) => props.onClick?.(e));
       });
 
       return {};

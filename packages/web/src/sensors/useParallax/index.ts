@@ -15,12 +15,7 @@ export type UseParallax = typeof createParallax;
 export const useParallax: UseParallax = (target, options = {}) => {
   return useScope(
     (opts) => {
-      const opts$ = toObs(opts, {
-        deviceOrientationTiltAdjust: "function",
-        deviceOrientationRollAdjust: "function",
-        mouseTiltAdjust: "function",
-        mouseRollAdjust: "function",
-      });
+      const opts$ = toObs(opts);
       return createParallax(target, opts$);
     },
     options as Record<string, unknown>

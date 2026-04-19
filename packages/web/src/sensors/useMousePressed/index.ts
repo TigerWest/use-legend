@@ -18,7 +18,7 @@ export const useMousePressed: UseMousePressed = (options = {}) => {
   const raw = options as UseMousePressedOptions;
   return useScope(
     (cbs) => {
-      const cbs$ = toObs(cbs, { onPressed: "function", onReleased: "function" });
+      const cbs$ = toObs(cbs);
       return createMousePressed({
         ...raw,
         onPressed: (...args) => cbs$.peek()?.onPressed?.(...args),

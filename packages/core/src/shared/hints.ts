@@ -1,7 +1,7 @@
 import { ObservableHint } from "@legendapp/state";
 
 /** Leaf hint for a single field */
-export type ScopeHint = "opaque" | "plain" | "function";
+export type ScopeHint = "opaque" | "plain";
 
 /** @internal depth-3 hint map */
 type HintMap3<P> = { [K in keyof P]?: ScopeHint };
@@ -18,7 +18,7 @@ type HintMap1<P> = {
 
 /**
  * Hint spec: scalar hint or up to 3-level nested hint map.
- * Supported hints: `'opaque'` | `'plain'` | `'function'`
+ * Supported hints: `'opaque'` | `'plain'`
  * @public
  */
 export type NestedHintSpec<P> = ScopeHint | HintMap1<P>;
@@ -73,8 +73,6 @@ export function applyHintToValue(
         return ObservableHint.opaque(val as object);
       case "plain":
         return ObservableHint.plain(val as object);
-      case "function":
-        return ObservableHint.function(val);
       default:
         return val;
     }

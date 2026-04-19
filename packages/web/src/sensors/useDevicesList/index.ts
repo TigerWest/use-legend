@@ -16,7 +16,7 @@ export type UseDevicesList = typeof createDevicesList;
 export const useDevicesList: UseDevicesList = (options = {}) => {
   return useScope(
     (opts) => {
-      const opts$ = toObs(opts, { onUpdated: "function" });
+      const opts$ = toObs(opts);
       return createDevicesList(opts$);
     },
     options as Record<string, unknown>

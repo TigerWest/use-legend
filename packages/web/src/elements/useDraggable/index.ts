@@ -18,9 +18,6 @@ export const useDraggable: UseDraggable = (target, options = {}) => {
         handle: "opaque",
         containerElement: "opaque",
         window: "opaque",
-        onStart: "function",
-        onMove: "function",
-        onEnd: "function",
       });
       return createDraggable(target, opts$);
     },

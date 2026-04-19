@@ -171,7 +171,7 @@ describe("useOnLongPress() — rerender stability", () => {
         ({ handler }: { handler: (e: PointerEvent) => void }) =>
           useScope(
             (cbs) => {
-              const cbs$ = toObs(cbs, { handler: "function" });
+              const cbs$ = toObs(cbs);
               onMount(() => (cbs$.handler as any).onChange(() => changeSpy()));
               return {};
             },
@@ -194,7 +194,7 @@ describe("useOnLongPress() — rerender stability", () => {
           const stableHandler = useCallback(() => handler(), []);
           return useScope(
             (cbs) => {
-              const cbs$ = toObs(cbs, { handler: "function" });
+              const cbs$ = toObs(cbs);
               onMount(() => (cbs$.handler as any).onChange(() => changeSpy()));
               return {};
             },

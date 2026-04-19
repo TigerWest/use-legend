@@ -10,7 +10,6 @@ export const useMagicKeys: UseMagicKeys = (options = {}) => {
   return useScope(
     (opts) => {
       const opts$ = toObs(opts, {
-        onEventFired: "function",
         window: "opaque",
       });
       return createMagicKeys(opts$);

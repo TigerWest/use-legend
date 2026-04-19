@@ -13,7 +13,7 @@ export type UseInfiniteScroll = typeof createInfiniteScroll;
 export const useInfiniteScroll: UseInfiniteScroll = (element, onLoadMore, options) => {
   return useScope(
     (p, opts) => {
-      const opts$ = toObs(opts, { canLoadMore: "function", window: "opaque" });
+      const opts$ = toObs(opts, { window: "opaque" });
       return createInfiniteScroll(element, (...args) => p.onLoadMore?.(...args), opts$);
     },
     { onLoadMore },

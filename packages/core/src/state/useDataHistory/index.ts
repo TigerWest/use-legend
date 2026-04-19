@@ -25,7 +25,7 @@ export type UseDataHistory = typeof createDataHistory;
 export const useDataHistory: UseDataHistory = (source$, options) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { dump: "function", parse: "function", shouldCommit: "function" });
+      const p$ = toObs(p);
       return createDataHistory(source$, p$);
     },
     (options ?? {}) as Record<string, unknown>

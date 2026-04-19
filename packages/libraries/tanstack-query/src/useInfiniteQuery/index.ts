@@ -39,11 +39,7 @@ export const useInfiniteQuery: UseInfiniteQuery = <
 
   const state$ = useScope(
     (opts) => {
-      const opts$ = toObs(opts, {
-        queryFn: "function",
-        getNextPageParam: "function",
-        getPreviousPageParam: "function",
-      }) as unknown as Observable<InfiniteOpts>;
+      const opts$ = toObs(opts) as unknown as Observable<InfiniteOpts>;
       return createInfiniteQuery<TQueryFnData, TQueryKey, TPageParam>(opts$);
     },
     (options ?? {}) as Record<string, unknown>
