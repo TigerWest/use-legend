@@ -12,7 +12,8 @@ import {
 
 export { onBeforeMount, onMount, onUnmount } from "./effectScope";
 export { observe } from "./observe";
-export { toObs } from "./reactiveProps";
+export { toObs } from "./toObs";
+export type { PropsOf } from "./toObs";
 export type { ReactiveProps } from "./reactiveProps";
 export { inject } from "./inject";
 

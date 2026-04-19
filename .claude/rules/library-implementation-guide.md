@@ -162,11 +162,10 @@ These functions are also exported as public framework-agnostic API, making the `
 
 ### Deprecated Hooks
 
-| Old                  | Replacement                          |
-| -------------------- | ------------------------------------ |
-| `useMaybeObservable` | `toObs(p)` — Legend-State auto-deref |
-| `useLatest`          | `p.field` — raw latest from props    |
-| `useConstant`        | `useScope` factory                   |
+| Old           | Replacement                       |
+| ------------- | --------------------------------- |
+| `useLatest`   | `p.field` — raw latest from props |
+| `useConstant` | `useScope` factory                |
 
 ### Lifecycle API
 
@@ -449,7 +448,7 @@ For hooks where options contain reactive scalar fields (e.g. `MaybeObservable<nu
 
 #### Pattern 1: MaybeObservable arg
 
-Replaces `useMaybeObservable`, `useLatest`, and `useConstant` with the `useScope((p) => ..., { ...args })` pattern.
+Replaces `useLatest` and `useConstant` with the `useScope((p) => ..., { ...args })` pattern.
 
 `toObs(p)` converts the ReactiveProps proxy to `Observable<Props>`. This `Observable` passes directly to core functions that accept `DeepMaybeObservable` — core wraps it with `observable()` internally, so prop changes propagate reactively into `observe()`.
 
@@ -993,7 +992,7 @@ export type UsePoller = typeof createPollerFn;
 export const usePoller: UsePoller = (fn, interval) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { fn: "function" });
+      const p$ = toObs(p);
       return createPollerFn((...args) => p.fn?.(...args), p$.interval as Observable<number>);
     },
     { fn, interval }
