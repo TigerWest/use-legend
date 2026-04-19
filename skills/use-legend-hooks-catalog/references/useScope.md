@@ -202,7 +202,6 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
     function useEventHandler(props: { onClick: (e: MouseEvent) => void; data: SomeObject }) {
       return useScope((p) => {
         const obs$ = toObs(p, {
-          onClick: "function", // stored opaque — access via obs$.peek()?.onClick
           data: "opaque",      // prevents deep-proxying
         });
 
@@ -224,7 +223,6 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
     function useEventHandler(props: { onClick: (e: MouseEvent) => void; data: SomeObject }) {
       "use scope"
       const obs$ = toObs(props, {
-        onClick: "function", // stored opaque — access via obs$.peek()?.onClick
         data: "opaque",      // prevents deep-proxying
       });
 

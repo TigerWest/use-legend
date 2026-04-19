@@ -42,7 +42,7 @@ function Card({ children, ...rest }: DeepMaybeObservable<CardProps>) {
   const props$ = toObs(rest);
 
   return (
-    <div onClick={() => props$.onPress.peek()?.()}>
+    <div onClick={() => props$.onPress()}>
       <CardTitle title={props$.title} />   {/* pass Observable field -- no .get() */}
       <CardSubtitle subtitle={props$.subtitle} />
       {children}

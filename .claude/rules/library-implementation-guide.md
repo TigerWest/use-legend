@@ -88,9 +88,10 @@ export type UseDebounced = typeof createDebounced;
 export const useDebounced: UseDebounced = (source$, options) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { onCallback: "function" });
+      const p$ = toObs(p);
       // p$ is Observable<Props> — passes directly as DeepMaybeObservable
       // core wraps it with observable(p$) → prop changes propagate reactively
+      // Note: callback props don't need a hint — dispatch via raw `p.onX?.()`
       return createDebounced(source$, p$);
     },
     (options ?? {}) as Record<string, unknown>
@@ -118,7 +119,7 @@ export type UseManualHistory = typeof createManualHistory;
 export const useManualHistory: UseManualHistory = (source$, options) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { dump: "function", parse: "function" });
+      const p$ = toObs(p);
       return createManualHistory(source$, p$);
     },
     (options ?? {}) as Record<string, unknown>
@@ -459,7 +460,7 @@ export type UseIntervalFn = typeof createIntervalFn;
 export const useIntervalFn: UseIntervalFn = (cb, interval, options) => {
   return useScope(
     (p, opts) => {
-      const p$ = toObs(p, { cb: "function" });
+      const p$ = toObs(p);
       const opts$ = toObs(opts);
       // p$ is Observable<Props> — passes directly as DeepMaybeObservable
       // core wraps it with observable(p$) → prop changes propagate reactively
@@ -497,7 +498,7 @@ export type UseInterval = typeof createInterval;
 export const useInterval: UseInterval = (intervalValue, options) => {
   return useScope(
     (scalars, opts) => {
-      const scalars$ = toObs(scalars, { callback: "function" });
+      const scalars$ = toObs(scalars);
       const opts$ = toObs(opts);
 
       return createInterval(scalars$.interval as Observable<number>, opts$);
@@ -525,14 +526,14 @@ Pass parameters as separate rest args rather than merging them into one object �
 ```ts
 // ❌ Bad — merging primitives + options loses per-parameter proxy tracking
 useScope(
-  (p) => { const p$ = toObs(p, { cb: "function" }); ... },
+  (p) => { const p$ = toObs(p); ... },
   { cb, interval, ...rawOpts } // ← DON'T spread primitives and options together
 );
 
 // ✅ Good — primitives wrapped, object options passed separately
 useScope(
   (scalars, opts) => {
-    const scalars$ = toObs(scalars, { cb: "function" });
+    const scalars$ = toObs(scalars);
     const opts$ = toObs(opts);
     ...
   },
@@ -550,7 +551,7 @@ useScope(
 // ❌ Before — merging into one object breaks timing proxy
 useScope(
   (p) => {
-    const obs$ = toObs(p, { dump: "function", parse: "function" });
+    const obs$ = toObs(p);
     const result = createDebouncedHistory(source$, obs$.debounce as Observable<number>, {
       ...obs$.peek(),
       maxWait: obs$.maxWait,
@@ -565,11 +566,7 @@ useScope(
 useScope(
   (timing, restOpts) => {
     const timing$ = toObs(timing);
-    const rest$ = toObs(restOpts, {
-      dump: "function",
-      parse: "function",
-      shouldCommit: "function",
-    });
+    const rest$ = toObs(restOpts);
 
     return createDebouncedHistory(source$, timing$.debounce as Observable<number>, {
       ...rest$.peek(),
@@ -617,14 +614,14 @@ useScope(
 
 Pass an optional `FieldTransformMap<T>` as the second argument to control how each field is resolved.
 
-| Hint                      | Behavior                                                        | Use when                                    |
-| ------------------------- | --------------------------------------------------------------- | ------------------------------------------- |
-| _(omitted)_ / `'default'` | no-op — Legend-State auto-derefs + registers dep at call site   | reactive plain fields (default)             |
-| `'element'`               | `getElement(fieldValue)` (reactive) + `ObservableHint.opaque()` | `MaybeElement` fields                       |
-| `'opaque'`                | `get(fieldValue)` + `ObservableHint.opaque()`                   | non-element objects needing opaque wrapping |
-| `'plain'`                 | `get(fieldValue)` + `ObservableHint.plain()`                    | prevent nested auto-deref                   |
-| `'function'`              | `get(fieldValue)` + `ObservableHint.function()`                 | callback fields                             |
-| `(value) => R`            | custom transform function                                       | escape hatch for complex cases              |
+| Hint                      | Behavior                                                                 | Use when                                    |
+| ------------------------- | ------------------------------------------------------------------------ | ------------------------------------------- |
+| _(omitted)_ / `'default'` | no-op — Legend-State auto-derefs + registers dep at call site            | reactive plain fields (default)             |
+| `'element'`               | `getElement(fieldValue)` (reactive) + `ObservableHint.opaque()`          | `MaybeElement` fields                       |
+| `'opaque'`                | `get(fieldValue)` + `ObservableHint.opaque()`                            | non-element objects needing opaque wrapping |
+| `'plain'`                 | `get(fieldValue)` + `ObservableHint.plain()`                             | prevent nested auto-deref                   |
+| `'function'`              | `get(fieldValue)` + `ObservableHint.function()` **⚠️ see warning below** | **avoid** — see callback-prop section       |
+| `(value) => R`            | custom transform function                                                | escape hatch for complex cases              |
 
 > **Note:** Object-form hints are skipped when `options` is an outer `Observable<T>`.
 > In that case, `opts$` proxies `options$` directly (preserving reference-equality tracking).
@@ -661,7 +658,7 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
 
 ### Standard Pattern (with callback fields)
 
-Use `'function'` hint for callback fields. Access callbacks via `p$.get().fieldName` or raw prop access `p.fieldName`.
+**raw prop access** (`p.onStart?.(...)`). The raw path always resolves to the latest closure with zero Legend-State interference.
 
 ```ts
 interface UseMyHookOptions {
@@ -670,14 +667,11 @@ interface UseMyHookOptions {
 
 function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   return useScope((p) => {
-    const p$ = toObs(p, {
-      onStart: "function",
-    });
+    const p$ = toObs(p); // no hint on onStart
 
-    // ✅ Correct — access via p$.get().onStart (reactive) or p.onStart (raw latest)
     observe(() => {
       // ... when event fires:
-      p$.get().onStart?.(pos, e);
+      p.onStart?.(pos, e); // ✅ raw-prop access — always latest closure
     });
   }, options ?? {});
 }
@@ -825,7 +819,7 @@ export type UseIntervalFn = typeof createIntervalFn;
 export const useIntervalFn: UseIntervalFn = (fn, interval) => {
   return useScope(
     (p) => {
-      const p$ = toObs(p, { fn: "function" });
+      const p$ = toObs(p);
       return createIntervalFn((...args) => p.fn?.(...args), p$.interval as Observable<number>);
     },
     { fn, interval }
