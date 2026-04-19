@@ -1,5 +1,5 @@
-import { observable, isObservable, batch, type Observable } from "@legendapp/state";
-import { onMount } from "./effectScope";
+import { observable, isObservable, type Observable } from "@legendapp/state";
+import { getCurrentScope } from "./effectScope";
 import { applyHintToValue, type ScopeHint, type NestedHintSpec } from "@shared/hints";
 
 /**
@@ -116,17 +116,27 @@ function buildInitialValue<P extends object>(ctx: ScopePropsCtx<P>): unknown {
     const val = (props as Record<string, unknown>)[key];
     if (isObservable(val)) {
       const obs = val as Observable<unknown>;
-      // Subscribe on every useEffect mount — not at factory time — so that
-      // React Strict Mode's simulated unmount/remount gets a fresh subscription
-      // instead of a spent unsub. The returned cleanup is the current-cycle unsub.
-      onMount(() => {
-        const unsub = obs.onChange(() => {
-          batch(() => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (ctx.props$ as any)?.[key].set(obs.peek());
-          });
+      // Register as a pausable subscription on the current scope. The
+      // subscribe function runs immediately (factory-time, so SSR-safe and
+      // ahead of any commit-phase writes like React ref callbacks), and
+      // re-runs on every `_resumeAll` after Strict Mode's simulated unmount.
+      // Catch-up is baked into `subscribe`: before attaching, sync the
+      // mirrored field to `obs.peek()` if they diverge. This covers both
+      // (a) the first subscribe cycle — in case a ref callback mutated obs
+      //     between factory and resumeAll, or between two Strict Mode cycles,
+      // and (b) SSR → hydration hand-off, where the factory ran on the server
+      //     but `_resumeAll` is the first client-side hookup.
+      getCurrentScope()?._addSubscription(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const target = (ctx.props$ as any)?.[key];
+        if (target) {
+          const latest = obs.peek();
+          if (!Object.is(target.peek?.(), latest)) target.set(latest);
+        }
+        return obs.onChange(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (ctx.props$ as any)?.[key].set(obs.peek());
         });
-        return unsub;
       });
     }
     result[key] = readField(key, val, hints);

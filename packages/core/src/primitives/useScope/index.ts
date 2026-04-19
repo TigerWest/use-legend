@@ -132,9 +132,18 @@ export function useScope(fn: any, ...rest: any[]): any {
   }
 
   // onBeforeMount — fires on every useLayoutEffect mount (twice in Strict Mode,
-  // matching React's useLayoutEffect double-invoke).
+  // matching React's useLayoutEffect double-invoke). Callbacks may return a
+  // cleanup that runs on layout-effect teardown (Strict Mode simulated unmount
+  // and real unmount alike).
   useLayoutEffect(() => {
-    for (const cb of stateRef.current!.scope._beforeMountCbs) cb();
+    const cleanups: Array<() => void> = [];
+    for (const cb of stateRef.current!.scope._beforeMountCbs) {
+      const cleanup = cb();
+      if (typeof cleanup === "function") cleanups.push(cleanup);
+    }
+    return () => {
+      for (let i = cleanups.length - 1; i >= 0; i--) cleanups[i]();
+    };
   }, []);
 
   // mount / unmount — observers pause on cleanup (sync unsub), resume on next mount.

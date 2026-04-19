@@ -34,7 +34,9 @@ describe("useScope()", () => {
 
       renderHook(() =>
         useScope(() => {
-          onBeforeMount(() => order.push("beforeMount"));
+          onBeforeMount(() => {
+            order.push("beforeMount");
+          });
           onMount(() => {
             order.push("mount");
           });
@@ -63,9 +65,15 @@ describe("useScope()", () => {
       const order: number[] = [];
       renderHook(() =>
         useScope(() => {
-          onBeforeMount(() => order.push(1));
-          onBeforeMount(() => order.push(2));
-          onBeforeMount(() => order.push(3));
+          onBeforeMount(() => {
+            order.push(1);
+          });
+          onBeforeMount(() => {
+            order.push(2);
+          });
+          onBeforeMount(() => {
+            order.push(3);
+          });
           return {};
         })
       );

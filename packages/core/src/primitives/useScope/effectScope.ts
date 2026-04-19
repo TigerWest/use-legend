@@ -10,6 +10,21 @@ export interface ObserverRecord {
 }
 
 /**
+ * @internal Pausable subscription record.
+ *
+ * Unlike `ObserverRecord`, this is a generic factory-registered subscription
+ * (e.g. `obs.onChange(...)`). It's paired with `_pauseAll`/`_resumeAll` so
+ * Strict Mode's simulated unmount tears down the subscription and remount
+ * restores it — without requiring the caller to re-run a full observer.
+ */
+export interface SubscriptionRecord {
+  /** Called to (re)subscribe. May perform catch-up before attaching. */
+  subscribe: () => () => void;
+  /** Current unsub function; `undefined` while paused. */
+  unsub?: () => void;
+}
+
+/**
  * @internal
  * Collects reactive effects, lifecycle callbacks, and child scopes.
  *
@@ -25,9 +40,10 @@ export class EffectScope {
 
   /** @internal */ readonly _disposables: Array<() => void> = [];
   /** @internal */ readonly _observers: ObserverRecord[] = [];
+  /** @internal */ readonly _subs: SubscriptionRecord[] = [];
   /** @internal */ readonly _children: EffectScope[] = [];
   /** @internal */ _parent: EffectScope | null = null;
-  /** @internal */ readonly _beforeMountCbs: Array<() => void> = [];
+  /** @internal */ readonly _beforeMountCbs: Array<() => (() => void) | void> = [];
   /** @internal */ readonly _mountCbs: Array<() => (() => void) | void> = [];
   /** @internal — React.Context refs collected by `inject()` during first-mount run */
   readonly _recordedCtxs: unknown[] = [];
@@ -73,6 +89,11 @@ export class EffectScope {
       r.unsub?.();
       r.unsub = undefined;
     }
+    for (let i = this._subs.length - 1; i >= 0; i--) {
+      const s = this._subs[i];
+      s.unsub?.();
+      s.unsub = undefined;
+    }
     for (const child of this._children) child._pauseAll();
   }
 
@@ -86,7 +107,25 @@ export class EffectScope {
       if (!r.unsub)
         r.unsub = (legendObserve as (...args: ObserverRecord["args"]) => () => void)(...r.args);
     }
+    for (const s of this._subs) {
+      if (!s.unsub) s.unsub = s.subscribe();
+    }
     for (const child of this._children) child._resumeAll();
+  }
+
+  /**
+   * @internal Register a pausable subscription.
+   *
+   * `subscribe` is invoked immediately (factory-time) and again on every
+   * `_resumeAll` after a pause. It must return an unsub function. Callers
+   * can embed a catch-up step inside `subscribe` so that each (re)attach
+   * syncs state before attaching listeners.
+   */
+  _addSubscription(subscribe: () => () => void): void {
+    if (!this.active) return;
+    const record: SubscriptionRecord = { subscribe };
+    record.unsub = subscribe();
+    this._subs.push(record);
   }
 
   /**
@@ -108,6 +147,13 @@ export class EffectScope {
       r.unsub = undefined;
     }
     this._observers.length = 0;
+    // subscriptions: reverse registration order — unsub and clear
+    for (let i = this._subs.length - 1; i >= 0; i--) {
+      const s = this._subs[i];
+      s.unsub?.();
+      s.unsub = undefined;
+    }
+    this._subs.length = 0;
     // disposables: reverse registration order
     for (let i = this._disposables.length - 1; i >= 0; i--) {
       this._disposables[i]();
@@ -136,9 +182,12 @@ export function getCurrentScope(): EffectScope | null {
 
 /**
  * Register a callback to run before the component mounts (useLayoutEffect timing).
+ * The callback may return a cleanup function that runs before the next
+ * `onBeforeMount` cycle — e.g. on React Strict Mode's simulated unmount
+ * and on real unmount.
  * Must be called inside a `useScope` factory. No-op outside a scope.
  */
-export function onBeforeMount(cb: () => void): void {
+export function onBeforeMount(cb: () => (() => void) | void): void {
   _currentScope?._beforeMountCbs.push(cb);
 }
 

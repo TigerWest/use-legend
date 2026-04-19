@@ -49,7 +49,9 @@ describe("useScope() — edge cases", () => {
 
       const { unmount } = renderHook(() =>
         useScope(() => {
-          onBeforeMount(() => order.push("beforeMount"));
+          onBeforeMount(() => {
+            order.push("beforeMount");
+          });
           onMount(() => {
             order.push("mount");
             return () => order.push("mountCleanup");

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from "@testing-library/react";
 import { createElement, useState } from "react";
-import { isObservable, observable } from "@legendapp/state";
+import { isObservable, observable, type Observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
 import { useScope, toObs, observe } from ".";
 
@@ -1268,5 +1268,167 @@ describe("useScope() — outer Observable as scope param", () => {
     expect((result.current.p$ as unknown) === (opts$ as unknown)).toBe(true);
     // function field accessible via peek
     expect(typeof result.current.p$.peek()?.onDone).toBe("function");
+  });
+});
+
+// Regression: per-field Observable mutated between factory and onMount
+//
+// Ref$ callbacks fire during React's commit phase — AFTER the useScope factory
+// runs but BEFORE useEffect (onMount) attaches onChange subscriptions. If toObs
+// only subscribes inside onMount without catching up the current peek() value,
+// the mirrored opts$ field is stuck at its pre-mount value and downstream
+// `observe()` consumers never rerun with the real element/value.
+//
+// This was the root cause of useIntersectionObserver appearing inert when
+// `root` was a Ref$: containerRef$ was null at factory time, the null was
+// mirrored into opts$.root, the ref callback flipped containerRef$ to the
+// element during commit, and onMount missed that edge because onChange was
+// registered only afterwards — leaving opts$.root permanently null.
+describe("useScope() — factory → onMount value propagation", () => {
+  it("per-field Observable mutated between factory and onMount is caught up at mount", () => {
+    const obs$ = observable<string | null>(null);
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          // Simulate a ref callback that runs during commit (after the
+          // factory, before onMount) by flipping the source observable here.
+          // `useScope` runs the factory inside useMemo during render — calling
+          // obs$.set here is equivalent to the ref-callback timing for the
+          // observable mirror, since onChange has not been attached yet.
+          obs$.set("committed");
+          return { p$ };
+        },
+        { field: obs$ } as unknown as Record<string, unknown>
+      )
+    );
+
+    // After mount, the mirrored field must reflect the post-factory value —
+    // not the `null` that was peeked when buildInitialValue ran.
+    expect((result.current.p$ as unknown as { field: { get(): string | null } }).field.get()).toBe(
+      "committed"
+    );
+  });
+
+  it("downstream observe() reruns with the caught-up value after mount", () => {
+    const obs$ = observable<string | null>(null);
+    const seen: Array<string | null> = [];
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p) as unknown as Observable<{ field: string | null }>;
+          // Flip source between factory and onMount.
+          obs$.set("ready");
+          observe(() => {
+            seen.push(p$.field.get());
+          });
+          return {};
+        },
+        { field: obs$ } as unknown as Record<string, unknown>
+      )
+    );
+
+    // `observe` fires synchronously on registration with the initial (null)
+    // value, then reruns once the onMount catch-up sets the field to "ready".
+    // If catch-up is missing, the second rerun never happens.
+    expect(seen).toContain("ready");
+  });
+
+  it("catch-up does not fire when the peek value equals the mirrored value", () => {
+    const obs$ = observable<string | null>("same");
+    const changes: Array<string | null> = [];
+
+    renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p) as unknown as Observable<{ field: string | null }>;
+          // `onChange` would normally not trigger for equal values, but the
+          // catch-up path is a direct `.set` — guard against a redundant fire.
+          p$.field.onChange(({ value }: { value: string | null }) => {
+            changes.push(value);
+          });
+          return {};
+        },
+        { field: obs$ } as unknown as Record<string, unknown>
+      )
+    );
+
+    // No change after mount: source === mirrored ("same") ⇒ no notify.
+    expect(changes).toEqual([]);
+  });
+
+  it("catch-up mirrors the latest value when the source observable is replaced with a different reference", () => {
+    // Covers the Ref$ mount scenario: value goes from null → element between
+    // factory execution and onMount registration.
+    const ref$ = observable<{ id: number } | null>(null);
+    const el = { id: 1 };
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          const p$ = toObs(p);
+          ref$.set(el); // simulate ref callback during commit
+          return { p$ };
+        },
+        { ref: ref$ } as unknown as Record<string, unknown>
+      )
+    );
+
+    expect(
+      (result.current.p$ as unknown as { ref: { get(): { id: number } | null } }).ref.get()
+    ).toBe(el);
+  });
+
+  it("catch-up survives React Strict Mode (double-mount)", () => {
+    // Strict Mode mounts, unmounts, and remounts the effect synchronously.
+    // The catch-up runs on every onMount, so the remounted subscription
+    // should see the same final value without losing the post-factory change.
+    const obs$ = observable<number>(0);
+    let factoryCalls = 0;
+
+    const { result } = renderHook(() =>
+      useScope(
+        (p) => {
+          factoryCalls += 1;
+          const p$ = toObs(p);
+          obs$.set(42);
+          return { p$ };
+        },
+        { n: obs$ } as unknown as Record<string, unknown>
+      )
+    );
+
+    // After the (possibly doubled) mount, the mirror must reflect 42.
+    expect((result.current.p$ as unknown as { n: { get(): number } }).n.get()).toBe(42);
+    // Sanity: factory executed at least once.
+    expect(factoryCalls).toBeGreaterThanOrEqual(1);
+  });
+
+  it("re-render after catch-up keeps subscribing to the same source observable", () => {
+    const obs$ = observable<number>(1);
+
+    const { result, rerender } = renderHook(
+      ({ extra }) =>
+        useScope(
+          (p) => {
+            const p$ = toObs(p);
+            return { p$, extra };
+          },
+          { n: obs$ } as unknown as Record<string, unknown>
+        ),
+      { initialProps: { extra: "a" } }
+    );
+
+    // Pre-mount catch-up path is fine — verify runtime subscription still
+    // flows after re-render.
+    act(() => obs$.set(2));
+    expect((result.current.p$ as unknown as { n: { get(): number } }).n.get()).toBe(2);
+
+    rerender({ extra: "b" });
+
+    act(() => obs$.set(3));
+    expect((result.current.p$ as unknown as { n: { get(): number } }).n.get()).toBe(3);
   });
 });
