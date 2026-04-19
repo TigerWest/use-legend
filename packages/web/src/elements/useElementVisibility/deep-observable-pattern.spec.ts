@@ -221,7 +221,7 @@ describe("useElementVisibility — reactivity comparison", () => {
     // and finally to `createIntersectionObserver`'s observe — which recreates
     // the IntersectionObserver with the new rootMargin.
     //
-    // This is a behavior improvement over the legacy `useMaybeObservable`
+    // This is a behavior improvement over the legacy `useToObs`
     // implementation which ignored child-field mutations on outer Observables.
     expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
     expect(capturedInit?.rootMargin).toBe("20px");

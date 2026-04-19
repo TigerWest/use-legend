@@ -8,22 +8,21 @@ import type { DeepMaybeObservable, MaybeObservable } from "../../types";
 /**
  * Per-field resolution hint for the object-form transform.
  *
- * - `'default'`  — Legend-State auto-derefs + if resolved value is `function`, wraps with `ObservableHint.function()`. **Default.**
+ * - `'default'`  — no-op: Legend-State auto-derefs + registers dep at call site. **Default.**
  * - `'opaque'`   — `get()` then `ObservableHint.opaque()`. Null-safe.
  * - `'plain'`    — `get()` then `ObservableHint.plain()`. Prevents nested auto-deref. Null-safe.
- * - `'function'` — `get()` then `ObservableHint.function()`. For callbacks. Null-safe.
- * - `'element'`  — `get(fieldValue)` (reactive) then `ObservableHint.opaque()`. For `MaybeEventTarget` fields.
  *
  * Escape hatch:
  * - `(value) => R` — custom transform function.
+ *
+ * Note: callback fields (functions) must NOT use any hint — store them without a hint
+ * and dispatch via raw access (`p.onX?.()`). See Rule 9 in `library-implementation-guide.md`.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic type parameter defaults require any for maximum flexibility
 export type FieldHint<V = any, R = any> =
   | "default"
   | "opaque"
   | "plain"
-  | "function"
-  | "element"
   | ((value: MaybeObservable<V>) => R);
 
 /**
@@ -36,7 +35,7 @@ export type FieldTransformMap<T> = {
 };
 
 /**
- * The `transform` parameter for `useMaybeObservable`.
+ * The `transform` parameter for `useToObs`.
  * - **Object form:** declarative per-field hints — `FieldTransformMap<T>`.
  * - **Function form:** full custom compute — `(current) => T | undefined`.
  */
@@ -45,14 +44,14 @@ export type Transform<T> =
   | ((current: DeepMaybeObservable<T> | undefined) => T | undefined);
 
 /**
- * Extended config for `useMaybeObservable`.
+ * Extended config for `useToObs`.
  * Combines per-field hints / custom compute with the `linked` write-back option.
  *
  * When the second argument is a plain `Transform<T>` (object-form or function-form),
  * it is treated as backward-compatible shorthand (equivalent to `{ transform: ... }`).
  * Use this extended form when `linked` is needed alongside a transform.
  */
-export interface UseMaybeObservableConfig<T> {
+export interface UseToObsConfig<T> {
   /**
    * Per-field hints or custom compute function.
    * Same as passing `Transform<T>` directly as the second argument.
@@ -83,37 +82,14 @@ function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>):
         if (v != null) result[key] = ObservableHint.plain(v as object);
         break;
       }
-      case "function": {
-        const v = get(fieldValue);
-        if (v != null) result[key] = ObservableHint.function(v as (...args: unknown[]) => unknown);
-        break;
-      }
-      case "element": {
-        if (fieldValue !== undefined) {
-          // Observable resolving to undefined means "not set" — propagate undefined
-          if (isObservable(fieldValue) && (fieldValue as Observable<unknown>).get() === undefined) {
-            result[key] = undefined;
-            break;
-          }
-          const el = (
-            isObservable(fieldValue) ? (fieldValue as Observable<unknown>).get() : fieldValue
-          ) as Element | Document | Window | null;
-          result[key] = el != null ? ObservableHint.opaque(el) : null;
-        }
-        break;
-      }
       default: {
         if (typeof hint === "function") {
           result[key] = hint(fieldValue);
           break;
         }
-        // Default behavior: preserve Legend-State auto-deref and auto-hint callbacks.
-        // This allows omitted hints to still treat function fields as stable callback values.
-        const v = get(fieldValue);
-        if (typeof v === "function") {
-          result[key] = ObservableHint.function(v as (...args: unknown[]) => unknown);
-        }
-        // 'default' or undefined → auto-deref; function values are auto-wrapped with ObservableHint.function
+        // 'default' or undefined → auto-deref via get(); callback functions are left as-is
+        // (do NOT wrap with ObservableHint.function — see Rule 9)
+        result[key] = get(fieldValue);
         break;
       }
     }
@@ -123,6 +99,8 @@ function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>):
 
 /**
  * Normalizes `DeepMaybeObservable<T>` into a stable computed `Observable<T | undefined>`.
+ * Callback fields (functions) must not use the `'function'` hint — store them without a hint
+ * and dispatch via raw access. See Rule 9 in `library-implementation-guide.md`.
  *
  * Handles three cases without interference:
  * - **Outer `Observable<T>`** — tracked via `.get()` dep inside the compute fn
@@ -135,7 +113,7 @@ function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>):
  *
  * @param options - DeepMaybeObservable options to normalize
  * @param transform - Optional transform. Two forms:
- *   - **Object form:** `FieldTransformMap<T>` — per-field hints (`'opaque'`, `'function'`, etc.).
+ *   - **Object form:** `FieldTransformMap<T>` — per-field hints (`'opaque'`, `'plain'`, etc.).
  *     Defaults to `'default'` for unspecified fields.
  *     **Note:** has no effect when `options` is an outer `Observable<T>` — in that case the
  *     proxy is returned as-is (same as no transform), preserving Legend-State's
@@ -143,9 +121,9 @@ function applyObjectTransform<T>(raw: T | undefined, map: FieldTransformMap<T>):
  *     when field-level hints are needed.
  *   - **Function form:** `(current) => T | undefined` — full custom compute for complex cases.
  */
-export function useMaybeObservable<T>(
+export function useToObs<T>(
   options: DeepMaybeObservable<T> | undefined,
-  config?: Transform<T> | UseMaybeObservableConfig<T>
+  config?: Transform<T> | UseToObsConfig<T>
 ): Observable<T | undefined> {
   // Resolve config: backward-compat (Transform<T>) vs extended ({ transform, linked })
   let transform: Transform<T> | undefined;
@@ -154,8 +132,8 @@ export function useMaybeObservable<T>(
     if (typeof config === "function") {
       transform = config;
     } else if ("linked" in config || "transform" in config) {
-      transform = (config as UseMaybeObservableConfig<T>).transform;
-      isLinked = (config as UseMaybeObservableConfig<T>).linked === true;
+      transform = (config as UseToObsConfig<T>).transform;
+      isLinked = (config as UseToObsConfig<T>).linked === true;
     } else {
       transform = config as Transform<T>;
     }

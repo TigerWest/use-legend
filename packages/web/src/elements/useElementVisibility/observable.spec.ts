@@ -181,7 +181,7 @@ describe("useElementVisibility() — reactive options", () => {
       // → `createIntersectionObserver` chain then recreates the observer.
       //
       // This is a deliberate behavior improvement over the legacy
-      // `useMaybeObservable` implementation (which had a documented limitation
+      // `useToObs` implementation (which had a documented limitation
       // where child-field mutations on outer Observables were ignored).
       expect(MockIntersectionObserver).toHaveBeenCalledTimes(1);
       expect(capturedInit?.rootMargin).toBe("20px");

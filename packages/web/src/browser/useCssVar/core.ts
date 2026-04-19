@@ -96,7 +96,7 @@ export function createCssVar(
   });
 
   // Optional MutationObserver — re-read when `style` / `class` attributes
-  // change. Construction-time flag — matches legacy `useInitialPick` behavior.
+  // change. Construction-time flag
   if (observeFlag) {
     createMutationObserver(
       (target ?? null) as MaybeEventTarget,
