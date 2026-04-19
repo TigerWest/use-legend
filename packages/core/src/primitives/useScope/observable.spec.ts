@@ -236,21 +236,19 @@ describe("useScope() — reactive props (toObs)", () => {
     });
   });
 
-  describe("toObs with hints", () => {
-    it("toObs(p, { onClick: 'function' }) — function prop changes detected", () => {
-      const spy = vi.fn();
+  describe("toObs with function-valued fields (no hint)", () => {
+    it("rerender with a new callback propagates to raw proxy access", () => {
       const fn1 = () => "first";
       const fn2 = () => "second";
+      let captured: (() => string) | undefined;
 
       const { rerender } = renderHook(
         ({ onClick }) =>
           useScope(
             (p) => {
-              const obs$ = toObs(p, { onClick: "function" });
-              observe(() => {
-                const fn = obs$.onClick.get();
-                spy(fn);
-              });
+              // No hint — dispatch via raw proxy access (p.onClick)
+              toObs(p);
+              captured = () => (p.onClick as () => string)();
               return {};
             },
             { onClick }
@@ -258,10 +256,9 @@ describe("useScope() — reactive props (toObs)", () => {
         { initialProps: { onClick: fn1 } }
       );
 
-      expect(spy).toHaveBeenCalledTimes(1);
-
+      expect(captured!()).toBe("first");
       rerender({ onClick: fn2 });
-      expect(spy).toHaveBeenCalledTimes(2);
+      expect(captured!()).toBe("second");
     });
   });
 
@@ -329,39 +326,14 @@ describe("toObs with scalar hint", () => {
     expect(val).toBeDefined();
   });
 
-  it("toObs(p, 'function') wraps entire props with function hint", () => {
-    const fn1 = () => "a";
-    const fn2 = () => "b";
-    const spy = vi.fn();
-
-    const { rerender } = renderHook(
-      ({ onClick, onHover }) =>
-        useScope(
-          (p) => {
-            const obs$ = toObs(p, "function");
-            observe(() => spy(obs$.onClick.get(), obs$.onHover.get()));
-            return {};
-          },
-          { onClick, onHover }
-        ),
-      { initialProps: { onClick: fn1, onHover: fn2 } }
-    );
-
-    expect(spy).toHaveBeenCalledTimes(1);
-
-    const fn3 = () => "c";
-    rerender({ onClick: fn3, onHover: fn2 });
-    expect(spy).toHaveBeenCalledTimes(2);
-  });
-
   it("toObs(p, { field: hint }) per-field hint still works", () => {
-    // 기존 per-field hint 하위 호환 확인
+    // 기존 per-field hint 하위 호환 확인 — 'plain' hint
     const spy = vi.fn();
     renderHook(
       ({ dump }) =>
         useScope(
           (p) => {
-            const obs$ = toObs(p, { dump: "function" });
+            const obs$ = toObs(p, { dump: "plain" });
             observe(() => spy(obs$.dump.get()));
             return {};
           },
@@ -1001,7 +973,7 @@ describe("useScope() — multi-param + toObs edge cases", () => {
       renderHook(() =>
         useScope(
           (p1, p2) => {
-            toObs(p1, { cb: "function" });
+            toObs(p1);
             const p2$ = toObs(p2, { root: "opaque" });
             // Raw proxy access returns the original function reference
             capturedFn = p1.cb;
@@ -1023,7 +995,7 @@ describe("useScope() — multi-param + toObs edge cases", () => {
       expect(capturedEl).toBe(el);
     });
 
-    it("p1 hint change does not affect p2 hint application", () => {
+    it("callback prop on p1 rerenders cleanly; p2 untouched", () => {
       const fn1 = vi.fn();
       const fn2 = vi.fn();
 
@@ -1031,11 +1003,11 @@ describe("useScope() — multi-param + toObs edge cases", () => {
         ({ cb }: { cb: () => void }) =>
           useScope(
             (p1, p2) => {
-              const p1$ = toObs(p1, { cb: "function" });
+              toObs(p1);
               const p2$ = toObs(p2);
               return {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cbFromP1: () => ((p1$ as any).cb.get() as () => void)(),
+                // raw-proxy dispatch — always latest closure
+                cbFromP1: () => (p1.cb as () => void)(),
                 plainFromP2: () => p2$.value.get(),
               };
             },
@@ -1285,7 +1257,7 @@ describe("useScope() — outer Observable as scope param", () => {
     const { result } = renderHook(() =>
       useScope(
         (p) => {
-          const p$ = toObs(p, { onDone: "function" });
+          const p$ = toObs(p, { onDone: "plain" });
           return { p$ };
         },
         opts$ as unknown as Record<string, unknown>

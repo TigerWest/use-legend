@@ -48,7 +48,7 @@ describe("useScope() — types", () => {
             expectTypeOf(scalars.interval).toBeNumber();
             const s$ = toObs(scalars);
             expectTypeOf(s$.interval).toEqualTypeOf<Observable<number>>();
-            const o$ = toObs(opts, { callback: "function" });
+            const o$ = toObs(opts);
             expectTypeOf(o$.immediate).toEqualTypeOf<Observable<boolean | undefined>>();
             return {};
           },
@@ -80,7 +80,7 @@ describe("useScope() — types", () => {
       renderHook(() =>
         useScope(
           (p) => {
-            toObs(p, "function");
+            toObs(p, "plain");
             return {};
           },
           { onClick: () => {}, onHover: () => {} }
@@ -116,12 +116,12 @@ describe("useScope() — types", () => {
       );
     });
 
-    it("plain function field with 'function' hint is not any", () => {
+    it("plain function field (no hint) is not any", () => {
       type CB = (v: number) => string;
       renderHook(() =>
         useScope(
           (p) => {
-            const p$ = toObs(p, { dump: "function" });
+            const p$ = toObs(p);
             expectTypeOf(p$.dump).not.toBeAny();
             return {};
           },
@@ -226,13 +226,13 @@ describe("useScope() — types", () => {
       renderHook(() =>
         useScope(
           (p) => {
-            const p$ = toObs(p, { cb: "function" });
+            const p$ = toObs(p, { data: "plain" });
             expectTypeOf(p$.count).not.toBeAny();
             // Positive: count is still Observable<number>
             expectTypeOf(p$.count).toEqualTypeOf<import("@legendapp/state").Observable<number>>();
             return {};
           },
-          { count: 0, cb: () => {} }
+          { count: 0, data: { id: 1 } }
         )
       );
     });
@@ -263,7 +263,7 @@ describe("useScope() — types", () => {
     it("interface props: toObs field resolves to correct Observable type", () => {
       renderHook(() =>
         useScope((p) => {
-          const p$ = toObs(p, { onTick: "function" });
+          const p$ = toObs(p);
           expectTypeOf(p$.interval).toEqualTypeOf<Observable<number | undefined>>();
           expectTypeOf(p$.immediate).toEqualTypeOf<Observable<boolean | undefined>>();
           return {};
@@ -322,7 +322,7 @@ describe("useScope() — types", () => {
     it("DeepMaybeObservable<P> props: toObs returns Observable with unwrapped P field types", () => {
       renderHook(() =>
         useScope((p) => {
-          const p$ = toObs(p, { onTick: "function" });
+          const p$ = toObs(p);
           expectTypeOf(p$.interval).toEqualTypeOf<Observable<number | undefined>>();
           expectTypeOf(p$.immediate).toEqualTypeOf<Observable<boolean | undefined>>();
           return {};
