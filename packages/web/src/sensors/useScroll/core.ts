@@ -1,5 +1,12 @@
 import { batch, observable, type Observable } from "@legendapp/state";
-import { type DeepMaybeObservable, get, observe, onMount, onUnmount, peek } from "@usels/core";
+import {
+  type DeepMaybeObservable,
+  get,
+  createObserve,
+  onMount,
+  onUnmount,
+  peek,
+} from "@usels/core";
 import { isWindow } from "@usels/core/shared/index";
 import { throttle } from "es-toolkit/function";
 import type { MaybeEventTarget } from "../../types";
@@ -203,7 +210,7 @@ export function createScroll(
   );
 
   // Reactive: when element transitions to null, reset state and clear timers.
-  observe(() => {
+  createObserve(() => {
     const el = get(element);
     if (!el) {
       if (idleTimer) {

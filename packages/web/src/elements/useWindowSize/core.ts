@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import { observe, onMount, type DeepMaybeObservable } from "@usels/core";
+import { createObserve, onMount, type DeepMaybeObservable } from "@usels/core";
 import { resolveWindowSource, type ConfigurableWindow } from "@shared/configurable";
 import { createEventListener } from "../../browser/useEventListener/core";
 import { createMediaQuery } from "../../browser/useMediaQuery/core";
@@ -89,7 +89,7 @@ export function createWindowSize(
 
   // Re-measure when type or includeScrollbar changes (skip initial run)
   let isFirstTypeChange = true;
-  observe(() => {
+  createObserve(() => {
     opts$.get();
     if (isFirstTypeChange) {
       isFirstTypeChange = false;
@@ -101,7 +101,7 @@ export function createWindowSize(
   // Orientation change — skip initial run, guard with listenOrientation flag
   const matches$ = createMediaQuery("(orientation: portrait)");
   let isFirstOrientation = true;
-  observe(() => {
+  createObserve(() => {
     matches$.get();
     if (isFirstOrientation) {
       isFirstOrientation = false;

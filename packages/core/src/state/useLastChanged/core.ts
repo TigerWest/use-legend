@@ -1,5 +1,5 @@
 import { type Observable } from "@legendapp/state";
-import { observe } from "@primitives/useScope";
+import { createObserve } from "@primitives/useScope";
 import { observable } from "@shared/observable";
 import type { DeepMaybeObservable, ReadonlyObservable } from "../../types";
 
@@ -28,7 +28,7 @@ export function createLastChanged<T>(
 
   let hasObservedInitial = false;
 
-  observe(() => {
+  createObserve(() => {
     source$.get(); // register reactive dependency
 
     if (!hasObservedInitial) {

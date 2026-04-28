@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { createElement, useState } from "react";
 import { isObservable, observable, type Observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
-import { useScope, toObs, observe } from ".";
+import { useScope, toObs, createObserve } from ".";
 
 describe("useScope() — reactive props (toObs)", () => {
   describe("toObs() basic", () => {
@@ -98,14 +98,14 @@ describe("useScope() — reactive props (toObs)", () => {
   });
 
   describe("reactive tracking", () => {
-    it("observe(() => obs$.count.get()) fires when count changes", () => {
+    it("createObserve(() => obs$.count.get()) fires when count changes", () => {
       const spy = vi.fn();
       const { rerender } = renderHook(
         ({ count }) =>
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => spy(obs$.count.get()));
+              createObserve(() => spy(obs$.count.get()));
               return {};
             },
             { count }
@@ -126,7 +126,7 @@ describe("useScope() — reactive props (toObs)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => countSpy(obs$.count.get()));
+              createObserve(() => countSpy(obs$.count.get()));
               return {};
             },
             { count, name }
@@ -150,8 +150,8 @@ describe("useScope() — reactive props (toObs)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => countSpy(obs$.count.get()));
-              observe(() => nameSpy(obs$.name.get()));
+              createObserve(() => countSpy(obs$.count.get()));
+              createObserve(() => nameSpy(obs$.name.get()));
               return {};
             },
             { count, name }
@@ -178,7 +178,7 @@ describe("useScope() — reactive props (toObs)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => spy(obs$.a.get(), obs$.b.get(), obs$.c.get()));
+              createObserve(() => spy(obs$.a.get(), obs$.b.get(), obs$.c.get()));
               return {};
             },
             { a, b, c }
@@ -288,7 +288,7 @@ describe("useScope() — reactive props (toObs)", () => {
         useScope(
           (p) => {
             const obs$ = toObs(p);
-            observe(() => {
+            createObserve(() => {
               external$.get();
               spy(obs$.count.get());
             });
@@ -334,7 +334,7 @@ describe("toObs with scalar hint", () => {
         useScope(
           (p) => {
             const obs$ = toObs(p, { dump: "plain" });
-            observe(() => spy(obs$.dump.get()));
+            createObserve(() => spy(obs$.dump.get()));
             return {};
           },
           { dump }
@@ -373,7 +373,7 @@ describe("useScope() — multi-params (rest args)", () => {
           (timing, opts) => {
             const t$ = toObs(timing);
             const o$ = toObs(opts);
-            observe(() => spy(t$.debounce.get(), o$.name.get()));
+            createObserve(() => spy(t$.debounce.get(), o$.name.get()));
             return {};
           },
           { debounce },
@@ -449,7 +449,7 @@ describe("toObs with Observable field props — auto-deref", () => {
     expect(result.current.p$.obs.get()).toBe(99);
   });
 
-  it("observe() on toObs(p).obs fires when the Observable field value changes", () => {
+  it("createObserve() on toObs(p).obs fires when the Observable field value changes", () => {
     const source$ = observable(0);
     const spy = vi.fn();
 
@@ -457,7 +457,7 @@ describe("toObs with Observable field props — auto-deref", () => {
       useScope(
         (p) => {
           const p$ = toObs(p);
-          observe(() => spy(p$.obs.get()));
+          createObserve(() => spy(p$.obs.get()));
           return {};
         },
         { obs: source$ }
@@ -491,7 +491,7 @@ describe("toObs with Observable field props — auto-deref", () => {
     expect(result.current.p$.b.get()).toBe(true);
   });
 
-  // ── Fire-count tests: how many times does observe() run when field$.set()? ──
+  // ── Fire-count tests: how many times does createObserve() run when field$.set()? ──
   // These establish the contract for per-field Observable + observe interactions.
 
   it("observe fires EXACTLY ONCE when field$.set() — child accessor (p$.field.get())", () => {
@@ -502,7 +502,7 @@ describe("toObs with Observable field props — auto-deref", () => {
       useScope(
         (p) => {
           const p$ = toObs(p);
-          observe(() => spy(p$.field.get()));
+          createObserve(() => spy(p$.field.get()));
           return {};
         },
         { field: field$ }
@@ -523,7 +523,7 @@ describe("toObs with Observable field props — auto-deref", () => {
       useScope(
         (p) => {
           const p$ = toObs(p);
-          observe(() => {
+          createObserve(() => {
             const raw = p$.get() as { field: string };
             spy(raw?.field);
           });
@@ -547,7 +547,7 @@ describe("toObs with Observable field props — auto-deref", () => {
       useScope(
         (p) => {
           const p$ = toObs(p);
-          observe(() => spy(p$.field.get()));
+          createObserve(() => spy(p$.field.get()));
           return {};
         },
         { field: options$.field }
@@ -563,13 +563,13 @@ describe("toObs with Observable field props — auto-deref", () => {
 
 describe("toObs with Observable field — opaque hint fire-count", () => {
   // Baseline: regular observable (no prop wrapping) — must fire exactly once
-  it("baseline — plain observe() on external observable fires exactly once per set()", () => {
+  it("baseline — plain createObserve() on external observable fires exactly once per set()", () => {
     const field$ = observable("a");
     const spy = vi.fn();
 
     renderHook(() =>
       useScope(() => {
-        observe(() => spy(field$.get()));
+        createObserve(() => spy(field$.get()));
         return {};
       })
     );
@@ -589,7 +589,7 @@ describe("toObs with Observable field — opaque hint fire-count", () => {
       useScope(
         (p) => {
           const p$ = toObs(p, { field: "opaque" });
-          observe(() => spy(p$.field.get()));
+          createObserve(() => spy(p$.field.get()));
           return {};
         },
         { field: field$ }
@@ -611,7 +611,7 @@ describe("toObs with Observable field — opaque hint fire-count", () => {
       useScope(
         (p) => {
           const p$ = toObs(p, { field: "opaque" });
-          observe(() => {
+          createObserve(() => {
             const raw = p$.get() as { field: string };
             spy(raw?.field);
           });
@@ -636,7 +636,7 @@ describe("toObs with Observable field — opaque hint fire-count", () => {
       useScope(
         (p) => {
           const p$ = toObs(p); // no hint
-          observe(() => spy(p$.field.get()));
+          createObserve(() => spy(p$.field.get()));
           return {};
         },
         { field: field$ }
@@ -658,7 +658,7 @@ describe("useScope() — reactiveProps plain state selectivity", () => {
         useScope(
           (p) => {
             const p$ = toObs(p);
-            observe(() => spy(p$.count.get()));
+            createObserve(() => spy(p$.count.get()));
             return {};
           },
           { count }
@@ -678,7 +678,7 @@ describe("useScope() — reactiveProps plain state selectivity", () => {
         useScope(
           (p) => {
             const p$ = toObs(p);
-            observe(() => spyA(p$.a.get())); // only tracking 'a'
+            createObserve(() => spyA(p$.a.get())); // only tracking 'a'
             return {};
           },
           { a, b }
@@ -705,7 +705,7 @@ describe("useScope() — reactiveProps plain state selectivity", () => {
       useScope(
         (p) => {
           const p$ = toObs(p);
-          observe(() => spy(p$.count.get()));
+          createObserve(() => spy(p$.count.get()));
           return {};
         },
         { count }
@@ -729,7 +729,7 @@ describe("useScope() — reactiveProps plain state selectivity", () => {
       useScope(
         (p) => {
           const p$ = toObs(p);
-          observe(() => spy(p$.count.get())); // only observing count
+          createObserve(() => spy(p$.count.get())); // only observing count
           return {};
         },
         { count: 0, name }
@@ -767,8 +767,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
             (p1, p2) => {
               const p1$ = toObs(p1);
               const p2$ = toObs(p2);
-              observe(() => p1Spy(p1$.a.get()));
-              observe(() => p2Spy(p2$.b.get()));
+              createObserve(() => p1Spy(p1$.a.get()));
+              createObserve(() => p2Spy(p2$.b.get()));
               return {};
             },
             { a },
@@ -795,8 +795,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
             (p1, p2) => {
               const p1$ = toObs(p1);
               const p2$ = toObs(p2);
-              observe(() => p1Spy(p1$.a.get()));
-              observe(() => p2Spy(p2$.b.get()));
+              createObserve(() => p1Spy(p1$.a.get()));
+              createObserve(() => p2Spy(p2$.b.get()));
               return {};
             },
             { a },
@@ -823,8 +823,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
             (p1, p2) => {
               const p1$ = toObs(p1);
               const p2$ = toObs(p2);
-              observe(() => p1Spy(p1$.a.get()));
-              observe(() => p2Spy(p2$.b.get()));
+              createObserve(() => p1Spy(p1$.a.get()));
+              createObserve(() => p2Spy(p2$.b.get()));
               return {};
             },
             { a },
@@ -851,9 +851,9 @@ describe("useScope() — multi-param + toObs edge cases", () => {
               const p1$ = toObs(p1);
               const p2$ = toObs(p2);
               const p3$ = toObs(p3);
-              observe(() => spies[0](p1$.a.get()));
-              observe(() => spies[1](p2$.b.get()));
-              observe(() => spies[2](p3$.c.get()));
+              createObserve(() => spies[0](p1$.a.get()));
+              createObserve(() => spies[1](p2$.b.get()));
+              createObserve(() => spies[2](p3$.c.get()));
               return {};
             },
             { a },
@@ -882,8 +882,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
           (p1, p2) => {
             const p1$ = toObs(p1);
             const p2$ = toObs(p2);
-            observe(() => p1Spy(p1$.rootMargin.get()));
-            observe(() => p2Spy(p2$.threshold.get()));
+            createObserve(() => p1Spy(p1$.rootMargin.get()));
+            createObserve(() => p2Spy(p2$.threshold.get()));
             return {};
           },
           { rootMargin: rootMargin$ },
@@ -911,8 +911,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
           (p1, p2) => {
             const p1$ = toObs(p1);
             const p2$ = toObs(p2);
-            observe(() => p1Spy(p1$.rootMargin.get()));
-            observe(() => p2Spy(p2$.threshold.get()));
+            createObserve(() => p1Spy(p1$.rootMargin.get()));
+            createObserve(() => p2Spy(p2$.threshold.get()));
             return {};
           },
           { rootMargin: "0px" },
@@ -941,8 +941,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
           (p1, p2) => {
             const p1$ = toObs(p1);
             const p2$ = toObs(p2);
-            observe(() => p1Spy(p1$.a.get()));
-            observe(() => p2Spy(p2$.b.get()));
+            createObserve(() => p1Spy(p1$.a.get()));
+            createObserve(() => p2Spy(p2$.b.get()));
             return {};
           },
           { a: a$ },
@@ -1074,8 +1074,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
             (p1, p2) => {
               const p1$ = toObs(p1);
               const p2$ = toObs(p2);
-              observe(() => p1Spy(p1$.a.get()));
-              observe(() => p2Spy(p2$.b.get()));
+              createObserve(() => p1Spy(p1$.a.get()));
+              createObserve(() => p2Spy(p2$.b.get()));
               return {};
             },
             stableP1,
@@ -1103,8 +1103,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
             (p1, p2) => {
               const p1$ = toObs(p1);
               const p2$ = toObs(p2);
-              observe(() => p1Spy(p1$.coord.x.get()));
-              observe(() => p2Spy(p2$.label.get()));
+              createObserve(() => p1Spy(p1$.coord.x.get()));
+              createObserve(() => p2Spy(p2$.label.get()));
               return {};
             },
             { coord },
@@ -1130,7 +1130,7 @@ describe("useScope() — multi-param + toObs edge cases", () => {
           useScope(
             (p1) => {
               const p1$ = toObs(p1);
-              observe(() => ySpy(p1$.coord.y.get()));
+              createObserve(() => ySpy(p1$.coord.y.get()));
               return {};
             },
             { coord: { x, y: 20 } }
@@ -1177,7 +1177,7 @@ describe("useScope() — multi-param + toObs edge cases", () => {
           useScope(
             (_p1, p2) => {
               const p2$ = toObs(p2);
-              observe(() => p2Spy(p2$.b.get()));
+              createObserve(() => p2Spy(p2$.b.get()));
               return {};
             },
             { a },
@@ -1208,8 +1208,8 @@ describe("useScope() — multi-param + toObs edge cases", () => {
           (p1, p2) => {
             const p1$ = toObs(p1);
             const p2$ = toObs(p2);
-            observe(() => p1Spy(p1$.a.get()));
-            observe(() => p2Spy(p2$.b.get()));
+            createObserve(() => p1Spy(p1$.a.get()));
+            createObserve(() => p2Spy(p2$.b.get()));
             return {};
           },
           { a: a$ },
@@ -1277,7 +1277,7 @@ describe("useScope() — outer Observable as scope param", () => {
 // runs but BEFORE useEffect (onMount) attaches onChange subscriptions. If toObs
 // only subscribes inside onMount without catching up the current peek() value,
 // the mirrored opts$ field is stuck at its pre-mount value and downstream
-// `observe()` consumers never rerun with the real element/value.
+// `createObserve()` consumers never rerun with the real element/value.
 //
 // This was the root cause of useIntersectionObserver appearing inert when
 // `root` was a Ref$: containerRef$ was null at factory time, the null was
@@ -1311,7 +1311,7 @@ describe("useScope() — factory → onMount value propagation", () => {
     );
   });
 
-  it("downstream observe() reruns with the caught-up value after mount", () => {
+  it("downstream createObserve() reruns with the caught-up value after mount", () => {
     const obs$ = observable<string | null>(null);
     const seen: Array<string | null> = [];
 
@@ -1321,7 +1321,7 @@ describe("useScope() — factory → onMount value propagation", () => {
           const p$ = toObs(p) as unknown as Observable<{ field: string | null }>;
           // Flip source between factory and onMount.
           obs$.set("ready");
-          observe(() => {
+          createObserve(() => {
             seen.push(p$.field.get());
           });
           return {};

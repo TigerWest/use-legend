@@ -1,5 +1,5 @@
 import { type Observable } from "@legendapp/state";
-import { observe } from "@primitives/useScope";
+import { createObserve } from "@primitives/useScope";
 import { observable } from "@shared/observable";
 import { createFilterWrapper, throttleFilter, type ThrottleFilterOptions } from "@shared/filters";
 import type { DeepMaybeObservable, ReadonlyObservable } from "../../types";
@@ -27,7 +27,7 @@ export function createThrottled<T>(
     value$.set(newValue);
   });
 
-  observe(() => {
+  createObserve(() => {
     const current = source$.get();
     throttledUpdate(current);
   });

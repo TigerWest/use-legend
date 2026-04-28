@@ -1,35 +1,37 @@
 ---
 title: Effects API
-description: Canonical reference for observe, watch, and whenever — the three scope-level effect primitives.
+description: Canonical reference for createObserve, watch, and whenever — the three scope-level effect primitives.
 ---
 
 Effects in a scope subscribe to observable reads and run work when those reads change. Three primitives cover the common cases.
 
 All three register against the current scope and are automatically disposed when the scope tears down. Use them inside `"use scope"` blocks, `useScope` factories, or store setup functions.
 
-## `observe()`
+## `createObserve()`
 
 Run a callback whenever any observable read inside it changes. Tracks reads on every run.
 
 **Signature:**
 
 ```ts
-function observe(callback: () => void): () => void;
+function createObserve(callback: () => void): () => void;
 ```
 
 Returns a dispose function. Inside a scope the dispose is auto-registered — you do not need to capture the return value.
 
+> The legacy export name `observe` is preserved as a deprecated alias for backwards compatibility.
+
 **Example:**
 
 ```tsx
-import { observable, observe } from "@usels/core";
+import { createObserve, observable } from "@usels/core";
 
 function Counter() {
   "use scope";
 
   const count$ = observable(0);
 
-  observe(() => {
+  createObserve(() => {
     document.title = `Count: ${count$.get()}`;
   });
 
@@ -127,7 +129,7 @@ Each transition from falsy → truthy fires the effect. Pass `{ once: true }` if
 
 | Need | API |
 | --- | --- |
-| React to any observable read inside the effect body (fires on mount) | `observe()` |
+| React to any observable read inside the effect body (fires on mount) | `createObserve()` |
 | React to a specific source (or tuple), skip the first value by default | `watch()` |
 | Fire only when a value becomes truthy (optionally one-shot via `once`) | `whenever()` |
 

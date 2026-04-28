@@ -1,5 +1,11 @@
 import { observable, type Observable } from "@legendapp/state";
-import { createSupported, observe, onUnmount, peek, type DeepMaybeObservable } from "@usels/core";
+import {
+  createSupported,
+  createObserve,
+  onUnmount,
+  peek,
+  type DeepMaybeObservable,
+} from "@usels/core";
 import { normalizeTargets } from "@shared/normalizeTargets";
 import { resolveWindowSource, type ConfigurableWindow } from "@shared/configurable";
 import type { MaybeEventTarget } from "../../types";
@@ -141,7 +147,7 @@ export function createElementBounding(
   // normalizeTargets) AND react to mount state (`isSupported$`) flipping true
   // on onBeforeMount — which is how the initial post-mount read is scheduled
   // without touching DOM / rAF during SSR render.
-  observe(() => {
+  createObserve(() => {
     if (!isSupported$.get()) return;
     normalizeTargets(target);
     update();

@@ -5,7 +5,7 @@ import { describe, it, expect, vi } from "vitest";
 import { observable } from "@legendapp/state";
 import { inject } from "./inject";
 import { useScope, onMount } from "./index";
-import { observe } from "./observe";
+import { createObserve } from "./observe";
 
 describe("inject()", () => {
   describe("error paths", () => {
@@ -75,7 +75,7 @@ describe("inject() — reactive propagation", () => {
     expect(renderCount).toBeGreaterThan(initialRenders);
   });
 
-  it("observe() inside scope reacts when Provider value is an Observable (stable ref)", () => {
+  it("createObserve() inside scope reacts when Provider value is an Observable (stable ref)", () => {
     const counter$ = observable({ n: 1 });
     const Ctx = React.createContext(counter$);
     const seen: number[] = [];
@@ -83,7 +83,7 @@ describe("inject() — reactive propagation", () => {
     function Child() {
       useScope(() => {
         const c$ = inject(Ctx);
-        observe(() => {
+        createObserve(() => {
           seen.push(c$.n.get());
         });
         return {};

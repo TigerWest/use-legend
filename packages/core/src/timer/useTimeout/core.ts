@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import { observe } from "@primitives/useScope";
+import { createObserve } from "@primitives/useScope";
 import type { DeepMaybeObservable, Fn, MaybeObservable, Stoppable } from "../../types";
 import { createTimeoutFn } from "@timer/useTimeoutFn/core";
 
@@ -51,7 +51,7 @@ export function createTimeout(
   );
 
   // Reset ready$ when a new timeout starts (isPending becomes true)
-  observe(() => {
+  createObserve(() => {
     if (result.isPending$.get()) ready$.set(false);
   });
 

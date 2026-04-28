@@ -2,7 +2,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
-import { useScope, onBeforeMount, onMount, onUnmount, observe } from ".";
+import { useScope, onBeforeMount, onMount, onUnmount, createObserve } from ".";
 
 describe("useScope()", () => {
   describe("factory execution", () => {
@@ -189,7 +189,7 @@ describe("useScope()", () => {
 
       const { unmount } = renderHook(() =>
         useScope(() => {
-          observe(() => {
+          createObserve(() => {
             spy(count$.get());
           });
           return {};
@@ -212,7 +212,7 @@ describe("useScope()", () => {
 
       renderHook(() =>
         useScope(() => {
-          observe(() => spy(val$.get()));
+          createObserve(() => spy(val$.get()));
           return {};
         })
       );
@@ -236,7 +236,7 @@ describe("useScope()", () => {
 
       const { unmount: unmount2 } = renderHook(() =>
         useScope(() => {
-          observe(() => trackSpy(count$.get()));
+          createObserve(() => trackSpy(count$.get()));
           return {};
         })
       );

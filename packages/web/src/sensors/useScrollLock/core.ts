@@ -1,5 +1,5 @@
 import { observable, ObservableHint, type Observable, type OpaqueObject } from "@legendapp/state";
-import { type DeepMaybeObservable, get, observe, onUnmount } from "@usels/core";
+import { type DeepMaybeObservable, get, createObserve, onUnmount } from "@usels/core";
 import type { MaybeObservable } from "@usels/core";
 import type { MaybeEventTarget } from "../../types";
 import { resolveWindowSource, type ConfigurableWindow } from "@shared/configurable";
@@ -106,7 +106,7 @@ export function createScrollLock(
   };
 
   // React to isLocked$ changes and element lifecycle.
-  observe(() => {
+  createObserve(() => {
     const el = get(element) as HTMLElement | null;
     const hasExplicitElement = element != null;
     const target = hasExplicitElement ? el : (el ?? window$.peek()?.document.body ?? null);

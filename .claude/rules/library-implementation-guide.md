@@ -28,9 +28,9 @@ packages/core/src/
 | Rule                                    | Description                                                                                                                                                                                           |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **No React**                            | Never import `react` or `@legendapp/state/react`                                                                                                                                                      |
-| **`observe()` only**                    | Use `observe()` from `@primitives/useScope`, not `useObserve()`                                                                                                                                       |
+| **`createObserve()` only**                    | Use `createObserve()` from `@primitives/useScope`, not `useObserve()`                                                                                                                                       |
 | **Same options type as hook**           | Accept `DeepMaybeObservable<Options>` — the same type the hook receives. Core decides how to consume it.                                                                                              |
-| **Reactive read → `opts$.get().field`** | Use `opts$.get().field` inside `observe()` or computed observables. Avoids the JSON serialization error that occurs when calling `.get()` on a function-typed child observable (`opts$.field.get()`). |
+| **Reactive read → `opts$.get().field`** | Use `opts$.get().field` inside `createObserve()` or computed observables. Avoids the JSON serialization error that occurs when calling `.get()` on a function-typed child observable (`opts$.field.get()`). |
 | **Non-reactive read → `opts$.peek()`**  | Use `opts$.peek()?.field` for construction-time-only reads — no separate `rawOpts` snapshot needed.                                                                                                   |
 | **Computed returning functions**        | Wrap returned objects containing functions with `ObservableHint.opaque({...})` to prevent Legend-State from JSON-comparing function values.                                                           |
 | **Observable results**                  | Return `Observable<T>` output — no additional wrapping needed in the hook layer.                                                                                                                      |
@@ -40,7 +40,7 @@ packages/core/src/
 
 ```ts
 import { type Observable, observable } from "@legendapp/state";
-import { observe, onUnmount } from "@primitives/useScope";
+import { createObserve, onUnmount } from "@primitives/useScope";
 import type { DeepMaybeObservable } from "../../types";
 
 function createDebounced<T>(
@@ -51,7 +51,7 @@ function createDebounced<T>(
   const opts$ = observable(options);
   const value$ = observable<T>(source$.peek());
 
-  observe(() => {
+  createObserve(() => {
     const val = source$.get();
     const ms = opts$.get().delay; // reactive — re-runs when opts$.delay changes
     // debounce logic...
@@ -171,7 +171,7 @@ These functions are also exported as public framework-agnostic API, making the `
 
 | API             | Import from            | Timing                         |
 | --------------- | ---------------------- | ------------------------------ |
-| `observe`       | `@primitives/useScope` | reactive, scope auto-cleanup   |
+| `createObserve` | `@primitives/useScope` | reactive, scope auto-cleanup   |
 | `onMount`       | `@primitives/useScope` | useEffect — after mount        |
 | `onUnmount`     | `@primitives/useScope` | unmount-only cleanup           |
 | `onBeforeMount` | `@primitives/useScope` | useLayoutEffect — before paint |
@@ -184,10 +184,10 @@ These functions are also exported as public framework-agnostic API, making the `
 | `useMount(cb)`                                 | `onMount(cb)`                                 | effect, after mount          |
 | `useMount(() => { setup(); return cleanup; })` | `onMount(() => { setup(); return cleanup; })` | setup + cleanup pair         |
 | `useUnmount(cb)`                               | `onUnmount(cb)`                               | unmount-only cleanup         |
-| `observe()` from `@legendapp/state`            | `observe()` from `@primitives/useScope`       | reactive, scope auto-cleanup |
+| `observe()` from `@legendapp/state`            | `createObserve()` from `@primitives/useScope`       | reactive, scope auto-cleanup |
 
-> **`observe` import**: Use `observe` from `@primitives/useScope`, not `@legendapp/state`.
-> Only the scoped version is automatically registered for cleanup.
+> **`createObserve` import**: Use `createObserve` from `@primitives/useScope`, not `observe` from `@legendapp/state`.
+> Only the scoped version is automatically registered for cleanup. The legacy `observe` export from `@usels/core` remains as a deprecated alias of `createObserve` for backwards compatibility.
 
 ### `onMount` vs `onUnmount`
 
@@ -237,7 +237,7 @@ useScope(() => {
 | -------------------------------------------------------- | --------------------------------------- |
 | `packages/core/src/primitives/useScope/index.ts`         | `useScope` implementation               |
 | `packages/core/src/primitives/useScope/effectScope.ts`   | `onMount`, `onUnmount`, `onBeforeMount` |
-| `packages/core/src/primitives/useScope/observe.ts`       | scope-aware `observe`                   |
+| `packages/core/src/primitives/useScope/observe.ts`       | scope-aware `createObserve`             |
 | `packages/core/src/primitives/useScope/reactiveProps.ts` | `toObs`, `ReactiveProps`                |
 
 ---
@@ -268,7 +268,7 @@ Use `isRef$` from `useRef$` only when you need to distinguish `Ref$` from other 
 > `@utilities/get` and `@utilities/peek` instead — they handle plain values,
 > Observables, and `Ref$` uniformly.
 
-#### In a Core Function (uses `observe`)
+#### In a Core Function (uses `createObserve`)
 
 ```ts
 import { get } from "@utilities/get";
@@ -277,7 +277,7 @@ import { peek } from "@utilities/peek";
 function createElementSize(target: MaybeElement): { size$: Observable<Size> } {
   const size$ = observable({ width: 0, height: 0 });
 
-  observe(() => {
+  createObserve(() => {
     const el = get(target); // reactive tracking registered
     if (!el || !(el instanceof HTMLElement)) return;
     // ResizeObserver setup...
@@ -300,7 +300,7 @@ import { isRef$ } from "../useRef$";
 
 function useMyHook(element: MaybeElement) {
   return useScope(() => {
-    observe(() => {
+    createObserve(() => {
       // Reactive read — registers tracking dependency on Ref$ or Observable element
       const el = get(element);
       if (el) setup(el);
@@ -383,7 +383,7 @@ function createMyUtil<T>(
   options?: DeepMaybeObservable<MyHookOptions>
 ): { value$: Observable<T> } {
   const opts$ = observable(options); // always wrap — handles plain, per-field, or outer Observable
-  // Reactive read → opts$.get().field inside observe()
+  // Reactive read → opts$.get().field inside createObserve()
   // Construction-time read → opts$.peek()?.field
 }
 ```
@@ -458,7 +458,7 @@ For hooks where options contain reactive scalar fields (e.g. `MaybeObservable<nu
 
 Replaces `useLatest` and `useConstant` with the `useScope((p) => ..., { ...args })` pattern.
 
-`toObs(p)` converts the ReactiveProps proxy to `Observable<Props>`. This `Observable` passes directly to core functions that accept `DeepMaybeObservable` — core wraps it with `observable()` internally, so prop changes propagate reactively into `observe()`.
+`toObs(p)` converts the ReactiveProps proxy to `Observable<Props>`. This `Observable` passes directly to core functions that accept `DeepMaybeObservable` — core wraps it with `observable()` internally, so prop changes propagate reactively into `createObserve()`.
 
 ```ts
 // Hook type derived from core — single source of truth for params and return type
@@ -595,7 +595,7 @@ useScope(
     const obs1$ = toObs(options1);
     const obs2$ = toObs(options2, "opaque"); // { nested: { ... } } → treat as opaque
 
-    observe(() => {
+    createObserve(() => {
       const val = obs2$.get(); // raw nested object
     });
     return {};
@@ -634,7 +634,7 @@ Pass an optional `FieldTransformMap<T>` as the second argument to control how ea
 
 > **`MaybeElement` fields — no hint at the `toObs` layer.**
 > Pass the field through `toObs(p)` without a hint and resolve it inside
-> `observe(() => get(p$.scrollTarget))` (import `get` from `@utilities/get`).
+> `createObserve(() => get(p$.scrollTarget))` (import `get` from `@utilities/get`).
 > A single `get()` call handles both the `toObs` proxy field and the inner
 > Ref$/Observable/raw element — reactive dependency is registered and the
 > element is returned directly. There is no per-field `toObs` hint for elements.
@@ -652,7 +652,7 @@ function useMyHook(options?: DeepMaybeObservable<UseMyHookOptions>) {
   return useScope((p) => {
     const p$ = toObs(p); // no hint on onStart
 
-    observe(() => {
+    createObserve(() => {
       // ... when event fires:
       p.onStart?.(pos, e); // ✅ raw-prop access — always latest closure
     });
@@ -918,7 +918,7 @@ export interface Disposable {
 function createMyUtil(source$: Observable<T>): { result$: Observable<T> } {
   const result$ = observable<T>(source$.peek());
 
-  observe(() => {
+  createObserve(() => {
     result$.set(source$.get());
   }); // auto-registered to current scope
 
@@ -960,7 +960,7 @@ function createPollerFn(fn: AnyFn, interval$: Observable<number>): Pausable {
     isActive$.set(true); /* setInterval... */
   };
 
-  observe(() => {
+  createObserve(() => {
     /* re-setup on interval$.get() change */
   });
 

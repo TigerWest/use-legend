@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import { observe, onMount, onUnmount } from "@primitives/useScope";
+import { createObserve, onMount, onUnmount } from "@primitives/useScope";
 import type { AnyFn, Pausable } from "../../types";
 
 export interface IntervalFnOptions {
@@ -44,7 +44,7 @@ export function createIntervalFn(
 
   // Reactive: restart interval when interval$ changes while active.
   // Tracks only interval$ (isActive$ via peek — no dep).
-  observe(() => {
+  createObserve(() => {
     const ms = interval$.get(); // register dep on interval$
     cleanupTimer();
     if (isActive$.peek()) {

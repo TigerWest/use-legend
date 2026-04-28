@@ -1,6 +1,6 @@
 import { observable, type Observable } from "@legendapp/state";
 import {
-  observe,
+  createObserve,
   peek,
   type DeepMaybeObservable,
   type ReadonlyObservable,
@@ -119,7 +119,7 @@ export function createInfiniteScroll(
   };
 
   // Auto-load when arrivedState matches direction or content doesn't overflow
-  observe(() => {
+  createObserve(() => {
     if (!immediate && !arrivedState$.get()) return; // skip auto-fill on mount when immediate=false
     const isVisible = isVisible$.get();
     const arrived = arrivedState$.get()[direction];

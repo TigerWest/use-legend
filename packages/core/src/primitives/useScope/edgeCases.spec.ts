@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
 import { effectScope, getCurrentScope, onBeforeMount, onMount, onUnmount } from "./effectScope";
-import { observe } from "./observe";
+import { createObserve } from "./observe";
 import { useScope, toObs } from ".";
 
 describe("useScope() — edge cases", () => {
@@ -23,7 +23,7 @@ describe("useScope() — edge cases", () => {
     it("observe outside scope behaves as normal legend-state observe", () => {
       const val$ = observable(0);
       const spy = vi.fn();
-      const unsub = observe(() => spy(val$.get()));
+      const unsub = createObserve(() => spy(val$.get()));
 
       expect(spy).toHaveBeenCalledTimes(1);
       act(() => val$.set(1));
@@ -167,8 +167,8 @@ describe("useScope() — edge cases", () => {
 
       const { unmount } = renderHook(() =>
         useScope(() => {
-          observe(() => spyA(a$.get()));
-          observe(() => spyB(b$.get()));
+          createObserve(() => spyA(a$.get()));
+          createObserve(() => spyB(b$.get()));
           return {};
         })
       );
@@ -185,11 +185,11 @@ describe("useScope() — edge cases", () => {
     });
   });
 
-  describe("observe() — manual unsub integration with _observers track", () => {
-    it("observe() inside an effectScope.run() registers a record on _observers", () => {
+  describe("createObserve() — manual unsub integration with _observers track", () => {
+    it("createObserve() inside an effectScope.run() registers a record on _observers", () => {
       const scope = effectScope();
       const val$ = observable(0);
-      scope.run(() => observe(() => val$.get()));
+      scope.run(() => createObserve(() => val$.get()));
 
       expect(scope._observers).toHaveLength(1);
       expect(scope._observers[0].args).toBeDefined();
@@ -201,7 +201,7 @@ describe("useScope() — edge cases", () => {
       const val$ = observable(0);
       let unsubHandle!: () => void;
       scope.run(() => {
-        unsubHandle = observe(() => val$.get());
+        unsubHandle = createObserve(() => val$.get());
       });
       expect(scope._observers).toHaveLength(1);
 
@@ -215,7 +215,7 @@ describe("useScope() — edge cases", () => {
       const spy = vi.fn();
       let unsubHandle!: () => void;
       scope.run(() => {
-        unsubHandle = observe(() => spy(val$.get()));
+        unsubHandle = createObserve(() => spy(val$.get()));
       });
 
       unsubHandle(); // remove from _observers
@@ -237,7 +237,7 @@ describe("useScope() — props edge cases", () => {
         ({ props }: { props: Record<string, unknown> }) =>
           useScope((p) => {
             const obs$ = toObs(p);
-            observe(() => spy(obs$.name?.get?.()));
+            createObserve(() => spy(obs$.name?.get?.()));
             return {};
           }, props),
         { initialProps: { props: { name: "alice", extra: 1 } as Record<string, unknown> } }

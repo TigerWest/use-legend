@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { observable } from "@legendapp/state";
 import { describe, it, expect, vi } from "vitest";
 import { StrictMode } from "react";
-import { useScope, onMount, onBeforeMount, onUnmount, observe, toObs } from ".";
+import { useScope, onMount, onBeforeMount, onUnmount, createObserve, toObs } from ".";
 
 /**
  * React Strict Mode (dev) runs:
@@ -30,7 +30,7 @@ describe("useScope() — React Strict Mode", () => {
     });
   });
 
-  describe("observe() reactivity after Strict Mode remount", () => {
+  describe("createObserve() reactivity after Strict Mode remount", () => {
     it("observe callback reacts to changes after Strict Mode remount", () => {
       const count$ = observable(0);
       const spy = vi.fn();
@@ -38,7 +38,7 @@ describe("useScope() — React Strict Mode", () => {
       renderHook(
         () =>
           useScope(() => {
-            observe(() => spy(count$.get()));
+            createObserve(() => spy(count$.get()));
             return {};
           }),
         { wrapper }
@@ -58,7 +58,7 @@ describe("useScope() — React Strict Mode", () => {
       const { unmount } = renderHook(
         () =>
           useScope(() => {
-            observe(() => spy(val$.get()));
+            createObserve(() => spy(val$.get()));
             return {};
           }),
         { wrapper }
@@ -80,8 +80,8 @@ describe("useScope() — React Strict Mode", () => {
       renderHook(
         () =>
           useScope(() => {
-            observe(() => spyA(a$.get()));
-            observe(() => spyB(b$.get()));
+            createObserve(() => spyA(a$.get()));
+            createObserve(() => spyB(b$.get()));
             return {};
           }),
         { wrapper }
@@ -107,7 +107,7 @@ describe("useScope() — React Strict Mode", () => {
         () =>
           useScope(() => {
             const count$ = observable(0);
-            observe(() => spy(count$.get()));
+            createObserve(() => spy(count$.get()));
             return { count$ };
           }),
         { wrapper }
@@ -201,7 +201,7 @@ describe("useScope() — React Strict Mode", () => {
       const { rerender } = renderHook(
         () =>
           useScope(() => {
-            observe(() => spy(val$.get()));
+            createObserve(() => spy(val$.get()));
             return {};
           }),
         { wrapper }
@@ -229,7 +229,7 @@ describe("useScope() — React Strict Mode", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => spy(obs$.count.get()));
+              createObserve(() => spy(obs$.count.get()));
               return {};
             },
             { count }
@@ -273,7 +273,7 @@ describe("useScope() — React Strict Mode", () => {
           useScope(
             (p) => {
               const p$ = toObs(p);
-              observe(() => spy(p$.val.get()));
+              createObserve(() => spy(p$.val.get()));
               return {};
             },
             { val: val$ }
@@ -316,7 +316,7 @@ describe("multi-params — Strict Mode", () => {
         useScope(
           (timing, _opts) => {
             const t$ = toObs(timing);
-            observe(() => spy(t$.debounce.get()));
+            createObserve(() => spy(t$.debounce.get()));
             return {};
           },
           { debounce },

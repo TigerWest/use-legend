@@ -1,5 +1,5 @@
 import { observable, ObservableHint, type Observable } from "@legendapp/state";
-import { get, observe, type DeepMaybeObservable } from "@usels/core";
+import { get, createObserve, type DeepMaybeObservable } from "@usels/core";
 import {
   createIntersectionObserver,
   type UseIntersectionObserverOptions,
@@ -72,7 +72,7 @@ export function createElementVisibility(
   );
 
   // Reset visibility when target element is removed
-  observe(() => {
+  createObserve(() => {
     const targets = normalizeTargets(element);
     if (!targets.length) {
       isVisible$.set((opts$.peek()?.initialValue as boolean | undefined) ?? false);

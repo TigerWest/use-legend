@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import { get, observe, type DeepMaybeObservable } from "@usels/core";
+import { get, createObserve, type DeepMaybeObservable } from "@usels/core";
 import { createResizeObserver } from "@elements/useResizeObserver/core";
 import type { MaybeEventTarget } from "../../types";
 
@@ -73,7 +73,7 @@ export function createElementSize(
 
   // Sync initial size from offsetWidth/offsetHeight after element mounts.
   // Re-runs when `target` (Ref$/Observable) changes.
-  observe(() => {
+  createObserve(() => {
     const el = get(target) as HTMLElement | null;
     if (!el) {
       size$.assign({ width: initial.width, height: initial.height });

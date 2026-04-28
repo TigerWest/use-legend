@@ -36,16 +36,16 @@
 
 ### Gating an effect until after mount
 
-Use `.get()` inside `observe()` so the effect re-runs when the mounted flag flips — the initial pre-mount run short-circuits, then the post-mount re-run proceeds.
+Use `.get()` inside `createObserve()` so the effect re-runs when the mounted flag flips — the initial pre-mount run short-circuits, then the post-mount re-run proceeds.
 
 ```tsx
-import { createIsMounted, observable, observe } from "@usels/core";
+import { createIsMounted, observable, createObserve } from "@usels/core";
 
 function Component({ deps$ }: { deps$: Observable<unknown> }) {
   "use scope";
   const isMounted$ = createIsMounted();
 
-  observe(() => {
+  createObserve(() => {
     const deps = deps$.get();
     if (!isMounted$.get()) return; // skip pre-mount run
     applyOptions(deps);

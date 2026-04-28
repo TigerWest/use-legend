@@ -19,7 +19,7 @@ function MyComponent() {
 |-----|--------|---------|
 | `observable(value)` | `@usels/core` | Create observable state |
 | `createRef$<T>()` | `@usels/core` | Create observable element ref (opaque-wrapped) |
-| `observe(fn)` | `@usels/core` | Reactive effect, auto-registered to scope, auto-cleanup |
+| `createObserve(fn)` | `@usels/core` | Reactive effect, auto-registered to scope, auto-cleanup |
 | `onMount(fn)` | `@usels/core` | After mount (return cleanup fn for setup+cleanup pairs) |
 | `onUnmount(fn)` | `@usels/core` | Unmount-only cleanup |
 | `onBeforeMount(fn)` | `@usels/core` | Before paint (`useLayoutEffect` timing) |
@@ -49,7 +49,7 @@ function MyComponent() {
 | `useEffect(() => { setup; return cleanup }, [])` | `onMount(() => { setup; return cleanup })` |
 | `useLayoutEffect(fn, [])` | `onBeforeMount(fn)` |
 | cleanup-only | `onUnmount(fn)` |
-| `useObserve(fn)` | `observe(fn)` |
+| `useObserve(fn)` | `createObserve(fn)` |
 | `useObservable(init)` | `observable(init)` |
 | `useRef$()` | `createRef$()` |
 
@@ -69,7 +69,7 @@ function Counter() {
 ## Full Example
 
 ```tsx
-import { observable, createRef$, observe, onMount, onUnmount } from "@usels/core";
+import { observable, createRef$, createObserve, onMount, onUnmount } from "@usels/core";
 
 function MyComponent() {
   "use scope";
@@ -77,7 +77,7 @@ function MyComponent() {
   const count$ = observable(0);
   const el$ = createRef$<HTMLDivElement>();
 
-  observe(() => {
+  createObserve(() => {
     const el = el$.get();
     if (el) { /* reactive to element mount/unmount */ }
   });
@@ -116,7 +116,7 @@ function GoodComponent() {
   "use scope";
   const count$ = observable(0);
   const el$ = createRef$<HTMLDivElement>();
-  observe(() => { /* reactive effect */ });
+  createObserve(() => { /* reactive effect */ });
   onMount(() => { /* post-mount setup */ });
   onUnmount(() => { /* cleanup */ });
 }
@@ -128,7 +128,7 @@ function GoodComponent() {
 |------|---------------------|
 | Create state | `observable(value)` |
 | Element ref | `createRef$<T>()` |
-| Reactive effect | `observe(fn)` |
+| Reactive effect | `createObserve(fn)` |
 | Post-mount setup | `onMount(fn)` |
 | Pre-paint setup | `onBeforeMount(fn)` |
 | Cleanup on unmount | `onUnmount(fn)` or return cleanup from `onMount` |

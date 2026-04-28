@@ -2,7 +2,7 @@ import { observable, type Observable } from "@legendapp/state";
 import {
   createSupported,
   get,
-  observe,
+  createObserve,
   type DeepMaybeObservable,
   type MaybeObservable,
 } from "@usels/core";
@@ -102,7 +102,7 @@ export function createMediaQuery(
   // Create / recreate the MediaQueryList whenever the query, window, or
   // support flag changes. Previous MQL is simply dropped — `createEventListener`
   // below reacts to `mql$` changes and tears down the old listener.
-  observe(() => {
+  createObserve(() => {
     const q = get(query);
     const win = win$.get();
     if (!isSupported$.get() || !win) {

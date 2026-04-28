@@ -1,6 +1,6 @@
 import { type Observable, type ObservablePrimitive, type OpaqueObject } from "@legendapp/state";
 import {
-  observe,
+  createObserve,
   onUnmount,
   get,
   type Arrayable,
@@ -201,13 +201,13 @@ export function createEventListener(...args: any[]): () => void {
     cleanups = [];
   };
 
-  // Scope-aware `observe` — runs synchronously at scope.run() time and re-fires
+  // Scope-aware `createObserve` — runs synchronously at scope.run() time and re-fires
   // whenever a tracked dep changes. The lifecycle is driven by the **target ref
   // itself**, not by component mount: when the ref/observable target resolves
   // to a non-null EventTarget, listeners are registered; when it goes back to
-  // null, they are torn down. The `observe` callback's unsub is auto-registered
-  // to the current scope, so it dies when the scope is disposed.
-  observe(() => {
+  // null, they are torn down. The callback's unsub is auto-registered to the
+  // current scope, so it dies when the scope is disposed.
+  createObserve(() => {
     // Teardown previous registrations before re-registering.
     teardown();
 

@@ -24,6 +24,27 @@ export interface SubscriptionRecord {
   unsub?: () => void;
 }
 
+/** Reverse-iterate and call `unsub?()` on each record, clearing the handle. */
+function pauseRecords(records: Array<{ unsub?: () => void }>): void {
+  for (let i = records.length - 1; i >= 0; i--) {
+    const r = records[i];
+    r.unsub?.();
+    r.unsub = undefined;
+  }
+}
+
+/** Re-subscribe each inactive record via its resubscribe factory. */
+function resumeRecords<R extends { unsub?: () => void }>(
+  records: R[],
+  resubscribe: (record: R) => () => void
+): void {
+  for (const r of records) {
+    if (!r.unsub) r.unsub = resubscribe(r);
+  }
+}
+
+const legendObserveFn = legendObserve as (...a: ObserverRecord["args"]) => () => void;
+
 /**
  * @internal
  * Collects reactive effects, lifecycle callbacks, and child scopes.
@@ -84,16 +105,8 @@ export class EffectScope {
    * Idempotent — safe to call on an already-paused scope.
    */
   _pauseAll(): void {
-    for (let i = this._observers.length - 1; i >= 0; i--) {
-      const r = this._observers[i];
-      r.unsub?.();
-      r.unsub = undefined;
-    }
-    for (let i = this._subs.length - 1; i >= 0; i--) {
-      const s = this._subs[i];
-      s.unsub?.();
-      s.unsub = undefined;
-    }
+    pauseRecords(this._observers);
+    pauseRecords(this._subs);
     for (const child of this._children) child._pauseAll();
   }
 
@@ -103,13 +116,8 @@ export class EffectScope {
    * Idempotent — already-active observers are left alone.
    */
   _resumeAll(): void {
-    for (const r of this._observers) {
-      if (!r.unsub)
-        r.unsub = (legendObserve as (...args: ObserverRecord["args"]) => () => void)(...r.args);
-    }
-    for (const s of this._subs) {
-      if (!s.unsub) s.unsub = s.subscribe();
-    }
+    resumeRecords(this._observers, (r) => legendObserveFn(...r.args));
+    resumeRecords(this._subs, (s) => s.subscribe());
     for (const child of this._children) child._resumeAll();
   }
 
@@ -140,20 +148,12 @@ export class EffectScope {
     for (let i = this._children.length - 1; i >= 0; i--) {
       this._children[i].dispose();
     }
-    // observers: reverse registration order — unsub and clear
-    for (let i = this._observers.length - 1; i >= 0; i--) {
-      const r = this._observers[i];
-      r.unsub?.();
-      r.unsub = undefined;
-    }
+
+    pauseRecords(this._observers);
     this._observers.length = 0;
-    // subscriptions: reverse registration order — unsub and clear
-    for (let i = this._subs.length - 1; i >= 0; i--) {
-      const s = this._subs[i];
-      s.unsub?.();
-      s.unsub = undefined;
-    }
+    pauseRecords(this._subs);
     this._subs.length = 0;
+
     // disposables: reverse registration order
     for (let i = this._disposables.length - 1; i >= 0; i--) {
       this._disposables[i]();

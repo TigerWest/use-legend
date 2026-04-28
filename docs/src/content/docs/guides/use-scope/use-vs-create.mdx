@@ -72,7 +72,7 @@ In a regular hook body, use `useRef$` and `useElementSize` instead.
 Inside a scope, `create*` reads naturally because the scope already owns lifecycle. The primitive does not need hook rules — setup happens once per scope, cleanup happens when the scope tears down:
 
 ```tsx
-import { createDebounced, observable, observe } from "@usels/core";
+import { createDebounced, observable, createObserve } from "@usels/core";
 
 function SearchBox({ onSearch }: { onSearch: (query: string) => void }) {
   "use scope";
@@ -80,7 +80,7 @@ function SearchBox({ onSearch }: { onSearch: (query: string) => void }) {
   const draft$ = observable("");
   const query$ = createDebounced(draft$, { ms: 150 });
 
-  observe(() => {
+  createObserve(() => {
     onSearch(query$.get());
   });
 

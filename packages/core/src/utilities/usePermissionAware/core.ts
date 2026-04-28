@@ -1,5 +1,5 @@
 import { observable } from "@shared/observable";
-import { observe, onMount } from "@primitives/useScope";
+import { createObserve, onMount } from "@primitives/useScope";
 import type { PermissionAware, PermissionState, ReadonlyObservable } from "../../types";
 
 export interface PermissionAwareOptions {
@@ -60,7 +60,7 @@ export function createPermissionAware({
     return s === "prompt" || s === "denied";
   });
 
-  observe(() => {
+  createObserve(() => {
     if (!isMounted$.get() || !isSupported$.get()) return;
     if (!queryPermission) return;
     revalidateOn$?.get();

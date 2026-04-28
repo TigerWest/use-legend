@@ -1,5 +1,5 @@
 import { observable } from "@legendapp/state";
-import { createSupported, get, observe, onUnmount } from "@usels/core";
+import { createSupported, get, createObserve, onUnmount } from "@usels/core";
 import { normalizeTargets } from "@shared/normalizeTargets";
 import type { DeepMaybeObservable, ReadonlyObservable, Supportable } from "@usels/core";
 import type { MaybeEventTarget } from "../../types";
@@ -29,7 +29,7 @@ export function createMutationObserver(
     observer = null;
   };
 
-  observe(() => {
+  createObserve(() => {
     const raw = opts$.get();
     const active = isActive$.get();
     // Reactive read — register dependency on target observables

@@ -5,7 +5,7 @@ import {
   type ObserveEventCallback,
 } from "@legendapp/state";
 import type { Disposable } from "../../types";
-import { observe } from "@primitives/useScope";
+import { createObserve } from "@primitives/useScope";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObservable = { get(): any };
@@ -67,7 +67,7 @@ export function watch<T extends WatchSource>(
   const selectorFn = toSelector(selector);
   let skipFirst = !immediate;
 
-  const dispose = observe(
+  const dispose = createObserve(
     selectorFn,
     (e: ObserveEventCallback<unknown>) => {
       if (skipFirst) {

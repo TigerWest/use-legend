@@ -1,7 +1,7 @@
 import { observable, type Observable } from "@legendapp/state";
 import {
   get,
-  observe,
+  createObserve,
   onMount,
   onUnmount,
   type DeepMaybeObservable,
@@ -76,12 +76,12 @@ export function createStyleTag(
   let styleTag: HTMLStyleElement | null = null;
 
   // Sync prop css → css$ (reactive when css is Observable, runs once for plain string)
-  observe(() => {
+  createObserve(() => {
     css$.set(get(css));
   });
 
   // Sync css$ changes → DOM
-  observe(() => {
+  createObserve(() => {
     const cssValue = css$.get();
     if (styleTag) styleTag.textContent = cssValue;
   });

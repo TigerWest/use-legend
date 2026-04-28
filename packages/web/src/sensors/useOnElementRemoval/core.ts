@@ -1,5 +1,5 @@
 import { observable } from "@legendapp/state";
-import { get, observe } from "@usels/core";
+import { get, createObserve } from "@usels/core";
 import type { DeepMaybeObservable } from "@usels/core";
 import { type ConfigurableDocumentOrShadowRoot, defaultDocument } from "@shared/configurable";
 import type { MaybeEventTarget } from "../../types";
@@ -28,7 +28,7 @@ export function createOnElementRemoval(
   // so the next mount → removal cycle can fire again.
   let trackedEl: Element | Document | Window | null = null;
 
-  observe(() => {
+  createObserve(() => {
     const el = get(target) as Element | Document | Window | null;
     if (el) trackedEl = el;
   });

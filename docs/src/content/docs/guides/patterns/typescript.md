@@ -85,7 +85,7 @@ formatPrice(price$.get());
 
 // Reactive function — accept Observable<T>
 function syncToServer(data$: Observable<Profile>) {
-  observe(() => {
+  createObserve(() => {
     sendUpdate(data$.get());
   });
 }

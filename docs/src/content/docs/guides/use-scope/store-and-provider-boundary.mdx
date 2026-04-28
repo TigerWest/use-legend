@@ -62,7 +62,7 @@ function StoreBackedSearch() {
   const { setQuery } = getSearchStore();
   const draft$ = observable("");
 
-  observe(() => {
+  createObserve(() => {
     setQuery(draft$.get());
   });
 

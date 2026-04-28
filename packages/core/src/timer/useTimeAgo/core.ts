@@ -2,7 +2,7 @@ import { observable, type Observable } from "@legendapp/state";
 import { formatDistance } from "date-fns";
 import type { Locale } from "date-fns";
 import type { DeepMaybeObservable, MaybeObservable, Pausable } from "../../types";
-import { observe, onMount } from "@primitives/useScope";
+import { createObserve, onMount } from "@primitives/useScope";
 import { createNow } from "@timer/useNow/core";
 
 export type UseTimeAgoUnitNamesDefault =
@@ -115,7 +115,7 @@ export function createTimeAgo(
     nowResult.resume();
   });
 
-  observe(() => {
+  createObserve(() => {
     const currentNow = nowResult.now$.get();
     const target = time$.get();
     const { max, showSecond = false, fullDateFormatter } = opts$.get() ?? {};

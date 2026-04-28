@@ -39,7 +39,7 @@ function Component() {
 ```tsx
 // ❌ BAD -- effect that copies derived state into another observable
 const fullName$ = observable("");
-observe(() => {
+createObserve(() => {
   fullName$.set(`${firstName$.get()} ${lastName$.get()}`);
 });
 
@@ -55,7 +55,7 @@ Use effects for **side-effects** (DOM manipulation, API calls, analytics, loggin
 
 | Primitive | When it fires | Use case |
 |-----------|--------------|----------|
-| `observe()` / `useObserve()` | Any tracked observable changes | General-purpose side-effects |
+| `createObserve()` / `useObserve()` | Any tracked observable changes | General-purpose side-effects |
 | `watch()` / `useWatch()` | Specific source changes, with old/new values | Reacting to a single source with comparison |
 | `whenever()` / `useWhenever()` | Source transitions to truthy | One-time or gated side-effects |
 
@@ -88,14 +88,14 @@ Inside `"use scope"`, use the **non-hook** versions. These are auto-cleaned up w
 
 ```tsx
 import { observable } from "@legendapp/state";
-import { observe, watch, whenever } from "@usels/core";
+import { createObserve, watch, whenever } from "@usels/core";
 
 function Component() {
   "use scope";
   const count$ = observable(0);
 
   // observe -- general side-effect
-  observe(() => {
+  createObserve(() => {
     console.log("Count changed:", count$.get());
   });
 
@@ -116,7 +116,7 @@ function Component() {
 | Need | Use |
 |------|-----|
 | Compute a new value from observables | Derived observable: `observable(() => ...)` |
-| React to changes with a side-effect | `observe()` / `useObserve()` |
+| React to changes with a side-effect | `createObserve()` / `useObserve()` |
 | Compare old/new values on change | `watch()` / `useWatch()` |
 | Fire once when condition becomes true | `whenever()` / `useWhenever()` with `{ once: true }` |
 | Fire every time condition becomes true | `whenever()` / `useWhenever()` |
@@ -125,13 +125,13 @@ function Component() {
 
 ```tsx
 // ❌ BAD -- early return prevents tracking of later observables
-observe(() => {
+createObserve(() => {
   if (loading$.get()) return;
   processData(data$.get());  // never tracked if loading$ is true initially
 });
 
 // ✅ GOOD -- read all sources first, then branch
-observe(() => {
+createObserve(() => {
   const loading = loading$.get();
   const data = data$.get();
   if (loading) return;

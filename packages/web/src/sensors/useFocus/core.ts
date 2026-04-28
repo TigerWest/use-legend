@@ -1,5 +1,5 @@
 import { observable, type Observable } from "@legendapp/state";
-import { observe, onMount, get, type DeepMaybeObservable } from "@usels/core";
+import { createObserve, onMount, get, type DeepMaybeObservable } from "@usels/core";
 import { resolveWindowSource, type ConfigurableWindow } from "@shared/configurable";
 import type { MaybeEventTarget } from "../../types";
 import { createEventListener } from "../../browser/useEventListener/core";
@@ -67,7 +67,7 @@ export function createFocus(
   );
 
   // --- Two-way binding: focused$ changes → focus/blur the element ---
-  observe(() => {
+  createObserve(() => {
     const isFocused = focused$.get();
     const el = get(target);
     if (!el || !(el instanceof HTMLElement)) return;

@@ -4,7 +4,7 @@ import { observable } from "@legendapp/state";
 import { Memo } from "@legendapp/state/react";
 import { createElement, memo as reactMemo, type ReactNode } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { useScope, onMount, onBeforeMount, observe, toObs } from ".";
+import { useScope, onMount, onBeforeMount, createObserve, toObs } from ".";
 
 describe("useScope() — rerender stability", () => {
   describe("factory not re-executed", () => {
@@ -61,7 +61,7 @@ describe("useScope() — rerender stability", () => {
 
       const { rerender } = renderHook(() =>
         useScope(() => {
-          observe(() => spy(count$.get()));
+          createObserve(() => spy(count$.get()));
           return {};
         })
       );
@@ -81,7 +81,7 @@ describe("useScope() — rerender stability", () => {
 
       const { rerender } = renderHook(() =>
         useScope(() => {
-          observe(() => spy(val$.get()));
+          createObserve(() => spy(val$.get()));
           return {};
         })
       );
@@ -114,7 +114,7 @@ describe("useScope() — rerender stability", () => {
 
       const { rerender, unmount } = renderHook(() =>
         useScope(() => {
-          observe(() => spy(count$.get()));
+          createObserve(() => spy(count$.get()));
           return {};
         })
       );
@@ -345,7 +345,7 @@ describe("useScope() — withState (useState as props source)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => spy(obs$.count.get()));
+              createObserve(() => spy(obs$.count.get()));
               return {};
             },
             { count }
@@ -371,7 +371,7 @@ describe("useScope() — withState (useState as props source)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => spy(obs$.count.get()));
+              createObserve(() => spy(obs$.count.get()));
               return {};
             },
             { count }
@@ -395,7 +395,7 @@ describe("useScope() — withState (useState as props source)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => countSpy(obs$.count.get()));
+              createObserve(() => countSpy(obs$.count.get()));
               return {};
             },
             { count, name }
@@ -418,7 +418,7 @@ describe("useScope() — withState (useState as props source)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => spy(obs$.count.get()));
+              createObserve(() => spy(obs$.count.get()));
               return {};
             },
             { count }
@@ -470,7 +470,7 @@ describe("useScope() — withState (useState as props source)", () => {
         ({ count }) =>
           useScope(
             (_p: any) => {
-              observe(() => spy(external$.get()));
+              createObserve(() => spy(external$.get()));
               return {};
             },
             { count }
@@ -499,7 +499,7 @@ describe("useScope() — withState (useState as props source)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p, { cfg: "opaque" });
-              observe(() => {
+              createObserve(() => {
                 obs$.cfg.get();
                 spy();
               });
@@ -529,7 +529,7 @@ describe("useScope() — withState (useState as props source)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => obs$.count.get());
+              createObserve(() => obs$.count.get());
               return {};
             },
             { count }
@@ -548,7 +548,7 @@ describe("useScope() — withState (useState as props source)", () => {
           useScope(
             (p) => {
               const obs$ = toObs(p);
-              observe(() => spy(obs$.count.get()));
+              createObserve(() => spy(obs$.count.get()));
               return {};
             },
             { count }

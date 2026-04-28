@@ -3,7 +3,7 @@ import {
   type DeepMaybeObservable,
   type ReadonlyObservable,
   get,
-  observe,
+  createObserve,
   onUnmount,
 } from "@usels/core";
 import type { MaybeEventTarget } from "../../types";
@@ -139,7 +139,7 @@ export function createPointerSwipe(
 
   // Apply `touch-action: pan-y` and user-select toggling reactively while the
   // target is mounted; restore on unmount or target change.
-  observe(() => {
+  createObserve(() => {
     const el = get(target) as HTMLElement | null;
     if (!el) return;
     const prevTouchAction = el.style.getPropertyValue("touch-action");

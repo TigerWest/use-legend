@@ -108,12 +108,12 @@ Inside `"use scope"`, use the non-hook versions of these APIs. They are auto-cle
 | Hook | Scope equivalent |
 |------|-----------------|
 | `useObservable(() => ...)` | `observable(() => ...)` |
-| `useObserve(fn)` | `observe(fn)` |
+| `useObserve(fn)` | `createObserve(fn)` |
 | `useWatch(source, fn)` | `watch(source, fn)` |
 | `useWhenever(source, fn)` | `whenever(source, fn)` |
 
 ```tsx
-import { observable, observe, watch, whenever } from "@usels/core";
+import { observable, createObserve, watch, whenever } from "@usels/core";
 
 function SearchSync() {
   "use scope";
@@ -123,7 +123,7 @@ function SearchSync() {
   const queryLength$ = observable(() => query$.get().length);
 
   // Side-effect
-  observe(() => {
+  createObserve(() => {
     console.log("query:", query$.get());
   });
 
@@ -142,4 +142,4 @@ For the full effects reference, see [Effects API](/use-legend/guides/use-scope/e
 
 - [Observable-First Mental Model](/use-legend/guides/observable-first-mental-model/) — why derived observables beat mirrored state.
 - [Data Fetching](/use-legend/guides/patterns/data-fetching/) — effects that sync with remote sources.
-- [Effects API](/use-legend/guides/use-scope/effects-api/) — canonical reference for `observe()`, `watch()`, `whenever()` in scope context.
+- [Effects API](/use-legend/guides/use-scope/effects-api/) — canonical reference for `createObserve()`, `watch()`, `whenever()` in scope context.

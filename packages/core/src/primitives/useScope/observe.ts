@@ -12,7 +12,7 @@ import { getCurrentScope, type ObserverRecord } from "./effectScope";
  *
  * Outside a scope, behaves identically to legend-state's `observe()`.
  */
-export function observe(...args: Parameters<typeof legendObserve>): () => void {
+export function createObserve(...args: Parameters<typeof legendObserve>): () => void {
   const scope = getCurrentScope();
   if (!scope) {
     return (legendObserve as (...a: Parameters<typeof legendObserve>) => () => void)(...args);
@@ -31,3 +31,12 @@ export function observe(...args: Parameters<typeof legendObserve>): () => void {
     if (idx !== -1) scope._observers.splice(idx, 1);
   };
 }
+
+/**
+ * @deprecated Use `createObserve` instead. `observe` will be removed in a future major release.
+ *
+ * Renamed for consistency with the project-wide `create*` naming convention used by every
+ * other core function (`createDebounced`, `createIntervalFn`, etc.). The runtime behavior
+ * is identical — this is purely a name change.
+ */
+export const observe = createObserve;

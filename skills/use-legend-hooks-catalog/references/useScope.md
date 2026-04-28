@@ -11,7 +11,7 @@
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-        import { observable, observe, onMount, onUnmount, useScope } from "@usels/core";
+        import { observable, createObserve, onMount, onUnmount, useScope } from "@usels/core";
 
     function useCounter() {
       return useScope(() => {
@@ -61,7 +61,7 @@ Pass a second argument to receive reactive props inside the factory. `p.field` a
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useScope, toObs, observe } from "@usels/core";
+    import { useScope, toObs, createObserve } from "@usels/core";
 
     function useThemeSync(props: { theme: string }) {
       return useScope((p) => {
@@ -69,7 +69,7 @@ Pass a second argument to receive reactive props inside the factory. `p.field` a
         // obs$.theme.get() — reactive, triggers re-observation on change
         const obs$ = toObs(p);
 
-        observe(() => {
+        createObserve(() => {
           document.documentElement.dataset.theme = obs$.theme.get();
         });
 
@@ -81,13 +81,13 @@ Pass a second argument to receive reactive props inside the factory. `p.field` a
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { toObs, observe } from "@usels/core";
+    import { toObs, createObserve } from "@usels/core";
 
     function useThemeSync(props: { theme: string }) {
       "use scope"
       const obs$ = toObs(props);
 
-      observe(() => {
+      createObserve(() => {
         document.documentElement.dataset.theme = obs$.theme.get();
       });
 
@@ -153,17 +153,17 @@ Pass a second argument to receive reactive props inside the factory. `p.field` a
   </Fragment>
 </CodeTabs>
 
-### Reactive subscriptions with `observe`
+### Reactive subscriptions with `createObserve`
 
-Use `observe` from `@usels/core` (not `@legendapp/state`) so subscriptions are automatically registered to the current scope and cleaned up on unmount.
+Use `createObserve` from `@usels/core` (not `@legendapp/state`) so subscriptions are automatically registered to the current scope and cleaned up on unmount.
 
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useScope, observe } from "@usels/core";
+    import { useScope, createObserve } from "@usels/core";
 
     useScope(() => {
-      observe(() => {
+      createObserve(() => {
         // re-runs whenever any accessed observable changes
         // automatically disposed when scope is destroyed
         document.title = title$.get();
@@ -174,12 +174,12 @@ Use `observe` from `@usels/core` (not `@legendapp/state`) so subscriptions are a
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { observe } from "@usels/core";
+    import { createObserve } from "@usels/core";
 
     function useTitle() {
       "use scope"
 
-      observe(() => {
+      createObserve(() => {
         // re-runs whenever any accessed observable changes
         // automatically disposed when scope is destroyed
         document.title = title$.get();
@@ -197,7 +197,7 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { useScope, toObs, observe } from "@usels/core";
+    import { useScope, toObs, createObserve } from "@usels/core";
 
     function useEventHandler(props: { onClick: (e: MouseEvent) => void; data: SomeObject }) {
       return useScope((p) => {
@@ -205,7 +205,7 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
           data: "opaque",      // prevents deep-proxying
         });
 
-        observe(() => {
+        createObserve(() => {
           const handler = obs$.peek()?.onClick;
           element.addEventListener("click", handler);
         });
@@ -218,7 +218,7 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { toObs, observe } from "@usels/core";
+    import { toObs, createObserve } from "@usels/core";
 
     function useEventHandler(props: { onClick: (e: MouseEvent) => void; data: SomeObject }) {
       "use scope"
@@ -226,7 +226,7 @@ Pass a hints map as the second argument to `toObs` for fields that are functions
         data: "opaque",      // prevents deep-proxying
       });
 
-      observe(() => {
+      createObserve(() => {
         const handler = obs$.peek()?.onClick;
         element.addEventListener("click", handler);
       });
@@ -249,7 +249,7 @@ When a component is rendered inside a `StoreProvider`, `getStore()` works inside
 <CodeTabs>
   <Fragment slot="hook">
     ```tsx
-    import { createStore, observable, observe, useScope } from "@usels/core";
+    import { createStore, observable, createObserve, useScope } from "@usels/core";
 
     const [, getSettingsStore] = createStore("settings", () => {
       const theme$ = observable<"light" | "dark">("light");
@@ -260,7 +260,7 @@ When a component is rendered inside a `StoreProvider`, `getStore()` works inside
       return useScope(() => {
         const { theme$ } = getSettingsStore(); // resolves from nearest StoreProvider
 
-        observe(() => {
+        createObserve(() => {
           document.documentElement.dataset.theme = theme$.get();
         });
 
@@ -272,7 +272,7 @@ When a component is rendered inside a `StoreProvider`, `getStore()` works inside
   </Fragment>
   <Fragment slot="scope">
     ```tsx
-    import { createStore, observable, observe } from "@usels/core";
+    import { createStore, observable, createObserve } from "@usels/core";
 
     const [, getSettingsStore] = createStore("settings", () => {
       const theme$ = observable<"light" | "dark">("light");
@@ -283,7 +283,7 @@ When a component is rendered inside a `StoreProvider`, `getStore()` works inside
       "use scope"
       const { theme$ } = getSettingsStore(); // resolves from nearest StoreProvider
 
-      observe(() => {
+      createObserve(() => {
         document.documentElement.dataset.theme = theme$.get();
       });
 
@@ -298,7 +298,7 @@ When a component is rendered inside a `StoreProvider`, `getStore()` works inside
 
 ```typescript
 export { onBeforeMount, onMount, onUnmount } from "./effectScope";
-export { observe } from "./observe";
+export { createObserve, observe } from "./observe";
 export { toObs } from "./reactiveProps";
 export type { ReactiveProps } from "./reactiveProps";
 export { inject } from "./inject";

@@ -1,7 +1,7 @@
 import { type Observable, observable } from "@legendapp/state";
 import {
   get,
-  observe,
+  createObserve,
   onUnmount,
   peek,
   type DeepMaybeObservable,
@@ -62,7 +62,7 @@ export function createCssVar(
   };
 
   // Watch prop + target + window: clean up old property and read new value.
-  observe(() => {
+  createObserve(() => {
     const key = get(prop);
     const win = win$.get() as Window | null;
     const docEl = win?.document?.documentElement ?? null;
@@ -79,7 +79,7 @@ export function createCssVar(
   });
 
   // Watch variable$ + target + prop: set/remove CSS property on element.
-  observe(() => {
+  createObserve(() => {
     const val = variable$.get();
     const key = get(prop);
     const win = win$.get() as Window | null;

@@ -58,13 +58,13 @@ Tracks the browser tab's visibility state (`'visible'` or `'hidden'`) as a react
   <Fragment slot="scope">
     ```tsx
     import { createDocumentVisibility } from "@usels/web";
-    import { observe } from "@usels/core";
+    import { createObserve } from "@usels/core";
 
     function Component() {
       "use scope"
       const visibility$ = createDocumentVisibility();
 
-      observe(() => {
+      createObserve(() => {
         if (visibility$.get() === "hidden") pausePolling();
         else resumePolling();
       });
@@ -101,7 +101,7 @@ Tracks the browser tab's visibility state (`'visible'` or `'hidden'`) as a react
   <Fragment slot="scope">
     ```tsx
     import { createDocumentVisibility } from "@usels/web";
-    import { observe } from "@usels/core";
+    import { createObserve } from "@usels/core";
     import { observable } from "@usels/core";
 
     function Component() {
@@ -109,7 +109,7 @@ Tracks the browser tab's visibility state (`'visible'` or `'hidden'`) as a react
       const visibility$ = createDocumentVisibility();
       const visibleSince = observable(Date.now());
 
-      observe(() => {
+      createObserve(() => {
         if (visibility$.get() === "visible") {
           visibleSince.set(Date.now());
         } else {

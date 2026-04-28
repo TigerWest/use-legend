@@ -4,7 +4,7 @@ import {
   createRafFn,
   createSupported,
   get,
-  observe,
+  createObserve,
   onMount,
   onUnmount,
   peek,
@@ -95,7 +95,7 @@ function extractNativeOpts(
  * Must be called inside a `useScope` factory — resource setup (`update`) is
  * registered via `onMount` and cleanup via `onUnmount`. rAF sync, element
  * tracking, keyframe reactivity, and animation-event listening are all driven
- * by scope-aware `observe()` so the whole pipeline tears down on scope
+ * by scope-aware `createObserve()` so the whole pipeline tears down on scope
  * disposal.
  */
 export function createAnimate(
@@ -168,7 +168,7 @@ export function createAnimate(
   });
 
   // Observable → Animation (user .set() detection)
-  observe(() => {
+  createObserve(() => {
     const time = currentTime$.get();
     if (!isSyncing && anim) {
       anim.currentTime = time;
@@ -176,21 +176,21 @@ export function createAnimate(
     }
   });
 
-  observe(() => {
+  createObserve(() => {
     const rate = playbackRate$.get();
     if (!isSyncing && anim) {
       anim.playbackRate = rate;
     }
   });
 
-  observe(() => {
+  createObserve(() => {
     const time = startTime$.get();
     if (!isSyncing && anim) {
       anim.startTime = time;
     }
   });
 
-  observe(() => {
+  createObserve(() => {
     const tl = timeline$.get();
     if (!isSyncing && anim) {
       anim.timeline = tl;
@@ -318,7 +318,7 @@ export function createAnimate(
   };
 
   // ── Element change → recreate animation ──
-  observe(() => {
+  createObserve(() => {
     const el = get(target);
     if (el) {
       update(true);
@@ -335,7 +335,7 @@ export function createAnimate(
   });
 
   // ── Keyframes & options reactivity ──
-  observe(() => {
+  createObserve(() => {
     const kf = get(keyframes);
     const nativeOpts = isNumberOpts
       ? (options as number)

@@ -1,5 +1,5 @@
 import { type Observable } from "@legendapp/state";
-import { observe, onUnmount } from "@primitives/useScope";
+import { createObserve, onUnmount } from "@primitives/useScope";
 import { observable } from "@shared/observable";
 import type { DeepMaybeObservable, TimerHandle, WidenPrimitive } from "../../types";
 
@@ -17,7 +17,7 @@ export function createAutoReset<T>(
   const value$ = observable<any>(source$.peek());
   let timer: TimerHandle;
 
-  observe(() => {
+  createObserve(() => {
     const current = value$.get();
     const def = source$.get();
 

@@ -17,8 +17,8 @@ function Counter() {
   // → All subscriptions to the previous instance are lost
   const count$ = observable(0);
 
-  // ❌ A new observe() is set up every render — previous ones are never cleaned up
-  observe(() => {
+  // ❌ A new createObserve() is set up every render — previous ones are never cleaned up
+  createObserve(() => {
     document.title = `Count: ${count$.get()}`;
   });
 
@@ -48,10 +48,10 @@ Store setup runs once, so `observable()` works directly. But inside a component,
 
 ## What `"use scope"` Solves
 
-`"use scope"` turns a component function body into a **scope factory that runs only once** — just like the setup phase in SolidJS or Svelte. Inside the scope, you can call `observable()`, `observe()`, `onMount()`, and other primitives directly, without hook wrappers.
+`"use scope"` turns a component function body into a **scope factory that runs only once** — just like the setup phase in SolidJS or Svelte. Inside the scope, you can call `observable()`, `createObserve()`, `onMount()`, and other primitives directly, without hook wrappers.
 
 ```tsx
-import { observable, observe, onMount, onUnmount } from "@usels/core";
+import { observable, createObserve, onMount, onUnmount } from "@usels/core";
 
 function Counter() {
   "use scope";
@@ -59,7 +59,7 @@ function Counter() {
   // ✅ Runs once — the same reference is preserved across re-renders
   const count$ = observable(0);
 
-  observe(() => {
+  createObserve(() => {
     document.title = `Count: ${count$.get()}`;
   });
 

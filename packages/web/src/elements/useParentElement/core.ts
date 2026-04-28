@@ -1,5 +1,5 @@
 import { type Observable, type OpaqueObject, ObservableHint, observable } from "@legendapp/state";
-import { get, observe } from "@usels/core";
+import { get, createObserve } from "@usels/core";
 import type { MaybeEventTarget } from "../../types";
 
 /**
@@ -22,7 +22,7 @@ export function createParentElement(
 ): Observable<OpaqueObject<HTMLElement | SVGElement> | null> {
   const parent$ = observable<OpaqueObject<HTMLElement | SVGElement> | null>(null);
 
-  observe(() => {
+  createObserve(() => {
     const el = element ? get(element) : null;
     // Document / Window have no parentElement → null (SSR-safe)
     const parent = (el as HTMLElement | null)?.parentElement ?? null;

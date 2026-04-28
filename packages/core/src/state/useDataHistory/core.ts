@@ -1,5 +1,5 @@
 import { type Observable, batch as legendBatch } from "@legendapp/state";
-import { observe, onUnmount } from "@primitives/useScope";
+import { createObserve, onUnmount } from "@primitives/useScope";
 import type { DeepMaybeObservable, Fn, ReadonlyObservable } from "../../types";
 import { observable } from "@shared/observable";
 import type { EventFilter } from "@shared/filters";
@@ -71,7 +71,7 @@ export function createDataHistory<Raw, Serialized = Raw>(
   let hasObservedInitial = false;
 
   // Auto-commit on source$ change — auto-registered to current scope
-  observe(() => {
+  createObserve(() => {
     const value = source$.get(); // register reactive dependency
 
     if (!hasObservedInitial) {

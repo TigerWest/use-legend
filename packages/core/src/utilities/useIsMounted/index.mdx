@@ -8,7 +8,7 @@ type-declarations:
 
 Returns a `ReadonlyObservable<boolean>` that flips from `false` to `true` after the component mounts. Use as a scope-internal gate — e.g. to defer an effect, subscription setup, or a `setOptions` call until after mount.
 
-Unlike `useWhenMounted` (which wraps a callback), this hook exposes the raw mounted flag so scope code can `.peek()` or `.get()` it conditionally inside `observe()`.
+Unlike `useWhenMounted` (which wraps a callback), this hook exposes the raw mounted flag so scope code can `.peek()` or `.get()` it conditionally inside `createObserve()`.
 
 ## Usage
 
@@ -41,16 +41,16 @@ Unlike `useWhenMounted` (which wraps a callback), this hook exposes the raw moun
 
 ### Gating an effect until after mount
 
-Use `.get()` inside `observe()` so the effect re-runs when the mounted flag flips — the initial pre-mount run short-circuits, then the post-mount re-run proceeds.
+Use `.get()` inside `createObserve()` so the effect re-runs when the mounted flag flips — the initial pre-mount run short-circuits, then the post-mount re-run proceeds.
 
 ```tsx
-import { createIsMounted, observable, observe } from "@usels/core";
+import { createIsMounted, observable, createObserve } from "@usels/core";
 
 function Component({ deps$ }: { deps$: Observable<unknown> }) {
   "use scope";
   const isMounted$ = createIsMounted();
 
-  observe(() => {
+  createObserve(() => {
     const deps = deps$.get();
     if (!isMounted$.get()) return; // skip pre-mount run
     applyOptions(deps);

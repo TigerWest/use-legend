@@ -1,5 +1,5 @@
 import { observable } from "@legendapp/state";
-import { createSupported, observe, onUnmount, get } from "@usels/core";
+import { createSupported, createObserve, onUnmount, get } from "@usels/core";
 import { normalizeTargets } from "@shared/normalizeTargets";
 import { isWindow } from "@usels/core/shared/index";
 import type { DeepMaybeObservable, ReadonlyObservable, Supportable, Pausable } from "@usels/core";
@@ -36,7 +36,7 @@ export function createIntersectionObserver(
     observer = null;
   };
 
-  observe(() => {
+  createObserve(() => {
     const raw = opts$.get();
     const rawRoot = get(raw?.root);
     const rootMargin = get(raw?.rootMargin) as string | undefined;

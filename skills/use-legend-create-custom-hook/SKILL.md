@@ -23,7 +23,7 @@ Inside a `"use scope"` block, call `createX(...)` directly. No React hook wrappe
 
 ```ts
 import { observable, type Observable } from "@legendapp/state";
-import { observe, onUnmount } from "@usels/core";
+import { createObserve, onUnmount } from "@usels/core";
 
 interface DebouncedOptions {
   maxWait?: number;
@@ -38,7 +38,7 @@ export function createDebounced<T>(
   const value$ = observable<T>(source$.peek());
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  observe(() => {
+  createObserve(() => {
     const val = source$.get();
     clearTimeout(timer);
     timer = setTimeout(() => value$.set(val), delay);
@@ -101,7 +101,7 @@ export const useDebounced: UseDebounced = (source$, delay, options) => {
 
 | API | Use for |
 |---|---|
-| `observe(() => …)` | Reactive re-run, auto-cleanup on scope dispose |
+| `createObserve(() => …)` | Reactive re-run, auto-cleanup on scope dispose |
 | `onMount(() => cleanup?)` | Post-mount setup, optional cleanup return |
 | `onUnmount(() => …)` | Teardown only |
 | `onBeforeMount(() => …)` | Layout-effect timing, before paint |
@@ -110,7 +110,7 @@ All imported from `@usels/core`.
 
 ## Avoid
 
-- Calling React hooks (`useState`, `useEffect`, etc.) inside a `useScope` factory. Put that logic in `createX` using `observe`/`onMount` instead.
+- Calling React hooks (`useState`, `useEffect`, etc.) inside a `useScope` factory. Put that logic in `createX` using `createObserve`/`onMount` instead.
 - Calling `.peek()` on `options` *before* `useScope`. Always pass `options` through; peek inside the factory if a mount-time snapshot is needed.
 - Returning a `dispose` function from `createX` when the scope already runs. Use `onUnmount(…)` — the scope disposes it.
 - Forgetting the `$` suffix on Observable return fields.

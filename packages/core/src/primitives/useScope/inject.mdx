@@ -1,0 +1,172 @@
+---
+title: inject
+category: Primitives
+---
+
+Reads a React Context value from inside a `useScope` factory (or a `"use scope"` directive body) where regular React hooks cannot be called. The scope records the Context during the first mount and replays `React.useContext(ctx)` in the same order on every subsequent render, so the component correctly subscribes to Context updates without violating the rules of hooks.
+
+## Usage
+
+### Basic — read a Context inside `useScope`
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx twoslash
+    // @noErrors
+    import React from "react";
+    import { inject, createObserve, useScope } from "@usels/core";
+
+    const ThemeCtx = React.createContext<"light" | "dark">("light");
+
+    function useThemeClass() {
+      return useScope(() => {
+        const theme = inject(ThemeCtx); // reads from nearest ThemeCtx.Provider
+
+        createObserve(() => {
+          document.documentElement.dataset.theme = theme;
+        });
+
+        return {};
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import React from "react";
+    import { inject, createObserve } from "@usels/core";
+
+    const ThemeCtx = React.createContext<"light" | "dark">("light");
+
+    function useThemeClass() {
+      "use scope"
+      const theme = inject(ThemeCtx);
+
+      createObserve(() => {
+        document.documentElement.dataset.theme = theme;
+      });
+
+      return {};
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Reactive Context — provide an Observable
+
+`inject` returns the raw Context value. When the Provider supplies an `Observable`, its reference is stable and `createObserve()` inside the scope reacts to field changes — the idiomatic pattern used by [`createProvider`](/core/utilities/createprovider).
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import React from "react";
+    import { observable } from "@legendapp/state";
+    import { inject, createObserve, useScope } from "@usels/core";
+
+    const counter$ = observable({ n: 1 });
+    const CounterCtx = React.createContext(counter$);
+
+    function useCounterLog() {
+      return useScope(() => {
+        const c$ = inject(CounterCtx); // stable reference
+
+        createObserve(() => {
+          console.log("count:", c$.n.get()); // reacts to field changes
+        });
+
+        return {};
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import React from "react";
+    import { observable } from "@legendapp/state";
+    import { inject, createObserve } from "@usels/core";
+
+    const counter$ = observable({ n: 1 });
+    const CounterCtx = React.createContext(counter$);
+
+    function useCounterLog() {
+      "use scope"
+      const c$ = inject(CounterCtx);
+
+      createObserve(() => {
+        console.log("count:", c$.n.get());
+      });
+
+      return {};
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+### Multiple contexts — order matters
+
+Each `inject()` call is recorded in order on the first mount and replayed in the same order on every re-render. Call `inject()` unconditionally at the top of the factory — the same rule as regular React hooks.
+
+<CodeTabs>
+  <Fragment slot="hook">
+    ```tsx
+    import React from "react";
+    import { inject, useScope } from "@usels/core";
+
+    const A = React.createContext(1);
+    const B = React.createContext("b");
+    const C = React.createContext(true);
+
+    function useAbc() {
+      return useScope(() => {
+        const a = inject(A);
+        const b = inject(B);
+        const c = inject(C);
+        return { a, b, c };
+      });
+    }
+    ```
+
+  </Fragment>
+  <Fragment slot="scope">
+    ```tsx
+    import React from "react";
+    import { inject } from "@usels/core";
+
+    const A = React.createContext(1);
+    const B = React.createContext("b");
+    const C = React.createContext(true);
+
+    function useAbc() {
+      "use scope"
+      const a = inject(A);
+      const b = inject(B);
+      const c = inject(C);
+      return { a, b, c };
+    }
+    ```
+
+  </Fragment>
+</CodeTabs>
+
+## Rules
+
+- **Call synchronously during the first run of the factory.** `inject()` records the Context on mount and replays it on re-render. Calls from `setTimeout`, `Promise.then`, `onMount`, `onUnmount`, event handlers, or any other deferred callback throw because the recorder is already torn down.
+- **Do not call conditionally.** The set of `inject()` calls must be stable across renders — the first mount defines the replay order. Conditional branches that add or skip an `inject()` break the replay order.
+- **Reactivity flows through references.** `inject()` returns the raw Context value. A Provider that swaps the value identity triggers a component re-render (standard React Context behavior). For fine-grained reactivity without re-rendering, provide an `Observable` and read fields via `createObserve()` / `.get()`.
+- **Strict Mode safe.** Even when React double-invokes the factory in development Strict Mode, the Context is recorded exactly once.
+
+## Error
+
+```
+inject() must be called inside useScope factory (during first mount)
+```
+
+Thrown when `inject()` is called outside an active scope recorder — typically from an async callback, a lifecycle hook (`onMount`/`onUnmount`), or a standalone function not wrapped by `useScope`.
+
+## Relation to `createProvider`
+
+[`createProvider`](/core/utilities/createprovider) returns a tuple `[Provider, useHook, getHook]`. The third entry `getHook` is implemented with `inject()` — use it to read the provided value inside a `useScope` factory without calling React hooks.

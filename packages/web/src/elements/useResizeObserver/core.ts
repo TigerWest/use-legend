@@ -1,4 +1,4 @@
-import { createSupported, observe, onUnmount } from "@usels/core";
+import { createSupported, createObserve, onUnmount } from "@usels/core";
 import { normalizeTargets } from "@shared/normalizeTargets";
 import type { DeepMaybeObservable, Supportable } from "@usels/core";
 import type { MaybeEventTarget } from "../../types";
@@ -25,7 +25,7 @@ export function createResizeObserver(
     observer = null;
   };
 
-  observe(() => {
+  createObserve(() => {
     cleanup();
     if (!isSupported$.get()) return;
 
