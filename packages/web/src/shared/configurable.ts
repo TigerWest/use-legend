@@ -1,4 +1,4 @@
-import { isClient } from "@usels/core/shared/utils";
+import { isBrowser } from "@usels/core/shared/utils";
 import type { Ref$ } from "@usels/core";
 import { observable, ObservableHint, type Observable, type OpaqueObject } from "@legendapp/state";
 
@@ -19,13 +19,13 @@ export interface ConfigurableDocumentOrShadowRoot {
   document?: DocumentOrShadowRoot;
 }
 
-export const defaultWindow = /* #__PURE__ */ isClient ? window : undefined;
+export const defaultWindow = /* #__PURE__ */ isBrowser ? window : undefined;
 
-export const defaultDocument = /* #__PURE__ */ isClient ? window.document : undefined;
+export const defaultDocument = /* #__PURE__ */ isBrowser ? window.document : undefined;
 
-export const defaultNavigator = /* #__PURE__ */ isClient ? window.navigator : undefined;
+export const defaultNavigator = /* #__PURE__ */ isBrowser ? window.navigator : undefined;
 
-export const defaultLocation = /* #__PURE__ */ isClient ? window.location : undefined;
+export const defaultLocation = /* #__PURE__ */ isBrowser ? window.location : undefined;
 
 /**
  * Internal raw resolver: takes the plain value held by an `opts$.window`

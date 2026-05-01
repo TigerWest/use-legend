@@ -1,5 +1,6 @@
 import { peek, type DeepMaybeObservable, type Fn } from "@usels/core";
-import { isIOS, noop } from "@usels/core/shared/utils";
+import { noop } from "@usels/core/shared/utils";
+import { isIOS } from "@shared/utils";
 import { type ConfigurableWindow, defaultWindow } from "@shared/configurable";
 import type { MaybeEventTarget } from "../../types";
 import { createEventListener } from "../../browser/useEventListener/core";
@@ -90,7 +91,7 @@ export function createOnClickOutside(
 
   // iOS workaround — passive click listeners on body children
   // https://github.com/vueuse/vueuse/issues/1520
-  if (defaultWindow && isIOS && !_iOSWorkaround) {
+  if (defaultWindow && isIOS() && !_iOSWorkaround) {
     _iOSWorkaround = true;
     const listenerOptions = { passive: true };
     Array.from(defaultWindow.document.body.children).forEach((el) =>

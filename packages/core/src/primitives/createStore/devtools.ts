@@ -1,5 +1,4 @@
 import { isObservable } from "@legendapp/state";
-import { isClient } from "../../shared/utils";
 import type { StoreRegistryValue } from "./storeContext";
 
 // ---------------------------------------------------------------------------
@@ -75,9 +74,11 @@ export function connectDevTools(
   _store: Record<string, unknown>,
   value: StoreRegistryValue
 ): void {
-  if (!isClient) return;
-
-  const ext = window.__REDUX_DEVTOOLS_EXTENSION__;
+  const ext =
+    typeof globalThis !== "undefined"
+      ? (globalThis as { __REDUX_DEVTOOLS_EXTENSION__?: ReduxDevToolsExtension })
+          .__REDUX_DEVTOOLS_EXTENSION__
+      : undefined;
   if (!ext) return;
 
   const { registry, actionTrackers } = value;

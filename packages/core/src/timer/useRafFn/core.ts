@@ -1,7 +1,7 @@
 import { observable } from "@legendapp/state";
 import type { MaybeObservable, Pausable } from "../../types";
 import { peek } from "@utilities/peek";
-import { isClient } from "@shared/utils";
+import { requestAnimationFrameSafe, cancelAnimationFrameSafe } from "@shared/raf";
 import { onMount, onUnmount } from "@primitives/useScope";
 
 export interface RafFnCallbackArguments {
@@ -35,10 +35,8 @@ export function createRafFn(
   const once = options?.once ?? false;
   const fpsLimit = options?.fpsLimit ?? null;
 
-  const requestFrame = (cb: FrameRequestCallback) =>
-    (isClient ? window.requestAnimationFrame.bind(window) : requestAnimationFrame)(cb);
-  const cancelFrame = (id: number) =>
-    (isClient ? window.cancelAnimationFrame.bind(window) : cancelAnimationFrame)(id);
+  const requestFrame = (cb: FrameRequestCallback) => requestAnimationFrameSafe(cb);
+  const cancelFrame = (id: number) => cancelAnimationFrameSafe(id);
 
   const pause = () => {
     if (isActive$.peek()) isActive$.set(false);
@@ -84,7 +82,6 @@ export function createRafFn(
   };
 
   const resume = () => {
-    if (!isClient) return;
     if (isActive$.peek()) return;
     if (rafHandle !== undefined) {
       cancelFrame(rafHandle);

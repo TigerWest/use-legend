@@ -1,8 +1,12 @@
-// ---------------------------------------------------------------------------
-// TIER 0-B: Shared pure utility functions (VueUse equivalents, no dependencies)
-// ---------------------------------------------------------------------------
+/** Real DOM environment — `window` and `document` both exist. */
+export const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
 
-export const isClient = typeof window !== "undefined" && typeof document !== "undefined";
+/** React Native runtime — Hermes/Metro after navigator polyfill. */
+export const isReactNative =
+  typeof navigator !== "undefined" && (navigator as { product?: string }).product === "ReactNative";
+
+/** Non-SSR runtime — browser or React Native. */
+export const isClient = isBrowser || isReactNative;
 
 export const noop = () => {};
 
@@ -14,12 +18,6 @@ export const notNullish = <T>(val?: T | null): val is T => val != null;
 
 export const isObject = (val: unknown): val is object =>
   Object.prototype.toString.call(val) === "[object Object]";
-
-export const isIOS =
-  /* #__PURE__ */ isClient &&
-  /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- IE11 MSStream property is not in Window typings
-  !(window as any).MSStream;
 
 export function toArray<T>(v: T | T[]): T[] {
   return Array.isArray(v) ? v : [v];
