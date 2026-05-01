@@ -1,6 +1,8 @@
 ---
 title: inject
 category: Primitives
+sidebar:
+  order: 10
 ---
 
 Reads a React Context value from inside a `useScope` factory (or a `"use scope"` directive body) where regular React hooks cannot be called. The scope records the Context during the first mount and replays `React.useContext(ctx)` in the same order on every subsequent render, so the component correctly subscribes to Context updates without violating the rules of hooks.

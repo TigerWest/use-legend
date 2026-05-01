@@ -1,7 +1,8 @@
 import type { ImmutableObservableBase } from "@legendapp/state";
 import { isObservable } from "@legendapp/state";
 import React from "react";
-import { detachedEffectScope } from "../useScope/effectScope";
+import { detachedEffectScope, getCurrentScope } from "../useScope/effectScope";
+import { inject } from "../useScope/inject";
 import {
   type ActionTracker,
   type StoreRegistryValue,
@@ -174,14 +175,26 @@ export function createStore<T extends Record<string, unknown>>(
     return resolveStore(name, setup, value);
   }
 
-  // [1] getStore accessor: core function — activeValue only (inter-store deps)
+  // [1] getStore accessor — three call paths
   function getStore(): T {
-    if (!getActiveValue()) {
-      throw new Error(
-        `createStore: "${name}" getStore must be called inside another store's setup() or inside a useScope factory within a <StoreProvider>`
-      );
+    // Path 1: cross-store deps — called inside another store's setup()
+    const active = getActiveValue();
+    if (active) return resolveStore(name, setup, active);
+
+    // Path 2: called inside a useScope factory — pull registry via inject()
+    const scope = getCurrentScope();
+    if (scope?._injectRecording) {
+      const value = inject(StoreRegistryContext);
+      if (!value) {
+        throw new Error(`createStore: "${name}" must be used within a <StoreProvider>`);
+      }
+      return resolveStore(name, setup, value);
     }
-    return resolveStore(name, setup, getActiveValue()!);
+
+    // Path 3: anywhere else — throw
+    throw new Error(
+      `createStore: "${name}" getStore must be called inside another store's setup() or inside a useScope factory within a <StoreProvider>`
+    );
   }
 
   return [useStore, getStore];

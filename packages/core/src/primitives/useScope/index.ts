@@ -2,7 +2,6 @@
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import type { ImmutableObservableBase } from "@legendapp/state";
 import { effectScope } from "./effectScope";
-import { StoreRegistryContext, setActiveValue } from "@primitives/createStore/storeContext";
 import {
   createReactiveProxy,
   syncProps,
@@ -78,8 +77,6 @@ export function useScope<Params extends [object, object, ...object[]], T extends
 ): T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useScope(fn: any, ...rest: any[]): any {
-  const _registry = React.useContext(StoreRegistryContext);
-
   const stateRef = useRef<{
     scope: ReturnType<typeof effectScope>;
     result: unknown;
@@ -104,7 +101,6 @@ export function useScope(fn: any, ...rest: any[]): any {
     }));
     const proxies = ctxList.map((ctx) => createReactiveProxy(ctx));
 
-    const _prev = setActiveValue(_registry);
     scope._injectRecording = true;
 
     let result: unknown;
@@ -112,7 +108,6 @@ export function useScope(fn: any, ...rest: any[]): any {
       result = scope.run(() => fn(...proxies)); // factory runs exactly once, ever
     } finally {
       scope._injectRecording = false;
-      setActiveValue(_prev);
     }
     stateRef.current = { scope, result, ctxList };
   }
